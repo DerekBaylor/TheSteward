@@ -1,10 +1,19 @@
+using Microsoft.EntityFrameworkCore;
 using TheSteward.Web.Components;
+using TheSteward.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+#region Connection Strings
+builder.Services.AddDbContext<TheStewardContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+#endregion Connection Strings
 
 var app = builder.Build();
 

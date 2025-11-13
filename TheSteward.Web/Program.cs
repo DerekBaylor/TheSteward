@@ -5,6 +5,8 @@ using TheSteward.Infrastructure.Data;
 using TheSteward.Web.Components;
 using TheSteward.Core.Models;
 using TheSteward.Web.Components.Account;
+using TheSteward.Shared.Interfaces;
+using TheSteward.Shared.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,11 @@ builder.Services.AddDbContext<TheStewardContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 #endregion Connection Strings
+
+
+#region Services
+builder.Services.AddScoped<INavigationService, NavigationService>();
+#endregion Services
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<TheStewardContext>()

@@ -1,13 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using TheSteward.Core.Models;
 namespace TheSteward.Infrastructure.Data;
 
-public class TheStewardContext : DbContext
-{
-    public TheStewardContext(DbContextOptions<TheStewardContext> options) : base(options)
-    {
-    }
 
+public class TheStewardContext(DbContextOptions<TheStewardContext> options) : IdentityDbContext<ApplicationUser>(options)
+
+{
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

@@ -4,31 +4,39 @@ using TheSteward.Shared.Interfaces;
 
 namespace TheSteward.Shared.Services;
 
-public class NavigationService : INavigationService
+public class NavigationService : INavigationService, IDisposable
 {
+    private bool _isInitialized;
     public string? CurrentMainSection { get; private set; }
 
     public event Action? OnChange;
 
-    private NavigationManager? Navigation { get; set; }
+    private NavigationManager? _navigation { get; set; }
 
     public void Dispose()
     {
-        if (Navigation != null)
-            Navigation.LocationChanged -= HandleLocationChanged;
+        if (_navigation != null)
+            _navigation.LocationChanged -= HandleLocationChanged;
     }
 
-    private void Initialize(NavigationManager navigation)
+    public void Initialize(NavigationManager navigation)
     {
-        Navigation = navigation;
-        Navigation.LocationChanged += HandleLocationChanged;
+        if (_isInitialized) return;
+
+        _navigation = navigation;
+        _navigation.LocationChanged += HandleLocationChanged;
+        _isInitialized = true;
+
         ParseCurrentUrl();
     }
 
     public void SetMainSection(string section)
     {
-        CurrentMainSection = section;
-        NotifyStateChanged();
+        if (CurrentMainSection != section)
+        {
+            CurrentMainSection = section;
+            NotifyStateChanged();
+        }
     }
 
     private void NotifyStateChanged() => OnChange?.Invoke();
@@ -41,10 +49,19 @@ public class NavigationService : INavigationService
 
     private void ParseCurrentUrl()
     {
-        if (Navigation == null) return;
+        if (_navigation == null) return;
 
-        var uri = new Uri(Navigation.Uri);
-        var segments = uri.Segments;
+        var uri = new Uri(_navigation.Uri);
+        var path = uri.AbsolutePath.TrimStart('/');
+
+        var firstSegment = path.Split('/', StringSplitOptions.RemoveEmptyEntries)
+                                .FirstOrDefault();
+
+        CurrentMainSection = string.IsNullOrEmpty(firstSegment)
+            ? "Dashboard"
+            : char.ToUpper(firstSegment[0]) + firstSegment.Substring(1);
+
+        NotifyStateChanged();
     }
 
     void INavigationService.Initialize(NavigationManager navigation)

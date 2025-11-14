@@ -14,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+#region Services
+builder.Services.AddScoped<INavigationService, NavigationService>();
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -26,6 +30,12 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
+builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<TheStewardContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+#endregion Services
+
 #region Connection Strings
 builder.Services.AddDbContext<TheStewardContext>(options =>
 {
@@ -34,14 +44,7 @@ builder.Services.AddDbContext<TheStewardContext>(options =>
 #endregion Connection Strings
 
 
-#region Services
-builder.Services.AddScoped<INavigationService, NavigationService>();
-#endregion Services
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<TheStewardContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
 
 var app = builder.Build();
 

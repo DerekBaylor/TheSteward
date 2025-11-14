@@ -21,8 +21,8 @@
 
 @code {
     [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    private HttpContext HttpContext { get; set; }
 
     private IComponentRenderMode? PageRenderMode =>
-        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
+        HttpContext?.AcceptsInteractiveRouting() == true ? InteractiveServer : null;
 }

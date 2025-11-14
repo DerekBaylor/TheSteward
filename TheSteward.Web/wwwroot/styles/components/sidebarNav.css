@@ -1,0 +1,75 @@
+﻿.sidebar {
+    min-width: 120px;
+    width: 120px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--nightly-blue) 80%, var(--teals-the-deal) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    font-family: var(--primary-font);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+
+.nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.1rem 0 0.4rem 0;
+    margin-bottom: 0.4rem;
+    font-family: var(--title-font);
+    border-radius: 16px;
+    transition: background 0.18s, color 0.18s, box-shadow 0.2s;
+    position: relative;
+    width: 95%;
+    cursor: pointer;
+    text-decoration: none !important;
+}
+
+.nav-title {
+    text-decoration: none !important;
+    color: var(--off-white);
+}
+
+a.nav-link.active, a.nav-link:active, a.nav-link:hover {
+    text-decoration: none !important;
+    background: var(--skys-the-limit);
+    color: var(--nightly-blue);
+}
+
+.nav-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.9rem;
+    margin-bottom: 0.3rem;
+    transition: color 0.18s, text-shadow 0.28s;
+}
+
+.nav-title {
+    font-family: var(--title-font);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    transition: color 0.18s;
+    letter-spacing: 0.03em;
+}
+
+.nav-link .nav-icon {
+    color: var(--brightly-green);
+}
+
+.nav-link.active .nav-icon,
+.nav-link:hover .nav-icon {
+    color: var(--nightly-blue);
+    text-shadow: 0 0 8px var(--brightly-green), 0 0 2px var(--skys-the-limit);
+}
+
+.nav-link.active .nav-title,
+.nav-link:hover .nav-title {
+    color: var(--nightly-blue);
+}

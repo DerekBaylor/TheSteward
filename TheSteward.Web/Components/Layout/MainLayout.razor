@@ -1,9 +1,23 @@
 ﻿@inherits LayoutComponentBase
+@inject INavigationService NavigationService
 
-@Body
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+<div class="app-container">
+    <SidebarNav />
+
+    <div class="main-content">
+        @Body
+    </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        NavigationService.OnChange -= StateHasChanged;
+    }
+}

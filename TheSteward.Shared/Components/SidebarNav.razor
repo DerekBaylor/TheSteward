@@ -1,0 +1,52 @@
+﻿@using TheSteward.Shared.Models
+@using TheSteward.Shared.Services
+@using TheSteward.Shared.Interfaces
+@implements IDisposable
+@inject INavigationService NavigationService
+@inject NavigationManager NavigationManager
+
+@namespace TheSteward.Shared.Components
+
+<nav id="mainSidebar" class="sidebar">
+    @foreach (var item in GetNavigationItems())
+    {
+        <NavLink href="@item.Route"
+                 class="nav-link"
+                 Match="NavLinkMatch.All"
+                 @onclick="() => HandleNavClick(item)">
+            <span class="nav-icon">
+                <span class="material-icons">@item.MaterialIcon</span>
+            </span>
+            <span class="nav-title">@item.Title</span>
+        </NavLink>
+    }
+</nav>
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationService.OnChange += StateHasChanged;
+    }
+
+    public List<NavItem> GetNavigationItems()
+    {
+        return new List<NavItem>
+        {
+            new("Dashboard", "dashboard", "/"),
+            new("Account", "bolt", "/account"),
+            new("Budget", "folder", "/budget"),
+            new("Register", "star", "/account/register"),
+            new("Login", "login", "/account/login"),
+        };
+    }
+
+    private void HandleNavClick(NavItem item)
+    {
+        NavigationService.SetMainSection(item.Title);
+    }
+
+    public void Dispose()
+    {
+        NavigationService.OnChange -= StateHasChanged;
+    }
+}

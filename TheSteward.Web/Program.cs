@@ -5,6 +5,8 @@ using TheSteward.Infrastructure.Data;
 using TheSteward.Web.Components;
 using TheSteward.Core.Models;
 using TheSteward.Web.Components.Account;
+using TheSteward.Shared.Interfaces;
+using TheSteward.Shared.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+#region Services
+builder.Services.AddScoped<INavigationService, NavigationService>();
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -24,6 +30,12 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
+builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<TheStewardContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+#endregion Services
+
 #region Connection Strings
 builder.Services.AddDbContext<TheStewardContext>(options =>
 {
@@ -31,10 +43,8 @@ builder.Services.AddDbContext<TheStewardContext>(options =>
 });
 #endregion Connection Strings
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<TheStewardContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
+
+
 
 var app = builder.Build();
 

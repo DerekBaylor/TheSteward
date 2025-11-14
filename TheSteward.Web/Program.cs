@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TheSteward.Infrastructure.Data;
-using TheSteward.Web.Components;
+using TheSteward.Core.IRepositories;
 using TheSteward.Core.Models;
-using TheSteward.Web.Components.Account;
+using TheSteward.Infrastructure.Data;
+using TheSteward.Infrastructure.Repositories;
 using TheSteward.Shared.Interfaces;
 using TheSteward.Shared.Services;
+using TheSteward.Web.Components;
+using TheSteward.Web.Components.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,7 @@ builder.Services.AddRazorComponents()
 
 #region Services
 builder.Services.AddScoped<INavigationService, NavigationService>();
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddCascadingAuthenticationState();

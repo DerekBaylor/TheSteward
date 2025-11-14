@@ -24,8 +24,4 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Services\" />
-	</ItemGroup>
-
 </Project>

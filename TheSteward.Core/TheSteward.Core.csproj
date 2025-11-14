@@ -13,8 +13,4 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="IServices\" />
-	</ItemGroup>
-
 </Project>

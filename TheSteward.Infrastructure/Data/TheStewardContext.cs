@@ -7,6 +7,8 @@ namespace TheSteward.Infrastructure.Data;
 public class TheStewardContext(DbContextOptions<TheStewardContext> options) : IdentityDbContext<ApplicationUser>(options)
 
 {
+    public DbSet<Household> Households { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

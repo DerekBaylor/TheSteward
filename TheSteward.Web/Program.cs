@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.IRepositories;
+using TheSteward.Core.IServices;
 using TheSteward.Core.Models;
 using TheSteward.Infrastructure.Data;
 using TheSteward.Infrastructure.Repositories;
+using TheSteward.Infrastructure.Services;
 using TheSteward.Shared.Interfaces;
 using TheSteward.Shared.Services;
 using TheSteward.Web.Components;
@@ -16,9 +18,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-#region Services
+#region Services & Repositories
 builder.Services.AddScoped<INavigationService, NavigationService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped<IHouseholdRepository, HouseholdRepository>();
+
+builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddCascadingAuthenticationState();
@@ -37,7 +42,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<TheStewardContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
-#endregion Services
+#endregion Services & Repositories
 
 #region Connection Strings
 builder.Services.AddDbContext<TheStewardContext>(options =>

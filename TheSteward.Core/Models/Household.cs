@@ -12,22 +12,26 @@ public class Household
     [MaxLength(200)]
     public required string HouseholdName { get; set; }
 
-    public bool IsHouseholdActive { get; set; }
+    [Required]
+    public required bool IsHouseholdActive { get; set; }
 
-    #region Household Modules
-    public bool HasFinanceManagerModule { get; set; }
+    [Required]
+    public required bool HasTaskManagerAccess { get; set; }
 
-    public bool HasKitchenManagerModule { get; set; }
+    [Required]
+    public required bool HasFinanceManagerAccess { get; set; }
 
-    public bool HasTaskManagerModule { get; set; }
+    [Required]
+    public required bool HasMealManagerAccess { get; set; }
 
-    public bool HasFileManagerModule { get; set; }
-    #endregion Household Modules
+    [Required]
+    public required bool HasFileManagerAccess { get; set; }
 
-    #region Navigational Properties
-    public required string UserId { get; set; }
-    [ForeignKey("UserId")]
-    public ApplicationUser Owner { get; set; } = default!;
+    [Required]
+    public required string OwnerId { get; set; }
 
-    #endregion Navigational Properties
+    [Required]
+    public required ApplicationUser Owner { get; set; }
+
+    public List<ApplicationUser> Members { get; set; } = new();
 }

@@ -1,13 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TheSteward.Core.Models;
 
 public class Household
 {
+
     public Guid HouseholdId { get; set; }
 
     [Required]
-    [MaxLength(100)]
+    [MaxLength(200)]
     public required string HouseholdName { get; set; }
 
     [Required]
@@ -27,10 +29,9 @@ public class Household
 
     [Required]
     public required string OwnerId { get; set; }
-    
+
     [Required]
     public required ApplicationUser Owner { get; set; }
 
     public List<ApplicationUser> Members { get; set; } = new();
-
 }

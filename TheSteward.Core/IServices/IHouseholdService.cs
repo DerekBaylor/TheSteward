@@ -1,5 +1,6 @@
 ﻿
 using TheSteward.Core.Models;
+using TheSteward.Core.DTOs;
 
 namespace TheSteward.Core.IServices;
 
@@ -11,7 +12,7 @@ public interface IHouseholdService
     /// <param name="household">The household entity to add.</param>
     /// <exception cref="ArgumentNullException">Thrown when household is null.</exception>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task AddAsync(Household household);
+    Task AddAsync(CreateUpdateHouseholdDto newHousehold, string ownerId);
 
     /// <summary>
     /// Deletes a household from the database.

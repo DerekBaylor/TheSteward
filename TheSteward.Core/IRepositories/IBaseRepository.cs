@@ -10,7 +10,7 @@ public interface IBaseRepository<T> where T : class
     /// A task that represents the asynchronous operation. 
     /// The task result contains the entity if found; otherwise, null.
     /// </returns>
-    Task<T> GetByIdAsync(Guid id);
+    Task<T?> GetByIdAsync(Guid id);
 
     /// <summary>
     /// Returns an IQueryable of all entities, allowing for deferred execution and additional filtering.

@@ -15,7 +15,7 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
         _dbSet = context.Set<T>();
     }
 
-    public async Task<T> GetByIdAsync(Guid id)
+    public async Task<T?> GetByIdAsync(Guid id)
     {
         return await _dbSet.FindAsync(id);
     }
@@ -38,11 +38,13 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     public async Task UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
+        await Task.CompletedTask;
     }
 
     public async Task DeleteAsync(T entity)
     {
         _dbSet.Remove(entity);
+        await Task.CompletedTask;
     }
 
     public async Task<int> SaveChangesAsync()

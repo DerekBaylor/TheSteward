@@ -11,12 +11,13 @@ public class HouseholdService : IHouseholdService
 {
     private readonly IHouseholdRepository _householdRepository;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IUserHouseholdService _userHouseholdService;
 
-    public HouseholdService(IHouseholdRepository householdRepository,
-    UserManager<ApplicationUser> userManager)
+    public HouseholdService(IHouseholdRepository householdRepository, UserManager<ApplicationUser> userManager, IUserHouseholdService userHouseholdService)
     {
         _householdRepository = householdRepository;
         _userManager = userManager;
+        _userHouseholdService = userHouseholdService;
     }
     public async Task AddAsync(CreateUpdateHouseholdDto newHousehold, string ownerId)
     {
@@ -43,6 +44,28 @@ public class HouseholdService : IHouseholdService
 
         await _householdRepository.AddAsync(household);
         await _householdRepository.SaveChangesAsync();
+
+        // create userhousehold
+       var createUpdateUserHouseholdDto = new CreateUpdateUserHouseholdDto
+        {
+            IsDefaultUserHousehold = newHousehold.IsDefaultHousehold,
+            IsHouseholdOwner = true,
+            HasAdminPermissions = true,
+            HasFinanceManagerWritePermission = true,
+            HasFinanceManagerReadPermission = true,
+            HasKitchenManagerWritePermission = true,
+            HasKitchenManagerReadPermission = true,
+            HasTaskManagerWritePermission = true,
+            HasTaskManagerReadPermission = true,
+            HasFileManagerWritePermission = true,
+            HasFileManagerReadPermission = true,
+            UserId = ownerId,
+            User = owner,
+            HouseholdId = household.HouseholdId,
+            Household = household
+       };
+
+        await _userHouseholdService.AddAsync(createUpdateUserHouseholdDto, ownerId);
     }
 
     public async Task DeleteAsync(Household household)

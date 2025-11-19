@@ -61,6 +61,14 @@ else if (showForm)
                     </label>
                 </div>
 
+                <div class="mb-3 form-check">
+                    <InputCheckbox id="defaultHousehold" class="form-check-input" @bind-Value="householdForm.IsDefaultHousehold" />
+                    <label class="form-check-label" for="defaultHousehold">
+                        Default Household
+                    </label>
+                </div>
+
+
                 <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
                     @if (isSubmitting)
                     {

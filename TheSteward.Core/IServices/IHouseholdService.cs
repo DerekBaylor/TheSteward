@@ -1,5 +1,4 @@
-﻿
-using TheSteward.Core.Models;
+﻿using TheSteward.Core.Models;
 using TheSteward.Core.DTOs;
 
 namespace TheSteward.Core.IServices;

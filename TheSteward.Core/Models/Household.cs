@@ -5,7 +5,7 @@ namespace TheSteward.Core.Models;
 
 public class Household
 {
-
+    [Key]
     public Guid HouseholdId { get; set; }
 
     [Required]

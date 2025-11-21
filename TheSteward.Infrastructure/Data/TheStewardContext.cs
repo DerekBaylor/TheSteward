@@ -8,6 +8,7 @@ public class TheStewardContext(DbContextOptions<TheStewardContext> options) : Id
 
 {
     public DbSet<Household> Households { get; set; }
+    public DbSet<UserHousehold> UserHouseholds { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

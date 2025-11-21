@@ -2,9 +2,13 @@
 
 @using System.Security.Claims
 @using System.ComponentModel.DataAnnotations
+@using AutoMapper
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
+@using TheSteward.Shared.Components
+
 @inject IHouseholdService HouseholdService
+@inject IUserHouseholdService UserHouseholdService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
@@ -19,104 +23,17 @@
 }
 else if (showForm)
 {
-    <h3>@(isEditMode ? "Edit Household" : "Create A Household")</h3>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">@(isEditMode ? "Update Your Household" : "Create Your Household")</h5>
-            <EditForm Model="householdForm" OnValidSubmit="SaveHousehold">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-
-                <div class="mb-3">
-                    <label for="householdName" class="form-label">Household Name</label>
-                    <InputText id="householdName" class="form-control" @bind-Value="householdForm.HouseholdName" />
-                    <ValidationMessage For="@(() => householdForm.HouseholdName)" />
-                </div>
-
-                <div class="mb-3 form-check">
-                    <InputCheckbox id="taskManager" class="form-check-input" @bind-Value="householdForm.HasTaskManagerAccess" />
-                    <label class="form-check-label" for="taskManager">
-                        Enable Task Manager
-                    </label>
-                </div>
-
-                <div class="mb-3 form-check">
-                    <InputCheckbox id="financeManager" class="form-check-input" @bind-Value="householdForm.HasFinanceManagerAccess" />
-                    <label class="form-check-label" for="financeManager">
-                        Enable Finance Manager
-                    </label>
-                </div>
-
-                <div class="mb-3 form-check">
-                    <InputCheckbox id="mealManager" class="form-check-input" @bind-Value="householdForm.HasMealManagerAccess" />
-                    <label class="form-check-label" for="mealManager">
-                        Enable Meal Manager
-                    </label>
-                </div>
-
-                <div class="mb-3 form-check">
-                    <InputCheckbox id="fileManager" class="form-check-input" @bind-Value="householdForm.HasFileManagerAccess" />
-                    <label class="form-check-label" for="fileManager">
-                        Enable File Manager
-                    </label>
-                </div>
-
-                <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
-                    @if (isSubmitting)
-                    {
-                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    }
-                    @(isEditMode ? "Update Household" : "Create Household")
-                </button>
-
-                @if (isEditMode)
-                {
-                    <button type="button" class="btn btn-secondary ms-2" @onclick="CancelEdit">Cancel</button>
-                }
-            </EditForm>
-        </div>
-    </div>
+     <HouseholdForm FormData="householdFormDto"
+        IsEditMode="isEditMode" 
+        IsSubmitting="isSubmitting"
+        OnSubmit="SaveHousehold"
+        OnCancel="CancelEdit" />
 }
-else if (household != null)
+else if (householdDto != null)
 {
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">@household.HouseholdName</h5>
-            <p class="card-text">
-                <strong>Status:</strong> @(household.IsHouseholdActive ? "Active" : "Inactive")
-            </p>
-
-            <h6 class="mt-3">Enabled Features:</h6>
-            <ul class="list-unstyled">
-                <li>
-                    <span class="material-icons" style="@(household.HasTaskManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                        @(household.HasTaskManagerAccess ? "check_circle" : "radio_button_unchecked")
-                    </span>
-                    <span style="@(household.HasTaskManagerAccess ? "" : "opacity: 0.6;")">Task Manager</span>
-                </li>
-                <li>
-                    <span class="material-icons" style="@(household.HasFinanceManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                        @(household.HasFinanceManagerAccess ? "check_circle" : "radio_button_unchecked")
-                    </span>
-                    <span style="@(household.HasFinanceManagerAccess ? "" : "opacity: 0.6;")">Finance Manager</span>
-                </li>
-                <li>
-                    <span class="material-icons" style="@(household.HasMealManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                        @(household.HasMealManagerAccess ? "check_circle" : "radio_button_unchecked")
-                    </span>
-                    <span style="@(household.HasMealManagerAccess ? "" : "opacity: 0.6;")">Meal Manager</span>
-                </li>
-                <li>
-                    <span class="material-icons" style="@(household.HasFileManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                        @(household.HasFileManagerAccess ? "check_circle" : "radio_button_unchecked")
-                    </span>
-                    <span style="@(household.HasFileManagerAccess ? "" : "opacity: 0.6;")">File Manager</span>
-                </li>
-            </ul>
-
-            <button class="btn btn-secondary mt-3" @onclick="EditHousehold">Edit</button>
-        </div>
-    </div>
+    <HouseholdCard 
+        HouseholdDto="householdDto" 
+        OnEdit="EditHousehold" />
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -128,11 +45,57 @@ else if (household != null)
 
 @code {
     private TheSteward.Core.Models.Household? household;
-    private CreateUpdateHouseholdDto householdForm = new();
+    private CreateUpdateHouseholdDto createUpdateHouseholdDto = new();
+    private HouseholdFormDto householdFormDto = new();
+    private HouseholdDto householdDto = new HouseholdDto
+    {
+        HouseholdId = Guid.Empty,
+        HouseholdName = string.Empty,
+        IsHouseholdActive = false,
+        HasTaskManagerAccess = false,
+        HasFinanceManagerAccess = false,
+        HasMealManagerAccess = false,
+        HasFileManagerAccess = false,
+        OwnerId = string.Empty,
+        Owner = new ApplicationUser(),
+        Members = new List<ApplicationUser>()
+    };
+
+    private UserHouseholdDto defaultUserHousehold = new UserHouseholdDto
+    {
+        IsDefaultUserHousehold = false,
+        IsHouseholdOwner = false,
+        HasAdminPermissions = false,
+        HasFinanceManagerWritePermission = false,
+        HasFinanceManagerReadPermission = false,
+        HasKitchenManagerWritePermission = false,
+        HasKitchenManagerReadPermission = false,
+        HasTaskManagerWritePermission = false,
+        HasTaskManagerReadPermission = false,
+        HasFileManagerWritePermission = false,
+        HasFileManagerReadPermission = false,
+        UserId = string.Empty,
+        User = new ApplicationUser(),
+        Household = new HouseholdDto
+        {
+            HouseholdId = Guid.Empty,
+            HouseholdName = string.Empty,
+            IsHouseholdActive = false,
+            HasTaskManagerAccess = false,
+            HasFinanceManagerAccess = false,
+            HasMealManagerAccess = false,
+            HasFileManagerAccess = false,
+            OwnerId = string.Empty,
+            Owner = new ApplicationUser(),
+            Members = new List<ApplicationUser>()
+        }
+    };
+
     private bool isLoading = true;
     private bool showForm = false;
     private bool isEditMode = false;
     private bool isSubmitting = false;
+    private bool hasDefaultHousehold = false;
     private string? errorMessage;
     private string? currentUserId;
 
@@ -149,14 +112,16 @@ else if (household != null)
 
                 if (!string.IsNullOrEmpty(currentUserId))
                 {
-                    var households = await HouseholdService.GetAllHouseholdsForUser(currentUserId);
+                    var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
 
-                    if (households.Any())
+                    if (defaultUserHousehold  != null)
                     {
-                        household = households.First();
+                        hasDefaultHousehold = true;
+                        householdDto = defaultUserHousehold.Household;
                     }
                     else
                     {
+                        hasDefaultHousehold = false;
                         showForm = true;
                         isEditMode = false;
                     }
@@ -186,30 +151,40 @@ else if (household != null)
 
         try
         {
-            if (isEditMode && household != null)
+            createUpdateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
+            createUpdateHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
+            createUpdateHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
+            createUpdateHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
+            createUpdateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
+
+            if (isEditMode && householdDto != null) // Update household
             {
-                // Update existing household
-                household.HouseholdName = householdForm.HouseholdName;
-                household.HasTaskManagerAccess = householdForm.HasTaskManagerAccess;
-                household.HasFinanceManagerAccess = householdForm.HasFinanceManagerAccess;
-                household.HasMealManagerAccess = householdForm.HasMealManagerAccess;
-                household.HasFileManagerAccess = householdForm.HasFileManagerAccess;
+                createUpdateHouseholdDto.HouseholdId = householdDto.HouseholdId;
+                createUpdateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
 
-                await HouseholdService.UpdateAsync(household);
+                await HouseholdService.UpdateAsync(createUpdateHouseholdDto);
+            }
+            else // Create household
+            {
+                createUpdateHouseholdDto.IsDefaultHousehold = !hasDefaultHousehold;
+                await HouseholdService.AddAsync(createUpdateHouseholdDto, currentUserId);
+            }
 
-                showForm = false;
-                isEditMode = false;
+            var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
+
+            if (defaultUserHousehold?.Household != null)
+            {
+                householdDto = defaultUserHousehold.Household;
             }
             else
             {
-                // Create new household
-                await HouseholdService.AddAsync(householdForm, currentUserId);
-
-                // Reload to show the created household
-                var households = await HouseholdService.GetAllHouseholdsForUser(currentUserId);
-                household = households.FirstOrDefault();
-                showForm = false;
+                errorMessage = "Unable to load household after save";
             }
+            
+            showForm = false;
+            isEditMode = false;
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -223,15 +198,15 @@ else if (household != null)
 
     private void EditHousehold()
     {
-        if (household == null) return;
+        if (householdDto == null) return;
 
-        householdForm = new CreateUpdateHouseholdDto
+        householdFormDto = new HouseholdFormDto
         {
-            HouseholdName = household.HouseholdName,
-            HasTaskManagerAccess = household.HasTaskManagerAccess,
-            HasFinanceManagerAccess = household.HasFinanceManagerAccess,
-            HasMealManagerAccess = household.HasMealManagerAccess,
-            HasFileManagerAccess = household.HasFileManagerAccess
+            HouseholdName = householdDto.HouseholdName,
+            HasTaskManagerAccess = householdDto.HasTaskManagerAccess,
+            HasFinanceManagerAccess = householdDto.HasFinanceManagerAccess,
+            HasMealManagerAccess = householdDto.HasMealManagerAccess,
+            HasFileManagerAccess = householdDto.HasFileManagerAccess
         };
 
         isEditMode = true;
@@ -242,7 +217,7 @@ else if (household != null)
     {
         showForm = false;
         isEditMode = false;
-        householdForm = new CreateUpdateHouseholdDto();
+        householdFormDto = new HouseholdFormDto();
         errorMessage = null;
     }
 }

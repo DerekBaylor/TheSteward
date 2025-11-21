@@ -1,0 +1,14 @@
+﻿using TheSteward.Core.DTOs;
+using TheSteward.Core.Models;
+
+namespace TheSteward.Core.IServices;
+
+public interface IUserHouseholdService
+{
+    Task AddAsync(CreateUpdateUserHouseholdDto newUserHousehold, string ownerId);
+    Task DeleteAsync(UserHousehold userHousehold);
+    Task UpdateAsync(CreateUpdateUserHouseholdDto updatedUserHousehold);
+    Task<UserHousehold> GetByIdAsync(Guid id);
+    Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUser(string userId);
+    Task<UserHouseholdDto?> GetDefaultUserHouseholdForUser(string userId);
+}

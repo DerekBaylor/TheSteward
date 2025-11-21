@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices;
 using TheSteward.Core.Models;
+using TheSteward.Core.Profiles;
 using TheSteward.Infrastructure.Data;
 using TheSteward.Infrastructure.Repositories;
 using TheSteward.Infrastructure.Services;
@@ -22,15 +23,26 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<INavigationService, NavigationService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IHouseholdRepository, HouseholdRepository>();
+builder.Services.AddScoped<IUserHouseholdRepository, UserHouseholdRepository>();
 
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
+builder.Services.AddScoped<IUserHouseholdService, UserHouseholdService>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+#endregion Services & Repositories
 
+#region Automapper Profiles
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddProfile<HouseholdProfiles>();
+});
+#endregion  Automapper Profiles
+
+#region Auth
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -42,7 +54,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<TheStewardContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
-#endregion Services & Repositories
+#endregion Auth
 
 #region Connection Strings
 builder.Services.AddDbContext<TheStewardContext>(options =>

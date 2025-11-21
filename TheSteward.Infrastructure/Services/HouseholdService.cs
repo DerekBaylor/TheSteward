@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using AutoMapper.Execution;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.DTOs;
 using TheSteward.Core.IRepositories;
@@ -11,12 +13,15 @@ public class HouseholdService : IHouseholdService
 {
     private readonly IHouseholdRepository _householdRepository;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IUserHouseholdService _userHouseholdService;
+    private readonly IMapper _mapper;
 
-    public HouseholdService(IHouseholdRepository householdRepository,
-    UserManager<ApplicationUser> userManager)
+    public HouseholdService(IHouseholdRepository householdRepository, UserManager<ApplicationUser> userManager, IUserHouseholdService userHouseholdService, IMapper mapper)
     {
         _householdRepository = householdRepository;
         _userManager = userManager;
+        _userHouseholdService = userHouseholdService;
+        _mapper = mapper;
     }
     public async Task AddAsync(CreateUpdateHouseholdDto newHousehold, string ownerId)
     {
@@ -27,37 +32,70 @@ public class HouseholdService : IHouseholdService
         if (owner == null)
             throw new KeyNotFoundException($"User with ID {ownerId} not found.");
 
-        var household = new Household
-        {
-            HouseholdId = Guid.NewGuid(),
-            HouseholdName = newHousehold.HouseholdName,
-            IsHouseholdActive = true,
-            HasTaskManagerAccess = newHousehold.HasTaskManagerAccess,
-            HasFinanceManagerAccess = newHousehold.HasFinanceManagerAccess,
-            HasMealManagerAccess = newHousehold.HasMealManagerAccess,
-            HasFileManagerAccess = newHousehold.HasFileManagerAccess,
-            OwnerId = ownerId,
-            Owner = null!,
-            Members = new List<ApplicationUser>() { owner }
-        };
+        var household = _mapper.Map<Household>(newHousehold);
+        household.OwnerId = ownerId;
+        household.IsHouseholdActive = true;
 
         await _householdRepository.AddAsync(household);
         await _householdRepository.SaveChangesAsync();
+
+       var createUpdateUserHouseholdDto = new CreateUpdateUserHouseholdDto
+        {
+            IsDefaultUserHousehold = newHousehold.IsDefaultHousehold,
+            IsHouseholdOwner = true,
+            HasAdminPermissions = true,
+            HasFinanceManagerWritePermission = true,
+            HasFinanceManagerReadPermission = true,
+            HasKitchenManagerWritePermission = true,
+            HasKitchenManagerReadPermission = true,
+            HasTaskManagerWritePermission = true,
+            HasTaskManagerReadPermission = true,
+            HasFileManagerWritePermission = true,
+            HasFileManagerReadPermission = true,
+            UserId = ownerId,
+            User = owner,
+            HouseholdId = household.HouseholdId,
+            Household = household
+       };
+
+        await _userHouseholdService.AddAsync(createUpdateUserHouseholdDto, ownerId);
     }
 
-    public async Task DeleteAsync(Household household)
-    {
+    public async Task DeleteAsync(HouseholdDto householdDto)
+    { 
+        var household = _mapper.Map<Household>(householdDto);
+
         await _householdRepository.DeleteAsync(household);
         await _householdRepository.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Household household)
+    public async Task UpdateAsync(CreateUpdateHouseholdDto updatedHousehold)
     {
-        await _householdRepository.UpdateAsync(household);
+        if (updatedHousehold.HouseholdId == null)
+            throw new ArgumentNullException(nameof(updatedHousehold.HouseholdId));
+
+        var currentHousehold = await _householdRepository.GetByIdAsync(updatedHousehold.HouseholdId.Value);
+
+        if (currentHousehold == null)
+            throw new KeyNotFoundException($"Household with ID {updatedHousehold.HouseholdId} not found.");
+
+        // Using Automapper on this block could potentially overwrite properties that aren't meant to be changed in this method, like IsHouseholdActive, OwnerId, Owner, and Members.
+        currentHousehold.HasFileManagerAccess = updatedHousehold.HasFileManagerAccess;
+        currentHousehold.HasFinanceManagerAccess = updatedHousehold.HasFinanceManagerAccess;
+        currentHousehold.HasMealManagerAccess = updatedHousehold.HasMealManagerAccess;
+        currentHousehold.HasTaskManagerAccess = updatedHousehold.HasTaskManagerAccess;
+        currentHousehold.HouseholdId = updatedHousehold.HouseholdId.Value;
+        currentHousehold.HouseholdName = updatedHousehold.HouseholdName;
+        currentHousehold.IsHouseholdActive = currentHousehold.IsHouseholdActive;
+        currentHousehold.OwnerId = currentHousehold.OwnerId;
+        currentHousehold.Owner = currentHousehold.Owner;
+        currentHousehold.Members = currentHousehold.Members;
+
+        await _householdRepository.UpdateAsync(currentHousehold);
         await _householdRepository.SaveChangesAsync();
     }
 
-    public async Task<Household> GetByIdAsync(Guid id)
+    public async Task<HouseholdDto> GetByIdAsync(Guid id)
     {
         var household = await _householdRepository.GetByIdAsync(id);
 
@@ -66,15 +104,19 @@ public class HouseholdService : IHouseholdService
             throw new KeyNotFoundException($"Household with ID {id} not found.");
         }
 
-        return household;
+        var householdDto = _mapper.Map<HouseholdDto>(household);
+
+        return householdDto;
     }
 
-    public async Task<List<Household>> GetAllHouseholdsForUser(string userId)
+    public async Task<List<HouseholdDto>> GetAllHouseholdsForUser(string userId)
     {
         var household = await _householdRepository.GetAll()
             .Where(h => h.IsHouseholdActive && h.Members.Any(m => m.Id == userId))
             .ToListAsync();
 
-        return household;
+        var householdDto = _mapper.Map<List<HouseholdDto>>(household);
+
+        return householdDto;
     }
 }

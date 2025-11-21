@@ -1,0 +1,91 @@
+﻿@namespace TheSteward.Shared.Components
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using TheSteward.Shared.DTOs
+
+
+<h3>@(IsEditMode ? "Edit Household" : "Create A Household")</h3>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@(IsEditMode ? "Update Your Household" : "Create Your Household")</h5>
+        <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="householdName" class="form-label">Household Name</label>
+                <InputText id="householdName" class="form-control" @bind-Value="FormData.HouseholdName" />
+                <ValidationMessage For="@(() => FormData.HouseholdName)" />
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="taskManager" class="form-check-input" @bind-Value="FormData.HasTaskManagerAccess" />
+                <label class="form-check-label" for="taskManager">
+                    Enable Task Manager
+                </label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="financeManager" class="form-check-input" @bind-Value="FormData.HasFinanceManagerAccess" />
+                <label class="form-check-label" for="financeManager">
+                    Enable Finance Manager
+                </label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="mealManager" class="form-check-input" @bind-Value="FormData.HasMealManagerAccess" />
+                <label class="form-check-label" for="mealManager">
+                    Enable Meal Manager
+                </label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="fileManager" class="form-check-input" @bind-Value="FormData.HasFileManagerAccess" />
+                <label class="form-check-label" for="fileManager">
+                    Enable File Manager
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+                @if (IsSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                }
+                @(IsEditMode ? "Update Household" : "Create Household")
+            </button>
+            
+            @if (IsEditMode)
+            {
+                <button type="button" class="btn btn-secondary ms-2" @onclick="HandleCancel">Cancel</button>
+            }
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public HouseholdFormDto FormData { get; set; } = new();
+
+    [Parameter]
+    public bool IsEditMode { get; set; }
+
+    [Parameter]
+    public bool IsSubmitting { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

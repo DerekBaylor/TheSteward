@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using AutoMapper.Execution;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.DTOs;
 using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices;
 using TheSteward.Core.Models;
-using AutoMapper;
 
 namespace TheSteward.Infrastructure.Services;
 
@@ -40,7 +41,7 @@ public class HouseholdService : IHouseholdService
 
        var createUpdateUserHouseholdDto = new CreateUpdateUserHouseholdDto
         {
-            IsDefaultUserHousehold = newHousehold.IsDefaultHousehold, //TODO: Needs to be default true on first household.
+            IsDefaultUserHousehold = newHousehold.IsDefaultHousehold,
             IsHouseholdOwner = true,
             HasAdminPermissions = true,
             HasFinanceManagerWritePermission = true,
@@ -79,21 +80,18 @@ public class HouseholdService : IHouseholdService
             throw new KeyNotFoundException($"Household with ID {updatedHousehold.HouseholdId} not found.");
 
         // Using Automapper on this block could potentially overwrite properties that aren't meant to be changed in this method, like IsHouseholdActive, OwnerId, Owner, and Members.
-        var household = new Household
-        {
-            HasFileManagerAccess = updatedHousehold.HasFileManagerAccess,
-            HasFinanceManagerAccess = updatedHousehold.HasFinanceManagerAccess,
-            HasMealManagerAccess = updatedHousehold.HasMealManagerAccess,
-            HasTaskManagerAccess = updatedHousehold.HasTaskManagerAccess,
-            HouseholdId = updatedHousehold.HouseholdId.Value,
-            HouseholdName = updatedHousehold.HouseholdName,
-            IsHouseholdActive = currentHousehold.IsHouseholdActive,
-            OwnerId = currentHousehold.OwnerId,
-            Owner = currentHousehold.Owner,
-            Members = currentHousehold.Members
-        };
+        currentHousehold.HasFileManagerAccess = updatedHousehold.HasFileManagerAccess;
+        currentHousehold.HasFinanceManagerAccess = updatedHousehold.HasFinanceManagerAccess;
+        currentHousehold.HasMealManagerAccess = updatedHousehold.HasMealManagerAccess;
+        currentHousehold.HasTaskManagerAccess = updatedHousehold.HasTaskManagerAccess;
+        currentHousehold.HouseholdId = updatedHousehold.HouseholdId.Value;
+        currentHousehold.HouseholdName = updatedHousehold.HouseholdName;
+        currentHousehold.IsHouseholdActive = currentHousehold.IsHouseholdActive;
+        currentHousehold.OwnerId = currentHousehold.OwnerId;
+        currentHousehold.Owner = currentHousehold.Owner;
+        currentHousehold.Members = currentHousehold.Members;
 
-        await _householdRepository.UpdateAsync(household);
+        await _householdRepository.UpdateAsync(currentHousehold);
         await _householdRepository.SaveChangesAsync();
     }
 

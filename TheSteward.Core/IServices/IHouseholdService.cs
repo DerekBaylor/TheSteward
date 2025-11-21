@@ -1,5 +1,4 @@
-﻿using TheSteward.Core.Models;
-using TheSteward.Core.DTOs;
+﻿using TheSteward.Core.DTOs;
 
 namespace TheSteward.Core.IServices;
 
@@ -18,14 +17,14 @@ public interface IHouseholdService
     /// </summary>
     /// <param name="household">The household entity to delete.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task DeleteAsync(Household household);
+    Task DeleteAsync(HouseholdDto householdDto);
 
     /// <summary>
     /// Updates an existing household in the database.
     /// </summary>
     /// <param name="household">The household entity with updated values.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task UpdateAsync(CreateUpdateHouseholdDto updatedHousehold);
+    Task UpdateAsync(CreateUpdateHouseholdDto updatedHouseholdDto);
 
     /// <summary>
     /// Retrieves a household by its unique identifier.
@@ -33,12 +32,12 @@ public interface IHouseholdService
     /// <param name="id">The unique identifier of the household.</param>
     /// <exception cref="KeyNotFoundException">Thrown when no household with the specified ID exists.</exception>
     /// <returns>A task representing the asynchronous operation, containing the household.</returns>
-    Task<Household> GetByIdAsync(Guid id);
+    Task<HouseholdDto> GetByIdAsync(Guid id);
 
     /// <summary>
     /// Retrieves all active households where the specified user is a member.
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>
     /// <returns>A task representing the asynchronous operation, containing a list of active households the user belongs to.</returns>
-    Task<List<Household>> GetAllHouseholdsForUser(string userId);
+    Task<List<HouseholdDto>> GetAllHouseholdsForUser(string userId);
 }

@@ -68,8 +68,9 @@ public class HouseholdService : IHouseholdService
         await _userHouseholdService.AddAsync(createUpdateUserHouseholdDto, ownerId);
     }
 
-    public async Task DeleteAsync(Household household)
-    {
+    public async Task DeleteAsync(HouseholdDto householdDto)
+    
+        //TODO: Map HouseholdDto to Household
         await _householdRepository.DeleteAsync(household);
         await _householdRepository.SaveChangesAsync();
     }
@@ -102,8 +103,9 @@ public class HouseholdService : IHouseholdService
         await _householdRepository.SaveChangesAsync();
     }
 
-    public async Task<Household> GetByIdAsync(Guid id)
+    public async Task<HouseholdDto> GetByIdAsync(Guid id)
     {
+        //TODO: Map HouseholdDto to Household
         var household = await _householdRepository.GetByIdAsync(id);
 
         if (household == null)
@@ -114,8 +116,10 @@ public class HouseholdService : IHouseholdService
         return household;
     }
 
-    public async Task<List<Household>> GetAllHouseholdsForUser(string userId)
+    public async Task<List<HouseholdDto>> GetAllHouseholdsForUser(string userId)
     {
+        //TODO: Map HouseholdDto to Household
+
         var household = await _householdRepository.GetAll()
             .Where(h => h.IsHouseholdActive && h.Members.Any(m => m.Id == userId))
             .ToListAsync();

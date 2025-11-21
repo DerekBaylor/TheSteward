@@ -24,6 +24,7 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.Web" />
+		<PackageReference Include="AutoMapper" />
 	</ItemGroup>
 
 	<ItemGroup>

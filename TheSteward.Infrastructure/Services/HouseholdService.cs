@@ -32,13 +32,15 @@ public class HouseholdService : IHouseholdService
             throw new KeyNotFoundException($"User with ID {ownerId} not found.");
 
         var household = _mapper.Map<Household>(newHousehold);
+        household.OwnerId = ownerId;
+        household.IsHouseholdActive = true;
 
         await _householdRepository.AddAsync(household);
         await _householdRepository.SaveChangesAsync();
 
        var createUpdateUserHouseholdDto = new CreateUpdateUserHouseholdDto
         {
-            IsDefaultUserHousehold = newHousehold.IsDefaultHousehold,
+            IsDefaultUserHousehold = newHousehold.IsDefaultHousehold, //TODO: Needs to be default true on first household.
             IsHouseholdOwner = true,
             HasAdminPermissions = true,
             HasFinanceManagerWritePermission = true,

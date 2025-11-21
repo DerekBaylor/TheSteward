@@ -9,6 +9,6 @@ public interface IUserHouseholdService
     Task DeleteAsync(UserHousehold userHousehold);
     Task UpdateAsync(CreateUpdateUserHouseholdDto updatedUserHousehold);
     Task<UserHousehold> GetByIdAsync(Guid id);
-    Task<List<UserHousehold>> GetAllUserHouseholdsForUser(string userId);
-    Task<UserHousehold?> GetDefaultUserHouseholdForUser(string userId);
+    Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUser(string userId);
+    Task<UserHouseholdDto?> GetDefaultUserHouseholdForUser(string userId);
 }

@@ -9,5 +9,10 @@ public class HouseholdProfiles : Profile
     {
         CreateMap<Household, HouseholdDto>().ReverseMap();
         CreateMap<Household, CreateUpdateHouseholdDto>().ReverseMap();
+
+        CreateMap<UserHousehold, UserHouseholdDto>()
+            .ForMember(h => h.Household, opt => opt.MapFrom(src => src.Household))
+            .ReverseMap();
+        CreateMap<UserHousehold, CreateUpdateUserHouseholdDto>().ReverseMap();
     }
 }

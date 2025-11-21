@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.DTOs;
 using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices;
 using TheSteward.Core.Models;
-using TheSteward.Infrastructure.Repositories;
 
 namespace TheSteward.Infrastructure.Services;
 
@@ -12,11 +12,13 @@ public class UserHouseholdService : IUserHouseholdService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUserHouseholdRepository _userHouseholdRepository;
+    private readonly IMapper _mapper;
 
-    public UserHouseholdService(IUserHouseholdRepository userHouseholdRepository, UserManager<ApplicationUser> userManager)
+    public UserHouseholdService(IUserHouseholdRepository userHouseholdRepository, UserManager<ApplicationUser> userManager, IMapper mapper)
     {
         _userHouseholdRepository = userHouseholdRepository;
         _userManager = userManager;
+        _mapper = mapper;
     }
 
     public async Task AddAsync(CreateUpdateUserHouseholdDto newUserHousehold, string ownerId)
@@ -99,21 +101,26 @@ public class UserHouseholdService : IUserHouseholdService
         return userHousehold;
     }
 
-    public async Task<List<UserHousehold>> GetAllUserHouseholdsForUser(string userId)
+    public async Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUser(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Where(uh => uh.Household.IsHouseholdActive && uh.UserId == userId)
             .ToListAsync();
 
-        return userHousehold;
+        var userHouseholdDto = _mapper.Map<List<UserHouseholdDto>>(userHousehold);
+
+        return userHouseholdDto;
     }
 
-    public async Task<UserHousehold?> GetDefaultUserHouseholdForUser(string userId)
+    public async Task<UserHouseholdDto?> GetDefaultUserHouseholdForUser(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
+            .Include(uh => uh.Household)
             .Where(uh => uh.UserId == userId && uh.IsDefaultUserHousehold && uh.Household.IsHouseholdActive)
             .FirstOrDefaultAsync();
 
-        return userHousehold;
+        var userHouseholdDto = _mapper.Map<UserHouseholdDto>(userHousehold);
+
+        return userHouseholdDto;
     }
 }

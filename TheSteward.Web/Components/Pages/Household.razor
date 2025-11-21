@@ -2,11 +2,13 @@
 
 @using System.Security.Claims
 @using System.ComponentModel.DataAnnotations
+@using AutoMapper
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
 @using TheSteward.Shared.Components
 
 @inject IHouseholdService HouseholdService
+@inject IUserHouseholdService UserHouseholdService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
@@ -21,17 +23,16 @@
 }
 else if (showForm)
 {
-     <HouseholdForm 
-        FormData="householdForm" 
+     <HouseholdForm FormData="householdFormDto"
         IsEditMode="isEditMode" 
         IsSubmitting="isSubmitting"
         OnSubmit="SaveHousehold"
         OnCancel="CancelEdit" />
 }
-else if (household != null)
+else if (householdDto != null)
 {
     <HouseholdCard 
-        Household="household" 
+        HouseholdDto="householdDto" 
         OnEdit="EditHousehold" />
 }
 
@@ -44,12 +45,57 @@ else if (household != null)
 
 @code {
     private TheSteward.Core.Models.Household? household;
-    private CreateUpdateHouseholdDto householdDto = new();
-    private HouseholdFormDto householdForm = new();
+    private CreateUpdateHouseholdDto createUpdateHouseholdDto = new();
+    private HouseholdFormDto householdFormDto = new();
+    private HouseholdDto householdDto = new HouseholdDto
+    {
+        HouseholdId = Guid.Empty,
+        HouseholdName = string.Empty,
+        IsHouseholdActive = false,
+        HasTaskManagerAccess = false,
+        HasFinanceManagerAccess = false,
+        HasMealManagerAccess = false,
+        HasFileManagerAccess = false,
+        OwnerId = string.Empty,
+        Owner = new ApplicationUser(),
+        Members = new List<ApplicationUser>()
+    };
+
+    private UserHouseholdDto defaultUserHousehold = new UserHouseholdDto
+    {
+        IsDefaultUserHousehold = false,
+        IsHouseholdOwner = false,
+        HasAdminPermissions = false,
+        HasFinanceManagerWritePermission = false,
+        HasFinanceManagerReadPermission = false,
+        HasKitchenManagerWritePermission = false,
+        HasKitchenManagerReadPermission = false,
+        HasTaskManagerWritePermission = false,
+        HasTaskManagerReadPermission = false,
+        HasFileManagerWritePermission = false,
+        HasFileManagerReadPermission = false,
+        UserId = string.Empty,
+        User = new ApplicationUser(),
+        Household = new HouseholdDto
+        {
+            HouseholdId = Guid.Empty,
+            HouseholdName = string.Empty,
+            IsHouseholdActive = false,
+            HasTaskManagerAccess = false,
+            HasFinanceManagerAccess = false,
+            HasMealManagerAccess = false,
+            HasFileManagerAccess = false,
+            OwnerId = string.Empty,
+            Owner = new ApplicationUser(),
+            Members = new List<ApplicationUser>()
+        }
+    };
+
     private bool isLoading = true;
     private bool showForm = false;
     private bool isEditMode = false;
     private bool isSubmitting = false;
+    private bool hasDefaultHousehold = false;
     private string? errorMessage;
     private string? currentUserId;
 
@@ -66,14 +112,16 @@ else if (household != null)
 
                 if (!string.IsNullOrEmpty(currentUserId))
                 {
-                    var households = await HouseholdService.GetAllHouseholdsForUser(currentUserId);
+                    var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
 
-                    if (households.Any())
+                    if (defaultUserHousehold  != null)
                     {
-                        household = households.First();
+                        hasDefaultHousehold = true;
+                        householdDto = defaultUserHousehold.Household;
                     }
                     else
                     {
+                        hasDefaultHousehold = false;
                         showForm = true;
                         isEditMode = false;
                     }
@@ -103,31 +151,40 @@ else if (household != null)
 
         try
         {
-            if (isEditMode && household != null)
+            createUpdateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
+            createUpdateHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
+            createUpdateHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
+            createUpdateHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
+            createUpdateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
+
+            if (isEditMode && householdDto != null) // Update household
             {
-                // Update existing household
-                householdDto.HouseholdId = household.HouseholdId;
-                householdDto.HouseholdName = householdForm.HouseholdName;
-                householdDto.HasTaskManagerAccess = householdForm.HasTaskManagerAccess;
-                householdDto.HasFinanceManagerAccess = householdForm.HasFinanceManagerAccess;
-                householdDto.HasMealManagerAccess = householdForm.HasMealManagerAccess;
-                householdDto.HasFileManagerAccess = householdForm.HasFileManagerAccess;
+                createUpdateHouseholdDto.HouseholdId = householdDto.HouseholdId;
+                createUpdateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
 
-                await HouseholdService.UpdateAsync(householdDto);
+                await HouseholdService.UpdateAsync(createUpdateHouseholdDto);
+            }
+            else // Create household
+            {
+                createUpdateHouseholdDto.IsDefaultHousehold = !hasDefaultHousehold;
+                await HouseholdService.AddAsync(createUpdateHouseholdDto, currentUserId);
+            }
 
-                showForm = false;
-                isEditMode = false;
+            var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
+
+            if (defaultUserHousehold?.Household != null)
+            {
+                householdDto = defaultUserHousehold.Household;
             }
             else
             {
-                // Create new household
-                await HouseholdService.AddAsync(householdDto, currentUserId);
-
-                // Reload to show the created household
-                var households = await HouseholdService.GetAllHouseholdsForUser(currentUserId);
-                household = households.FirstOrDefault();
-                showForm = false;
+                errorMessage = "Unable to load household after save";
             }
+            
+            showForm = false;
+            isEditMode = false;
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -141,15 +198,15 @@ else if (household != null)
 
     private void EditHousehold()
     {
-        if (household == null) return;
+        if (householdDto == null) return;
 
-        householdForm = new HouseholdFormDto
+        householdFormDto = new HouseholdFormDto
         {
-            HouseholdName = household.HouseholdName,
-            HasTaskManagerAccess = household.HasTaskManagerAccess,
-            HasFinanceManagerAccess = household.HasFinanceManagerAccess,
-            HasMealManagerAccess = household.HasMealManagerAccess,
-            HasFileManagerAccess = household.HasFileManagerAccess
+            HouseholdName = householdDto.HouseholdName,
+            HasTaskManagerAccess = householdDto.HasTaskManagerAccess,
+            HasFinanceManagerAccess = householdDto.HasFinanceManagerAccess,
+            HasMealManagerAccess = householdDto.HasMealManagerAccess,
+            HasFileManagerAccess = householdDto.HasFileManagerAccess
         };
 
         isEditMode = true;
@@ -160,7 +217,7 @@ else if (household != null)
     {
         showForm = false;
         isEditMode = false;
-        householdForm = new HouseholdFormDto();
+        householdFormDto = new HouseholdFormDto();
         errorMessage = null;
     }
 }

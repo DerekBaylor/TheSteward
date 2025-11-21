@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
-
+using TheSteward.Core.DTOs;
+using TheSteward.Core.Models;
 namespace TheSteward.Core.Profiles;
 
 public class HouseholdProfiles : Profile
 {
     public HouseholdProfiles()
     {
-        CreateMap<Models.Household, DTOs.HouseholdDto>().ReverseMap();
-        CreateMap<Models.Household, DTOs.CreateUpdateHouseholdDto>().ReverseMap();
+        CreateMap<Household, HouseholdDto>().ReverseMap();
+        CreateMap<Household, CreateUpdateHouseholdDto>().ReverseMap();
     }
 }

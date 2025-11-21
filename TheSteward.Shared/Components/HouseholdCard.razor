@@ -1,0 +1,56 @@
+﻿@namespace TheSteward.Shared.Components
+
+@using TheSteward.Core.Models
+
+<h3>My Household</h3>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@Household.HouseholdName</h5>
+        <p class="card-text">
+            <strong>Status:</strong> @(Household.IsHouseholdActive ? "Active" : "Inactive")
+        </p>
+
+        <h6 class="mt-3">Enabled Features:</h6>
+        <ul style="list-style: none; padding-left: 0;">
+            <li>
+                <span class="material-icons" style="@(Household.HasTaskManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
+                    @(Household.HasTaskManagerAccess ? "check_circle" : "radio_button_unchecked")
+                </span>
+                <span style="@(Household.HasTaskManagerAccess ? "" : "opacity: 0.6;")">Task Manager</span>
+            </li>
+            <li>
+                <span class="material-icons" style="@(Household.HasFinanceManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
+                    @(Household.HasFinanceManagerAccess ? "check_circle" : "radio_button_unchecked")
+                </span>
+                <span style="@(Household.HasFinanceManagerAccess ? "" : "opacity: 0.6;")">Finance Manager</span>
+            </li>
+            <li>
+                <span class="material-icons" style="@(Household.HasMealManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
+                    @(Household.HasMealManagerAccess ? "check_circle" : "radio_button_unchecked")
+                </span>
+                <span style="@(Household.HasMealManagerAccess ? "" : "opacity: 0.6;")">Meal Manager</span>
+            </li>
+            <li>
+                <span class="material-icons" style="@(Household.HasFileManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
+                    @(Household.HasFileManagerAccess ? "check_circle" : "radio_button_unchecked")
+                </span>
+                <span style="@(Household.HasFileManagerAccess ? "" : "opacity: 0.6;")">File Manager</span>
+            </li>
+        </ul>
+
+        <button class="btn btn-secondary mt-3" @onclick="HandleEdit">Edit</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Household Household { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback OnEdit { get; set; }
+
+    private async Task HandleEdit()
+    {
+        await OnEdit.InvokeAsync();
+    }
+}

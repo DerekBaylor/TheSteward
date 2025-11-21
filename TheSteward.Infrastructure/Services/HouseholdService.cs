@@ -74,8 +74,30 @@ public class HouseholdService : IHouseholdService
         await _householdRepository.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Household household)
+    public async Task UpdateAsync(CreateUpdateHouseholdDto updatedHousehold)
     {
+        if (updatedHousehold.HouseholdId == null)
+            throw new ArgumentNullException(nameof(updatedHousehold.HouseholdId));
+
+        var currentHousehold = await _householdRepository.GetByIdAsync(updatedHousehold.HouseholdId.Value);
+
+        if (currentHousehold == null)
+            throw new KeyNotFoundException($"Household with ID {updatedHousehold.HouseholdId} not found.");
+
+        var household = new Household
+        { 
+            HasFileManagerAccess = updatedHousehold.HasFileManagerAccess,
+            HasFinanceManagerAccess = updatedHousehold.HasFinanceManagerAccess,
+            HasMealManagerAccess = updatedHousehold.HasMealManagerAccess,
+            HasTaskManagerAccess = updatedHousehold.HasTaskManagerAccess,
+            HouseholdId = updatedHousehold.HouseholdId.Value,
+            HouseholdName = updatedHousehold.HouseholdName,
+            IsHouseholdActive = currentHousehold.IsHouseholdActive,
+            OwnerId = currentHousehold.OwnerId,
+            Owner = currentHousehold.Owner,
+            Members = currentHousehold.Members
+        };
+
         await _householdRepository.UpdateAsync(household);
         await _householdRepository.SaveChangesAsync();
     }

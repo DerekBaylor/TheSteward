@@ -15,6 +15,11 @@
 		<None Remove="wwwroot\**" />
 	</ItemGroup>
 
+	<!-- Project References -->
+	<ItemGroup>
+		<ProjectReference Include="..\TheSteward.Core\TheSteward.Core.csproj" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components" />

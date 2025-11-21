@@ -25,7 +25,7 @@ public interface IHouseholdService
     /// </summary>
     /// <param name="household">The household entity with updated values.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task UpdateAsync(Household household);
+    Task UpdateAsync(CreateUpdateHouseholdDto updatedHousehold);
 
     /// <summary>
     /// Retrieves a household by its unique identifier.

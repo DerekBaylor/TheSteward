@@ -1,6 +1,8 @@
 ﻿@namespace TheSteward.Shared.Components
 
-@using TheSteward.Core.DTOs
+@using TheSteward.Core.Dtos.HouseholdDtos
+@using TheSteward.Core.Models
+
 
 <h3>My Household</h3>
 <div class="card">
@@ -38,6 +40,44 @@
             </li>
         </ul>
 
+        <h6 class="mt-4">Members:</h6>
+        @if (HouseholdDto.Members != null && HouseholdDto.Members.Any())
+        {
+            <ul style="list-style: none; padding-left: 0;">
+                @foreach (var member in HouseholdDto.Members)
+                {
+                    <li class="mb-2">
+                        @if (HasAdminPermissions)
+                        {
+                            <button class="btn btn-link p-0 text-start" @onclick="() => HandleMemberClick(member)">
+                                <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
+                                @member.UserName
+                                @if (member.Id == HouseholdDto.OwnerId)
+                                {
+                                    <span class="badge bg-primary ms-2">Owner</span>
+                                }
+                            </button>
+                        }
+                        else
+                        {
+                            <span>
+                                <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
+                                @member.UserName
+                                @if (member.Id == HouseholdDto.OwnerId)
+                                {
+                                    <span class="badge bg-primary ms-2">Owner</span>
+                                }
+                            </span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="text-muted">No members found.</p>
+        }
+
         <button class="btn btn-secondary mt-3" @onclick="HandleEdit">Edit</button>
     </div>
 </div>
@@ -46,11 +86,22 @@
     [Parameter, EditorRequired]
     public HouseholdDto HouseholdDto { get; set; } = null!;
 
+    [Parameter, EditorRequired]
+    public bool HasAdminPermissions { get; set; }
+
     [Parameter]
     public EventCallback OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<ApplicationUser> OnMemberEdit { get; set; }
 
     private async Task HandleEdit()
     {
         await OnEdit.InvokeAsync();
+    }
+
+    private async Task HandleMemberClick(ApplicationUser member)
+    {
+        await OnMemberEdit.InvokeAsync(member);
     }
 }

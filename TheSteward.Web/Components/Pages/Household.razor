@@ -1,10 +1,11 @@
 ﻿@page "/household"
 
-@using System.Security.Claims
 @using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
 @using AutoMapper
-@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using TheSteward.Core.Dtos.HouseholdDtos
 @using TheSteward.Shared.Components
 
 @inject IHouseholdService HouseholdService
@@ -23,16 +24,19 @@
 }
 else if (showForm)
 {
-     <HouseholdForm FormData="householdFormDto"
-        IsEditMode="isEditMode" 
+    <HouseholdForm 
+        IsEditMode="isEditMode"
+        FormData="householdFormDto"
         IsSubmitting="isSubmitting"
         OnSubmit="SaveHousehold"
         OnCancel="CancelEdit" />
+
 }
-else if (householdDto != null)
+else if (showCard)
 {
     <HouseholdCard 
-        HouseholdDto="householdDto" 
+        HouseholdDto="householdDto"
+        HasAdminPermissions="hasAdminPermissions"
         OnEdit="EditHousehold" />
 }
 
@@ -44,8 +48,9 @@ else if (householdDto != null)
 }
 
 @code {
-    private TheSteward.Core.Models.Household? household;
-    private CreateUpdateHouseholdDto createUpdateHouseholdDto = new();
+    private Household? household;
+    private CreateHouseholdDto createHouseholdDto = new();
+    private UpdateHouseholdDto updateHouseholdDto = new();
     private HouseholdFormDto householdFormDto = new();
     private HouseholdDto householdDto = new HouseholdDto
     {
@@ -93,9 +98,13 @@ else if (householdDto != null)
 
     private bool isLoading = true;
     private bool showForm = false;
+    private bool showCard = false;
     private bool isEditMode = false;
     private bool isSubmitting = false;
     private bool hasDefaultHousehold = false;
+    private bool hasAdminPermissions = false;
+    private ApplicationUser? selectedMember;
+    private bool showMemberPermissionsForm = false;
     private string? errorMessage;
     private string? currentUserId;
 
@@ -118,10 +127,13 @@ else if (householdDto != null)
                     {
                         hasDefaultHousehold = true;
                         householdDto = defaultUserHousehold.Household;
+                        hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
+                        showCard = true;
                     }
                     else
                     {
                         hasDefaultHousehold = false;
+                        showCard = false;
                         showForm = true;
                         isEditMode = false;
                     }
@@ -151,23 +163,29 @@ else if (householdDto != null)
 
         try
         {
-            createUpdateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
-            createUpdateHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
-            createUpdateHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
-            createUpdateHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
-            createUpdateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
-
             if (isEditMode && householdDto != null) // Update household
             {
-                createUpdateHouseholdDto.HouseholdId = householdDto.HouseholdId;
-                createUpdateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
 
-                await HouseholdService.UpdateAsync(createUpdateHouseholdDto);
+                updateHouseholdDto.HouseholdId = householdDto.HouseholdId;
+                updateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
+                updateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
+                updateHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
+                updateHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
+                updateHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
+                updateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
+
+                await HouseholdService.UpdateAsync(updateHouseholdDto);
             }
             else // Create household
             {
-                createUpdateHouseholdDto.IsDefaultHousehold = !hasDefaultHousehold;
-                await HouseholdService.AddAsync(createUpdateHouseholdDto, currentUserId);
+                createHouseholdDto.IsDefaultHousehold = !hasDefaultHousehold;
+                createHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
+                createHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
+                createHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
+                createHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
+                createHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
+
+                await HouseholdService.AddAsync(createHouseholdDto, currentUserId);
             }
 
             var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
@@ -175,6 +193,8 @@ else if (householdDto != null)
             if (defaultUserHousehold?.Household != null)
             {
                 householdDto = defaultUserHousehold.Household;
+                hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
+                hasDefaultHousehold = true;
             }
             else
             {
@@ -182,6 +202,7 @@ else if (householdDto != null)
             }
             
             showForm = false;
+            showCard = true;
             isEditMode = false;
 
             StateHasChanged();
@@ -219,5 +240,13 @@ else if (householdDto != null)
         isEditMode = false;
         householdFormDto = new HouseholdFormDto();
         errorMessage = null;
+    }
+
+    private void EditMemberPermissions(ApplicationUser member)
+    {
+        // Open your member permissions edit form
+        // You can set a flag to show a different form, similar to showForm
+        selectedMember = member;
+        showMemberPermissionsForm = true;
     }
 }

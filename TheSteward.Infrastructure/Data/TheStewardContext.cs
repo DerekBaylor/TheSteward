@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Models;
+using TheSteward.Core.Models.HouseholdModels;
 namespace TheSteward.Infrastructure.Data;
 
 

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TheSteward.Core.Models;
 
-namespace TheSteward.Core.DTOs;
+namespace TheSteward.Core.Dtos.HouseholdDtos;
 
 public class UserHouseholdDto
 {

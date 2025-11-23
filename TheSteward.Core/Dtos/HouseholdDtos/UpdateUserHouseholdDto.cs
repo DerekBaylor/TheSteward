@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TheSteward.Core.Models;
+using TheSteward.Core.Models.HouseholdModels;
 
-namespace TheSteward.Core.DTOs;
+namespace TheSteward.Core.Dtos.HouseholdDtos;
 
-public class CreateUpdateUserHouseholdDto
+public class UpdateUserHouseholdDto
 {
     public Guid? UserHouseholdId { get; set; }
     public bool IsDefaultUserHousehold { get; set; }

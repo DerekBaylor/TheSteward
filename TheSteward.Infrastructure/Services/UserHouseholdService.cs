@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TheSteward.Core.DTOs;
+using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices;
 using TheSteward.Core.Models;
+using TheSteward.Core.Models.HouseholdModels;
 
 namespace TheSteward.Infrastructure.Services;
 
@@ -21,7 +22,7 @@ public class UserHouseholdService : IUserHouseholdService
         _mapper = mapper;
     }
 
-    public async Task AddAsync(CreateUpdateUserHouseholdDto newUserHousehold, string ownerId)
+    public async Task AddAsync(CreateUserHouseholdDto newUserHousehold, string ownerId)
     {
         if (newUserHousehold == null)
             throw new ArgumentNullException(nameof(newUserHousehold));
@@ -45,9 +46,7 @@ public class UserHouseholdService : IUserHouseholdService
             HasFileManagerWritePermission = newUserHousehold.HasFileManagerWritePermission,
             HasFileManagerReadPermission = newUserHousehold.HasFileManagerReadPermission,
             UserId = newUserHousehold.UserId,
-            User = newUserHousehold.User,
-            HouseholdId = newUserHousehold.HouseholdId,
-            Household = newUserHousehold.Household
+            HouseholdId = newUserHousehold.HouseholdId
         };
 
         await _userHouseholdRepository.AddAsync(userHousehold);
@@ -60,7 +59,7 @@ public class UserHouseholdService : IUserHouseholdService
         await _userHouseholdRepository.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(CreateUpdateUserHouseholdDto updatedUserHousehold)
+    public async Task UpdateAsync(UpdateUserHouseholdDto updatedUserHousehold)
     {
         if (updatedUserHousehold.UserHouseholdId == null)
             throw new ArgumentNullException(nameof(updatedUserHousehold.UserHouseholdId));
@@ -116,6 +115,7 @@ public class UserHouseholdService : IUserHouseholdService
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
+            .ThenInclude(h => h.Members)
             .Where(uh => uh.UserId == userId && uh.IsDefaultUserHousehold && uh.Household.IsHouseholdActive)
             .FirstOrDefaultAsync();
 

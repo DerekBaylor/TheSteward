@@ -1,4 +1,4 @@
-﻿using TheSteward.Core.Models;
+﻿using TheSteward.Core.Models.HouseholdModels;
 
 namespace TheSteward.Core.IRepositories;
 

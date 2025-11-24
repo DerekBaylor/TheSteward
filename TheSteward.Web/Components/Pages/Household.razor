@@ -48,53 +48,11 @@ else if (showCard)
 }
 
 @code {
-    private Household? household;
     private CreateHouseholdDto createHouseholdDto = new();
     private UpdateHouseholdDto updateHouseholdDto = new();
     private HouseholdFormDto householdFormDto = new();
-    private HouseholdDto householdDto = new HouseholdDto
-    {
-        HouseholdId = Guid.Empty,
-        HouseholdName = string.Empty,
-        IsHouseholdActive = false,
-        HasTaskManagerAccess = false,
-        HasFinanceManagerAccess = false,
-        HasMealManagerAccess = false,
-        HasFileManagerAccess = false,
-        OwnerId = string.Empty,
-        Owner = new ApplicationUser(),
-        Members = new List<ApplicationUser>()
-    };
-
-    private UserHouseholdDto defaultUserHousehold = new UserHouseholdDto
-    {
-        IsDefaultUserHousehold = false,
-        IsHouseholdOwner = false,
-        HasAdminPermissions = false,
-        HasFinanceManagerWritePermission = false,
-        HasFinanceManagerReadPermission = false,
-        HasKitchenManagerWritePermission = false,
-        HasKitchenManagerReadPermission = false,
-        HasTaskManagerWritePermission = false,
-        HasTaskManagerReadPermission = false,
-        HasFileManagerWritePermission = false,
-        HasFileManagerReadPermission = false,
-        UserId = string.Empty,
-        User = new ApplicationUser(),
-        Household = new HouseholdDto
-        {
-            HouseholdId = Guid.Empty,
-            HouseholdName = string.Empty,
-            IsHouseholdActive = false,
-            HasTaskManagerAccess = false,
-            HasFinanceManagerAccess = false,
-            HasMealManagerAccess = false,
-            HasFileManagerAccess = false,
-            OwnerId = string.Empty,
-            Owner = new ApplicationUser(),
-            Members = new List<ApplicationUser>()
-        }
-    };
+    private HouseholdDto? householdDto = null;
+    private UserHouseholdDto? userHouseholdDto = null;
 
     private bool isLoading = true;
     private bool showForm = false;
@@ -232,11 +190,13 @@ else if (showCard)
 
         isEditMode = true;
         showForm = true;
+        showCard = false;
     }
 
     private void CancelEdit()
     {
         showForm = false;
+        showCard = true;
         isEditMode = false;
         householdFormDto = new HouseholdFormDto();
         errorMessage = null;

@@ -22,7 +22,7 @@
 {
     <p><em>Loading...</em></p>
 }
-else if (showForm)
+else if (showHouseholdForm)
 {
     <HouseholdForm 
         IsEditMode="isEditMode"
@@ -37,7 +37,16 @@ else if (showCard)
     <HouseholdCard 
         HouseholdDto="householdDto"
         HasAdminPermissions="hasAdminPermissions"
-        OnEdit="EditHousehold" />
+        OnEditHosuehold="EditHousehold"
+        GetMember="GetMember" />
+    
+    if (selectedUserHouseholdDto != null)
+    {        
+        <UserHouseholdCard 
+            UserHouseholdDto="selectedUserHouseholdDto"
+            ClearSelectedMember="ClearSelectedMember"
+            EditMemberPermissions="EditMemberPermissions" />
+    }
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -47,22 +56,26 @@ else if (showCard)
     </div>
 }
 
+
 @code {
     private CreateHouseholdDto createHouseholdDto = new();
     private UpdateHouseholdDto updateHouseholdDto = new();
     private HouseholdFormDto householdFormDto = new();
     private HouseholdDto? householdDto = null;
     private UserHouseholdDto? userHouseholdDto = null;
+    private UserHouseholdDto? selectedUserHouseholdDto = null;
+    private ApplicationUser? selectedMember;
 
     private bool isLoading = true;
-    private bool showForm = false;
+    private bool isLoadingMember = false;
+    private bool showHouseholdForm = false;
     private bool showCard = false;
     private bool isEditMode = false;
     private bool isSubmitting = false;
     private bool hasDefaultHousehold = false;
     private bool hasAdminPermissions = false;
-    private ApplicationUser? selectedMember;
     private bool showMemberPermissionsForm = false;
+
     private string? errorMessage;
     private string? currentUserId;
 
@@ -79,7 +92,7 @@ else if (showCard)
 
                 if (!string.IsNullOrEmpty(currentUserId))
                 {
-                    var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
+                    var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
 
                     if (defaultUserHousehold  != null)
                     {
@@ -92,7 +105,7 @@ else if (showCard)
                     {
                         hasDefaultHousehold = false;
                         showCard = false;
-                        showForm = true;
+                        showHouseholdForm = true;
                         isEditMode = false;
                     }
                 }
@@ -146,7 +159,7 @@ else if (showCard)
                 await HouseholdService.AddAsync(createHouseholdDto, currentUserId);
             }
 
-            var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
+            var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
 
             if (defaultUserHousehold?.Household != null)
             {
@@ -159,7 +172,7 @@ else if (showCard)
                 errorMessage = "Unable to load household after save";
             }
             
-            showForm = false;
+            showHouseholdForm = false;
             showCard = true;
             isEditMode = false;
 
@@ -189,24 +202,69 @@ else if (showCard)
         };
 
         isEditMode = true;
-        showForm = true;
+        showHouseholdForm = true;
         showCard = false;
     }
 
     private void CancelEdit()
     {
-        showForm = false;
+        showHouseholdForm = false;
         showCard = true;
         isEditMode = false;
         householdFormDto = new HouseholdFormDto();
         errorMessage = null;
     }
 
-    private void EditMemberPermissions(ApplicationUser member)
+
+    private async Task GetMember(ApplicationUser member)
+    {
+        if (householdDto == null)
+        {
+            errorMessage = "Household data not loaded.";
+            return;
+        }
+
+        isLoadingMember = true;
+        errorMessage = null;
+        selectedUserHouseholdDto = null;
+        StateHasChanged();
+
+        try
+        {
+            var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(householdDto.HouseholdId, member.Id);
+
+            if (userHousehold != null)
+            {
+                selectedUserHouseholdDto = userHousehold;
+                selectedMember = member;
+            }
+            else
+            {
+                errorMessage = "Unable to load member details.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading member details: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingMember = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ClearSelectedMember()
+    {
+        selectedUserHouseholdDto = null;
+        selectedMember = null;
+        errorMessage = null;
+    }
+
+    private void EditMemberPermissions(UserHouseholdDto userHouseholdDto)
     {
         // Open your member permissions edit form
         // You can set a flag to show a different form, similar to showForm
-        selectedMember = member;
         showMemberPermissionsForm = true;
     }
 }

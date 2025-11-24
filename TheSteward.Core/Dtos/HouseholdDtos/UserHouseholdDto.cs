@@ -1,53 +1,49 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using TheSteward.Core.Attributes;
 using TheSteward.Core.Models;
 
 namespace TheSteward.Core.Dtos.HouseholdDtos;
 
 public class UserHouseholdDto
 {
-    [Key]
     public Guid UserHouseholdId { get; set; }
 
-    [Required]
-    public required bool IsDefaultUserHousehold { get; set; }
+    public bool IsDefaultUserHousehold { get; set; }
 
-    [Required]
-    public required bool IsHouseholdOwner { get; set; }
+    public bool IsHouseholdOwner { get; set; }
 
     #region Permissions
 
-    [Required]
-    public required bool HasAdminPermissions { get; set; }
+    [UserPermission("Admin Permissions", "General")]
+    public bool HasAdminPermissions { get; set; }
 
-    [Required]
-    public required bool HasFinanceManagerWritePermission { get; set; }
+    [UserPermission("Finance Manager - Write", "Finance")]
+    public bool HasFinanceManagerWritePermission { get; set; }
 
-    [Required]
-    public required bool HasFinanceManagerReadPermission { get; set; }
+    [UserPermission("Finance Manager - Read", "Finance")]
+    public bool HasFinanceManagerReadPermission { get; set; }
 
-    [Required]
-    public required bool HasKitchenManagerWritePermission { get; set; }
+    [UserPermission("Kitchen Manager - Write", "Kitchen")]
+    public bool HasKitchenManagerWritePermission { get; set; }
 
-    [Required]
-    public required bool HasKitchenManagerReadPermission { get; set; }
+    [UserPermission("Kitchen Manager - Read", "Kitchen")]
+    public bool HasKitchenManagerReadPermission { get; set; }
 
-    [Required]
-    public required bool HasTaskManagerWritePermission { get; set; }
+    [UserPermission("Task Manager - Write", "Tasks")]
+    public bool HasTaskManagerWritePermission { get; set; }
 
-    [Required]
-    public required bool HasTaskManagerReadPermission { get; set; }
+    [UserPermission("Task Manager - Read", "Tasks")]
+    public bool HasTaskManagerReadPermission { get; set; }
 
-    [Required]
-    public required bool HasFileManagerWritePermission { get; set; }
+    [UserPermission("File Manager - Write", "Files")]
+    public bool HasFileManagerWritePermission { get; set; }
 
-    [Required]
-    public required bool HasFileManagerReadPermission { get; set; }
+    [UserPermission("File Manager - Read")]
+    public bool HasFileManagerReadPermission { get; set; }
 
     #endregion Permissions
 
     [Required]
-    [ForeignKey(nameof(UserId))]
     public required string UserId { get; set; }
 
     [Required]
@@ -55,6 +51,5 @@ public class UserHouseholdDto
 
     public Guid HouseholdId { get; set; }
 
-    [ForeignKey(nameof(HouseholdId))]
     public required HouseholdDto Household { get; set; }
 }

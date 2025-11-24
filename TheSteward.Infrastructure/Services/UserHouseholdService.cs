@@ -100,7 +100,7 @@ public class UserHouseholdService : IUserHouseholdService
         return userHousehold;
     }
 
-    public async Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUser(string userId)
+    public async Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUserAsync(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Where(uh => uh.Household.IsHouseholdActive && uh.UserId == userId)
@@ -111,12 +111,26 @@ public class UserHouseholdService : IUserHouseholdService
         return userHouseholdDto;
     }
 
-    public async Task<UserHouseholdDto?> GetDefaultUserHouseholdForUser(string userId)
+    public async Task<UserHouseholdDto?> GetDefaultUserHouseholdForUserAsync(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
             .ThenInclude(h => h.Members)
-            .Where(uh => uh.UserId == userId && uh.IsDefaultUserHousehold && uh.Household.IsHouseholdActive)
+            .Where(uh => 
+                uh.UserId == userId && 
+                uh.IsDefaultUserHousehold && 
+                uh.Household.IsHouseholdActive)
+            .FirstOrDefaultAsync();
+
+        var userHouseholdDto = _mapper.Map<UserHouseholdDto>(userHousehold);
+
+        return userHouseholdDto;
+    }
+
+    public async Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId)
+    {
+        var userHousehold = await _userHouseholdRepository.GetAll()
+            .Where(uh => uh.UserId == userId && uh.HouseholdId == householdId)
             .FirstOrDefaultAsync();
 
         var userHouseholdDto = _mapper.Map<UserHouseholdDto>(userHousehold);

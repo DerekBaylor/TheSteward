@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using TheSteward.Core.Models;
 using TheSteward.Core.Models.HouseholdModels;
 
@@ -25,14 +24,11 @@ public class UpdateUserHouseholdDto
     #endregion Permissions
 
     [Required]
-    [ForeignKey(nameof(UserId))]
     public required string UserId { get; set; }
 
-    [Required]
     public required ApplicationUser User { get; set; }
 
     public Guid HouseholdId { get; set; }
 
-    [ForeignKey(nameof(HouseholdId))]
     public required Household Household { get; set; }
 }

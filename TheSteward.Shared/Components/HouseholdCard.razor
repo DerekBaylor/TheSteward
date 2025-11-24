@@ -2,7 +2,8 @@
 
 @using TheSteward.Core.Dtos.HouseholdDtos
 @using TheSteward.Core.Models
-
+@using System.Reflection
+@using TheSteward.Core.Attributes
 
 <h3>My Household</h3>
 <div class="card">
@@ -12,35 +13,23 @@
             <strong>Status:</strong> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
         </p>
 
-        <h6 class="mt-3">Enabled Features:</h6>
+        <h6 class="mt-3"><strong>Enabled Features:</strong></h6>
+
         <ul style="list-style: none; padding-left: 0;">
-            <li>
-                <span class="material-icons" style="@(HouseholdDto.HasTaskManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                    @(HouseholdDto.HasTaskManagerAccess ? "check_circle" : "radio_button_unchecked")
-                </span>
-                <span style="@(HouseholdDto.HasTaskManagerAccess ? "" : "opacity: 0.6;")">Task Manager</span>
-            </li>
-            <li>
-                <span class="material-icons" style="@(HouseholdDto.HasFinanceManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                    @(HouseholdDto.HasFinanceManagerAccess ? "check_circle" : "radio_button_unchecked")
-                </span>
-                <span style="@(HouseholdDto.HasFinanceManagerAccess ? "" : "opacity: 0.6;")">Finance Manager</span>
-            </li>
-            <li>
-                <span class="material-icons" style="@(HouseholdDto.HasMealManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                    @(HouseholdDto.HasMealManagerAccess ? "check_circle" : "radio_button_unchecked")
-                </span>
-                <span style="@(HouseholdDto.HasMealManagerAccess ? "" : "opacity: 0.6;")">Meal Manager</span>
-            </li>
-            <li>
-                <span class="material-icons" style="@(HouseholdDto.HasFileManagerAccess ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                    @(HouseholdDto.HasFileManagerAccess ? "check_circle" : "radio_button_unchecked")
-                </span>
-                <span style="@(HouseholdDto.HasFileManagerAccess ? "" : "opacity: 0.6;")">File Manager</span>
-            </li>
+            @foreach (var feature in GetFeatures())
+            {
+                <li>
+                    <span class="material-icons" style="@(feature.IsEnabled ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
+                        @(feature.IsEnabled ? "check_circle" : "radio_button_unchecked")
+                    </span>
+                    <span style="@(feature.IsEnabled ? "" : "opacity: 0.6;")">@feature.Name</span>
+                </li>
+            }
         </ul>
 
-        <h6 class="mt-4">Members:</h6>
+        <button class="btn btn-secondary mt-3" @onclick="HandleEdit">Edit</button>
+
+        <h6 class="mt-4"><strong>Members:</strong></h6>
         @if (HouseholdDto.Members != null && HouseholdDto.Members.Any())
         {
             <ul style="list-style: none; padding-left: 0;">
@@ -77,8 +66,6 @@
         {
             <p class="text-muted">No members found.</p>
         }
-
-        <button class="btn btn-secondary mt-3" @onclick="HandleEdit">Edit</button>
     </div>
 </div>
 
@@ -90,18 +77,36 @@
     public bool HasAdminPermissions { get; set; }
 
     [Parameter]
-    public EventCallback OnEdit { get; set; }
+    public EventCallback OnEditHosuehold { get; set; }
 
     [Parameter]
-    public EventCallback<ApplicationUser> OnMemberEdit { get; set; }
+    public EventCallback<ApplicationUser> GetMember { get; set; }
+
+    private List<(string Name, bool IsEnabled)> GetFeatures()
+    {
+        var features = new List<(string Name, bool IsEnabled)>();
+
+        var properties = typeof(HouseholdDto).GetProperties()
+            .Where(p => p.GetCustomAttribute<HouseholdFeatureAttribute>() != null);
+
+        foreach (var property in properties)
+        {
+            var attribute = property.GetCustomAttribute<HouseholdFeatureAttribute>();
+            var value = (bool)(property.GetValue(HouseholdDto) ?? false);
+
+            features.Add((attribute!.DisplayName, value));
+        }
+
+        return features;
+    }
 
     private async Task HandleEdit()
     {
-        await OnEdit.InvokeAsync();
+        await OnEditHosuehold.InvokeAsync();
     }
 
     private async Task HandleMemberClick(ApplicationUser member)
     {
-        await OnMemberEdit.InvokeAsync(member);
+        await GetMember.InvokeAsync(member);
     }
 }

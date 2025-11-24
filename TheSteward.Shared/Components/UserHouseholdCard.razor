@@ -1,0 +1,72 @@
+﻿@namespace TheSteward.Shared.Components
+
+@using TheSteward.Core.Dtos.HouseholdDtos
+@using TheSteward.Core.Models
+@using System.Reflection
+@using TheSteward.Core.Attributes
+
+<h3>Memeber Information</h3>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@UserHouseholdDto.User.UserName</h5>
+        <p class="card-text">
+            <strong>Household Owner:</strong> @UserHouseholdDto.IsHouseholdOwner
+        </p>
+        <h6 class="mt-3"><strong>Permissions:</strong></h6>
+        <ul style="list-style: none; padding-left: 0;">
+            @foreach (var feature in GetPermissions())
+            {
+                <li>
+                    <span class="material-icons" style="@(feature.IsEnabled ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
+                        @(feature.IsEnabled ? "check_circle" : "radio_button_unchecked")
+                    </span>
+                    <span style="@(feature.IsEnabled ? "" : "opacity: 0.6;")">@feature.Name</span>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <button type="button" class="btn btn-secondary ms-2" @onclick="HandleCancel">Cancel</button>
+
+    <button type="button" class="btn btn-secondary ms-2" @onclick="@(() => HandleEdit(UserHouseholdDto))">Edit</button>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public UserHouseholdDto UserHouseholdDto { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback ClearSelectedMember { get; set; }
+
+    [Parameter]
+    public EventCallback<UserHouseholdDto> EditMemberPermissions { get; set; }
+
+    private async Task HandleCancel()
+    {
+        await ClearSelectedMember.InvokeAsync();
+    }
+
+    private async Task HandleEdit(UserHouseholdDto userHouseholdDto)
+    {
+        await EditMemberPermissions.InvokeAsync(userHouseholdDto);
+    }
+
+    private List<(string Name, bool IsEnabled)> GetPermissions()
+    {
+        var features = new List<(string Name, bool IsEnabled)>();
+
+        var properties = typeof(UserHouseholdDto).GetProperties()
+            .Where(p => p.GetCustomAttribute<UserPermissionAttribute>() != null);
+
+        foreach (var property in properties)
+        {
+            var attribute = property.GetCustomAttribute<UserPermissionAttribute>();
+            var value = (bool)(property.GetValue(UserHouseholdDto) ?? false);
+
+            features.Add((attribute!.DisplayName, value));
+        }
+
+        return features;
+    }
+}

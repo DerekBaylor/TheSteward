@@ -22,17 +22,17 @@
 {
     <p><em>Loading...</em></p>
 }
-else if (showHouseholdForm)
+else if (isEditHouseholdMode)
 {
     <HouseholdForm 
-        IsEditMode="isEditMode"
+        IsEditMode="isEditHouseholdMode"
         FormData="householdFormDto"
         IsSubmitting="isSubmitting"
         OnSubmit="SaveHousehold"
-        OnCancel="CancelEdit" />
+        OnCancel="CancelHouseholdEdit" />
 
 }
-else if (showCard)
+else if (showHouseholdCard)
 {
     <HouseholdCard 
         HouseholdDto="householdDto"
@@ -40,12 +40,21 @@ else if (showCard)
         OnEditHosuehold="EditHousehold"
         GetMember="GetMember" />
     
-    if (selectedUserHouseholdDto != null)
+    if (showMemberPermissionsForm && userHouseholdFormDto != null)
+    {
+        <UserHouseholdForm 
+            FormData="userHouseholdFormDto"
+            IsSubmitting="isSubmitting"
+            OnSubmit="SaveUserHousehold"
+            OnCancel="CancelUserHouseholdEdit" />
+
+    }
+    else if (selectedUserHouseholdDto != null && !showMemberPermissionsForm)
     {        
         <UserHouseholdCard 
             UserHouseholdDto="selectedUserHouseholdDto"
-            ClearSelectedMember="ClearSelectedMember"
-            EditMemberPermissions="EditMemberPermissions" />
+            OnCancel="ClearSelectedMember"
+            OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
     }
 }
 
@@ -64,13 +73,15 @@ else if (showCard)
     private HouseholdDto? householdDto = null;
     private UserHouseholdDto? userHouseholdDto = null;
     private UserHouseholdDto? selectedUserHouseholdDto = null;
+    private UserHouseholdFormDto? userHouseholdFormDto = null;
     private ApplicationUser? selectedMember;
 
     private bool isLoading = true;
     private bool isLoadingMember = false;
     private bool showHouseholdForm = false;
-    private bool showCard = false;
-    private bool isEditMode = false;
+    private bool showHouseholdCard = false;
+    private bool isEditHouseholdMode = false;
+    private bool isEditUserHouseholdMode = false;
     private bool isSubmitting = false;
     private bool hasDefaultHousehold = false;
     private bool hasAdminPermissions = false;
@@ -99,14 +110,14 @@ else if (showCard)
                         hasDefaultHousehold = true;
                         householdDto = defaultUserHousehold.Household;
                         hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
-                        showCard = true;
+                        showHouseholdCard = true;
                     }
                     else
                     {
                         hasDefaultHousehold = false;
-                        showCard = false;
+                        showHouseholdCard = false;
                         showHouseholdForm = true;
-                        isEditMode = false;
+                        isEditHouseholdMode = false;
                     }
                 }
             }
@@ -134,7 +145,7 @@ else if (showCard)
 
         try
         {
-            if (isEditMode && householdDto != null) // Update household
+            if (isEditHouseholdMode && householdDto != null) // Update household
             {
 
                 updateHouseholdDto.HouseholdId = householdDto.HouseholdId;
@@ -171,10 +182,10 @@ else if (showCard)
             {
                 errorMessage = "Unable to load household after save";
             }
-            
+
             showHouseholdForm = false;
-            showCard = true;
-            isEditMode = false;
+            showHouseholdCard = true;
+            isEditHouseholdMode = false;
 
             StateHasChanged();
         }
@@ -201,16 +212,16 @@ else if (showCard)
             HasFileManagerAccess = householdDto.HasFileManagerAccess
         };
 
-        isEditMode = true;
+        isEditHouseholdMode = true;
         showHouseholdForm = true;
-        showCard = false;
+        showHouseholdCard = false;
     }
 
-    private void CancelEdit()
+    private void CancelHouseholdEdit()
     {
         showHouseholdForm = false;
-        showCard = true;
-        isEditMode = false;
+        showHouseholdCard = true;
+        isEditHouseholdMode = false;
         householdFormDto = new HouseholdFormDto();
         errorMessage = null;
     }
@@ -263,8 +274,41 @@ else if (showCard)
 
     private void EditMemberPermissions(UserHouseholdDto userHouseholdDto)
     {
-        // Open your member permissions edit form
-        // You can set a flag to show a different form, similar to showForm
+        if (userHouseholdDto == null)
+        {
+            errorMessage = "User household data is missing.";
+            return;
+        }
+
+        userHouseholdFormDto = new UserHouseholdFormDto
+        {
+            UserHouseholdId = userHouseholdDto.UserHouseholdId,
+            MemberName = userHouseholdDto.User?.UserName ?? "Unknown",
+            IsHouseholdOwner = userHouseholdDto.IsHouseholdOwner,
+            HasAdminPermissions = userHouseholdDto.HasAdminPermissions,
+            HasFinanceManagerReadPermission = userHouseholdDto.HasFinanceManagerReadPermission,
+            HasFinanceManagerWritePermission = userHouseholdDto.HasFinanceManagerWritePermission,
+            HasKitchenManagerReadPermission = userHouseholdDto.HasKitchenManagerReadPermission,
+            HasKitchenManagerWritePermission = userHouseholdDto.HasKitchenManagerWritePermission,
+            HasTaskManagerReadPermission = userHouseholdDto.HasTaskManagerReadPermission,
+            HasTaskManagerWritePermission = userHouseholdDto.HasTaskManagerWritePermission,
+            HasFileManagerReadPermission = userHouseholdDto.HasFileManagerReadPermission,
+            HasFileManagerWritePermission = userHouseholdDto.HasFileManagerWritePermission
+        };
+
         showMemberPermissionsForm = true;
     }
+
+    private void CancelUserHouseholdEdit()
+    {
+        showMemberPermissionsForm = false;
+        isEditUserHouseholdMode = false;
+        userHouseholdFormDto = null;
+        errorMessage = null;
+    }
+
+    private void SaveUserHousehold()
+    {
+        // Implementation for saving user household permissions goes here.
+    }   
 }

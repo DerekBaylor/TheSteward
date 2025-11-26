@@ -12,6 +12,7 @@ public class HouseholdProfiles : Profile
         CreateMap<Household, UpdateHouseholdDto>().ReverseMap();
 
         CreateMap<UserHousehold, UserHouseholdDto>()
+            .ForMember(h => h.User, opt => opt.MapFrom(src => src.User))
             .ForMember(h => h.Household, opt => opt.MapFrom(src => src.Household))
             .ReverseMap();
         CreateMap<UserHousehold, CreateUserHouseholdDto>().ReverseMap();

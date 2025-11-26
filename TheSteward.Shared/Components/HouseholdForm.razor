@@ -1,9 +1,7 @@
 ﻿@namespace TheSteward.Shared.Components
-
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using TheSteward.Shared.DTOs
-
+@using TheSteward.Shared.Dtos
 
 <h3>@(IsEditMode ? "Edit Household" : "Create A Household")</h3>
 <div class="card">
@@ -54,7 +52,7 @@
                 }
                 @(IsEditMode ? "Update Household" : "Create Household")
             </button>
-            
+
             @if (IsEditMode)
             {
                 <button type="button" class="btn btn-secondary ms-2" @onclick="HandleCancel">Cancel</button>

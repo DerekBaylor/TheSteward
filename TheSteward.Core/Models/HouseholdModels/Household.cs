@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TheSteward.Core.Models;
 
-namespace TheSteward.Core.DTOs;
+namespace TheSteward.Core.Models.HouseholdModels;
 
-public class HouseholdDto
+public class Household
 {
     [Key]
     public Guid HouseholdId { get; set; }

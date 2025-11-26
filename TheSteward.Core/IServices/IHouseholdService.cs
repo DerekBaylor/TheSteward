@@ -1,10 +1,10 @@
-﻿using TheSteward.Core.DTOs;
+﻿using TheSteward.Core.Dtos.HouseholdDtos;
 
 namespace TheSteward.Core.IServices;
 
 public interface IHouseholdService
 {
-    /// <summary>
+  /// <summary>
     /// Adds a new household to the database and creates an owner relationship for the specified user.
     /// The owner is automatically added as a member with full permissions across all household modules.
     /// </summary>
@@ -13,7 +13,7 @@ public interface IHouseholdService
     /// <exception cref="ArgumentNullException">Thrown when newHousehold is null.</exception>
     /// <exception cref="KeyNotFoundException">Thrown when the user with the specified ownerId does not exist.</exception>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task AddAsync(CreateUpdateHouseholdDto newHousehold, string ownerId);
+    Task AddAsync(CreateHouseholdDto newHousehold, string ownerId);
 
     /// <summary>
     /// Deletes a household from the database.
@@ -22,7 +22,7 @@ public interface IHouseholdService
     /// <returns>A task representing the asynchronous operation.</returns>
     Task DeleteAsync(HouseholdDto householdDto);
 
-    /// <summary>
+  /// <summary>
     /// Updates an existing household's editable properties in the database.
     /// Protected properties (IsHouseholdActive, OwnerId, Owner, Members) are preserved and cannot be modified through this method.
     /// </summary>
@@ -30,7 +30,7 @@ public interface IHouseholdService
     /// <exception cref="ArgumentNullException">Thrown when updatedHouseholdDto.HouseholdId is null.</exception>
     /// <exception cref="KeyNotFoundException">Thrown when no household with the specified ID exists.</exception>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task UpdateAsync(CreateUpdateHouseholdDto updatedHouseholdDto);
+    Task UpdateAsync(UpdateHouseholdDto updatedHouseholdDto);
 
     /// <summary>
     /// Retrieves a household by its unique identifier.
@@ -40,7 +40,7 @@ public interface IHouseholdService
     /// <returns>A task representing the asynchronous operation, containing the household data transfer object.</returns>
     Task<HouseholdDto> GetByIdAsync(Guid id);
 
-    /// <summary>
+  /// <summary>
     /// Retrieves all active households where the specified user is a member.
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>

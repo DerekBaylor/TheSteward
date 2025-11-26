@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TheSteward.Core.DTOs;
+using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices;
 using TheSteward.Core.Models;
+using TheSteward.Core.Models.HouseholdModels;
 
 namespace TheSteward.Infrastructure.Services;
 
@@ -21,7 +22,7 @@ public class UserHouseholdService : IUserHouseholdService
         _mapper = mapper;
     }
 
-    public async Task AddAsync(CreateUpdateUserHouseholdDto newUserHousehold, string ownerId)
+    public async Task AddAsync(CreateUserHouseholdDto newUserHousehold, string ownerId)
     {
         if (newUserHousehold == null)
             throw new ArgumentNullException(nameof(newUserHousehold));
@@ -45,9 +46,7 @@ public class UserHouseholdService : IUserHouseholdService
             HasFileManagerWritePermission = newUserHousehold.HasFileManagerWritePermission,
             HasFileManagerReadPermission = newUserHousehold.HasFileManagerReadPermission,
             UserId = newUserHousehold.UserId,
-            User = newUserHousehold.User,
-            HouseholdId = newUserHousehold.HouseholdId,
-            Household = newUserHousehold.Household
+            HouseholdId = newUserHousehold.HouseholdId
         };
 
         await _userHouseholdRepository.AddAsync(userHousehold);
@@ -60,32 +59,19 @@ public class UserHouseholdService : IUserHouseholdService
         await _userHouseholdRepository.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(CreateUpdateUserHouseholdDto updatedUserHousehold)
+    public async Task UpdateAsync(UpdateUserHouseholdDto updatedUserHousehold)
     {
         if (updatedUserHousehold.UserHouseholdId == null)
             throw new ArgumentNullException(nameof(updatedUserHousehold.UserHouseholdId));
 
-        var userHousehold = new UserHousehold
-        {
-            UserHouseholdId = (Guid)updatedUserHousehold.UserHouseholdId,
-            IsDefaultUserHousehold = updatedUserHousehold.IsDefaultUserHousehold,
-            IsHouseholdOwner = updatedUserHousehold.IsHouseholdOwner,
-            HasAdminPermissions = updatedUserHousehold.HasAdminPermissions,
-            HasFinanceManagerWritePermission = updatedUserHousehold.HasFinanceManagerWritePermission,
-            HasFinanceManagerReadPermission = updatedUserHousehold.HasFinanceManagerReadPermission,
-            HasKitchenManagerWritePermission = updatedUserHousehold.HasKitchenManagerWritePermission,
-            HasKitchenManagerReadPermission = updatedUserHousehold.HasKitchenManagerReadPermission,
-            HasTaskManagerWritePermission = updatedUserHousehold.HasTaskManagerWritePermission,
-            HasTaskManagerReadPermission = updatedUserHousehold.HasTaskManagerReadPermission,
-            HasFileManagerWritePermission = updatedUserHousehold.HasFileManagerWritePermission,
-            HasFileManagerReadPermission = updatedUserHousehold.HasFileManagerReadPermission,
-            UserId = updatedUserHousehold.UserId,
-            User = updatedUserHousehold.User,
-            HouseholdId = updatedUserHousehold.HouseholdId,
-            Household = updatedUserHousehold.Household
-        };
+        var currentUserHousehold = await GetByIdAsync(updatedUserHousehold.UserHouseholdId.Value);
 
-        await _userHouseholdRepository.UpdateAsync(userHousehold);
+        if (currentUserHousehold == null)
+            throw new KeyNotFoundException($"UserHousehold with ID {updatedUserHousehold.UserHouseholdId} not found.");
+
+        _mapper.Map(updatedUserHousehold, currentUserHousehold);
+
+        await _userHouseholdRepository.UpdateAsync(currentUserHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
     }
 
@@ -101,7 +87,7 @@ public class UserHouseholdService : IUserHouseholdService
         return userHousehold;
     }
 
-    public async Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUser(string userId)
+    public async Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUserAsync(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Where(uh => uh.Household.IsHouseholdActive && uh.UserId == userId)
@@ -112,11 +98,26 @@ public class UserHouseholdService : IUserHouseholdService
         return userHouseholdDto;
     }
 
-    public async Task<UserHouseholdDto?> GetDefaultUserHouseholdForUser(string userId)
+    public async Task<UserHouseholdDto?> GetDefaultUserHouseholdForUserAsync(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
-            .Where(uh => uh.UserId == userId && uh.IsDefaultUserHousehold && uh.Household.IsHouseholdActive)
+            .ThenInclude(h => h.Members)
+            .Where(uh => 
+                uh.UserId == userId && 
+                uh.IsDefaultUserHousehold && 
+                uh.Household.IsHouseholdActive)
+            .FirstOrDefaultAsync();
+
+        var userHouseholdDto = _mapper.Map<UserHouseholdDto>(userHousehold);
+
+        return userHouseholdDto;
+    }
+
+    public async Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId)
+    {
+        var userHousehold = await _userHouseholdRepository.GetAll()
+            .Where(uh => uh.UserId == userId && uh.HouseholdId == householdId)
             .FirstOrDefaultAsync();
 
         var userHouseholdDto = _mapper.Map<UserHouseholdDto>(userHousehold);

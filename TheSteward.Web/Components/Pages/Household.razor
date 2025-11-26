@@ -1,10 +1,11 @@
 ﻿@page "/household"
 
-@using System.Security.Claims
 @using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
 @using AutoMapper
-@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using TheSteward.Core.Dtos.HouseholdDtos
 @using TheSteward.Shared.Components
 
 @inject IHouseholdService HouseholdService
@@ -21,19 +22,40 @@
 {
     <p><em>Loading...</em></p>
 }
-else if (showForm)
+else if (isEditHouseholdMode)
 {
-     <HouseholdForm FormData="householdFormDto"
-        IsEditMode="isEditMode" 
+    <HouseholdForm 
+        IsEditMode="isEditHouseholdMode"
+        FormData="householdFormDto"
         IsSubmitting="isSubmitting"
         OnSubmit="SaveHousehold"
-        OnCancel="CancelEdit" />
+        OnCancel="CancelHouseholdEdit" />
+
 }
-else if (householdDto != null)
+else if (showHouseholdCard)
 {
     <HouseholdCard 
-        HouseholdDto="householdDto" 
-        OnEdit="EditHousehold" />
+        HouseholdDto="householdDto"
+        HasAdminPermissions="hasAdminPermissions"
+        OnEditHosuehold="EditHousehold"
+        GetMember="GetMember" />
+    
+    if (showMemberPermissionsForm && userHouseholdFormDto != null)
+    {
+        <UserHouseholdForm 
+            FormData="userHouseholdFormDto"
+            IsSubmitting="isSubmitting"
+            OnSubmit="SaveUserHousehold"
+            OnCancel="CancelUserHouseholdEdit" />
+
+    }
+    else if (selectedUserHouseholdDto != null && !showMemberPermissionsForm)
+    {        
+        <UserHouseholdCard 
+            UserHouseholdDto="selectedUserHouseholdDto"
+            OnCancel="ClearSelectedMember"
+            OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
+    }
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -43,59 +65,28 @@ else if (householdDto != null)
     </div>
 }
 
-@code {
-    private TheSteward.Core.Models.Household? household;
-    private CreateUpdateHouseholdDto createUpdateHouseholdDto = new();
-    private HouseholdFormDto householdFormDto = new();
-    private HouseholdDto householdDto = new HouseholdDto
-    {
-        HouseholdId = Guid.Empty,
-        HouseholdName = string.Empty,
-        IsHouseholdActive = false,
-        HasTaskManagerAccess = false,
-        HasFinanceManagerAccess = false,
-        HasMealManagerAccess = false,
-        HasFileManagerAccess = false,
-        OwnerId = string.Empty,
-        Owner = new ApplicationUser(),
-        Members = new List<ApplicationUser>()
-    };
 
-    private UserHouseholdDto defaultUserHousehold = new UserHouseholdDto
-    {
-        IsDefaultUserHousehold = false,
-        IsHouseholdOwner = false,
-        HasAdminPermissions = false,
-        HasFinanceManagerWritePermission = false,
-        HasFinanceManagerReadPermission = false,
-        HasKitchenManagerWritePermission = false,
-        HasKitchenManagerReadPermission = false,
-        HasTaskManagerWritePermission = false,
-        HasTaskManagerReadPermission = false,
-        HasFileManagerWritePermission = false,
-        HasFileManagerReadPermission = false,
-        UserId = string.Empty,
-        User = new ApplicationUser(),
-        Household = new HouseholdDto
-        {
-            HouseholdId = Guid.Empty,
-            HouseholdName = string.Empty,
-            IsHouseholdActive = false,
-            HasTaskManagerAccess = false,
-            HasFinanceManagerAccess = false,
-            HasMealManagerAccess = false,
-            HasFileManagerAccess = false,
-            OwnerId = string.Empty,
-            Owner = new ApplicationUser(),
-            Members = new List<ApplicationUser>()
-        }
-    };
+@code {
+    private CreateHouseholdDto createHouseholdDto = new();
+    private UpdateHouseholdDto updateHouseholdDto = new();
+    private HouseholdFormDto householdFormDto = new();
+    private HouseholdDto? householdDto = null;
+    private UserHouseholdDto? userHouseholdDto = null;
+    private UserHouseholdDto? selectedUserHouseholdDto = null;
+    private UserHouseholdFormDto? userHouseholdFormDto = null;
+    private ApplicationUser? selectedMember;
 
     private bool isLoading = true;
-    private bool showForm = false;
-    private bool isEditMode = false;
+    private bool isLoadingMember = false;
+    private bool showHouseholdForm = false;
+    private bool showHouseholdCard = false;
+    private bool isEditHouseholdMode = false;
+    private bool isEditUserHouseholdMode = false;
     private bool isSubmitting = false;
     private bool hasDefaultHousehold = false;
+    private bool hasAdminPermissions = false;
+    private bool showMemberPermissionsForm = false;
+
     private string? errorMessage;
     private string? currentUserId;
 
@@ -112,18 +103,21 @@ else if (householdDto != null)
 
                 if (!string.IsNullOrEmpty(currentUserId))
                 {
-                    var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
+                    var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
 
                     if (defaultUserHousehold  != null)
                     {
                         hasDefaultHousehold = true;
                         householdDto = defaultUserHousehold.Household;
+                        hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
+                        showHouseholdCard = true;
                     }
                     else
                     {
                         hasDefaultHousehold = false;
-                        showForm = true;
-                        isEditMode = false;
+                        showHouseholdCard = false;
+                        showHouseholdForm = true;
+                        isEditHouseholdMode = false;
                     }
                 }
             }
@@ -151,38 +145,47 @@ else if (householdDto != null)
 
         try
         {
-            createUpdateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
-            createUpdateHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
-            createUpdateHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
-            createUpdateHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
-            createUpdateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
-
-            if (isEditMode && householdDto != null) // Update household
+            if (isEditHouseholdMode && householdDto != null) // Update household
             {
-                createUpdateHouseholdDto.HouseholdId = householdDto.HouseholdId;
-                createUpdateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
 
-                await HouseholdService.UpdateAsync(createUpdateHouseholdDto);
+                updateHouseholdDto.HouseholdId = householdDto.HouseholdId;
+                updateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
+                updateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
+                updateHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
+                updateHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
+                updateHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
+                updateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
+
+                await HouseholdService.UpdateAsync(updateHouseholdDto);
             }
             else // Create household
             {
-                createUpdateHouseholdDto.IsDefaultHousehold = !hasDefaultHousehold;
-                await HouseholdService.AddAsync(createUpdateHouseholdDto, currentUserId);
+                createHouseholdDto.IsDefaultHousehold = !hasDefaultHousehold;
+                createHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
+                createHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
+                createHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
+                createHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
+                createHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
+
+                await HouseholdService.AddAsync(createHouseholdDto, currentUserId);
             }
 
-            var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUser(currentUserId);
+            var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
 
             if (defaultUserHousehold?.Household != null)
             {
                 householdDto = defaultUserHousehold.Household;
+                hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
+                hasDefaultHousehold = true;
             }
             else
             {
                 errorMessage = "Unable to load household after save";
             }
-            
-            showForm = false;
-            isEditMode = false;
+
+            showHouseholdForm = false;
+            showHouseholdCard = true;
+            isEditHouseholdMode = false;
 
             StateHasChanged();
         }
@@ -209,15 +212,163 @@ else if (householdDto != null)
             HasFileManagerAccess = householdDto.HasFileManagerAccess
         };
 
-        isEditMode = true;
-        showForm = true;
+        isEditHouseholdMode = true;
+        showHouseholdForm = true;
+        showHouseholdCard = false;
     }
 
-    private void CancelEdit()
+    private void CancelHouseholdEdit()
     {
-        showForm = false;
-        isEditMode = false;
+        showHouseholdForm = false;
+        showHouseholdCard = true;
+        isEditHouseholdMode = false;
         householdFormDto = new HouseholdFormDto();
         errorMessage = null;
+    }
+
+
+    private async Task GetMember(ApplicationUser member)
+    {
+        if (householdDto == null)
+        {
+            errorMessage = "Household data not loaded.";
+            return;
+        }
+
+        isLoadingMember = true;
+        errorMessage = null;
+        selectedUserHouseholdDto = null;
+        StateHasChanged();
+
+        try
+        {
+            var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(householdDto.HouseholdId, member.Id);
+
+            if (userHousehold != null)
+            {
+                selectedUserHouseholdDto = userHousehold;
+                selectedMember = member;
+            }
+            else
+            {
+                errorMessage = "Unable to load member details.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading member details: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingMember = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ClearSelectedMember()
+    {
+        selectedUserHouseholdDto = null;
+        selectedMember = null;
+        errorMessage = null;
+    }
+
+    private void EditMemberPermissions(UserHouseholdDto userHouseholdDto)
+    {
+        if (userHouseholdDto == null)
+        {
+            errorMessage = "User household data is missing.";
+            return;
+        }
+
+        userHouseholdFormDto = new UserHouseholdFormDto
+        {
+            UserHouseholdId = userHouseholdDto.UserHouseholdId,
+            MemberName = userHouseholdDto.User?.UserName ?? "Unknown",
+            IsHouseholdOwner = userHouseholdDto.IsHouseholdOwner,
+            HasAdminPermissions = userHouseholdDto.HasAdminPermissions,
+            HasFinanceManagerReadPermission = userHouseholdDto.HasFinanceManagerReadPermission,
+            HasFinanceManagerWritePermission = userHouseholdDto.HasFinanceManagerWritePermission,
+            HasKitchenManagerReadPermission = userHouseholdDto.HasKitchenManagerReadPermission,
+            HasKitchenManagerWritePermission = userHouseholdDto.HasKitchenManagerWritePermission,
+            HasTaskManagerReadPermission = userHouseholdDto.HasTaskManagerReadPermission,
+            HasTaskManagerWritePermission = userHouseholdDto.HasTaskManagerWritePermission,
+            HasFileManagerReadPermission = userHouseholdDto.HasFileManagerReadPermission,
+            HasFileManagerWritePermission = userHouseholdDto.HasFileManagerWritePermission
+        };
+
+        showMemberPermissionsForm = true;
+    }
+
+    private void CancelUserHouseholdEdit()
+    {
+        showMemberPermissionsForm = false;
+        isEditUserHouseholdMode = false;
+        userHouseholdFormDto = null;
+        errorMessage = null;
+    }
+
+    private async Task SaveUserHousehold()
+    {
+        if (string.IsNullOrEmpty(currentUserId) || userHouseholdFormDto == null)
+        {
+            errorMessage = "Invalid data for saving permissions";
+            return;
+        }
+
+        if (selectedUserHouseholdDto == null)
+        {
+            errorMessage = "No member selected for updating permissions";
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var updateUserHouseholdDto = new UpdateUserHouseholdDto
+            {
+                UserId = selectedUserHouseholdDto.UserId,
+                UserHouseholdId = userHouseholdFormDto.UserHouseholdId,
+                HouseholdId = selectedUserHouseholdDto.HouseholdId,
+                IsDefaultUserHousehold = selectedUserHouseholdDto.IsDefaultUserHousehold,
+                HasAdminPermissions = userHouseholdFormDto.HasAdminPermissions,
+                HasFinanceManagerWritePermission = userHouseholdFormDto.HasFinanceManagerWritePermission,
+                HasFinanceManagerReadPermission = userHouseholdFormDto.HasFinanceManagerReadPermission,
+                HasKitchenManagerWritePermission = userHouseholdFormDto.HasKitchenManagerWritePermission,
+                HasKitchenManagerReadPermission = userHouseholdFormDto.HasKitchenManagerReadPermission,
+                HasTaskManagerWritePermission = userHouseholdFormDto.HasTaskManagerWritePermission,
+                HasTaskManagerReadPermission = userHouseholdFormDto.HasTaskManagerReadPermission,
+                HasFileManagerWritePermission = userHouseholdFormDto.HasFileManagerWritePermission,
+                HasFileManagerReadPermission = userHouseholdFormDto.HasFileManagerReadPermission
+            };
+
+            await UserHouseholdService.UpdateAsync(updateUserHouseholdDto);
+
+            if (householdDto != null && selectedMember != null)
+            {
+                var updatedUserHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(
+                    householdDto.HouseholdId,
+                    selectedMember.Id);
+
+                if (updatedUserHousehold != null)
+                {
+                    selectedUserHouseholdDto = updatedUserHousehold;
+                }
+            }
+
+            showMemberPermissionsForm = false;
+            isEditUserHouseholdMode = false;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error saving member permissions: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
     }
 }

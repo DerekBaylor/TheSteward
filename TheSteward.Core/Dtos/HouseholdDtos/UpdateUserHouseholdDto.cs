@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using TheSteward.Core.Models;
+using TheSteward.Core.Models.HouseholdModels;
 
-namespace TheSteward.Core.DTOs;
+namespace TheSteward.Core.Dtos.HouseholdDtos;
 
-public class CreateUpdateUserHouseholdDto
+public class UpdateUserHouseholdDto
 {
     public Guid? UserHouseholdId { get; set; }
     public bool IsDefaultUserHousehold { get; set; }
@@ -24,14 +24,7 @@ public class CreateUpdateUserHouseholdDto
     #endregion Permissions
 
     [Required]
-    [ForeignKey(nameof(UserId))]
     public required string UserId { get; set; }
 
-    [Required]
-    public required ApplicationUser User { get; set; }
-
     public Guid HouseholdId { get; set; }
-
-    [ForeignKey(nameof(HouseholdId))]
-    public required Household Household { get; set; }
 }

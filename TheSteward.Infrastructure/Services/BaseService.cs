@@ -52,7 +52,7 @@ public class BaseService<T> : IBaseService<T> where T : class
 
     public virtual async Task<T?> GetByIdAsync(Guid id)
     {
-        if (id == null || id == Guid.Empty)
+        if (id == Guid.Empty)
             throw new ArgumentNullException("ID cannot be empty", "id");
 
         return await _repository.GetByIdAsync(id);

@@ -1,0 +1,101 @@
+﻿@namespace TheSteward.Shared.Components
+@using System.ComponentModel.DataAnnotations
+@using System.Reflection
+@using Microsoft.AspNetCore.Components.Forms
+@using TheSteward.Shared.Dtos
+@using TheSteward.Core.Attributes
+
+<h3>Member Permissions</h3>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@FormData.MemberName</h5>
+        <p class="card-text">
+            <strong>Household Owner:</strong> @(FormData.IsHouseholdOwner ? "Yes" : "No")
+        </p>
+
+        <h6 class="mt-3"><strong>Permissions:</strong></h6>
+
+        <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="adminPermissions" class="form-check-input" @bind-Value="FormData.HasAdminPermissions" />
+                <label class="form-check-label" for="adminPermissions">Admin Permissions <span class="badge bg-secondary ms-2">General</span></label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="financeWrite" class="form-check-input" @bind-Value="FormData.HasFinanceManagerWritePermission" />
+                <label class="form-check-label" for="financeWrite">Finance Manager - Write <span class="badge bg-secondary ms-2">Finance</span></label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="financeRead" class="form-check-input" @bind-Value="FormData.HasFinanceManagerReadPermission" />
+                <label class="form-check-label" for="financeRead">Finance Manager - Read <span class="badge bg-secondary ms-2">Finance</span></label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="kitchenWrite" class="form-check-input" @bind-Value="FormData.HasKitchenManagerWritePermission" />
+                <label class="form-check-label" for="kitchenWrite">Kitchen Manager - Write <span class="badge bg-secondary ms-2">Kitchen</span></label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="kitchenRead" class="form-check-input" @bind-Value="FormData.HasKitchenManagerReadPermission" />
+                <label class="form-check-label" for="kitchenRead">Kitchen Manager - Read <span class="badge bg-secondary ms-2">Kitchen</span></label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="taskWrite" class="form-check-input" @bind-Value="FormData.HasTaskManagerWritePermission" />
+                <label class="form-check-label" for="taskWrite">Task Manager - Write <span class="badge bg-secondary ms-2">Tasks</span></label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="taskRead" class="form-check-input" @bind-Value="FormData.HasTaskManagerReadPermission" />
+                <label class="form-check-label" for="taskRead">Task Manager - Read <span class="badge bg-secondary ms-2">Tasks</span></label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="fileWrite" class="form-check-input" @bind-Value="FormData.HasFileManagerWritePermission" />
+                <label class="form-check-label" for="fileWrite">File Manager - Write <span class="badge bg-secondary ms-2">Files</span></label>
+            </div>
+
+            <div class="mb-3 form-check">
+                <InputCheckbox id="fileRead" class="form-check-input" @bind-Value="FormData.HasFileManagerReadPermission" />
+                <label class="form-check-label" for="fileRead">File Manager - Read <span class="badge bg-secondary ms-2">Files</span></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+                @if (IsSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                }
+                Update Permissions
+            </button>
+            <button type="button" class="btn btn-secondary ms-2" @onclick="HandleCancel">Cancel</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public UserHouseholdFormDto FormData { get; set; } = new();
+
+    [Parameter]
+    public bool IsSubmitting { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

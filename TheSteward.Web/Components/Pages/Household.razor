@@ -307,8 +307,68 @@ else if (showHouseholdCard)
         errorMessage = null;
     }
 
-    private void SaveUserHousehold()
+    private async Task SaveUserHousehold()
     {
-        // Implementation for saving user household permissions goes here.
-    }   
+        if (string.IsNullOrEmpty(currentUserId) || userHouseholdFormDto == null)
+        {
+            errorMessage = "Invalid data for saving permissions";
+            return;
+        }
+
+        if (selectedUserHouseholdDto == null)
+        {
+            errorMessage = "No member selected for updating permissions";
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var updateUserHouseholdDto = new UpdateUserHouseholdDto
+            {
+                UserId = selectedUserHouseholdDto.UserId,
+                UserHouseholdId = userHouseholdFormDto.UserHouseholdId,
+                HouseholdId = selectedUserHouseholdDto.HouseholdId,
+                IsDefaultUserHousehold = selectedUserHouseholdDto.IsDefaultUserHousehold,
+                HasAdminPermissions = userHouseholdFormDto.HasAdminPermissions,
+                HasFinanceManagerWritePermission = userHouseholdFormDto.HasFinanceManagerWritePermission,
+                HasFinanceManagerReadPermission = userHouseholdFormDto.HasFinanceManagerReadPermission,
+                HasKitchenManagerWritePermission = userHouseholdFormDto.HasKitchenManagerWritePermission,
+                HasKitchenManagerReadPermission = userHouseholdFormDto.HasKitchenManagerReadPermission,
+                HasTaskManagerWritePermission = userHouseholdFormDto.HasTaskManagerWritePermission,
+                HasTaskManagerReadPermission = userHouseholdFormDto.HasTaskManagerReadPermission,
+                HasFileManagerWritePermission = userHouseholdFormDto.HasFileManagerWritePermission,
+                HasFileManagerReadPermission = userHouseholdFormDto.HasFileManagerReadPermission
+            };
+
+            await UserHouseholdService.UpdateAsync(updateUserHouseholdDto);
+
+            if (householdDto != null && selectedMember != null)
+            {
+                var updatedUserHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(
+                    householdDto.HouseholdId,
+                    selectedMember.Id);
+
+                if (updatedUserHousehold != null)
+                {
+                    selectedUserHouseholdDto = updatedUserHousehold;
+                }
+            }
+
+            showMemberPermissionsForm = false;
+            isEditUserHouseholdMode = false;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error saving member permissions: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
 }

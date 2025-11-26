@@ -64,27 +64,14 @@ public class UserHouseholdService : IUserHouseholdService
         if (updatedUserHousehold.UserHouseholdId == null)
             throw new ArgumentNullException(nameof(updatedUserHousehold.UserHouseholdId));
 
-        var userHousehold = new UserHousehold
-        {
-            UserHouseholdId = (Guid)updatedUserHousehold.UserHouseholdId,
-            IsDefaultUserHousehold = updatedUserHousehold.IsDefaultUserHousehold,
-            IsHouseholdOwner = updatedUserHousehold.IsHouseholdOwner,
-            HasAdminPermissions = updatedUserHousehold.HasAdminPermissions,
-            HasFinanceManagerWritePermission = updatedUserHousehold.HasFinanceManagerWritePermission,
-            HasFinanceManagerReadPermission = updatedUserHousehold.HasFinanceManagerReadPermission,
-            HasKitchenManagerWritePermission = updatedUserHousehold.HasKitchenManagerWritePermission,
-            HasKitchenManagerReadPermission = updatedUserHousehold.HasKitchenManagerReadPermission,
-            HasTaskManagerWritePermission = updatedUserHousehold.HasTaskManagerWritePermission,
-            HasTaskManagerReadPermission = updatedUserHousehold.HasTaskManagerReadPermission,
-            HasFileManagerWritePermission = updatedUserHousehold.HasFileManagerWritePermission,
-            HasFileManagerReadPermission = updatedUserHousehold.HasFileManagerReadPermission,
-            UserId = updatedUserHousehold.UserId,
-            User = updatedUserHousehold.User,
-            HouseholdId = updatedUserHousehold.HouseholdId,
-            Household = updatedUserHousehold.Household
-        };
+        var currentUserHousehold = await GetByIdAsync(updatedUserHousehold.UserHouseholdId.Value);
 
-        await _userHouseholdRepository.UpdateAsync(userHousehold);
+        if (currentUserHousehold == null)
+            throw new KeyNotFoundException($"UserHousehold with ID {updatedUserHousehold.UserHouseholdId} not found.");
+
+        _mapper.Map(updatedUserHousehold, currentUserHousehold);
+
+        await _userHouseholdRepository.UpdateAsync(currentUserHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
     }
 

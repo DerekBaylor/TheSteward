@@ -26,9 +26,5 @@ public class UpdateUserHouseholdDto
     [Required]
     public required string UserId { get; set; }
 
-    public required ApplicationUser User { get; set; }
-
     public Guid HouseholdId { get; set; }
-
-    public required Household Household { get; set; }
 }

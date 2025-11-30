@@ -1,8 +1,9 @@
 ﻿.sidebar {
-    min-width: 120px;
-    width: 120px;
+    min-width: 200px;
+    width: 200px;
     min-height: 100vh;
     background: linear-gradient(180deg, var(--nightly-blue) 80%, var(--teals-the-deal) 100%);
+    background-image: linear-gradient(var(--green), var(--green), var(--green), var(--light-green), var(--yellow-green));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,13 +16,36 @@
     z-index: 1000;
 }
 
-.nav-link {
+.nav-img-container {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1.1rem 0 0.4rem 0;
-    margin-bottom: 0.4rem;
+}
+
+.nav-image {
+    height: 10rem;
+    width: fit-content;
+}
+
+.navbar-brand-text {
     font-family: var(--title-font);
+    font-size: 1.5rem;
+    text-decoration: none;
+    color: var(--white);
+    white-space: nowrap;
+}
+
+.nav-link-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content:center;
+    text-align: center;
+
+    padding: 1rem 0 1rem .5rem;
+    margin-bottom: .25rem;
+
     border-radius: 16px;
     transition: background 0.18s, color 0.18s, box-shadow 0.2s;
     position: relative;
@@ -30,12 +54,7 @@
     text-decoration: none !important;
 }
 
-.nav-title {
-    text-decoration: none !important;
-    color: var(--off-white);
-}
-
-a.nav-link.active, a.nav-link:active, a.nav-link:hover {
+a.nav-link-group.active, a.nav-link-group:active, a.nav-link-group:hover {
     text-decoration: none !important;
     background: var(--skys-the-limit);
     color: var(--nightly-blue);
@@ -45,31 +64,30 @@ a.nav-link.active, a.nav-link:active, a.nav-link:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.9rem;
-    margin-bottom: 0.3rem;
+    margin-right: 0.5rem;
     transition: color 0.18s, text-shadow 0.28s;
 }
 
 .nav-title {
-    font-family: var(--title-font);
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 1rem;
     text-align: center;
     transition: color 0.18s;
     letter-spacing: 0.03em;
+    color: var(--off-white);
+    text-decoration: none !important;
 }
 
-.nav-link .nav-icon {
+.nav-link-group .nav-icon {
     color: var(--brightly-green);
 }
 
-.nav-link.active .nav-icon,
-.nav-link:hover .nav-icon {
+.nav-link-group.active .nav-icon,
+.nav-link-group:hover .nav-icon {
     color: var(--nightly-blue);
     text-shadow: 0 0 8px var(--brightly-green), 0 0 2px var(--skys-the-limit);
 }
 
-.nav-link.active .nav-title,
-.nav-link:hover .nav-title {
+.nav-link-group.active .nav-title,
+.nav-link-group:hover .nav-title {
     color: var(--nightly-blue);
 }

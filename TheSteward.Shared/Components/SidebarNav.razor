@@ -9,10 +9,14 @@
 
 <nav id="mainSidebar" class="sidebar">
 
-    <div class="nav-img-container">
+    <NavLink 
+        href="/" 
+        class="nav-img-container" 
+        @onclick="@(() => HandleNavClick(new NavItem("Dashboard", "dashboard", "/")))">
+        
         <img src="/Assets/Images/TheSteward_264x563.webp" alt="a cartoon man in a black suit wearing glasses" class="nav-image" />
-        <a class="navbar-brand-text" href="">The Steward</a>
-    </div>
+        <a class="nav-brand-text" href="">The Steward</a>
+    </NavLink>
 
     @foreach (var item in GetNavigationItems())
     {

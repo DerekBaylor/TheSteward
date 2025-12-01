@@ -1,0 +1,12 @@
+﻿.household-container {
+    width: 100%;
+    display:flex;
+    flex-direction: row;
+}
+
+
+.household-card-container, .userHousehold-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

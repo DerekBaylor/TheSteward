@@ -68,7 +68,7 @@ a.nav-link-group.active, a.nav-link-group:active, a.nav-link-group:hover {
     align-items: center;
     margin-right: 0.5rem;
     transition: color 0.18s, text-shadow 0.28s;
-    color: var(--nightly-blue);
+    color: var(--dark-blue);
 }
 
 .nav-title {
@@ -83,10 +83,10 @@ a.nav-link-group.active, a.nav-link-group:active, a.nav-link-group:hover {
 
 .nav-link-group.active .nav-icon,
 .nav-link-group:hover .nav-icon {
-    color: var(--nightly-blue);
+    color: var(--dark-blue);
 }
 
 .nav-link-group.active .nav-title,
 .nav-link-group:hover .nav-title {
-    color: var(--nightly-blue);
+    color: var(--dark-blue);
 }

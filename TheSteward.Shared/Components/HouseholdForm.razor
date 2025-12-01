@@ -4,7 +4,7 @@
 @using TheSteward.Shared.Dtos
 
 <h3>@(IsEditMode ? "Edit Household" : "Create A Household")</h3>
-<div class="card">
+<div class="ts-card household-form-card">
     <div class="card-body">
         <h5 class="card-title">@(IsEditMode ? "Update Your Household" : "Create Your Household")</h5>
         <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
@@ -12,7 +12,7 @@
             <ValidationSummary />
 
             <div class="mb-3">
-                <label for="householdName" class="form-label">Household Name</label>
+                <label for="householdName" class="form-label">Household Name:</label>
                 <InputText id="householdName" class="form-control" @bind-Value="FormData.HouseholdName" />
                 <ValidationMessage For="@(() => FormData.HouseholdName)" />
             </div>
@@ -45,18 +45,18 @@
                 </label>
             </div>
 
-            <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+            @if (IsEditMode)
+            {
+                <button type="button" class="ts-btn ts-cancel-btn ms-2 me-2" @onclick="HandleCancel">Cancel</button>
+            }
+
+            <button type="submit" class="ts-btn ts-submit-btn" disabled="@IsSubmitting">
                 @if (IsSubmitting)
                 {
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 }
                 @(IsEditMode ? "Update Household" : "Create Household")
             </button>
-
-            @if (IsEditMode)
-            {
-                <button type="button" class="btn btn-secondary ms-2" @onclick="HandleCancel">Cancel</button>
-            }
         </EditForm>
     </div>
 </div>

@@ -1,4 +1,4 @@
-﻿.sidebar {
+﻿/*.sidebar {
     min-width: 200px;
     width: 200px;
     min-height: 100vh;
@@ -90,3 +90,155 @@ a.nav-link-group.active, a.nav-link-group:active, a.nav-link-group:hover {
 .nav-link-group:hover .nav-title {
     color: var(--dark-blue);
 }
+
+
+.nav-link-group-form {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    color: inherit;
+    font: inherit;*/
+    /* Copy any other styles from your .nav-link-group class */
+/*}
+
+    .logout-button:hover {*/
+        /* Copy hover styles from your .nav-link-group:hover */
+    /*}*/
+
+
+.sidebar {
+    min-width: 200px;
+    width: 200px;
+    min-height: 100vh;
+    background-image: linear-gradient(var(--green), var(--green), var(--green), var(--light-green), var(--yellow-green));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    font-family: var(--primary-font);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+
+.nav-img-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+    .nav-img-container.active, .nav-img-container.hover {
+        text-decoration: none;
+    }
+
+.nav-image {
+    height: 10rem;
+    width: fit-content;
+}
+
+.nav-brand-text {
+    font-family: var(--title-font);
+    font-size: 1.5rem;
+    text-decoration: none;
+    color: var(--off-white);
+    white-space: nowrap;
+}
+
+.nav-link-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    text-align: center;
+    padding: 1rem 0 1rem .5rem;
+    margin-bottom: .25rem;
+    border-radius: 16px;
+    transition: background 0.18s, color 0.18s, box-shadow 0.2s;
+    position: relative;
+    width: 95%;
+    cursor: pointer;
+    text-decoration: none !important;
+}
+
+a.nav-link-group.active, a.nav-link-group:active, a.nav-link-group:hover {
+    background: var(--light-green);
+}
+
+.nav-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 0.5rem;
+    transition: color 0.18s, text-shadow 0.28s;
+    color: var(--dark-blue);
+}
+
+.nav-title {
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    transition: color 0.18s;
+    color: var(--off-white);
+    text-decoration: none !important;
+    letter-spacing: .1em;
+}
+
+.nav-link-group.active .nav-icon,
+.nav-link-group:hover .nav-icon {
+    color: var(--dark-blue);
+}
+
+.nav-link-group.active .nav-title,
+.nav-link-group:hover .nav-title {
+    color: var(--dark-blue);
+}
+
+.nav-link-group-form {
+    margin: 0;
+    padding: 0;
+    width: 95%;
+    margin-bottom: .25rem;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    text-align: center;
+    padding: 1rem 0 1rem .5rem;
+    border-radius: 16px;
+    transition: background 0.18s, color 0.18s, box-shadow 0.2s;
+    position: relative;
+    font-family: var(--primary-font);
+}
+
+    .logout-button:hover {
+        background: var(--light-green);
+    }
+
+        .logout-button:hover .nav-icon {
+            color: var(--dark-blue);
+        }
+
+        .logout-button:hover .nav-title {
+            color: var(--dark-blue);
+        }

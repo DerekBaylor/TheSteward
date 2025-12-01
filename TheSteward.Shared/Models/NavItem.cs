@@ -3,5 +3,7 @@
 public record NavItem(
     string Title,
     string MaterialIcon,
-    string Route
+    string Route,
+    bool RequiresAuth,
+    bool IsLogout
 );

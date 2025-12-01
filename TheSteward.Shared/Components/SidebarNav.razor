@@ -1,7 +1,11 @@
-﻿@using TheSteward.Shared.Models
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using TheSteward.Shared.Models
 @using TheSteward.Shared.Services
 @using TheSteward.Shared.Interfaces
+@using Microsoft.AspNetCore.Identity;
+
 @implements IDisposable
+
 @inject INavigationService NavigationService
 @inject NavigationManager NavigationManager
 
@@ -12,7 +16,7 @@
     <NavLink 
         href="/" 
         class="nav-img-container" 
-        @onclick="@(() => HandleNavClick(new NavItem("Dashboard", "dashboard", "/")))">
+        @onclick="@(() => HandleNavClick(new NavItem("Dashboard", "dashboard", "/", true, false)))">
         
         <img src="/Assets/Images/TheSteward_264x563.webp" alt="a cartoon man in a black suit wearing glasses" class="nav-image" />
         <a class="nav-brand-text" href="">The Steward</a>
@@ -20,15 +24,54 @@
 
     @foreach (var item in GetNavigationItems())
     {
-        <NavLink href="@item.Route"
-                 class="nav-link-group"
-                 Match="NavLinkMatch.All"
-                 @onclick="() => HandleNavClick(item)">
-            <span class="nav-icon">
-                <span class="material-symbols-outlined">@item.MaterialIcon</span>
-            </span>
-            <span class="nav-title">@item.Title</span>
-        </NavLink>
+        <AuthorizeView>
+            <Authorized>
+                @if (item.RequiresAuth)
+                {
+                    @if (!item.IsLogout)
+                    {
+                        <NavLink href="@item.Route"
+                                 class="nav-link-group"
+                                 Match="NavLinkMatch.All"
+                                 @onclick="() => HandleNavClick(item)">
+                            <span class="nav-icon">
+                                <span class="material-symbols-outlined">@item.MaterialIcon</span>
+                            </span>
+                            <span class="nav-title">@item.Title</span>
+                        </NavLink>
+                    } 
+                    else
+                    {
+                    <form @formname="logoutForm" method="post" action="/account/logout" class="nav-link-group-form">
+                        <AntiforgeryToken />
+                        <button type="submit" class="nav-link-group logout-button">
+                            <span class="nav-icon">
+                                <span class="material-symbols-outlined">@item.MaterialIcon</span>
+                            </span>
+                            <span class="nav-title">@item.Title</span>
+                        </button>
+                    </form>
+                    }
+                }
+            </Authorized>
+            <NotAuthorized>
+                @if (!item.RequiresAuth)
+                {
+                    @if (!item.IsLogout)
+                    {                        
+                        <NavLink href="@item.Route"
+                                 class="nav-link-group"
+                                 Match="NavLinkMatch.All"
+                                 @onclick="() => HandleNavClick(item)">
+                            <span class="nav-icon">
+                                <span class="material-symbols-outlined">@item.MaterialIcon</span>
+                            </span>
+                            <span class="nav-title">@item.Title</span>
+                        </NavLink>
+                    }
+                }
+            </NotAuthorized>
+        </AuthorizeView>
     }
 </nav>
 @code {
@@ -41,12 +84,12 @@
     {
         return new List<NavItem>
         {
-            new("Dashboard", "dashboard", "/"),
-            new("Household", "home", "/household"),
-            new("Budget", "finance", "/budget"),
-            new("Register", "app_registration", "/account/register"),
-            new("Logout", "logout", "/account/login"),
-            new("Login", "login", "/account/login"),
+            new("Dashboard", "dashboard", "/", true, false),
+            new("Household", "home", "/household", true, false),
+            new("Budget", "finance", "/budget", true, false),
+            new("Register", "app_registration", "/account/register", false, false),
+            new("Logout", "logout", "/", true, true),
+            new("Login", "login", "/account/login", false, false),
         };
     }
 

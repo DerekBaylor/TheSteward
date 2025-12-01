@@ -5,9 +5,9 @@
 @using System.Reflection
 @using TheSteward.Core.Attributes
 
-<h3>Memeber Information</h3>
+<h3>Member Information</h3>
 
-<div class="card">
+<div class="ts-card">
     <div class="card-body">
         <h5 class="card-title">@UserHouseholdDto.User.UserName</h5>
         <p class="card-text">
@@ -27,8 +27,8 @@
         </ul>
     </div>
 
-    <button type="button" class="btn btn-secondary ms-2" @onclick="HandleCancel">Cancel</button>
-    <button type="button" class="btn btn-primary ms-2" @onclick="HandleEdit">Edit Permissions</button>
+    <button type="button" class="ts-btn ts-cancel-btn" @onclick="HandleCancel">Close</button>
+    <button type="button" class="ts-btn ts-edit-btn" @onclick="HandleEdit">Edit Permissions</button>
 </div>
 
 @code {

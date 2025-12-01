@@ -1,0 +1,66 @@
+﻿/* ----- */
+/* Cards */
+/* ----- */
+
+.ts-card {
+    border: solid 1px var(--dark-gray-25);
+    border-radius: .75rem;
+    padding: .75rem;
+    margin: 1rem;
+}
+
+
+/* ------- */
+/* Buttons */
+/* ------- */
+.ts-btn {
+    border-radius: .5rem;
+    border-width: 1px;
+    cursor: pointer;
+    padding: .375rem .750rem;
+    font-family: var(--primary-font);
+    font-weight: 400;
+}
+
+.ts-edit-btn {
+    background-color: var(--light-orange);
+    color: var(--dark-blue);
+    border-color: var(--light-orange);
+    
+}
+    .ts-edit-btn:hover {
+        background-color: var(--dark-orange);
+        color: var(--off-white);
+    }
+
+    .ts-edit-btn:active {
+        background-color: var(--darkest-orange);
+        color: var(--off-white);
+    }
+
+.ts-cancel-btn {
+    background-color: var(--dark-gray);
+    color: var(--off-white);
+    border-color: var(--dark-gray);
+}
+    .ts-cancel-btn:hover {
+        background-color: var(--dark-gray-hover);
+    }
+
+    .ts-cancel-btn:active {
+        background-color: var(--dark-gray-active);
+    }
+
+.ts-submit-btn {
+    background-color: var(--green);
+    color: var(--off-white);
+    border-color: var(--green);
+}
+
+    .ts-submit-btn:hover {
+        background-color: var(--dark-green);
+    }
+
+    .ts-submit-btn:active {
+        background-color: var(--darkest-green);
+    }

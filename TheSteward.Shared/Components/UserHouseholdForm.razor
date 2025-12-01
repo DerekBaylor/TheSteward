@@ -64,14 +64,14 @@
                 <label class="form-check-label" for="fileRead">File Manager - Read <span class="badge bg-secondary ms-2">Files</span></label>
             </div>
 
-            <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+            <button type="button" class="ts-btn ts-cancel-btn ms-2  me-2" @onclick="HandleCancel">Cancel</button>
+            <button type="submit" class="ts-btn ts-submit-btn" disabled="@IsSubmitting">
                 @if (IsSubmitting)
                 {
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 }
                 Update Permissions
             </button>
-            <button type="button" class="btn btn-secondary ms-2" @onclick="HandleCancel">Cancel</button>
         </EditForm>
     </div>
 </div>

@@ -5,10 +5,8 @@
 @using System.Reflection
 @using TheSteward.Core.Attributes
 
-<h3>My Household</h3>
-<div class="card">
+<div class="ts-card household-card">
     <div class="card-body">
-        <h5 class="card-title">@HouseholdDto.HouseholdName</h5>
         <p class="card-text">
             <strong>Status:</strong> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
         </p>
@@ -27,7 +25,8 @@
             }
         </ul>
 
-        <button class="btn btn-secondary mt-3" @onclick="HandleEdit">Edit</button>
+        @* <button class="btn btn-secondary mt-3" @onclick="HandleEdit">Edit Household</button> *@
+        <button class="ts-btn ts-edit-btn" @onclick="HandleEdit">Edit Household</button>
 
         <h6 class="mt-4"><strong>Members:</strong></h6>
         @if (HouseholdDto.Members != null && HouseholdDto.Members.Any())
@@ -43,7 +42,7 @@
                                 @member.UserName
                                 @if (member.Id == HouseholdDto.OwnerId)
                                 {
-                                    <span class="badge bg-primary ms-2">Owner</span>
+                                    <span class="badge bg-primary ms-2 owner-badge">Owner</span>
                                 }
                             </button>
                         }

@@ -20,7 +20,7 @@
 
 @if (isLoading)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Loading...</em></p>  
 }
 else if (isEditHouseholdMode)
 {
@@ -34,28 +34,37 @@ else if (isEditHouseholdMode)
 }
 else if (showHouseholdCard)
 {
-    <HouseholdCard 
-        HouseholdDto="householdDto"
-        HasAdminPermissions="hasAdminPermissions"
-        OnEditHosuehold="EditHousehold"
-        GetMember="GetMember" />
-    
-    if (showMemberPermissionsForm && userHouseholdFormDto != null)
-    {
-        <UserHouseholdForm 
-            FormData="userHouseholdFormDto"
-            IsSubmitting="isSubmitting"
-            OnSubmit="SaveUserHousehold"
-            OnCancel="CancelUserHouseholdEdit" />
+    <div class="household-container"> 
+        <div class="household-card-container">
+            <h3> @householdDto.HouseholdName </h3>
 
-    }
-    else if (selectedUserHouseholdDto != null && !showMemberPermissionsForm)
-    {        
-        <UserHouseholdCard 
-            UserHouseholdDto="selectedUserHouseholdDto"
-            OnCancel="ClearSelectedMember"
-            OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
-    }
+            <HouseholdCard 
+                HouseholdDto="householdDto"
+                HasAdminPermissions="hasAdminPermissions"
+                OnEditHosuehold="EditHousehold"
+                GetMember="GetMember" />
+    
+        </div>
+        <div class="userHousehold-container">
+
+        @if (showMemberPermissionsForm && userHouseholdFormDto != null)
+        {
+            <UserHouseholdForm 
+                FormData="userHouseholdFormDto"
+                IsSubmitting="isSubmitting"
+                OnSubmit="SaveUserHousehold"
+                OnCancel="CancelUserHouseholdEdit" />
+
+        }
+        else if (selectedUserHouseholdDto != null && !showMemberPermissionsForm)
+        {        
+            <UserHouseholdCard 
+                UserHouseholdDto="selectedUserHouseholdDto"
+                OnCancel="ClearSelectedMember"
+                OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
+        }
+        </div>
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -330,6 +339,7 @@ else if (showHouseholdCard)
             {
                 UserId = selectedUserHouseholdDto.UserId,
                 UserHouseholdId = userHouseholdFormDto.UserHouseholdId,
+                IsHouseholdOwner = userHouseholdFormDto.IsHouseholdOwner,
                 HouseholdId = selectedUserHouseholdDto.HouseholdId,
                 IsDefaultUserHousehold = selectedUserHouseholdDto.IsDefaultUserHousehold,
                 HasAdminPermissions = userHouseholdFormDto.HasAdminPermissions,

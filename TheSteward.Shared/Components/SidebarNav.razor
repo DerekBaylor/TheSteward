@@ -8,20 +8,29 @@
 @namespace TheSteward.Shared.Components
 
 <nav id="mainSidebar" class="sidebar">
+
+    <NavLink 
+        href="/" 
+        class="nav-img-container" 
+        @onclick="@(() => HandleNavClick(new NavItem("Dashboard", "dashboard", "/")))">
+        
+        <img src="/Assets/Images/TheSteward_264x563.webp" alt="a cartoon man in a black suit wearing glasses" class="nav-image" />
+        <a class="nav-brand-text" href="">The Steward</a>
+    </NavLink>
+
     @foreach (var item in GetNavigationItems())
     {
         <NavLink href="@item.Route"
-                 class="nav-link"
+                 class="nav-link-group"
                  Match="NavLinkMatch.All"
                  @onclick="() => HandleNavClick(item)">
             <span class="nav-icon">
-                <span class="material-icons">@item.MaterialIcon</span>
+                <span class="material-symbols-outlined">@item.MaterialIcon</span>
             </span>
             <span class="nav-title">@item.Title</span>
         </NavLink>
     }
 </nav>
-
 @code {
     protected override void OnInitialized()
     {
@@ -33,9 +42,10 @@
         return new List<NavItem>
         {
             new("Dashboard", "dashboard", "/"),
-            new("Household", "bolt", "/household"),
-            new("Budget", "folder", "/budget"),
-            new("Register", "star", "/account/register"),
+            new("Household", "home", "/household"),
+            new("Budget", "finance", "/budget"),
+            new("Register", "app_registration", "/account/register"),
+            new("Logout", "logout", "/account/login"),
             new("Login", "login", "/account/login"),
         };
     }

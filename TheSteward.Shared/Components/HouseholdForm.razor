@@ -6,7 +6,6 @@
 <h3>@(IsEditMode ? "Edit Household" : "Create A Household")</h3>
 <div class="ts-card household-form-card">
     <div class="card-body">
-        <h5 class="card-title">@(IsEditMode ? "Update Your Household" : "Create Your Household")</h5>
         <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />

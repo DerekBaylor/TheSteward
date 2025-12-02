@@ -10,6 +10,7 @@
 
 @inject IHouseholdService HouseholdService
 @inject IUserHouseholdService UserHouseholdService
+@inject HouseholdState HouseholdState
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
@@ -34,6 +35,21 @@ else if (isEditHouseholdMode)
 }
 else if (showHouseholdCard)
 {
+    <div class="hosuehold-tool-group">
+
+        <select @bind="selectedHouseholdId" @bind:after="OnHouseholdSelected">
+            @foreach (var h in allHouseholds)
+            {
+                <option value="@h.HouseholdId">@h.HouseholdName</option>
+            }
+        </select>
+
+
+
+
+        <buitton class="ts-btn ts-submit-btn" diasabled>Add Household</buitton>
+    </div>
+
     <div class="household-container"> 
         <div class="household-card-container">
             <h3> @householdDto.HouseholdName </h3>
@@ -42,11 +58,12 @@ else if (showHouseholdCard)
                 HouseholdDto="householdDto"
                 HasAdminPermissions="hasAdminPermissions"
                 OnEditHosuehold="EditHousehold"
+                OnAddMember="AddMember"
                 GetMember="GetMember" />
     
         </div>
-        <div class="userHousehold-container">
 
+        <div class="userHousehold-container">
         @if (showMemberPermissionsForm && userHouseholdFormDto != null)
         {
             <UserHouseholdForm 
@@ -76,10 +93,13 @@ else if (showHouseholdCard)
 
 
 @code {
+    private List<HouseholdDto> allHouseholds = new();
+    private Guid? selectedHouseholdId { get; set; }
     private CreateHouseholdDto createHouseholdDto = new();
     private UpdateHouseholdDto updateHouseholdDto = new();
     private HouseholdFormDto householdFormDto = new();
     private HouseholdDto? householdDto = null;
+    private HouseholdDto? selectedHouseholdDto = null;
     private UserHouseholdDto? userHouseholdDto = null;
     private UserHouseholdDto? selectedUserHouseholdDto = null;
     private UserHouseholdFormDto? userHouseholdFormDto = null;
@@ -114,6 +134,8 @@ else if (showHouseholdCard)
                 {
                     var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
 
+                    allHouseholds = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+
                     if (defaultUserHousehold  != null)
                     {
                         hasDefaultHousehold = true;
@@ -140,6 +162,21 @@ else if (showHouseholdCard)
             isLoading = false;
         }
     }
+
+    private void OnHouseholdSelected()
+    {
+        if (selectedHouseholdId is Guid id)
+        {
+            selectedHouseholdDto = allHouseholds.FirstOrDefault(h => h.HouseholdId == id);
+
+            if (selectedHouseholdDto != null)
+            {
+                HouseholdState.SetHousehold(selectedHouseholdDto);
+            }
+        }
+    }
+
+
 
     private async Task SaveHousehold()
     {
@@ -233,6 +270,17 @@ else if (showHouseholdCard)
         isEditHouseholdMode = false;
         householdFormDto = new HouseholdFormDto();
         errorMessage = null;
+    }
+
+    private void AddMember()
+    {
+        if (householdDto == null)
+        {
+            errorMessage = "Household data not loaded.";
+            return;
+        }
+
+        errorMessage = $"Add member button connected, Add logic.";
     }
 
 

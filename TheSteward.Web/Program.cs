@@ -28,6 +28,8 @@ builder.Services.AddScoped<IUserHouseholdRepository, UserHouseholdRepository>();
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IUserHouseholdService, UserHouseholdService>();
 
+builder.Services.AddSingleton<HouseholdState>();
+
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();

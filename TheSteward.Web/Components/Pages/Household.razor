@@ -33,29 +33,32 @@ else if (isEditHouseholdMode)
         OnCancel="CancelHouseholdEdit" />
 
 }
-else if (showHouseholdCard)
+else if (showHouseholdCard && selectedHouseholdDto != null)
 {
     <div class="hosuehold-tool-group">
 
-        <select @bind="selectedHouseholdId" @bind:after="OnHouseholdSelected">
-            @foreach (var h in allHouseholds)
-            {
-                <option value="@h.HouseholdId">@h.HouseholdName</option>
-            }
-        </select>
+        <div class="mb-3">
+            <label for="householdSelect" class="form-label">Active Household</label>
+            <select id="householdSelect"
+                    class="form-select"
+                    @bind="selectedHouseholdId"
+                    @bind:after="OnHouseholdChanged">
 
+                @foreach (var h in households)
+                {
+                    <option value="@h.HouseholdId">@h.HouseholdName</option>
+                }
+            </select>
+        </div>
 
-
-
-        <buitton class="ts-btn ts-submit-btn" diasabled>Add Household</buitton>
+        <button class="ts-btn ts-submit-btn" disabled>Add Household</button>
     </div>
 
     <div class="household-container"> 
         <div class="household-card-container">
-            <h3> @householdDto.HouseholdName </h3>
+            <h3> @selectedHouseholdDto.HouseholdName </h3>
 
-            <HouseholdCard 
-                HouseholdDto="householdDto"
+            <HouseholdCard HouseholdDto="selectedHouseholdDto"
                 HasAdminPermissions="hasAdminPermissions"
                 OnEditHosuehold="EditHousehold"
                 OnAddMember="AddMember"
@@ -73,7 +76,7 @@ else if (showHouseholdCard)
                 OnCancel="CancelUserHouseholdEdit" />
 
         }
-        else if (selectedUserHouseholdDto != null && !showMemberPermissionsForm)
+        else if (selectedUserHouseholdDto != null && showMemberCard)
         {        
             <UserHouseholdCard 
                 UserHouseholdDto="selectedUserHouseholdDto"
@@ -93,13 +96,13 @@ else if (showHouseholdCard)
 
 
 @code {
-    private List<HouseholdDto> allHouseholds = new();
+    private List<HouseholdDto> households = new();
     private Guid? selectedHouseholdId { get; set; }
     private CreateHouseholdDto createHouseholdDto = new();
     private UpdateHouseholdDto updateHouseholdDto = new();
     private HouseholdFormDto householdFormDto = new();
-    private HouseholdDto? householdDto = null;
     private HouseholdDto? selectedHouseholdDto = null;
+
     private UserHouseholdDto? userHouseholdDto = null;
     private UserHouseholdDto? selectedUserHouseholdDto = null;
     private UserHouseholdFormDto? userHouseholdFormDto = null;
@@ -115,6 +118,7 @@ else if (showHouseholdCard)
     private bool hasDefaultHousehold = false;
     private bool hasAdminPermissions = false;
     private bool showMemberPermissionsForm = false;
+    private bool showMemberCard = false;
 
     private string? errorMessage;
     private string? currentUserId;
@@ -126,32 +130,52 @@ else if (showHouseholdCard)
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
-            if (user.Identity?.IsAuthenticated == true)
+            if (user.Identity?.IsAuthenticated != true)
             {
-                currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                NavigationManager.NavigateTo("/login", true);
+                return;
+            }
 
-                if (!string.IsNullOrEmpty(currentUserId))
+            currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserId))
+                return;
+
+
+            var currentHouseholdDto = HouseholdState.CurrentHousehold;
+
+            if (currentHouseholdDto != null)
+            {
+                await GetUserHouseholdAndPermissions(currentHouseholdDto.HouseholdId);
+                households = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+            }
+            else
+            {
+                // If state not set for some reason, fall back to default household
+                var defaultUserHousehold = await UserHouseholdService
+                    .GetDefaultUserHouseholdForUserAsync(currentUserId);
+
+                if (defaultUserHousehold?.Household != null)
+                {               
+                    await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
+                    households = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+
+                    HouseholdState.SetHousehold(defaultUserHousehold.Household);
+                }
+                else
                 {
-                    var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
+                    // No household exists, household show add household form
+                    hasDefaultHousehold = false;
+                    showHouseholdCard = false;
+                    showHouseholdForm = true;
+                    isLoading = false;
 
-                    allHouseholds = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
-
-                    if (defaultUserHousehold  != null)
-                    {
-                        hasDefaultHousehold = true;
-                        householdDto = defaultUserHousehold.Household;
-                        hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
-                        showHouseholdCard = true;
-                    }
-                    else
-                    {
-                        hasDefaultHousehold = false;
-                        showHouseholdCard = false;
-                        showHouseholdForm = true;
-                        isEditHouseholdMode = false;
-                    }
+                    return;
                 }
             }
+
+            hasDefaultHousehold = true;
+            showHouseholdCard = true;
+
         }
         catch (Exception ex)
         {
@@ -163,20 +187,58 @@ else if (showHouseholdCard)
         }
     }
 
-    private void OnHouseholdSelected()
+    private async Task OnHouseholdChanged()
     {
-        if (selectedHouseholdId is Guid id)
-        {
-            selectedHouseholdDto = allHouseholds.FirstOrDefault(h => h.HouseholdId == id);
+        selectedHouseholdDto = households?.FirstOrDefault(h => h.HouseholdId == selectedHouseholdId);
 
-            if (selectedHouseholdDto != null)
-            {
-                HouseholdState.SetHousehold(selectedHouseholdDto);
-            }
+        if (selectedHouseholdDto != null)
+        {
+            await GetUserHouseholdAndPermissions(selectedHouseholdDto.HouseholdId);
+
+            HouseholdState.SetHousehold(selectedHouseholdDto);
+
+            StateHasChanged();
         }
     }
 
+    private async Task GetUserHouseholdAndPermissions(Guid householdId)
+    {
+        try
+        {
+            selectedHouseholdId = householdId;
 
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                errorMessage = "User ID not found";
+                selectedUserHouseholdDto = null;
+                selectedHouseholdDto = null;
+                hasAdminPermissions = false;
+
+                return;
+            }
+
+            selectedUserHouseholdDto = await UserHouseholdService
+                .GetUserHouseholdByHouseholdIdAndUserIdAsync(householdId, currentUserId);
+
+            if (selectedUserHouseholdDto?.Household != null)
+            {
+                selectedHouseholdDto = selectedUserHouseholdDto.Household;
+                hasAdminPermissions = selectedUserHouseholdDto.HasAdminPermissions;
+            }
+            else
+            {
+                errorMessage = "Could not load household data";
+                selectedHouseholdDto = null;
+                hasAdminPermissions = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error getting household: {ex.Message}";
+            selectedHouseholdDto = null;
+            hasAdminPermissions = false;
+        }
+    }
 
     private async Task SaveHousehold()
     {
@@ -191,10 +253,10 @@ else if (showHouseholdCard)
 
         try
         {
-            if (isEditHouseholdMode && householdDto != null) // Update household
+            if (isEditHouseholdMode && selectedHouseholdDto != null) // Update household
             {
 
-                updateHouseholdDto.HouseholdId = householdDto.HouseholdId;
+                updateHouseholdDto.HouseholdId = selectedHouseholdDto.HouseholdId;
                 updateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
                 updateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
                 updateHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
@@ -220,7 +282,7 @@ else if (showHouseholdCard)
 
             if (defaultUserHousehold?.Household != null)
             {
-                householdDto = defaultUserHousehold.Household;
+                selectedHouseholdDto = defaultUserHousehold.Household;
                 hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
                 hasDefaultHousehold = true;
             }
@@ -247,15 +309,15 @@ else if (showHouseholdCard)
 
     private void EditHousehold()
     {
-        if (householdDto == null) return;
+        if (selectedHouseholdDto == null) return;
 
         householdFormDto = new HouseholdFormDto
         {
-            HouseholdName = householdDto.HouseholdName,
-            HasTaskManagerAccess = householdDto.HasTaskManagerAccess,
-            HasFinanceManagerAccess = householdDto.HasFinanceManagerAccess,
-            HasMealManagerAccess = householdDto.HasMealManagerAccess,
-            HasFileManagerAccess = householdDto.HasFileManagerAccess
+            HouseholdName = selectedHouseholdDto.HouseholdName,
+            HasTaskManagerAccess = selectedHouseholdDto.HasTaskManagerAccess,
+            HasFinanceManagerAccess = selectedHouseholdDto.HasFinanceManagerAccess,
+            HasMealManagerAccess = selectedHouseholdDto.HasMealManagerAccess,
+            HasFileManagerAccess = selectedHouseholdDto.HasFileManagerAccess
         };
 
         isEditHouseholdMode = true;
@@ -274,7 +336,7 @@ else if (showHouseholdCard)
 
     private void AddMember()
     {
-        if (householdDto == null)
+        if (selectedHouseholdDto == null)
         {
             errorMessage = "Household data not loaded.";
             return;
@@ -286,7 +348,7 @@ else if (showHouseholdCard)
 
     private async Task GetMember(ApplicationUser member)
     {
-        if (householdDto == null)
+        if (selectedHouseholdDto == null)
         {
             errorMessage = "Household data not loaded.";
             return;
@@ -299,7 +361,7 @@ else if (showHouseholdCard)
 
         try
         {
-            var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(householdDto.HouseholdId, member.Id);
+            var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(selectedHouseholdDto.HouseholdId, member.Id);
 
             if (userHousehold != null)
             {
@@ -318,6 +380,7 @@ else if (showHouseholdCard)
         finally
         {
             isLoadingMember = false;
+            showMemberCard = true;
             StateHasChanged();
         }
     }
@@ -325,6 +388,7 @@ else if (showHouseholdCard)
     private void ClearSelectedMember()
     {
         selectedUserHouseholdDto = null;
+        showMemberCard = false;
         selectedMember = null;
         errorMessage = null;
     }
@@ -403,10 +467,10 @@ else if (showHouseholdCard)
 
             await UserHouseholdService.UpdateAsync(updateUserHouseholdDto);
 
-            if (householdDto != null && selectedMember != null)
+            if (selectedHouseholdDto != null && selectedMember != null)
             {
                 var updatedUserHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(
-                    householdDto.HouseholdId,
+                    selectedHouseholdDto.HouseholdId,
                     selectedMember.Id);
 
                 if (updatedUserHousehold != null)

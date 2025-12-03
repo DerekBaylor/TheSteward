@@ -5,15 +5,13 @@
 @using System.Reflection
 @using TheSteward.Core.Attributes
 
-<h3>Member Information</h3>
-
 <div class="ts-card">
+    <h5 class="card-title">@UserHouseholdDto.User.UserName</h5>
     <div class="card-body">
-        <h5 class="card-title">@UserHouseholdDto.User.UserName</h5>
         <p class="card-text">
             <strong>Household Owner:</strong> @UserHouseholdDto.IsHouseholdOwner
         </p>
-        <h6 class="mt-3"><strong>Permissions:</strong></h6>
+        <h6 class="mt-3 ts-lable">Permissions:</h6>
         <ul style="list-style: none; padding-left: 0;">
             @foreach (var p in GetPermissions())
             {

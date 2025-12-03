@@ -23,40 +23,37 @@
 {
     <p><em>Loading...</em></p>  
 }
-else if (isEditHouseholdMode)
+else if (showHouseholdForm)
 {
-    <HouseholdForm 
-        IsEditMode="isEditHouseholdMode"
-        FormData="householdFormDto"
-        IsSubmitting="isSubmitting"
-        OnSubmit="SaveHousehold"
-        OnCancel="CancelHouseholdEdit" />
+    <div class="household-form-container">
+        <h4 class="section-title">@(isEditHouseholdMode ? "Edit Household" : "Create A Household")</h4>
+        <HouseholdForm 
+            IsEditMode="isEditHouseholdMode"
+            FormData="householdFormDto"
+            IsSubmitting="isSubmitting"
+            OnSubmit="SaveHousehold"
+            OnCancel="CancelHouseholdEdit" />
+    </div>
 
 }
 else if (showHouseholdCard && selectedHouseholdDto != null)
 {
-    <div class="hosuehold-tool-group">
+    <div id="householdToolContainer" class="household-tool-container">
+        <div class="ts-select-group">
+            <label for="householdSelect" class="ts-select-label">Active Household: </label>
 
-        <div class="mb-3">
-            <label for="householdSelect" class="form-label">Active Household</label>
-            <select id="householdSelect"
-                    class="form-select"
-                    @bind="selectedHouseholdId"
-                    @bind:after="OnHouseholdChanged">
-
-                @foreach (var h in households)
-                {
-                    <option value="@h.HouseholdId">@h.HouseholdName</option>
-                }
-            </select>
+            <TsSelect TValue="Guid?"
+                      Items="householdItems"
+                      @bind-Value="selectedHouseholdId"
+                      Placeholder="Choose household" />
         </div>
 
-        <button class="ts-btn ts-submit-btn" disabled>Add Household</button>
+        <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
     </div>
 
     <div class="household-container"> 
         <div class="household-card-container">
-            <h3> @selectedHouseholdDto.HouseholdName </h3>
+            <h4 class="section-title"> Household Information </h4>
 
             <HouseholdCard HouseholdDto="selectedHouseholdDto"
                 HasAdminPermissions="hasAdminPermissions"
@@ -67,22 +64,27 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         </div>
 
         <div class="userHousehold-container">
-        @if (showMemberPermissionsForm && userHouseholdFormDto != null)
-        {
-            <UserHouseholdForm 
-                FormData="userHouseholdFormDto"
-                IsSubmitting="isSubmitting"
-                OnSubmit="SaveUserHousehold"
-                OnCancel="CancelUserHouseholdEdit" />
+            <div class="household-card-container">
+                @if (showMemberPermissionsForm && userHouseholdFormDto != null)
+                {
+                    <h4 class="section-title"> Member Permissions</h4>
+                    <UserHouseholdForm 
+                        FormData="userHouseholdFormDto"
+                        IsSubmitting="isSubmitting"
+                        OnSubmit="SaveUserHousehold"
+                        OnCancel="CancelUserHouseholdEdit" />
 
-        }
-        else if (selectedUserHouseholdDto != null && showMemberCard)
-        {        
-            <UserHouseholdCard 
-                UserHouseholdDto="selectedUserHouseholdDto"
-                OnCancel="ClearSelectedMember"
-                OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
-        }
+                }
+                else if (selectedUserHouseholdDto != null && showMemberCard)
+                    {
+
+                    <h4 class="section-title"> Member Information</h4>
+                    <UserHouseholdCard 
+                        UserHouseholdDto="selectedUserHouseholdDto"
+                        OnCancel="ClearSelectedMember"
+                        OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
+                }
+            </div>
         </div>
     </div>
 }
@@ -102,6 +104,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
     private UpdateHouseholdDto updateHouseholdDto = new();
     private HouseholdFormDto householdFormDto = new();
     private HouseholdDto? selectedHouseholdDto = null;
+    private List<SelectItem<Guid?>> householdItems = new();
 
     private UserHouseholdDto? userHouseholdDto = null;
     private UserHouseholdDto? selectedUserHouseholdDto = null;
@@ -147,6 +150,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             {
                 await GetUserHouseholdAndPermissions(currentHouseholdDto.HouseholdId);
                 households = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+
             }
             else
             {
@@ -185,6 +189,15 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         {
             isLoading = false;
         }
+    }
+
+    protected override void OnParametersSet()
+    {
+        householdItems = households.Select(h => new SelectItem<Guid?>
+        {
+            Value = h.HouseholdId,
+            Text = h.HouseholdName
+        }).ToList();
     }
 
     private async Task OnHouseholdChanged()
@@ -238,6 +251,11 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             selectedHouseholdDto = null;
             hasAdminPermissions = false;
         }
+    }
+
+    private void OpenHouseholdForm()
+    {
+        showHouseholdForm = true;
     }
 
     private async Task SaveHousehold()

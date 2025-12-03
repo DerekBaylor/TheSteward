@@ -3,59 +3,59 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using TheSteward.Shared.Dtos
 
-<h3>@(IsEditMode ? "Edit Household" : "Create A Household")</h3>
-<div class="ts-card household-form-card">
+<div id="householdForm" class="ts-card household-form-card">
     <div class="card-body">
         <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="mb-3">
-                <label for="householdName" class="form-label">Household Name:</label>
+            <div class="mb-3 ts-form-control-group">
+                <label for="householdName" class="form-label ts-label">Household Name:</label>
                 <InputText id="householdName" class="form-control" @bind-Value="FormData.HouseholdName" />
                 <ValidationMessage For="@(() => FormData.HouseholdName)" />
             </div>
 
-            <div class="mb-3 form-check">
-                <InputCheckbox id="taskManager" class="form-check-input" @bind-Value="FormData.HasTaskManagerAccess" />
-                <label class="form-check-label" for="taskManager">
-                    Enable Task Manager
-                </label>
+            <div class="household-modules-checkbox-group">
+                <div class="ts-form-check">
+                    <label class="form-check-label ts-label" for="taskManager">
+                        Enable Task Manager:
+                    </label>
+                    <InputCheckbox id="taskManager" class="form-check-input ts-form-check-input" @bind-Value="FormData.HasTaskManagerAccess" />
+                </div>
+                <div class="ts-form-check">
+                    <label class="form-check-label ts-label" for="financeManager">
+                        Enable Finance Manager:
+                    </label>
+                    <InputCheckbox id="financeManager" class="form-check-input ts-form-check-input" @bind-Value="FormData.HasFinanceManagerAccess" />
+                </div>
+                <div class="ts-form-check">
+                    <label class="form-check-label ts-label" for="mealManager">
+                        Enable Meal Manager:
+                    </label>
+                    <InputCheckbox id="mealManager" class="form-check-input ts-form-check-input" @bind-Value="FormData.HasMealManagerAccess" />
+                </div>
+                <div class="ts-form-check">
+                    <label class="form-check-label ts-label" for="fileManager">
+                        Enable File Manager:
+                    </label>
+                    <InputCheckbox id="fileManager" class="form-check-input ts-form-check-input" @bind-Value="FormData.HasFileManagerAccess" />
+                </div>
             </div>
 
-            <div class="mb-3 form-check">
-                <InputCheckbox id="financeManager" class="form-check-input" @bind-Value="FormData.HasFinanceManagerAccess" />
-                <label class="form-check-label" for="financeManager">
-                    Enable Finance Manager
-                </label>
-            </div>
-
-            <div class="mb-3 form-check">
-                <InputCheckbox id="mealManager" class="form-check-input" @bind-Value="FormData.HasMealManagerAccess" />
-                <label class="form-check-label" for="mealManager">
-                    Enable Meal Manager
-                </label>
-            </div>
-
-            <div class="mb-3 form-check">
-                <InputCheckbox id="fileManager" class="form-check-input" @bind-Value="FormData.HasFileManagerAccess" />
-                <label class="form-check-label" for="fileManager">
-                    Enable File Manager
-                </label>
-            </div>
-
-            @if (IsEditMode)
-            {
-                <button type="button" class="ts-btn ts-cancel-btn ms-2 me-2" @onclick="HandleCancel">Cancel</button>
-            }
-
-            <button type="submit" class="ts-btn ts-submit-btn" disabled="@IsSubmitting">
-                @if (IsSubmitting)
+            <div class="button-container">
+                @if (IsEditMode)
                 {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <button type="button" class="ts-btn ts-cancel-btn ms-2 me-2" @onclick="HandleCancel">Cancel</button>
                 }
-                @(IsEditMode ? "Update Household" : "Create Household")
-            </button>
+
+                <button type="submit" class="ts-btn ts-submit-btn" disabled="@IsSubmitting">
+                    @if (IsSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    }
+                    @(IsEditMode ? "Update" : "Create")
+                </button>
+            </div>
         </EditForm>
     </div>
 </div>

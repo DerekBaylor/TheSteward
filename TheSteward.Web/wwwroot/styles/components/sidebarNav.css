@@ -7,7 +7,7 @@
     flex-direction: column;
     align-items: center;
     padding: 2rem 1rem;
-    font-family: var(--primary-font);
+    font-family: var(--label-font);
     position: fixed;
     left: 0;
     top: 0;
@@ -109,7 +109,7 @@ a.nav-link-group.active, a.nav-link-group:active, a.nav-link-group:hover {
     border-radius: 16px;
     transition: background 0.18s, color 0.18s, box-shadow 0.2s;
     position: relative;
-    font-family: var(--primary-font);
+    font-family: var(--label-font);
 }
 
     .logout-button:hover {

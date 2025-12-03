@@ -13,7 +13,7 @@
     /* ----- */
     --title-font: 'Title-Font', sans-serif;
     --primary-font: 'Primary-Font', sans-serif;
-    --secondary-font: 'Secondary-Font', sans-serif;
+    --label-font: 'Label-Font', sans-serif;
     /* ------ */
     /* Colors */
     /* ------ */
@@ -29,9 +29,9 @@
     --blue: rgba(0, 51, 88, 1);
     --light-blue: rgb(31, 255, 255);
     /* ------ */
+    --light-gray: rgba(235,235, 235, 1);
     --dark-gray: rgb(48, 48, 48);
-    --dark-gray-50: rgba(48, 48, 48, .5); /**/
-    --dark-gray-25: rgba(48, 48, 48, .25); /* border color */
+    --dark-gray-25: rgba(48, 48, 48, .25); 
     --dark-gray-hover: rgba(38, 38, 38, 1);
     --dark-gray-active: rgba(18, 18, 18, 1);
     --shadow: rgba(10, 10, 10, 1);
@@ -51,6 +51,9 @@
     --dark-yellow-3: rgba(180, 150, 50, 1);
     --dark-yellow-4: rgba(160, 130, 40, 1);
     /* ------ */
+    --border-color: var(--dark-gray-25);
+    --border-radius: .5rem;
+    /* ------ */
     --section-background: rgba(32, 178, 170, 0.3);
     --section-background-green: rgb(32, 178, 170);
     --button-background-light: rgba(247, 247, 247, 0.75);
@@ -62,6 +65,7 @@
 }
 
 body {
+    font-family: var(--primary-font);
     margin: 0;
 }
 
@@ -75,6 +79,10 @@ body {
     margin-left: 200px;
     transition: margin-left 0.3s ease;
     padding: 2rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--label-font);
 }
 
 @media (max-width: 768px) {
@@ -98,11 +106,23 @@ body {
 @font-face {
     font-family: 'Primary-Font';
     font-display: auto;
+    src: url('./Assets/Fonts/Poppins-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Label-Font';
+    font-display: auto;
+    src: url('./Assets/Fonts/FiraCode-VariableFont_wght.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Primary-Font-One';
+    font-display: auto;
     src: url('./Assets/Fonts/Roboto-Regular.ttf') format('truetype');
 }
 
 @font-face {
-    font-family: 'Secondary-Font';
+    font-family: 'Secondary-Font-One';
     font-display: auto;
     src: url('./Assets/Fonts/Lato-Regular.ttf') format('truetype');
 }

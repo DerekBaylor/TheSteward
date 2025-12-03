@@ -4,22 +4,45 @@
 
 .ts-card {
     border: solid 1px var(--dark-gray-25);
-    border-radius: .75rem;
+    border: solid 1px var(--dark-gray-25);
+    border-radius: var(--border-radius);
     padding: .75rem;
     margin: 1rem;
+    font-family: var(--primary-font);
 }
 
+.ts-card-title {
+    font-family: var(--label-font);
+}
+
+/* ----- */
+/* Label */
+/* ----- */
+.ts-label {
+    font-family: var(--label-font);
+    font-weight: 600;
+}
+
+/* ----- */
+/* Badge */
+/* ----- */
+.ts-badge {
+    font-family: var(--label-font);
+    font-weight: 600;
+    background-color: var(--dark-gray);
+}
 
 /* ------- */
 /* Buttons */
 /* ------- */
 .ts-btn {
-    border-radius: .5rem;
+    border-radius: var(--border-radius);
     border-width: 1px;
     cursor: pointer;
-    padding: .375rem .750rem;
-    font-family: var(--primary-font);
+    height: fit-content;
+    font-family: var(--label-font);
     font-weight: 400;
+    padding: .375rem .750rem;
 }
 
 .ts-edit-btn {
@@ -64,3 +87,178 @@
     .ts-submit-btn:active {
         background-color: var(--darkest-green);
     }
+
+
+/* ----------------------------- */
+/* Single Select Razor Component */
+/* ----------------------------- */
+
+.ts-select-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: .5rem;
+}
+
+
+.ts-select-label {
+    font-weight: bold;
+    font-size: 1rem;
+    white-space: nowrap;
+    font-family: var(--label-font);
+}
+
+
+.ts-custom-select-container {
+    position: relative;
+    width: 100%;
+}
+
+
+.ts-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: .375rem .75rem;
+    padding-right: 2.5rem;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--dark-green);
+    background-color: var(--light-gray);
+    font-size: 1rem;
+    color: var(--dark-gray);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+    .ts-select-header:hover {
+        border-color: var(--light-green);
+    }
+
+    .ts-select-header:focus,
+    .ts-custom-select-container.open .ts-select-header {
+        border-color: var(--light-green);
+        background-color: var(--off-white);
+        box-shadow: 0 0 0 3px var(--yellow-green);
+        outline: none;
+    }
+
+
+.ts-chevron {
+    position: absolute;
+    right: 0.75rem;
+    font-size: 1.75rem;
+    color: var(--dark-green);
+    pointer-events: none;
+    transition: transform 0.2s ease;
+}
+
+    .ts-chevron.rotated {
+        transform: rotate(180deg);
+    }
+
+
+.ts-select-options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background-color: var(--light-gray);
+    border: 2px solid var(--dark-green);
+    border-radius: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .ts-select-options li {
+        padding: .375rem .75rem;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        color: var(--dark-gray);
+    }
+
+        .ts-select-options li:hover {
+            background-color: var(--yellow-green);
+        }
+
+        .ts-select-options li:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .ts-select-options li:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+    /* Scrollbar styling for dropdown */
+    .ts-select-options::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .ts-select-options::-webkit-scrollbar-track {
+        background: var(--light-gray);
+        border-radius: 0 8px 8px 0;
+    }
+
+    .ts-select-options::-webkit-scrollbar-thumb {
+        background: var(--dark-green);
+        border-radius: 4px;
+    }
+
+        .ts-select-options::-webkit-scrollbar-thumb:hover {
+            background: var(--light-green);
+        }
+
+/* ------------ */
+/* Form Control */
+/* ------------ */
+.ts-form-control-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.ts-form-control-group label {
+    white-space: nowrap;
+    margin: 0 .5rem 0 0;
+}
+
+
+/* ----------- */
+/* Check Boxes */
+/* ----------- */
+
+.ts-form-check {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    min-height: 1.25rem;
+    margin: .5rem 0;
+}
+
+
+.form-check-input.ts-form-check-input {
+    margin-right: 8rem;
+    margin-top: 0;
+    height: 1.25rem;
+    width: 1.25rem;
+
+    border-color: var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--light-gray);
+    cursor: pointer;
+}
+
+.form-check-input.ts-form-check-input:checked {
+    background-color: var(--dark-blue);
+    border-color: var(--dark-blue);
+}
+
+
+
+

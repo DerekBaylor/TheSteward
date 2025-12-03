@@ -117,6 +117,8 @@ public class UserHouseholdService : IUserHouseholdService
     public async Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
+            .Include(uh => uh.Household)
+            .ThenInclude(h => h.Members)
             .Where(uh => uh.UserId == userId && uh.HouseholdId == householdId)
             .FirstOrDefaultAsync();
 

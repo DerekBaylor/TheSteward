@@ -5,14 +5,13 @@
 @using System.Reflection
 @using TheSteward.Core.Attributes
 
-<div class="ts-card household-card">
+<div class="ts-card">
+    <h5 class="card-title"> @HouseholdDto.HouseholdName </h5>
     <div class="card-body">
         <p class="card-text">
-            <strong>Status:</strong> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
+            <span class="ts-label">Status:</span> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
         </p>
-
-        <h6 class="mt-3"><strong>Enabled Features:</strong></h6>
-
+        <h6 class="mt-3 ts-lable">Enabled Features:</h6>
         <ul style="list-style: none; padding-left: 0;">
             @foreach (var feature in GetFeatures())
             {
@@ -25,10 +24,10 @@
             }
         </ul>
 
-        @* <button class="btn btn-secondary mt-3" @onclick="HandleEdit">Edit Household</button> *@
         <button class="ts-btn ts-edit-btn" @onclick="HandleEdit">Edit Household</button>
+        <button class="ts-btn ts-submit-btn" @onclick="HandleAddMember">Add Member</button>
 
-        <h6 class="mt-4"><strong>Members:</strong></h6>
+        <h6 class="mt-3 ts-lable">Members:</h6>
         @if (HouseholdDto.Members != null && HouseholdDto.Members.Any())
         {
             <ul style="list-style: none; padding-left: 0;">
@@ -42,7 +41,7 @@
                                 @member.UserName
                                 @if (member.Id == HouseholdDto.OwnerId)
                                 {
-                                    <span class="badge bg-primary ms-2 owner-badge">Owner</span>
+                                    <span class="badge ts-badge ms-2 owner-badge">Owner</span>
                                 }
                             </button>
                         }
@@ -79,6 +78,9 @@
     public EventCallback OnEditHosuehold { get; set; }
 
     [Parameter]
+    public EventCallback OnAddMember { get; set; }
+
+    [Parameter]
     public EventCallback<ApplicationUser> GetMember { get; set; }
 
     private List<(string Name, bool IsEnabled)> GetFeatures()
@@ -102,6 +104,11 @@
     private async Task HandleEdit()
     {
         await OnEditHosuehold.InvokeAsync();
+    }
+
+    private async Task HandleAddMember()
+    {
+        await OnAddMember.InvokeAsync();
     }
 
     private async Task HandleMemberClick(ApplicationUser member)

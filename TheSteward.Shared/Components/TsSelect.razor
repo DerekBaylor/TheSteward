@@ -1,0 +1,53 @@
+﻿@typeparam TValue
+@using TheSteward.Shared.Models;
+
+<div class="ts-custom-select-container">
+    <div class="ts-select-header" @onclick="ToggleDropdown">
+        <span>@GetDisplayText()</span>
+        <span class="material-icons ts-chevron @(IsOpen ? "rotated" : "")">expand_more</span>
+    </div>
+
+    @if (IsOpen)
+    {
+        <ul class="ts-select-options">
+            @foreach (var item in Items)
+            {
+                <li @onclick="() => SelectItemHandler(item)">
+                    @item.Text
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private bool IsOpen = false;
+
+    [Parameter] public TValue? Value { get; set; }
+    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
+
+    [Parameter] public List<SelectItem<TValue>> Items { get; set; } = new();
+
+    [Parameter] public string? Placeholder { get; set; } = "Select…";
+
+    private void ToggleDropdown() => IsOpen = !IsOpen;
+
+    // Renamed method to avoid conflict with nested class
+    private async Task SelectItemHandler(SelectItem<TValue> item)
+    {
+        Value = item.Value;
+        await ValueChanged.InvokeAsync(Value);
+        IsOpen = false;
+    }
+
+    private string GetDisplayText()
+    {
+        if (Value is null)
+            return Placeholder ?? "Select…";
+
+        var match = Items.FirstOrDefault(i =>
+            EqualityComparer<TValue>.Default.Equals(i.Value, Value));
+
+        return match?.Text ?? Placeholder ?? "Select…";
+    }
+}

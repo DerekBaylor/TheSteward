@@ -3,6 +3,7 @@
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
 @using TheSteward.Core.Models
 @using TheSteward.Web.Components.Account
 
@@ -10,6 +11,10 @@
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserHouseholdService UserHouseholdService
+@inject HouseholdState HouseholdState
+
 
 <PageTitle>Log in</PageTitle>
 
@@ -94,6 +99,29 @@
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
+
+            // Load user
+            var user = await UserManager.FindByEmailAsync(Input.Email);
+
+            if (user == null)
+            {
+                errorMessage = "Error: User not found after successful login.";
+                return;
+            }
+
+            // Load user's households (via the join table)
+            var defaultUserHousehold = await UserHouseholdService
+                .GetDefaultUserHouseholdForUserAsync(user.Id);
+
+            // Set default household
+            if (defaultUserHousehold?.Household != null)
+            {
+                var householdDto = defaultUserHousehold.Household;
+
+                // Push default household into state (global)
+                HouseholdState.SetHousehold(householdDto);
+            }
+
             RedirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.RequiresTwoFactor)

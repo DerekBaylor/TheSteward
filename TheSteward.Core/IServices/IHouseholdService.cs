@@ -45,5 +45,5 @@ public interface IHouseholdService
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>
     /// <returns>A task representing the asynchronous operation, containing a list of household data transfer objects for active households the user belongs to.</returns>
-    Task<List<HouseholdDto>> GetAllHouseholdsForUser(string userId);
+    Task<List<HouseholdDto>> GetAllHouseholdsForUserAsync(string userId);
 }

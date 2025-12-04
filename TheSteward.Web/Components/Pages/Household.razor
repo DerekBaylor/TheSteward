@@ -30,6 +30,7 @@ else if (showHouseholdForm)
         <HouseholdForm 
             IsEditMode="isEditHouseholdMode"
             FormData="householdFormDto"
+            HasDefaultHousehold="hasDefaultHousehold"
             IsSubmitting="isSubmitting"
             OnSubmit="SaveHousehold"
             OnCancel="CancelHouseholdEdit" />
@@ -277,7 +278,6 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         {
             if (isEditHouseholdMode && selectedHouseholdDto != null) // Update household
             {
-
                 updateHouseholdDto.HouseholdId = selectedHouseholdDto.HouseholdId;
                 updateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
                 updateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
@@ -287,6 +287,11 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                 updateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
 
                 await HouseholdService.UpdateAsync(updateHouseholdDto);
+
+                households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                PopulateHouseholdItems();
+
+                await GetUserHouseholdAndPermissions(selectedHouseholdDto.HouseholdId);
             }
             else // Create household
             {
@@ -298,22 +303,23 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                 createHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
 
                 await HouseholdService.AddAsync(createHouseholdDto, currentUserId);
-            }
 
-            var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
+                var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
 
-            if (defaultUserHousehold?.Household != null)
-            {
-                selectedHouseholdDto = defaultUserHousehold.Household;
-                hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
-                hasDefaultHousehold = true;
+                if (defaultUserHousehold?.Household != null)
+                {
+                    households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                    PopulateHouseholdItems();
 
-                households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
-                PopulateHouseholdItems();
-            }
-            else
-            {
-                errorMessage = "Unable to load household after save";
+                    await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
+
+                    hasDefaultHousehold = true;
+                    HouseholdState.SetHousehold(defaultUserHousehold.Household);
+                }
+                else
+                {
+                    errorMessage = "Unable to load household after save";
+                }
             }
 
             showHouseholdForm = false;

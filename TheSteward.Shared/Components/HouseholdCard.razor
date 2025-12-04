@@ -28,35 +28,38 @@
         <button class="ts-btn ts-submit-btn" @onclick="HandleAddMember">Add Member</button>
 
         <h6 class="mt-3 ts-lable">Members:</h6>
-        @if (HouseholdDto.Members != null && HouseholdDto.Members.Any())
+        @if (HouseholdDto.UserHouseholdDtos != null && HouseholdDto.UserHouseholdDtos.Any())
         {
             <ul style="list-style: none; padding-left: 0;">
-                @foreach (var member in HouseholdDto.Members)
+                @foreach (var userHousehold in HouseholdDto.UserHouseholdDtos)
                 {
-                    <li class="mb-2">
-                        @if (HasAdminPermissions)
-                        {
-                            <button class="btn btn-link p-0 text-start" @onclick="() => HandleMemberClick(member)">
-                                <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
-                                @member.UserName
-                                @if (member.Id == HouseholdDto.OwnerId)
-                                {
-                                    <span class="badge ts-badge ms-2 owner-badge">Owner</span>
-                                }
-                            </button>
-                        }
-                        else
-                        {
-                            <span>
-                                <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
-                                @member.UserName
-                                @if (member.Id == HouseholdDto.OwnerId)
-                                {
-                                    <span class="badge bg-primary ms-2">Owner</span>
-                                }
-                            </span>
-                        }
-                    </li>
+                    @if (userHousehold.User != null)
+                    {
+                        <li class="mb-2">
+                            @if (HasAdminPermissions)
+                            {
+                                <button class="btn btn-link p-0 text-start" @onclick="() => HandleMemberClick(userHousehold.User)">
+                                    <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
+                                    @userHousehold.User.UserName
+                                    @if (userHousehold.User.Id == HouseholdDto.OwnerId)
+                                    {
+                                        <span class="badge ts-badge ms-2 owner-badge">Owner</span>
+                                    }
+                                </button>
+                            }
+                            else
+                            {
+                                <span>
+                                    <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
+                                    @userHousehold.User.UserName
+                                    @if (userHousehold.User.Id == HouseholdDto.OwnerId)
+                                    {
+                                        <span class="badge bg-primary ms-2">Owner</span>
+                                    }
+                                </span>
+                            }
+                        </li>
+                    }
                 }
             </ul>
         }

@@ -23,11 +23,20 @@
 @code {
     private bool IsOpen = false;
 
-    [Parameter] public TValue? Value { get; set; }
-    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
-    [Parameter] public List<SelectItem<TValue>> Items { get; set; } = new();
-    [Parameter] public string? Placeholder { get; set; } = "Select…";
-    [Parameter] public EventCallback OnChange { get; set; }
+    [Parameter] 
+    public TValue? Value { get; set; }
+    
+    [Parameter] 
+    public EventCallback<TValue?> ValueChanged { get; set; }
+    
+    [Parameter] 
+    public List<SelectItem<TValue>> Items { get; set; } = new();
+    
+    [Parameter] 
+    public string? Placeholder { get; set; } = "Select…";
+    
+    [Parameter] 
+    public EventCallback OnChange { get; set; }
 
     private void ToggleDropdown() => IsOpen = !IsOpen;
 

@@ -116,7 +116,7 @@ public class UserHouseholdService : IUserHouseholdService
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
-            .ThenInclude(h => h.Members)
+            .ThenInclude(h => h.UserHouseholds)
             .Where(uh => 
                 uh.UserId == userId && 
                 uh.IsDefaultUserHousehold && 
@@ -132,7 +132,8 @@ public class UserHouseholdService : IUserHouseholdService
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
-            .ThenInclude(h => h.Members)
+                .ThenInclude(h => h.UserHouseholds)
+                    .ThenInclude(uh => uh.User)
             .Where(uh => uh.UserId == userId && uh.HouseholdId == householdId)
             .FirstOrDefaultAsync();
 

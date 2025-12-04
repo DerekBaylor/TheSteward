@@ -36,7 +36,6 @@ public class HouseholdService : IHouseholdService
         household.HouseholdId = Guid.NewGuid();
         household.OwnerId = ownerId;
         household.IsHouseholdActive = true;
-        household.Members = new List<ApplicationUser> { owner };
 
         await _householdRepository.AddAsync(household);
         await _householdRepository.SaveChangesAsync();
@@ -88,7 +87,7 @@ public class HouseholdService : IHouseholdService
         currentHousehold.IsHouseholdActive = currentHousehold.IsHouseholdActive;
         currentHousehold.OwnerId = currentHousehold.OwnerId;
         currentHousehold.Owner = currentHousehold.Owner;
-        currentHousehold.Members = currentHousehold.Members;
+        currentHousehold.UserHouseholds = currentHousehold.UserHouseholds;
 
         await _householdRepository.UpdateAsync(currentHousehold);
         await _householdRepository.SaveChangesAsync();

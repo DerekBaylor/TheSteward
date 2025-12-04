@@ -156,7 +156,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             }
             else
             {
-                // If state not set for some reason, fall back to default household
+                // If state is not set for some reason, fall back to default household
                 var defaultUserHousehold = await UserHouseholdService
                     .GetDefaultUserHouseholdForUserAsync(currentUserId);
 

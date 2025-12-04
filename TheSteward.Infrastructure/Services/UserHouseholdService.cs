@@ -98,6 +98,20 @@ public class UserHouseholdService : IUserHouseholdService
         return userHouseholdDto;
     }
 
+    public async Task<List<HouseholdDto>> GetAllHouseholdsForUserAsync(string userId)
+    {
+        var households = await _userHouseholdRepository.GetAll()
+            .Include(uh => uh.Household)
+            .Where(uh => uh.UserId == userId &&
+                   uh.Household.IsHouseholdActive)
+            .Select(uh => uh.Household)
+            .ToListAsync();
+
+        var householdDtos = _mapper.Map<List<HouseholdDto>>(households);
+
+        return householdDtos;
+    }
+
     public async Task<UserHouseholdDto?> GetDefaultUserHouseholdForUserAsync(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()

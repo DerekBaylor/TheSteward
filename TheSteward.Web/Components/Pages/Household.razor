@@ -149,8 +149,8 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             if (currentHouseholdDto != null)
             {
                 await GetUserHouseholdAndPermissions(currentHouseholdDto.HouseholdId);
-                households = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
-
+                households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                PopulateHouseholdItems();
             }
             else
             {
@@ -161,7 +161,8 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                 if (defaultUserHousehold?.Household != null)
                 {               
                     await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
-                    households = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                    households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                    PopulateHouseholdItems();
 
                     HouseholdState.SetHousehold(defaultUserHousehold.Household);
                 }
@@ -191,7 +192,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         }
     }
 
-    protected override void OnParametersSet()
+    private void PopulateHouseholdItems()
     {
         householdItems = households.Select(h => new SelectItem<Guid?>
         {
@@ -303,6 +304,9 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                 selectedHouseholdDto = defaultUserHousehold.Household;
                 hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
                 hasDefaultHousehold = true;
+
+                households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                PopulateHouseholdItems();
             }
             else
             {

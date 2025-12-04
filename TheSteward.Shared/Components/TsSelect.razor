@@ -32,7 +32,6 @@
 
     private void ToggleDropdown() => IsOpen = !IsOpen;
 
-    // Renamed method to avoid conflict with nested class
     private async Task SelectItemHandler(SelectItem<TValue> item)
     {
         Value = item.Value;

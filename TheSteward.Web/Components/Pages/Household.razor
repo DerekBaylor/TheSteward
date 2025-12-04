@@ -45,6 +45,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             <TsSelect TValue="Guid?"
                       Items="householdItems"
                       @bind-Value="selectedHouseholdId"
+                      OnChange="OnHouseholdChanged"
                       Placeholder="Choose household" />
         </div>
 
@@ -151,6 +152,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                 await GetUserHouseholdAndPermissions(currentHouseholdDto.HouseholdId);
                 households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
                 PopulateHouseholdItems();
+                selectedHouseholdId = currentHouseholdDto.HouseholdId;
             }
             else
             {
@@ -163,6 +165,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                     await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
                     households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
                     PopulateHouseholdItems();
+                    selectedHouseholdId = defaultUserHousehold.Household.HouseholdId;
 
                     HouseholdState.SetHousehold(defaultUserHousehold.Household);
                 }

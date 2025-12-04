@@ -23,20 +23,28 @@
 @code {
     private bool IsOpen = false;
 
-    [Parameter] public TValue? Value { get; set; }
-    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
-
-    [Parameter] public List<SelectItem<TValue>> Items { get; set; } = new();
-
-    [Parameter] public string? Placeholder { get; set; } = "Select…";
+    [Parameter] 
+    public TValue? Value { get; set; }
+    
+    [Parameter] 
+    public EventCallback<TValue?> ValueChanged { get; set; }
+    
+    [Parameter] 
+    public List<SelectItem<TValue>> Items { get; set; } = new();
+    
+    [Parameter] 
+    public string? Placeholder { get; set; } = "Select…";
+    
+    [Parameter] 
+    public EventCallback OnChange { get; set; }
 
     private void ToggleDropdown() => IsOpen = !IsOpen;
 
-    // Renamed method to avoid conflict with nested class
     private async Task SelectItemHandler(SelectItem<TValue> item)
     {
         Value = item.Value;
         await ValueChanged.InvokeAsync(Value);
+        await OnChange.InvokeAsync();
         IsOpen = false;
     }
 

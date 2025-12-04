@@ -32,5 +32,5 @@ public class Household
     [Required]
     public required ApplicationUser Owner { get; set; }
 
-    public List<ApplicationUser> Members { get; set; } = new();
+    public List<UserHousehold> UserHouseholds { get; set; } = new();
 }

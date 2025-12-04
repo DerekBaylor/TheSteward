@@ -45,6 +45,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             <TsSelect TValue="Guid?"
                       Items="householdItems"
                       @bind-Value="selectedHouseholdId"
+                      OnChange="OnHouseholdChanged"
                       Placeholder="Choose household" />
         </div>
 
@@ -149,19 +150,22 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             if (currentHouseholdDto != null)
             {
                 await GetUserHouseholdAndPermissions(currentHouseholdDto.HouseholdId);
-                households = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
-
+                households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                PopulateHouseholdItems();
+                selectedHouseholdId = currentHouseholdDto.HouseholdId;
             }
             else
             {
-                // If state not set for some reason, fall back to default household
+                // If state is not set for some reason, fall back to default household
                 var defaultUserHousehold = await UserHouseholdService
                     .GetDefaultUserHouseholdForUserAsync(currentUserId);
 
                 if (defaultUserHousehold?.Household != null)
                 {               
                     await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
-                    households = await HouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                    households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                    PopulateHouseholdItems();
+                    selectedHouseholdId = defaultUserHousehold.Household.HouseholdId;
 
                     HouseholdState.SetHousehold(defaultUserHousehold.Household);
                 }
@@ -191,7 +195,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         }
     }
 
-    protected override void OnParametersSet()
+    private void PopulateHouseholdItems()
     {
         householdItems = households.Select(h => new SelectItem<Guid?>
         {
@@ -303,6 +307,9 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                 selectedHouseholdDto = defaultUserHousehold.Household;
                 hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
                 hasDefaultHousehold = true;
+
+                households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                PopulateHouseholdItems();
             }
             else
             {

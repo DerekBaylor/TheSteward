@@ -39,11 +39,4 @@ public interface IHouseholdService
     /// <exception cref="KeyNotFoundException">Thrown when no household with the specified ID exists.</exception>
     /// <returns>A task representing the asynchronous operation, containing the household data transfer object.</returns>
     Task<HouseholdDto> GetByIdAsync(Guid id);
-
-  /// <summary>
-    /// Retrieves all active households where the specified user is a member.
-    /// </summary>
-    /// <param name="userId">The unique identifier of the user.</param>
-    /// <returns>A task representing the asynchronous operation, containing a list of household data transfer objects for active households the user belongs to.</returns>
-    Task<List<HouseholdDto>> GetAllHouseholdsForUserAsync(string userId);
 }

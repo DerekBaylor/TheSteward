@@ -32,5 +32,5 @@ public class HouseholdDto
     [Required]
     public required ApplicationUser Owner { get; set; }
 
-    public List<ApplicationUser> Members { get; set; } = new();
+    public List<UserHouseholdDto> UserHouseholdDtos { get; set; } = new();
 }

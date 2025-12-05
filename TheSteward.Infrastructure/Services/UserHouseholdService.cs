@@ -77,6 +77,7 @@ public class UserHouseholdService : IUserHouseholdService
         await _userHouseholdRepository.SaveChangesAsync();
     }
 
+    #region Get UserHousehold Methods
     public async Task<UserHousehold> GetByIdAsync(Guid id)
     {
         var userHousehold = await _userHouseholdRepository.GetByIdAsync(id);
@@ -143,6 +144,7 @@ public class UserHouseholdService : IUserHouseholdService
 
         return userHouseholdDto;
     }
+    #endregion Get UserHousehold Methods
 
     #region Invitation Methods
 
@@ -292,8 +294,11 @@ public class UserHouseholdService : IUserHouseholdService
         if (invitation == null)
             throw new KeyNotFoundException("Invitation not found.");
 
+        var user = await _userManager.FindByIdAsync(userId);
+
         var canCancel = invitation.InvitedByUserId == userId ||
-                        await CanInviteMembersAsync(invitation.HouseholdId, userId);
+                        await CanInviteMembersAsync(invitation.HouseholdId, userId) ||
+                        (user != null && user.Email?.ToLower() == invitation.InvitedUserEmail.ToLower());
 
         if (!canCancel)
             throw new UnauthorizedAccessException("You don't have permission to cancel this invitation.");

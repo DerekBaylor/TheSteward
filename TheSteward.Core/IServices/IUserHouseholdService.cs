@@ -99,9 +99,11 @@ public interface IUserHouseholdService
 
     /// <summary>
     /// Cancels/deletes a household invitation.
+    /// Can be canceled by: the person who sent it, household admin/owner, or the invited recipient.
     /// </summary>
     /// <param name="invitationId">The invitation ID to cancel.</param>
     /// <param name="userId">The ID of the user canceling the invitation.</param>
+    /// <exception cref="KeyNotFoundException">Thrown when invitation not found.</exception>
     /// <exception cref="UnauthorizedAccessException">Thrown when user doesn't have permission to cancel.</exception>
     Task CancelInvitationAsync(Guid invitationId, string userId);
 

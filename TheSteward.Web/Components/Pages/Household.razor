@@ -21,83 +21,86 @@
 
 @if (isLoading)
 {
-    <p><em>Loading...</em></p>  
+    <p><em>Loading...</em></p>
 }
-
-else if (!isLoading && pendingInvitations.Any())
+else
 {
-    <PendingInvitations Invitations="pendingInvitations"
-                        HasExistingHousehold="hasDefaultHousehold"
-                        OnAccept="AcceptInvitation"
-                        OnDecline="DeclineInvitation" />
-}
-
-else if (showHouseholdForm)
-{
-    <div class="household-form-container">
-        <h4 class="section-title">@(isEditHouseholdMode ? "Edit Household" : "Create A Household")</h4>
-        <HouseholdForm 
-            IsEditMode="isEditHouseholdMode"
-            FormData="householdFormDto"
-            HasDefaultHousehold="hasDefaultHousehold"
-            IsSubmitting="isSubmitting"
-            OnSubmit="SaveHousehold"
-            OnCancel="CancelHouseholdEdit" />
-    </div>
-
-}
-else if (showHouseholdCard && selectedHouseholdDto != null)
-{
-    <div id="householdToolContainer" class="household-tool-container">
-        <div class="ts-select-group">
-            <label for="householdSelect" class="ts-select-label">Active Household: </label>
-
-            <TsSelect TValue="Guid?"
-                      Items="householdItems"
-                      @bind-Value="selectedHouseholdId"
-                      OnChange="OnHouseholdChanged"
-                      Placeholder="Choose household" />
-        </div>
-
-        <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
-    </div>
-
-    <div class="household-container"> 
-        <div class="household-card-container">
-            <h4 class="section-title"> Household Information </h4>
-
-            <HouseholdCard HouseholdDto="selectedHouseholdDto"
-                HasAdminPermissions="hasAdminPermissions"
-                OnEditHosuehold="EditHousehold"
-                OnAddMember="AddMember"
-                GetMember="GetMember" />
     
+    @if (pendingInvitations.Any())
+    {
+        <PendingInvitations Invitations="pendingInvitations"
+                            HasExistingHousehold="hasDefaultHousehold"
+                            OnAccept="AcceptInvitation"
+                            OnDecline="DeclineInvitation" />
+    }
+
+    @if (showHouseholdForm)
+    {
+        <div class="household-form-container">
+            <h4 class="section-title">@(isEditHouseholdMode ? "Edit Household" : "Create A Household")</h4>
+            <HouseholdForm 
+                IsEditMode="isEditHouseholdMode"
+                FormData="householdFormDto"
+                HasDefaultHousehold="hasDefaultHousehold"
+                IsSubmitting="isSubmitting"
+                OnSubmit="SaveHousehold"
+                OnCancel="CancelHouseholdEdit" />
         </div>
 
-        <div class="userHousehold-container">
+    }
+    else if (showHouseholdCard && selectedHouseholdDto != null)
+    {
+        <div id="householdToolContainer" class="household-tool-container">
+            <div class="ts-select-group">
+                <label for="householdSelect" class="ts-select-label">Active Household: </label>
+
+                <TsSelect TValue="Guid?"
+                          Items="householdItems"
+                          @bind-Value="selectedHouseholdId"
+                          OnChange="OnHouseholdChanged"
+                          Placeholder="Choose household" />
+            </div>
+
+            <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
+        </div>
+
+        <div class="household-container"> 
             <div class="household-card-container">
-                @if (showMemberPermissionsForm && userHouseholdFormDto != null)
-                {
-                    <h4 class="section-title"> Member Permissions</h4>
-                    <UserHouseholdForm 
-                        FormData="userHouseholdFormDto"
-                        IsSubmitting="isSubmitting"
-                        OnSubmit="SaveUserHousehold"
-                        OnCancel="CancelUserHouseholdEdit" />
+                <h4 class="section-title"> Household Information </h4>
 
-                }
-                else if (selectedUserHouseholdDto != null && showMemberCard)
+                <HouseholdCard HouseholdDto="selectedHouseholdDto"
+                    HasAdminPermissions="hasAdminPermissions"
+                    OnEditHosuehold="EditHousehold"
+                    OnAddMember="AddMember"
+                    GetMember="GetMember" />
+    
+            </div>
+
+            <div class="userHousehold-container">
+                <div class="household-card-container">
+                    @if (showMemberPermissionsForm && userHouseholdFormDto != null)
                     {
+                        <h4 class="section-title"> Member Permissions</h4>
+                        <UserHouseholdForm 
+                            FormData="userHouseholdFormDto"
+                            IsSubmitting="isSubmitting"
+                            OnSubmit="SaveUserHousehold"
+                            OnCancel="CancelUserHouseholdEdit" />
 
-                    <h4 class="section-title"> Member Information</h4>
-                    <UserHouseholdCard 
-                        UserHouseholdDto="selectedUserHouseholdDto"
-                        OnCancel="ClearSelectedMember"
-                        OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
-                }
+                    }
+                    else if (selectedUserHouseholdDto != null && showMemberCard)
+                        {
+
+                        <h4 class="section-title"> Member Information</h4>
+                        <UserHouseholdCard 
+                            UserHouseholdDto="selectedUserHouseholdDto"
+                            OnCancel="ClearSelectedMember"
+                            OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
+                    }
+                </div>
             </div>
         </div>
-    </div>
+    }
 }
 
 @if (showInviteModal && selectedHouseholdDto != null)
@@ -440,28 +443,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         {
             await UserHouseholdService.AcceptInvitationAsync(data.InvitationId, currentUserId, data.SetAsDefault);
 
-            households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
-            PopulateHouseholdItems();
-
-            var email = (await AuthenticationStateProvider.GetAuthenticationStateAsync())
-                .User.FindFirst(ClaimTypes.Email)?.Value;
-            if (!string.IsNullOrEmpty(email))
-            {
-                pendingInvitations = await UserHouseholdService.GetPendingInvitationsForUserAsync(email);
-            }
-
-            if (data.SetAsDefault)
-            {
-                var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
-                if (defaultUserHousehold?.Household != null)
-                {
-                    await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
-                    HouseholdState.SetHousehold(defaultUserHousehold.Household);
-                }
-            }
-
-            errorMessage = null;
-            StateHasChanged();
+            NavigationManager.NavigateTo("/household", forceLoad: true);
         }
         catch (Exception ex)
         {

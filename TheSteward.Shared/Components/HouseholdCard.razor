@@ -24,8 +24,11 @@
             }
         </ul>
 
-        <button class="ts-btn ts-edit-btn" @onclick="HandleEdit">Edit Household</button>
-        <button class="ts-btn ts-submit-btn" @onclick="HandleAddMember">Add Member</button>
+        @if(HasAdminPermissions)
+        {            
+            <button class="ts-btn ts-edit-btn" @onclick="HandleEdit">Edit Household</button>
+            <button class="ts-btn ts-submit-btn" @onclick="HandleAddMember">Add Member</button>
+        }
 
         <h6 class="mt-3 ts-lable">Members:</h6>
         @if (HouseholdDto.UserHouseholdDtos != null && HouseholdDto.UserHouseholdDtos.Any())

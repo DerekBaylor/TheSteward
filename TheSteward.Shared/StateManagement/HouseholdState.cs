@@ -12,5 +12,11 @@ public class HouseholdState
         NotifyStateChanged();
     }
 
+    public void ClearHousehold()
+    {
+        CurrentHousehold = null;
+        NotifyStateChanged();
+    }
+
     private void NotifyStateChanged() => OnChange?.Invoke();
 }

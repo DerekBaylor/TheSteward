@@ -21,73 +21,93 @@
 
 @if (isLoading)
 {
-    <p><em>Loading...</em></p>  
+    <p><em>Loading...</em></p>
 }
-else if (showHouseholdForm)
+else
 {
-    <div class="household-form-container">
-        <h4 class="section-title">@(isEditHouseholdMode ? "Edit Household" : "Create A Household")</h4>
-        <HouseholdForm 
-            IsEditMode="isEditHouseholdMode"
-            FormData="householdFormDto"
-            IsSubmitting="isSubmitting"
-            OnSubmit="SaveHousehold"
-            OnCancel="CancelHouseholdEdit" />
-    </div>
-
-}
-else if (showHouseholdCard && selectedHouseholdDto != null)
-{
-    <div id="householdToolContainer" class="household-tool-container">
-        <div class="ts-select-group">
-            <label for="householdSelect" class="ts-select-label">Active Household: </label>
-
-            <TsSelect TValue="Guid?"
-                      Items="householdItems"
-                      @bind-Value="selectedHouseholdId"
-                      OnChange="OnHouseholdChanged"
-                      Placeholder="Choose household" />
-        </div>
-
-        <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
-    </div>
-
-    <div class="household-container"> 
-        <div class="household-card-container">
-            <h4 class="section-title"> Household Information </h4>
-
-            <HouseholdCard HouseholdDto="selectedHouseholdDto"
-                HasAdminPermissions="hasAdminPermissions"
-                OnEditHosuehold="EditHousehold"
-                OnAddMember="AddMember"
-                GetMember="GetMember" />
     
+    @if (pendingInvitations.Any())
+    {
+        <PendingInvitations Invitations="pendingInvitations"
+                            HasExistingHousehold="hasDefaultHousehold"
+                            OnAccept="AcceptInvitation"
+                            OnDecline="DeclineInvitation" />
+    }
+
+    @if (showHouseholdForm)
+    {
+        <div class="household-form-container">
+            <h4 class="section-title">@(isEditHouseholdMode ? "Edit Household" : "Create A Household")</h4>
+            <HouseholdForm 
+                IsEditMode="isEditHouseholdMode"
+                FormData="householdFormDto"
+                HasDefaultHousehold="hasDefaultHousehold"
+                IsSubmitting="isSubmitting"
+                OnSubmit="SaveHousehold"
+                OnCancel="CancelHouseholdEdit" />
         </div>
 
-        <div class="userHousehold-container">
+    }
+    else if (showHouseholdCard && selectedHouseholdDto != null)
+    {
+        <div id="householdToolContainer" class="household-tool-container">
+            <div class="ts-select-group">
+                <label for="householdSelect" class="ts-select-label">Active Household: </label>
+
+                <TsSelect TValue="Guid?"
+                          Items="householdItems"
+                          @bind-Value="selectedHouseholdId"
+                          OnChange="OnHouseholdChanged"
+                          Placeholder="Choose household" />
+            </div>
+
+            <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
+        </div>
+
+        <div class="household-container"> 
             <div class="household-card-container">
-                @if (showMemberPermissionsForm && userHouseholdFormDto != null)
-                {
-                    <h4 class="section-title"> Member Permissions</h4>
-                    <UserHouseholdForm 
-                        FormData="userHouseholdFormDto"
-                        IsSubmitting="isSubmitting"
-                        OnSubmit="SaveUserHousehold"
-                        OnCancel="CancelUserHouseholdEdit" />
+                <h4 class="section-title"> Household Information </h4>
 
-                }
-                else if (selectedUserHouseholdDto != null && showMemberCard)
+                <HouseholdCard HouseholdDto="selectedHouseholdDto"
+                    HasAdminPermissions="hasAdminPermissions"
+                    OnEditHosuehold="EditHousehold"
+                    OnAddMember="AddMember"
+                    GetMember="GetMember" />
+    
+            </div>
+
+            <div class="userHousehold-container">
+                <div class="household-card-container">
+                    @if (showMemberPermissionsForm && userHouseholdFormDto != null)
                     {
+                        <h4 class="section-title"> Member Permissions</h4>
+                        <UserHouseholdForm 
+                            FormData="userHouseholdFormDto"
+                            IsSubmitting="isSubmitting"
+                            OnSubmit="SaveUserHousehold"
+                            OnCancel="CancelUserHouseholdEdit" />
 
-                    <h4 class="section-title"> Member Information</h4>
-                    <UserHouseholdCard 
-                        UserHouseholdDto="selectedUserHouseholdDto"
-                        OnCancel="ClearSelectedMember"
-                        OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
-                }
+                    }
+                    else if (selectedUserHouseholdDto != null && showMemberCard)
+                        {
+
+                        <h4 class="section-title"> Member Information</h4>
+                        <UserHouseholdCard 
+                            UserHouseholdDto="selectedUserHouseholdDto"
+                            OnCancel="ClearSelectedMember"
+                            OnEdit="() => EditMemberPermissions(selectedUserHouseholdDto)" />
+                    }
+                </div>
             </div>
         </div>
-    </div>
+    }
+}
+
+@if (showInviteModal && selectedHouseholdDto != null)
+{
+    <InviteMemberModal HouseholdId="selectedHouseholdDto.HouseholdId"
+                       OnClose="CloseInviteModal"
+                       OnInviteSent="SendInvitation" />
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -112,6 +132,8 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
     private UserHouseholdFormDto? userHouseholdFormDto = null;
     private ApplicationUser? selectedMember;
 
+    private List<HouseholdInvitationDto> pendingInvitations = new();
+
     private bool isLoading = true;
     private bool isLoadingMember = false;
     private bool showHouseholdForm = false;
@@ -123,6 +145,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
     private bool hasAdminPermissions = false;
     private bool showMemberPermissionsForm = false;
     private bool showMemberCard = false;
+    private bool showInviteModal = false;
 
     private string? errorMessage;
     private string? currentUserId;
@@ -133,6 +156,12 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
+
+            var email = user.FindFirst(ClaimTypes.Email)?.Value;
+            if (!string.IsNullOrEmpty(email))
+            {
+                pendingInvitations = await UserHouseholdService.GetPendingInvitationsForUserAsync(email);
+            }
 
             if (user.Identity?.IsAuthenticated != true)
             {
@@ -277,7 +306,6 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         {
             if (isEditHouseholdMode && selectedHouseholdDto != null) // Update household
             {
-
                 updateHouseholdDto.HouseholdId = selectedHouseholdDto.HouseholdId;
                 updateHouseholdDto.IsDefaultHousehold = hasDefaultHousehold;
                 updateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
@@ -287,6 +315,11 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                 updateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
 
                 await HouseholdService.UpdateAsync(updateHouseholdDto);
+
+                households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                PopulateHouseholdItems();
+
+                await GetUserHouseholdAndPermissions(selectedHouseholdDto.HouseholdId);
             }
             else // Create household
             {
@@ -298,22 +331,23 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
                 createHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
 
                 await HouseholdService.AddAsync(createHouseholdDto, currentUserId);
-            }
 
-            var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
+                var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
 
-            if (defaultUserHousehold?.Household != null)
-            {
-                selectedHouseholdDto = defaultUserHousehold.Household;
-                hasAdminPermissions = defaultUserHousehold.HasAdminPermissions;
-                hasDefaultHousehold = true;
+                if (defaultUserHousehold?.Household != null)
+                {
+                    households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+                    PopulateHouseholdItems();
 
-                households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
-                PopulateHouseholdItems();
-            }
-            else
-            {
-                errorMessage = "Unable to load household after save";
+                    await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
+
+                    hasDefaultHousehold = true;
+                    HouseholdState.SetHousehold(defaultUserHousehold.Household);
+                }
+                else
+                {
+                    errorMessage = "Unable to load household after save";
+                }
             }
 
             showHouseholdForm = false;
@@ -359,6 +393,8 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         errorMessage = null;
     }
 
+    #region Member Invitation
+    
     private void AddMember()
     {
         if (selectedHouseholdDto == null)
@@ -367,9 +403,82 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             return;
         }
 
-        errorMessage = $"Add member button connected, Add logic.";
+        showInviteModal = true;
+    }
+    
+    private void CloseInviteModal()
+    {
+        showInviteModal = false;
     }
 
+    private async Task SendInvitation(InviteUserToHouseholdDto inviteDto)
+    {
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            errorMessage = "User not authenticated.";
+            return;
+        }
+
+        try
+        {
+            await UserHouseholdService.InviteUserToHouseholdAsync(inviteDto, currentUserId);
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error sending invitation: {ex.Message}";
+            throw;
+        }
+    }
+
+    private async Task AcceptInvitation((Guid InvitationId, bool SetAsDefault) data)
+    {
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            errorMessage = "User not authenticated.";
+            return;
+        }
+
+        try
+        {
+            await UserHouseholdService.AcceptInvitationAsync(data.InvitationId, currentUserId, data.SetAsDefault);
+
+            NavigationManager.NavigateTo("/household", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error accepting invitation: {ex.Message}";
+        }
+    }
+
+    private async Task DeclineInvitation(Guid invitationId)
+    {
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            errorMessage = "User not authenticated.";
+            return;
+        }
+
+        try
+        {
+            await UserHouseholdService.CancelInvitationAsync(invitationId, currentUserId);
+
+            var email = (await AuthenticationStateProvider.GetAuthenticationStateAsync())
+                .User.FindFirst(ClaimTypes.Email)?.Value;
+            if (!string.IsNullOrEmpty(email))
+            {
+                pendingInvitations = await UserHouseholdService.GetPendingInvitationsForUserAsync(email);
+            }
+
+            errorMessage = null;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error declining invitation: {ex.Message}";
+        }
+    }
+    #endregion Member Invitation
 
     private async Task GetMember(ApplicationUser member)
     {

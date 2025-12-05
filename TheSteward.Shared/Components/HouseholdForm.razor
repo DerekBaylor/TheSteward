@@ -43,7 +43,7 @@
             </div>
 
             <div class="button-container">
-                @if (IsEditMode)
+                @if (HasDefaultHousehold)
                 {
                     <button type="button" class="ts-btn ts-cancel-btn ms-2 me-2" @onclick="HandleCancel">Cancel</button>
                 }
@@ -69,6 +69,9 @@
 
     [Parameter]
     public bool IsSubmitting { get; set; }
+
+    [Parameter]
+    public bool HasDefaultHousehold { get; set; }
 
     [Parameter]
     public EventCallback OnSubmit { get; set; }

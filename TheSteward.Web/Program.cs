@@ -24,6 +24,7 @@ builder.Services.AddScoped<INavigationService, NavigationService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IHouseholdRepository, HouseholdRepository>();
 builder.Services.AddScoped<IUserHouseholdRepository, UserHouseholdRepository>();
+builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IUserHouseholdService, UserHouseholdService>();
@@ -87,8 +88,11 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.MapPost("/account/logout", async (SignInManager<ApplicationUser> signInManager) =>
+app.MapPost("/account/logout", async (
+    SignInManager<ApplicationUser> signInManager,
+    HouseholdState householdState) =>
 {
+    householdState.ClearHousehold();
     await signInManager.SignOutAsync();
     return Results.Redirect("/");
 }).RequireAuthorization();

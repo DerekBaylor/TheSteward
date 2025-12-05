@@ -1,0 +1,101 @@
+﻿@namespace TheSteward.Shared.Components
+@using TheSteward.Core.Dtos.HouseholdDtos
+@using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
+
+<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Invite Member to Household</h5>
+                <button type="button" class="btn-close" @onclick="HandleCancel"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="inviteDto" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address:</label>
+                        <InputText id="email" class="form-control" @bind-value="inviteDto.Email" 
+                                   placeholder="user@example.com" />
+                        <ValidationMessage For="@(() => inviteDto.Email)" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success">@successMessage</div>
+                    }
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="HandleCancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                            }
+                            Send Invitation
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid HouseholdId { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback<InviteUserToHouseholdDto> OnInviteSent { get; set; }
+    //public EventCallback OnInviteSent { get; set; }
+
+    private InviteUserToHouseholdDto inviteDto = new();
+    private bool isSubmitting = false;
+    private string? errorMessage;
+    private string? successMessage;
+
+    protected override void OnInitialized()
+    {
+        inviteDto.HouseholdId = HouseholdId;
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSubmitting = true;
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            await OnInviteSent.InvokeAsync(inviteDto);
+            successMessage = "Invitation sent successfully!";
+            
+            inviteDto = new InviteUserToHouseholdDto { HouseholdId = HouseholdId };
+            
+            await Task.Delay(2000);
+            await HandleCancel();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

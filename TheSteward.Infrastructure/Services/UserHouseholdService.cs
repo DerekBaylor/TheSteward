@@ -12,13 +12,15 @@ namespace TheSteward.Infrastructure.Services;
 public class UserHouseholdService : IUserHouseholdService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IInvitationRepository _invitationRepository;
     private readonly IUserHouseholdRepository _userHouseholdRepository;
     private readonly IMapper _mapper;
 
-    public UserHouseholdService(IUserHouseholdRepository userHouseholdRepository, UserManager<ApplicationUser> userManager, IMapper mapper)
+    public UserHouseholdService(IUserHouseholdRepository userHouseholdRepository, UserManager<ApplicationUser> userManager, IInvitationRepository invitationRepository, IMapper mapper)
     {
         _userHouseholdRepository = userHouseholdRepository;
         _userManager = userManager;
+        _invitationRepository = invitationRepository;
         _mapper = mapper;
     }
 
@@ -141,4 +143,174 @@ public class UserHouseholdService : IUserHouseholdService
 
         return userHouseholdDto;
     }
+
+    #region Invitation Methods
+
+    public async Task<HouseholdInvitationDto> InviteUserToHouseholdAsync(InviteUserToHouseholdDto inviteDto, string invitingUserId)
+    {
+        var canInvite = await CanInviteMembersAsync(inviteDto.HouseholdId, invitingUserId);
+        if (!canInvite)
+            throw new UnauthorizedAccessException("You don't have permission to invite members to this household.");
+
+        var existingMember = await _userHouseholdRepository.GetAll()
+            .FirstOrDefaultAsync(uh => uh.HouseholdId == inviteDto.HouseholdId && uh.User.Email == inviteDto.Email);
+
+        if (existingMember != null)
+            throw new InvalidOperationException("This user is already a member of the household.");
+
+        var existingInvitation = await _invitationRepository.GetAll()
+            .FirstOrDefaultAsync(i => i.HouseholdId == inviteDto.HouseholdId
+                && i.InvitedUserEmail == inviteDto.Email
+                && !i.IsAccepted
+                && (i.ExpirationDate == null || i.ExpirationDate > DateTime.UtcNow));
+
+        if (existingInvitation != null)
+            throw new InvalidOperationException("This user already has a pending invitation to this household.");
+
+        var household = await _userHouseholdRepository.GetAll()
+            .Include(h => h.Household)
+            .Where(h => h.HouseholdId == inviteDto.HouseholdId)
+            .Select(h => h.Household)
+            .FirstOrDefaultAsync();
+
+        if (household == null)
+            throw new KeyNotFoundException("Household not found.");
+
+        var invitingUser = await _userManager.FindByIdAsync(invitingUserId);
+        if (invitingUser == null)
+            throw new KeyNotFoundException("Inviting user not found.");
+
+        var invitation = new HouseholdInvitation
+        {
+            InvitationId = Guid.NewGuid(),
+            HouseholdId = inviteDto.HouseholdId,
+            Household = household,
+            InvitedUserEmail = inviteDto.Email.ToLower(),
+            InvitedByUserId = invitingUserId,
+            InvitedByUser = invitingUser,
+            InvitedDate = DateTime.UtcNow,
+            ExpirationDate = DateTime.UtcNow.AddDays(7), // 7 day expiration
+            IsAccepted = false
+        };
+
+        await _invitationRepository.AddAsync(invitation);
+        await _invitationRepository.SaveChangesAsync();
+
+        var invitationDto = _mapper.Map<HouseholdInvitationDto>(invitation);
+        return invitationDto;
+    }
+
+    public async Task AcceptInvitationAsync(Guid invitationId, string userId, bool setAsDefault)
+    {
+        var invitation = await _invitationRepository.GetAll()
+            .Include(i => i.Household)
+            .Include(i => i.InvitedByUser)
+            .FirstOrDefaultAsync(i => i.InvitationId == invitationId);
+
+        if (invitation == null)
+            throw new KeyNotFoundException("Invitation not found.");
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null || user.Email?.ToLower() != invitation.InvitedUserEmail.ToLower())
+            throw new UnauthorizedAccessException("This invitation is not for you.");
+
+        if (invitation.IsAccepted)
+            throw new InvalidOperationException("This invitation has already been accepted.");
+
+        if (invitation.ExpirationDate.HasValue && invitation.ExpirationDate.Value < DateTime.UtcNow)
+            throw new InvalidOperationException("This invitation has expired.");
+
+        if (setAsDefault)
+        {
+            var existingDefaults = await _userHouseholdRepository.GetAll()
+                .Where(uh => uh.UserId == userId && uh.IsDefaultUserHousehold)
+                .ToListAsync();
+
+            foreach (var existing in existingDefaults)
+            {
+                existing.IsDefaultUserHousehold = false;
+                await _userHouseholdRepository.UpdateAsync(existing);
+            }
+        }
+        else
+        {
+            var hasHouseholds = await _userHouseholdRepository.GetAll()
+                .AnyAsync(uh => uh.UserId == userId);
+
+            if (!hasHouseholds)
+                setAsDefault = true;
+        }
+
+        var userHousehold = new UserHousehold
+        {
+            UserHouseholdId = Guid.NewGuid(),
+            UserId = userId,
+            HouseholdId = invitation.HouseholdId,
+            IsDefaultUserHousehold = setAsDefault,
+            IsHouseholdOwner = false,
+            HasAdminPermissions = false,
+            HasFinanceManagerWritePermission = false,
+            HasFinanceManagerReadPermission = false,
+            HasKitchenManagerWritePermission = false,
+            HasKitchenManagerReadPermission = false,
+            HasTaskManagerWritePermission = false,
+            HasTaskManagerReadPermission = false,
+            HasFileManagerWritePermission = false,
+            HasFileManagerReadPermission = false
+        };
+
+        await _userHouseholdRepository.AddAsync(userHousehold);
+
+        invitation.IsAccepted = true;
+        invitation.AcceptedDate = DateTime.UtcNow;
+        await _invitationRepository.UpdateAsync(invitation);
+
+        await _userHouseholdRepository.SaveChangesAsync();
+    }
+
+    public async Task<List<HouseholdInvitationDto>> GetPendingInvitationsForUserAsync(string email)
+    {
+        var invitations = await _invitationRepository.GetAll()
+            .Include(i => i.Household)
+            .Include(i => i.InvitedByUser)
+            .Where(i => i.InvitedUserEmail.ToLower() == email.ToLower()
+                && !i.IsAccepted
+                && (i.ExpirationDate == null || i.ExpirationDate > DateTime.UtcNow))
+            .OrderByDescending(i => i.InvitedDate)
+            .ToListAsync();
+
+        return _mapper.Map<List<HouseholdInvitationDto>>(invitations);
+    }
+
+
+    public async Task CancelInvitationAsync(Guid invitationId, string userId)
+    {
+        var invitation = await _invitationRepository.GetAll()
+            .Include(i => i.Household)
+            .FirstOrDefaultAsync(i => i.InvitationId == invitationId);
+
+        if (invitation == null)
+            throw new KeyNotFoundException("Invitation not found.");
+
+        var canCancel = invitation.InvitedByUserId == userId ||
+                        await CanInviteMembersAsync(invitation.HouseholdId, userId);
+
+        if (!canCancel)
+            throw new UnauthorizedAccessException("You don't have permission to cancel this invitation.");
+
+        await _invitationRepository.DeleteAsync(invitation);
+        await _invitationRepository.SaveChangesAsync();
+    }
+
+    public async Task<bool> CanInviteMembersAsync(Guid householdId, string userId)
+    {
+        var userHousehold = await _userHouseholdRepository.GetAll()
+            .FirstOrDefaultAsync(uh => uh.HouseholdId == householdId && uh.UserId == userId);
+
+        if (userHousehold == null)
+            return false;
+
+        return userHousehold.IsHouseholdOwner || userHousehold.HasAdminPermissions;
+    }
+    #endregion Invitation Methods
 }

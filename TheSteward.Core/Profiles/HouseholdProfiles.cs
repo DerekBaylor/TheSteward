@@ -29,5 +29,13 @@ public class HouseholdProfiles : Profile
             .ForMember(dest => dest.IsDefaultUserHousehold, opt => opt.Ignore())
             .ForMember(dest => dest.IsHouseholdOwner, opt => opt.Ignore())
             .ReverseMap();
+
+        CreateMap<HouseholdInvitation, HouseholdInvitationDto>()
+            .ForMember(dest => dest.HouseholdName, opt => opt.MapFrom(src => src.Household.HouseholdName))
+            .ForMember(dest => dest.InvitedByUserName, opt => opt.MapFrom(src => src.InvitedByUser.UserName))
+            .ReverseMap();
+
+        CreateMap<InviteUserToHouseholdDto, HouseholdInvitation>()
+            .ReverseMap();
     }
 }

@@ -67,4 +67,50 @@ public interface IUserHouseholdService
     /// <param name="userId">The unique identifier of the user.</param>
     /// <returns>A task representing the asynchronous operation, containing the user-household DTO or null if not found.</returns>
     Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId);
+
+    #region Invitation Methods
+
+    /// <summary>
+    /// Sends an invitation to a user to join a household.
+    /// </summary>
+    /// <param name="inviteDto">The invitation details.</param>
+    /// <param name="invitingUserId">The ID of the user sending the invitation.</param>
+    /// <exception cref="UnauthorizedAccessException">Thrown when user doesn't have permission to invite.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when user is already a member or has pending invitation.</exception>
+    /// <returns>The created invitation DTO.</returns>
+    Task<HouseholdInvitationDto> InviteUserToHouseholdAsync(InviteUserToHouseholdDto inviteDto, string invitingUserId);
+
+    /// <summary>
+    /// Accepts a household invitation and adds the user to the household.
+    /// </summary>
+    /// <param name="invitationId">The invitation ID to accept.</param>
+    /// <param name="userId">The ID of the user accepting the invitation.</param>
+    /// <param name="setAsDefault">Whether to set this as the user's default household.</param>
+    /// <exception cref="KeyNotFoundException">Thrown when invitation not found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when invitation is expired or already accepted.</exception>
+    Task AcceptInvitationAsync(Guid invitationId, string userId, bool setAsDefault);
+
+    /// <summary>
+    /// Gets all pending invitations for a user by email.
+    /// </summary>
+    /// <param name="email">The email address of the user.</param>
+    /// <returns>List of pending invitation DTOs.</returns>
+    Task<List<HouseholdInvitationDto>> GetPendingInvitationsForUserAsync(string email);
+
+    /// <summary>
+    /// Cancels/deletes a household invitation.
+    /// </summary>
+    /// <param name="invitationId">The invitation ID to cancel.</param>
+    /// <param name="userId">The ID of the user canceling the invitation.</param>
+    /// <exception cref="UnauthorizedAccessException">Thrown when user doesn't have permission to cancel.</exception>
+    Task CancelInvitationAsync(Guid invitationId, string userId);
+
+    /// <summary>
+    /// Checks if a user has permission to invite members to a household.
+    /// </summary>
+    /// <param name="householdId">The household ID to check.</param>
+    /// <param name="userId">The user ID to check permissions for.</param>
+    /// <returns>True if user can invite members, false otherwise.</returns>
+    Task<bool> CanInviteMembersAsync(Guid householdId, string userId);
+    #endregion Invitation Methods
 }

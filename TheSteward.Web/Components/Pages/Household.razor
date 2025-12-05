@@ -23,6 +23,15 @@
 {
     <p><em>Loading...</em></p>  
 }
+
+else if (!isLoading && pendingInvitations.Any())
+{
+    <PendingInvitations Invitations="pendingInvitations"
+                        HasExistingHousehold="hasDefaultHousehold"
+                        OnAccept="AcceptInvitation"
+                        OnDecline="DeclineInvitation" />
+}
+
 else if (showHouseholdForm)
 {
     <div class="household-form-container">
@@ -91,6 +100,13 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
     </div>
 }
 
+@if (showInviteModal && selectedHouseholdDto != null)
+{
+    <InviteMemberModal HouseholdId="selectedHouseholdDto.HouseholdId"
+                       OnClose="CloseInviteModal"
+                       OnInviteSent="SendInvitation" />
+}
+
 @if (!string.IsNullOrEmpty(errorMessage))
 {
     <div class="alert alert-danger mt-3" role="alert">
@@ -113,6 +129,8 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
     private UserHouseholdFormDto? userHouseholdFormDto = null;
     private ApplicationUser? selectedMember;
 
+    private List<HouseholdInvitationDto> pendingInvitations = new();
+
     private bool isLoading = true;
     private bool isLoadingMember = false;
     private bool showHouseholdForm = false;
@@ -124,6 +142,7 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
     private bool hasAdminPermissions = false;
     private bool showMemberPermissionsForm = false;
     private bool showMemberCard = false;
+    private bool showInviteModal = false;
 
     private string? errorMessage;
     private string? currentUserId;
@@ -134,6 +153,12 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
+
+            var email = user.FindFirst(ClaimTypes.Email)?.Value;
+            if (!string.IsNullOrEmpty(email))
+            {
+                pendingInvitations = await UserHouseholdService.GetPendingInvitationsForUserAsync(email);
+            }
 
             if (user.Identity?.IsAuthenticated != true)
             {
@@ -365,6 +390,8 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
         errorMessage = null;
     }
 
+    #region Member Invitation
+    
     private void AddMember()
     {
         if (selectedHouseholdDto == null)
@@ -373,9 +400,103 @@ else if (showHouseholdCard && selectedHouseholdDto != null)
             return;
         }
 
-        errorMessage = $"Add member button connected, Add logic.";
+        showInviteModal = true;
+    }
+    
+    private void CloseInviteModal()
+    {
+        showInviteModal = false;
     }
 
+    private async Task SendInvitation(InviteUserToHouseholdDto inviteDto)
+    {
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            errorMessage = "User not authenticated.";
+            return;
+        }
+
+        try
+        {
+            await UserHouseholdService.InviteUserToHouseholdAsync(inviteDto, currentUserId);
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error sending invitation: {ex.Message}";
+            throw;
+        }
+    }
+
+    private async Task AcceptInvitation((Guid InvitationId, bool SetAsDefault) data)
+    {
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            errorMessage = "User not authenticated.";
+            return;
+        }
+
+        try
+        {
+            await UserHouseholdService.AcceptInvitationAsync(data.InvitationId, currentUserId, data.SetAsDefault);
+
+            households = await UserHouseholdService.GetAllHouseholdsForUserAsync(currentUserId);
+            PopulateHouseholdItems();
+
+            var email = (await AuthenticationStateProvider.GetAuthenticationStateAsync())
+                .User.FindFirst(ClaimTypes.Email)?.Value;
+            if (!string.IsNullOrEmpty(email))
+            {
+                pendingInvitations = await UserHouseholdService.GetPendingInvitationsForUserAsync(email);
+            }
+
+            if (data.SetAsDefault)
+            {
+                var defaultUserHousehold = await UserHouseholdService.GetDefaultUserHouseholdForUserAsync(currentUserId);
+                if (defaultUserHousehold?.Household != null)
+                {
+                    await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
+                    HouseholdState.SetHousehold(defaultUserHousehold.Household);
+                }
+            }
+
+            errorMessage = null;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error accepting invitation: {ex.Message}";
+        }
+    }
+
+    private async Task DeclineInvitation(Guid invitationId)
+    {
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            errorMessage = "User not authenticated.";
+            return;
+        }
+
+        try
+        {
+            await UserHouseholdService.CancelInvitationAsync(invitationId, currentUserId);
+
+            var email = (await AuthenticationStateProvider.GetAuthenticationStateAsync())
+                .User.FindFirst(ClaimTypes.Email)?.Value;
+            if (!string.IsNullOrEmpty(email))
+            {
+                pendingInvitations = await UserHouseholdService.GetPendingInvitationsForUserAsync(email);
+            }
+
+            errorMessage = null;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error declining invitation: {ex.Message}";
+        }
+    }
+    #endregion Member Invitation
 
     private async Task GetMember(ApplicationUser member)
     {

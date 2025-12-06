@@ -3,16 +3,42 @@
 /* ----- */
 
 .ts-card {
-    border: solid 1px var(--dark-gray-25);
-    border: solid 1px var(--dark-gray-25);
-    border-radius: var(--border-radius);
     padding: .75rem;
     margin: 1rem;
     font-family: var(--primary-font);
 }
 
+.ts-card-btn-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding-right: .5rem;
+}
+
+.ts-card-content {
+    border: solid 3px var(--dark-gray-25);
+    border-radius: var(--border-radius);
+    padding: .5rem;
+}
+
+.ts-card-header {
+    background-color: var(--yellow-green);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    margin-bottom: .5rem;
+    padding: .5rem;
+}
+
 .ts-card-title {
     font-family: var(--label-font);
+}
+
+.ts-card-body {
+    padding-left: .5rem;
+}
+
+.ts-card-row {
+    display: flex;
+    flex-direction: row;
 }
 
 /* ----- */
@@ -23,6 +49,11 @@
     font-weight: 600;
 }
 
+.ts-row-title {
+    font-family: var(--label-font);
+    font-weight: 400;
+}
+
 /* ----- */
 /* Badge */
 /* ----- */
@@ -30,6 +61,20 @@
     font-family: var(--label-font);
     font-weight: 600;
     background-color: var(--dark-gray);
+}
+
+/* ------------ */
+/* Card Buttons */
+/* ------------ */
+.ts-card-btn {
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    border-width: 1px;
+    cursor: pointer;
+    height: fit-content;
+    font-family: var(--label-font);
+    font-weight: 400;
+    padding: .375rem 1rem;
+    color: var(--off-white);
 }
 
 /* ------- */

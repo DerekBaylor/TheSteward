@@ -5,71 +5,74 @@
 @using System.Reflection
 @using TheSteward.Core.Attributes
 
-<div class="ts-card">
-    <h5 class="card-title"> @HouseholdDto.HouseholdName </h5>
-    <div class="card-body">
-        <p class="card-text">
-            <span class="ts-label">Status:</span> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
-        </p>
-        <h6 class="mt-3 ts-lable">Enabled Features:</h6>
-        <ul style="list-style: none; padding-left: 0;">
-            @foreach (var feature in GetFeatures())
-            {
-                <li>
-                    <span class="material-icons" style="@(feature.IsEnabled ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                        @(feature.IsEnabled ? "check_circle" : "radio_button_unchecked")
-                    </span>
-                    <span style="@(feature.IsEnabled ? "" : "opacity: 0.6;")">@feature.Name</span>
-                </li>
-            }
-        </ul>
-
-        @if(HasAdminPermissions)
-        {            
-            <button class="ts-btn ts-edit-btn" @onclick="HandleEdit">Edit Household</button>
-            <button class="ts-btn ts-submit-btn" @onclick="HandleAddMember">Add Member</button>
-        }
-
-        <h6 class="mt-3 ts-lable">Members:</h6>
-        @if (HouseholdDto.UserHouseholdDtos != null && HouseholdDto.UserHouseholdDtos.Any())
-        {
-            <ul style="list-style: none; padding-left: 0;">
-                @foreach (var userHousehold in HouseholdDto.UserHouseholdDtos)
-                {
-                    @if (userHousehold.User != null)
+<div id="householdCard" class="ts-card">
+    @if (HasAdminPermissions)
+    {
+        <div class="ts-card-btn-container">
+            <button id="editHouseholdBtn" class="ts-card-btn" @onclick="HandleEdit">Edit Household</button>
+            <button id="addMemberBtn" class="ts-card-btn ts-submit-btn" @onclick="HandleAddMember">Add Member</button>
+        </div>
+    }
+    <div class="ts-card-content">
+       <h5 class="card-title"><span class="ts-label"> @HouseholdDto.HouseholdName: </span></h5>
+       <div class="ts-card-body">
+                <p id="householdStatusRow" class="ts-card-row">
+                    <span class="ts-row-title">Status:</span> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
+                </p>
+            <p class="ts-label">Features:</p>
+                <ul id="householdFeatureList" >
+                    @foreach (var feature in GetFeatures())
                     {
-                        <li class="mb-2">
-                            @if (HasAdminPermissions)
-                            {
-                                <button class="btn btn-link p-0 text-start" @onclick="() => HandleMemberClick(userHousehold.User)">
-                                    <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
-                                    @userHousehold.User.UserName
-                                    @if (userHousehold.User.Id == HouseholdDto.OwnerId)
-                                    {
-                                        <span class="badge ts-badge ms-2 owner-badge">Owner</span>
-                                    }
-                                </button>
-                            }
-                            else
-                            {
-                                <span>
-                                    <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
-                                    @userHousehold.User.UserName
-                                    @if (userHousehold.User.Id == HouseholdDto.OwnerId)
-                                    {
-                                        <span class="badge bg-primary ms-2">Owner</span>
-                                    }
-                                </span>
-                            }
+                        <li>
+                            <span style="@(feature.IsEnabled ? "" : "opacity: 0.6;")">@feature.Name</span>
+                            <span class="material-icons" style="@(feature.IsEnabled ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
+                                @(feature.IsEnabled ? "check_circle" : "radio_button_unchecked")
+                            </span>
                         </li>
                     }
-                }
-            </ul>
-        }
-        else
-        {
-            <p class="text-muted">No members found.</p>
-        }
+                </ul>
+
+            <p class="ts-label">Members:</p>
+            @if (HouseholdDto.UserHouseholdDtos != null && HouseholdDto.UserHouseholdDtos.Any())
+            {
+                <ul style="list-style: none; padding-left: 0;">
+                    @foreach (var userHousehold in HouseholdDto.UserHouseholdDtos)
+                    {
+                        @if (userHousehold.User != null)
+                        {
+                            <li class="mb-2">
+                                @if (HasAdminPermissions)
+                                {
+                                    <button class="btn btn-link p-0 text-start" @onclick="() => HandleMemberClick(userHousehold.User)">
+                                        <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
+                                        @userHousehold.User.UserName
+                                        @if (userHousehold.User.Id == HouseholdDto.OwnerId)
+                                        {
+                                            <span class="badge ts-badge ms-2 owner-badge">Owner</span>
+                                        }
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span>
+                                        <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
+                                        @userHousehold.User.UserName
+                                        @if (userHousehold.User.Id == HouseholdDto.OwnerId)
+                                        {
+                                            <span class="badge bg-primary ms-2">Owner</span>
+                                        }
+                                    </span>
+                                }
+                            </li>
+                        }
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">No members found.</p>
+            }
+       </div>
     </div>
 </div>
 

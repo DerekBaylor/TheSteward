@@ -31,6 +31,7 @@ builder.Services.AddScoped<IUserHouseholdService, UserHouseholdService>();
 
 builder.Services.AddSingleton<HouseholdState>();
 
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
@@ -53,7 +54,18 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 6;
+
+    options.User.AllowedUserNameCharacters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+' ";
+})
     .AddEntityFrameworkStores<TheStewardContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();

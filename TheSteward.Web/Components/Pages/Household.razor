@@ -6,10 +6,13 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using TheSteward.Core.Dtos.HouseholdDtos
+@using TheSteward.Core.Dtos.UserDtos
+@using TheSteward.Infrastructure.Services
 @using TheSteward.Shared.Components
 
 @inject IHouseholdService HouseholdService
 @inject IUserHouseholdService UserHouseholdService
+@inject IUserService UserService
 @inject HouseholdState HouseholdState
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
@@ -62,6 +65,7 @@ else
             </div>
 
             <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
+            <button class="ts-btn ts-edit-btn" @onclick="ShowUserProfile">My Profile</button>
         </div>
 
         <div class="household-container"> 
@@ -100,6 +104,28 @@ else
                 </div>
             </div>
         </div>
+
+        @if (showUserProfileForm && userProfileFormDto != null)
+        {
+            <div class="household-form-container mt-3">
+                <h4 class="section-title">Edit My Profile</h4>
+                <UserProfileForm FormData="userProfileFormDto"
+                                 IsSubmitting="isSubmitting"
+                                 OnSubmit="SaveUserProfile"
+                                 OnCancel="CancelUserProfileEdit" />
+            </div>
+        }
+        else if (showUserProfileCard && currentUser != null)
+        {
+            <div class="household-container mt-3">
+                <div class="household-card-container">
+                    <h4 class="section-title">My Profile</h4>
+                    <UserProfileCard User="currentUser"
+                                     OnClose="CloseUserProfile"
+                                     OnEdit="EditUserProfile" />
+                </div>
+            </div>
+        }
     }
 }
 
@@ -134,6 +160,9 @@ else
 
     private List<HouseholdInvitationDto> pendingInvitations = new();
 
+    private UserProfileFormDto? userProfileFormDto = null;
+    private ApplicationUser? currentUser = null;
+
     private bool isLoading = true;
     private bool isLoadingMember = false;
     private bool showHouseholdForm = false;
@@ -146,6 +175,8 @@ else
     private bool showMemberPermissionsForm = false;
     private bool showMemberCard = false;
     private bool showInviteModal = false;
+    private bool showUserProfileForm = false;
+    private bool showUserProfileCard = false;
 
     private string? errorMessage;
     private string? currentUserId;
@@ -173,6 +204,7 @@ else
             if (string.IsNullOrEmpty(currentUserId))
                 return;
 
+            currentUser = await UserService.GetUserByIdAsync(currentUserId);
 
             var currentHouseholdDto = HouseholdState.CurrentHousehold;
 
@@ -224,6 +256,7 @@ else
         }
     }
 
+    #region Household Management
     private void PopulateHouseholdItems()
     {
         householdItems = households.Select(h => new SelectItem<Guid?>
@@ -393,6 +426,100 @@ else
         errorMessage = null;
     }
 
+    #endregion Household Management
+
+    #region User Profile Management
+    private void EditUserProfile()
+    {
+        if (currentUser == null)
+        {
+            errorMessage = "User profile not loaded.";
+            return;
+        }
+
+        userProfileFormDto = new UserProfileFormDto
+        {
+            UserName = currentUser.UserName ?? "",
+            Email = currentUser.Email ?? "",
+            PhoneNumber = currentUser.PhoneNumber
+        };
+
+        showUserProfileForm = true;
+        showUserProfileCard = false;
+    }
+
+    private void CancelUserProfileEdit()
+    {
+        showUserProfileForm = false;
+        showUserProfileCard = false;
+        userProfileFormDto = null;
+        errorMessage = null;
+    }
+
+    private async Task SaveUserProfile()
+    {
+        if (string.IsNullOrEmpty(currentUserId) || userProfileFormDto == null || currentUser == null)
+        {
+            errorMessage = "Invalid data for saving profile";
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var updateDto = new UpdateUserProfileDto
+            {
+                UserId = currentUserId,
+                UserName = userProfileFormDto.UserName,
+                Email = userProfileFormDto.Email,
+                PhoneNumber = userProfileFormDto.PhoneNumber
+            };
+
+            var result = await UserService.UpdateUserProfileAsync(updateDto);
+
+            if (result.Succeeded)
+            {
+                currentUser = await UserService.GetUserByIdAsync(currentUserId);
+
+                showUserProfileForm = false;
+                showUserProfileCard = false;
+
+                NavigationManager.NavigateTo("/household", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error saving profile: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void ShowUserProfile()
+    {
+        if (currentUser == null)
+        {
+            errorMessage = "User profile not loaded.";
+            return;
+        }
+
+        showUserProfileCard = true;
+    }
+    private void CloseUserProfile()
+    {
+        showUserProfileCard = false;
+    }
+
+    #endregion User Profile Management
+
     #region Member Invitation
     
     private void AddMember()
@@ -479,6 +606,7 @@ else
         }
     }
     #endregion Member Invitation
+
 
     private async Task GetMember(ApplicationUser member)
     {

@@ -1,3 +1,16 @@
+/*-------*/
+/* Pages */
+/*-------*/
+@import url('./styles/pages/household.css');
+
+/*------------*/
+/* Components */
+/*------------*/
+@import url("./styles/components/sidebarNav.css");
+@import url("./styles/components/householdCard.css");
+@import url("./styles/components/householdForm.css");
+@import url("./styles/components/inviteMemberModal.css");
+
 :root {
     /* Primary Colors */
     --brightly-green: rgba(72, 255, 155, 1);

@@ -1,0 +1,41 @@
+#inviteMemberModal .modal{
+    /*display: flex !important;*/
+    /*align-items: center;*/
+    /*justify-content: center;*/
+}
+
+#inviteMemberModal .modal-dialog {
+    margin: -3rem auto 1.75rem auto;
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 3.5rem);
+    pointer-events: none;
+}
+
+#inviteMemberModal .ts-modal-content{
+    border: 3px solid var(--purple);
+    border-radius: var(--border-radius);
+
+    pointer-events: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: var(--off-white);
+    background-clip: padding-box;
+    outline: 0;
+}
+
+#inviteMemberModal .ts-modal-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1rem;
+    background-color: var(--purple);
+    color: var(--off-white);
+}
+
+#inviteMemberModal .btn-close {
+    color: red !important;
+}

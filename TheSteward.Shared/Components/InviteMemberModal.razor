@@ -3,12 +3,14 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using System.ComponentModel.DataAnnotations
 
-<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+<div id="inviteMemberModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="ts-modal-content">
+            <div class="ts-modal-header">
                 <h5 class="modal-title">Invite Member to Household</h5>
-                <button type="button" class="btn-close" @onclick="HandleCancel"></button>
+                <button type="button" @onclick="HandleCancel"><span class="material-symbols-outlined">
+                    close
+                </span></button>
             </div>
             <div class="modal-body">
                 <EditForm Model="inviteDto" OnValidSubmit="HandleSubmit">

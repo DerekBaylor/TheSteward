@@ -31,7 +31,7 @@
     /* ------ */
     --light-gray: rgba(235,235, 235, 1);
     --dark-gray: rgb(48, 48, 48);
-    --dark-gray-25: rgba(48, 48, 48, .25); 
+    --dark-gray-25: rgba(48, 48, 48, .25);
     --dark-gray-hover: rgba(38, 38, 38, 1);
     --dark-gray-active: rgba(18, 18, 18, 1);
     --shadow: rgba(10, 10, 10, 1);
@@ -50,6 +50,10 @@
     --dark-yellow-2: rgba(200, 180, 70, 1);
     --dark-yellow-3: rgba(180, 150, 50, 1);
     --dark-yellow-4: rgba(160, 130, 40, 1);
+    /* ------ */
+    --purple: rgba(140, 0, 152, 1);
+    --dark-purple: rgba(85, 0, 92, 1);
+    --light-purple: rgba(198, 87, 207, 1);
     /* ------ */
     --border-color: var(--dark-gray-25);
     --border-radius: .5rem;

@@ -1,0 +1,46 @@
+﻿@namespace TheSteward.Shared.Components
+
+@using TheSteward.Core.Models
+
+<div class="ts-card">
+    <div class="card-body">
+        <div class="mb-2">
+            <span class="ts-label">Username:</span>
+            <span>@User.UserName</span>
+        </div>
+
+        <div class="mb-2">
+            <span class="ts-label">Email:</span>
+            <span>@User.Email</span>
+        </div>
+
+        <div class="mb-2">
+            <span class="ts-label">Phone:</span>
+            <span>@(string.IsNullOrEmpty(User.PhoneNumber) ? "Not set" : User.PhoneNumber)</span>
+        </div>
+
+        <button type="button" class="ts-btn ts-cancel-btn ms-2 me-2" @onclick="OnClose">Close</button>
+        <button class="ts-btn ts-edit-btn mt-3" @onclick="HandleEdit">Edit Profile</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ApplicationUser User { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async Task HandleEdit()
+    {
+        await OnEdit.InvokeAsync();
+    }
+
+    private async Task HandleClose()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

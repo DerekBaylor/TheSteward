@@ -1,1 +1,55 @@
 ﻿
+#householdCard {
+    width: 25rem;
+}
+
+#editHouseholdBtn.ts-card-btn {
+    background-color: var(--light-purple);
+    border-color: var(--light-purple);
+}
+
+#addMemberBtn.ts-card-btn {
+    background-color: var(--purple);
+    border-color: var(--purple);
+}
+
+button#editHouseholdBtn:hover {
+    background-color: var(--dark-purple);
+}
+
+button#addMemberBtn:hover {
+    background-color: var(--dark-purple);
+}
+
+#householdCard .ts-card-content{
+    border-color: var(--purple);
+}
+
+#householdCard p {
+    margin: 0;
+}
+
+#householdStatusRow :first-child {
+    flex-grow: 2;
+    max-width: 15rem;
+}
+
+ul#householdFeatureList{
+    list-style: none;
+    padding-left: .5rem;
+}
+
+ul#householdFeatureList li {
+    display: flex;
+    flex-direction: row;
+}
+
+
+    ul#householdFeatureList li :first-child {
+        flex-grow: 2;
+        max-width: 14.5rem;
+    }
+
+    ul#householdFeatureList li :last-child {
+        flex-grow: 1;
+    }

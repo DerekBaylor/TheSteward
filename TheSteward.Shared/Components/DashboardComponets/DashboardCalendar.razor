@@ -1,0 +1,237 @@
+﻿@namespace TheSteward.Shared.Components.DashboardComponets
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <button class="btn btn-sm btn-outline-secondary" @onclick="PreviousMonth">
+            <span>&laquo;</span>
+        </button>
+        <h4 class="calendar-title">@currentDate.ToString("MMMM yyyy")</h4>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="NextMonth">
+            <span>&raquo;</span>
+        </button>
+    </div>
+
+    <div class="calendar-grid">
+        <div class="calendar-day-header">Sun</div>
+        <div class="calendar-day-header">Mon</div>
+        <div class="calendar-day-header">Tue</div>
+        <div class="calendar-day-header">Wed</div>
+        <div class="calendar-day-header">Thu</div>
+        <div class="calendar-day-header">Fri</div>
+        <div class="calendar-day-header">Sat</div>
+
+        @foreach (var day in calendarDays)
+        {
+            <div class="calendar-day @GetDayClass(day)">
+                <span class="day-number">@day.Day</span>
+                @if (day.HasEvent)
+                {
+                    <div class="event-indicator"></div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .calendar-container {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .calendar-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+    }
+
+    .calendar-day-header {
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #6c757d;
+        padding: 8px 0;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .calendar-day {
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        border-radius: 6px;
+        background: #f8f9fa;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .calendar-day:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day.today {
+            background: #0d6efd;
+            color: white;
+            font-weight: bold;
+        }
+
+            .calendar-day.today:hover {
+                background: #0b5ed7;
+            }
+
+    .day-number {
+        font-size: 0.875rem;
+    }
+
+    .event-indicator {
+        width: 6px;
+        height: 6px;
+        background: #198754;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 4px;
+    }
+
+    .calendar-day.today .event-indicator {
+        background: white;
+    }
+
+    @@media (max-width: 768px) {
+        .calendar-container {
+            padding: 12px;
+        }
+
+        .calendar-grid {
+            gap: 4px;
+        }
+
+        .calendar-day {
+            padding: 4px;
+        }
+
+        .day-number {
+            font-size: 0.75rem;
+        }
+
+        .calendar-title {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+@code {
+    private DateTime currentDate = DateTime.Today;
+    private List<CalendarDay> calendarDays = new();
+
+    protected override void OnInitialized()
+    {
+        GenerateCalendar();
+    }
+
+    private void GenerateCalendar()
+    {
+        calendarDays.Clear();
+
+        var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+        // Get the starting day (Sunday = 0)
+        int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+
+        // Add previous month days
+        var previousMonth = firstDayOfMonth.AddMonths(-1);
+        var daysInPreviousMonth = DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
+
+        for (int i = startDayOfWeek - 1; i >= 0; i--)
+        {
+            calendarDays.Add(new CalendarDay
+            {
+                Date = new DateTime(previousMonth.Year, previousMonth.Month, daysInPreviousMonth - i),
+                IsCurrentMonth = false,
+                HasEvent = false
+            });
+        }
+
+        // Add current month days
+        for (int day = 1; day <= lastDayOfMonth.Day; day++)
+        {
+            var date = new DateTime(currentDate.Year, currentDate.Month, day);
+            calendarDays.Add(new CalendarDay
+            {
+                Date = date,
+                IsCurrentMonth = true,
+                HasEvent = Random.Shared.Next(0, 5) == 0 // Random events for demo
+            });
+        }
+
+        // Add next month days to fill the grid
+        int remainingDays = 42 - calendarDays.Count; // 6 rows x 7 days
+        var nextMonth = firstDayOfMonth.AddMonths(1);
+
+        for (int day = 1; day <= remainingDays; day++)
+        {
+            calendarDays.Add(new CalendarDay
+            {
+                Date = new DateTime(nextMonth.Year, nextMonth.Month, day),
+                IsCurrentMonth = false,
+                HasEvent = false
+            });
+        }
+    }
+
+    private string GetDayClass(CalendarDay day)
+    {
+        var classes = new List<string>();
+
+        if (!day.IsCurrentMonth)
+            classes.Add("other-month");
+
+        if (day.Date.Date == DateTime.Today)
+            classes.Add("today");
+
+        return string.Join(" ", classes);
+    }
+
+    private void PreviousMonth()
+    {
+        currentDate = currentDate.AddMonths(-1);
+        GenerateCalendar();
+    }
+
+    private void NextMonth()
+    {
+        currentDate = currentDate.AddMonths(1);
+        GenerateCalendar();
+    }
+
+    private class CalendarDay
+    {
+        public DateTime Date { get; set; }
+        public bool IsCurrentMonth { get; set; }
+        public bool HasEvent { get; set; }
+        public int Day => Date.Day;
+    }
+}

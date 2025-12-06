@@ -1,0 +1,19 @@
+﻿@namespace TheSteward.Shared.Components.DashboardComponets
+@inject NavigationManager NavigationManager
+
+<div class="landing-container text-center mt-5">
+    <h1>Welcome to The Steward</h1>
+    <p>Your complete household management companion.</p>
+    <p class="lead mb-4">Take control of your home management with tasks, calendars, and meal planning—all in one place.</p>
+
+    <div class="mt-4">
+        <button class="btn btn-primary me-2" @onclick="GoToLogin">Sign In</button>
+        <button class="btn btn-secondary" @onclick="GoToRegister">Register</button>
+    </div>
+</div>
+
+@code {
+    private void GoToLogin() => NavigationManager.NavigateTo("Account/Login", forceLoad: true);
+    private void GoToRegister() => NavigationManager.NavigateTo("Account/Register", forceLoad: true);
+
+}

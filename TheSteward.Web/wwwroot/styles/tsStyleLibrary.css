@@ -133,7 +133,38 @@
         background-color: var(--darkest-green);
     }
 
+.ts-modal-close-btn {
+    background: transparent;
+    border: none;
+    padding: .5rem;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    color: var(--off-white);
+}
 
+    .ts-modal-close-btn:hover {
+        background: var(--off-white);
+        color: var(--dark-gray);
+    }
+
+    .ts-modal-close-btn:active {
+        background: var(--light-gray);
+        transform: scale(0.95);
+    }
+
+    .ts-modal-close-btn .material-symbols-outlined {
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+
+    .ts-modal-close-btn:focus {
+        outline: 2px solid var(--dark-gray);
+        outline-offset: 2px;
+    }
 /* ----------------------------- */
 /* Single Select Razor Component */
 /* ----------------------------- */

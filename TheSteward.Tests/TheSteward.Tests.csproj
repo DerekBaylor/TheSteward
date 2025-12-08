@@ -1,19 +1,25 @@
 <!-- TheSteward.Tests -->
-<Project Sdk="MSTest.Sdk/3.6.4">
-
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<UseVSTest>true</UseVSTest>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="coverlet.collector" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" />
 		<PackageReference Include="NUnit" />
 		<PackageReference Include="NUnit.Analyzers" />
 		<PackageReference Include="NUnit3TestAdapter" />
+		<PackageReference Include="Moq" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+		<PackageReference Include="FluentAssertions" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\TheSteward.Infrastructure\TheSteward.Infrastructure.csproj" />
+		<ProjectReference Include="..\TheSteward.Core\TheSteward.Core.csproj" />
 	</ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 ﻿
-#householdCard {
+#householdCard.ts-card {
+    border: none;
     width: 25rem;
 }
 
@@ -34,11 +35,11 @@ button#addMemberBtn:hover {
     max-width: 15rem;
 }
 
-ul#householdFeatureList{
+/*ul#householdFeatureList{
     list-style: none;
     padding-left: .5rem;
 }
-
+*/
 ul#householdFeatureList li {
     display: flex;
     flex-direction: row;

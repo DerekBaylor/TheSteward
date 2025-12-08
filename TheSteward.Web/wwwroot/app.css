@@ -10,6 +10,7 @@
 @import url("./styles/components/householdCard.css");
 @import url("./styles/components/householdForm.css");
 @import url("./styles/components/inviteMemberModal.css");
+@import url("./styles/components/pendingInvitationCard.css");
 
 :root {
     /* Primary Colors */

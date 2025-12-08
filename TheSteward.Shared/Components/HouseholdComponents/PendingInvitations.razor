@@ -1,45 +1,49 @@
 ﻿@namespace TheSteward.Shared.Components.HouseholdComponents
 
 @using TheSteward.Core.Dtos.HouseholdDtos
-
 @if (Invitations != null && Invitations.Any())
 {
-    <div class="alert alert-info">
-        <h5>Pending Household Invitations</h5>
+    <div class="pending-invitation-card-row">
         @foreach (var invitation in Invitations)
         {
-            <div class="card mb-2">
-                <div class="card-body">
-                    <h6>@invitation.HouseholdName</h6>
-                    <p class="mb-1">Invited by: @invitation.InvitedByUserName</p>
-                    <p class="mb-2">
-                        <small>Invited: @invitation.InvitedDate.ToShortDateString()</small>
-                    </p>
-
-                    @if (HasExistingHousehold)
-                    {
-                        <div class="mb-2">
-                            <label>
-                                <input type="checkbox" @bind="setAsDefaultFlags[invitation.InvitationId]" />
-                                Set as default household
-                            </label>
+            @if (!hiddenInvitations.Contains(invitation.InvitationId))
+            {
+                <div class="pending-invitation-card ts-card">
+                    <div class="ts-card-header">
+                        <h5 class="ts-card-title">Pending Household Invitations</h5>
+                        <button type="button" class="ts-x-btn" @onclick="() => HandleHide(invitation.InvitationId)">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="ts-card-body">
+                        <div class="invitation-info-container">
+                            <p class="ts-card-row"><span class="ts-label">Household Name: </span>@invitation.HouseholdName</p>
+                            <p class="ts-card-row"><span class="ts-label">Invited By: </span>@invitation.InvitedByUserName</p>
+                            <p class="ts-card-row"><span class="ts-label">Invited: </span>@invitation.InvitedDate.ToShortDateString()</p>
+                            @if (HasExistingHousehold || Invitations.Count(inv => !hiddenInvitations.Contains(inv.InvitationId)) > 1)
+                            {
+                                <label class="ts-card-row">
+                                    <span class="ts-label">Set as default household:</span>
+                                    <input class="ts-checkbox" type="checkbox" @bind="setAsDefaultFlags[invitation.InvitationId]" />
+                                </label>
+                            }
+                            <div class="ts-card-btn-container">
+                                <button class="ts-btn ts-cancel-btn"
+                                        @onclick="() => HandleDecline(invitation.InvitationId)">
+                                    Decline
+                                </button>
+                                <button class="ts-btn ts-submit-btn"
+                                        @onclick="() => HandleAccept(invitation.InvitationId)">
+                                    Accept
+                                </button>
+                            </div>
                         </div>
-                    }
-
-                    <button class="btn btn-sm btn-success"
-                            @onclick="() => HandleAccept(invitation.InvitationId)">
-                        Accept
-                    </button>
-                    <button class="btn btn-sm btn-secondary"
-                            @onclick="() => HandleDecline(invitation.InvitationId)">
-                        Decline
-                    </button>
+                    </div>
                 </div>
-            </div>
+            }
         }
     </div>
 }
-
 @code {
     [Parameter]
     public List<HouseholdInvitationDto> Invitations { get; set; } = new();
@@ -53,16 +57,19 @@
     [Parameter]
     public EventCallback<Guid> OnDecline { get; set; }
 
+    [Parameter]
+    public EventCallback<Guid> OnHide { get; set; }
+
     private Dictionary<Guid, bool> setAsDefaultFlags = new();
+    private HashSet<Guid> hiddenInvitations = new();
 
     protected override void OnParametersSet()
     {
-        // Initialize flags for each invitation
         foreach (var invitation in Invitations)
         {
             if (!setAsDefaultFlags.ContainsKey(invitation.InvitationId))
             {
-                setAsDefaultFlags[invitation.InvitationId] = !HasExistingHousehold;
+                setAsDefaultFlags[invitation.InvitationId] = false;
             }
         }
     }
@@ -76,5 +83,11 @@
     private async Task HandleDecline(Guid invitationId)
     {
         await OnDecline.InvokeAsync(invitationId);
+    }
+
+    private async Task HandleHide(Guid invitationId)
+    {
+        hiddenInvitations.Add(invitationId);
+        await OnHide.InvokeAsync(invitationId);
     }
 }

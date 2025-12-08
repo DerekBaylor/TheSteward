@@ -8,7 +8,7 @@
 <div id="householdCard" class="ts-card">
     @if (HasAdminPermissions)
     {
-        <div class="ts-card-btn-container">
+        <div class="ts-card-tab-btn-container">
             <button id="editHouseholdBtn" class="ts-card-btn" @onclick="HandleEdit">Edit Household</button>
             <button id="addMemberBtn" class="ts-card-btn ts-submit-btn" @onclick="HandleAddMember">Add Member</button>
         </div>
@@ -20,7 +20,7 @@
                     <span class="ts-row-title">Status:</span> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
                 </p>
             <p class="ts-label">Features:</p>
-                <ul id="householdFeatureList" >
+                <ul id="householdFeatureList" class="ts-card-list" >
                     @foreach (var feature in GetFeatures())
                     {
                         <li>
@@ -35,7 +35,7 @@
             <p class="ts-label">Members:</p>
             @if (HouseholdDto.UserHouseholdDtos != null && HouseholdDto.UserHouseholdDtos.Any())
             {
-                <ul style="list-style: none; padding-left: 0;">
+                <ul class="ts-card-list">
                     @foreach (var userHousehold in HouseholdDto.UserHouseholdDtos)
                     {
                         @if (userHousehold.User != null)

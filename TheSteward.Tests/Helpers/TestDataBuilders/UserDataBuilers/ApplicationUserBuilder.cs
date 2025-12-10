@@ -1,6 +1,6 @@
 ﻿using TheSteward.Core.Models;
 
-namespace TheSteward.Tests.Helpers.TestDataBuilders;
+namespace TheSteward.Tests.Helpers.TestDataBuilders.UserDataBuilers;
 
 public class ApplicationUserBuilder
 {
@@ -40,7 +40,6 @@ public class ApplicationUserBuilder
             NormalizedUserName = _userName.ToUpperInvariant(),
             NormalizedEmail = _email.ToUpperInvariant(),
             EmailConfirmed = true,
-            // Add other required ApplicationUser properties here
         };
     }
 }

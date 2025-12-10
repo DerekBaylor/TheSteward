@@ -1,6 +1,6 @@
 ﻿using TheSteward.Core.Dtos.HouseholdDtos;
 
-namespace TheSteward.Tests.Helpers.TestDataBuilders;
+namespace TheSteward.Tests.Helpers.TestDataBuilders.HouseholdDataBuilders;
 
 public class CreateHouseholdDtoBuilder
 {

@@ -9,7 +9,8 @@ using TheSteward.Core.IServices;
 using TheSteward.Core.Models;
 using TheSteward.Core.Models.HouseholdModels;
 using TheSteward.Infrastructure.Services;
-using TheSteward.Tests.Helpers.TestDataBuilders;
+using TheSteward.Tests.Helpers.TestDataBuilders.HouseholdDataBuilders;
+using TheSteward.Tests.Helpers.TestDataBuilders.UserDataBuilers;
 
 namespace TheSteward.Tests.Services;
 

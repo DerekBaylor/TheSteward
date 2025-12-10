@@ -6,6 +6,8 @@ using TheSteward.Infrastructure.Data;
 using TheSteward.Infrastructure.Repositories;
 using TheSteward.Tests.Helpers;
 using TheSteward.Tests.Helpers.TestDataBuilders;
+using TheSteward.Tests.Helpers.TestDataBuilders.HouseholdDataBuilders;
+using TheSteward.Tests.Helpers.TestDataBuilders.UserDataBuilers;
 
 namespace TheSteward.Tests.Repositories;
 

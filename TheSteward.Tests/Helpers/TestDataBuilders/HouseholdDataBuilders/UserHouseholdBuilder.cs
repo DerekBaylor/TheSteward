@@ -1,7 +1,7 @@
 ﻿using TheSteward.Core.Models;
 using TheSteward.Core.Models.HouseholdModels;
 
-namespace TheSteward.Tests.Helpers.TestDataBuilders;
+namespace TheSteward.Tests.Helpers.TestDataBuilders.HouseholdDataBuilders;
 
 public class UserHouseholdBuilder
 {

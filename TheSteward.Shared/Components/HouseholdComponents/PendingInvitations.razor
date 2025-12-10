@@ -1,0 +1,93 @@
+﻿@namespace TheSteward.Shared.Components.HouseholdComponents
+
+@using TheSteward.Core.Dtos.HouseholdDtos
+@if (Invitations != null && Invitations.Any())
+{
+    <div class="pending-invitation-card-row">
+        @foreach (var invitation in Invitations)
+        {
+            @if (!hiddenInvitations.Contains(invitation.InvitationId))
+            {
+                <div class="pending-invitation-card ts-card">
+                    <div class="ts-card-header">
+                        <h5 class="ts-card-title">Pending Household Invitations</h5>
+                        <button type="button" class="ts-x-btn" @onclick="() => HandleHide(invitation.InvitationId)">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="ts-card-body">
+                        <div class="invitation-info-container">
+                            <p class="ts-card-row"><span class="ts-label">Household Name: </span>@invitation.HouseholdName</p>
+                            <p class="ts-card-row"><span class="ts-label">Invited By: </span>@invitation.InvitedByUserName</p>
+                            <p class="ts-card-row"><span class="ts-label">Invited: </span>@invitation.InvitedDate.ToShortDateString()</p>
+                            @if (HasExistingHousehold || Invitations.Count(inv => !hiddenInvitations.Contains(inv.InvitationId)) > 1)
+                            {
+                                <label class="ts-card-row">
+                                    <span class="ts-label">Set as default household:</span>
+                                    <input class="ts-checkbox" type="checkbox" @bind="setAsDefaultFlags[invitation.InvitationId]" />
+                                </label>
+                            }
+                            <div class="ts-card-btn-container">
+                                <button class="ts-btn ts-cancel-btn"
+                                        @onclick="() => HandleDecline(invitation.InvitationId)">
+                                    Decline
+                                </button>
+                                <button class="ts-btn ts-submit-btn"
+                                        @onclick="() => HandleAccept(invitation.InvitationId)">
+                                    Accept
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+@code {
+    [Parameter]
+    public List<HouseholdInvitationDto> Invitations { get; set; } = new();
+
+    [Parameter]
+    public bool HasExistingHousehold { get; set; }
+
+    [Parameter]
+    public EventCallback<(Guid InvitationId, bool SetAsDefault)> OnAccept { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnDecline { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnHide { get; set; }
+
+    private Dictionary<Guid, bool> setAsDefaultFlags = new();
+    private HashSet<Guid> hiddenInvitations = new();
+
+    protected override void OnParametersSet()
+    {
+        foreach (var invitation in Invitations)
+        {
+            if (!setAsDefaultFlags.ContainsKey(invitation.InvitationId))
+            {
+                setAsDefaultFlags[invitation.InvitationId] = false;
+            }
+        }
+    }
+
+    private async Task HandleAccept(Guid invitationId)
+    {
+        var setAsDefault = setAsDefaultFlags.GetValueOrDefault(invitationId, false);
+        await OnAccept.InvokeAsync((invitationId, setAsDefault));
+    }
+
+    private async Task HandleDecline(Guid invitationId)
+    {
+        await OnDecline.InvokeAsync(invitationId);
+    }
+
+    private async Task HandleHide(Guid invitationId)
+    {
+        hiddenInvitations.Add(invitationId);
+        await OnHide.InvokeAsync(invitationId);
+    }
+}

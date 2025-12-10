@@ -9,6 +9,7 @@
 @using TheSteward.Core.Dtos.UserDtos
 @using TheSteward.Infrastructure.Services
 @using TheSteward.Shared.Components
+@using TheSteward.Shared.Components.HouseholdComponents
 
 @inject IHouseholdService HouseholdService
 @inject IUserHouseholdService UserHouseholdService
@@ -28,19 +29,43 @@
 }
 else
 {
-    
+    <div id="householdToolContainer" class="household-tool-container">
+    @if (selectedHouseholdDto != null)
+        {            
+            <div class="ts-select-group">
+                <label for="householdSelect" class="ts-select-label">Active Household: </label>
+
+                <TsSelect TValue="Guid?"
+                          Items="householdItems"
+                          @bind-Value="selectedHouseholdId"
+                          OnChange="OnHouseholdChanged"
+                          Placeholder="Choose household" />
+            </div>
+        }
+
+        <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
+        <button class="ts-btn ts-edit-btn" @onclick="ShowUserProfile">My Profile</button>
+    </div>
+
+    @if (!hasDefaultHousehold)
+    {
+        <div class="alert alert-info mt-3" role="alert">
+            You are not part of a household. Please Add a household, or accept an invitation.
+        </div>
+    }
+
     @if (pendingInvitations.Any())
     {
         <PendingInvitations Invitations="pendingInvitations"
                             HasExistingHousehold="hasDefaultHousehold"
                             OnAccept="AcceptInvitation"
-                            OnDecline="DeclineInvitation" />
+                            OnDecline="DeclineInvitation"
+                            OnHide="HideInvitation" />
     }
 
     @if (showHouseholdForm)
     {
         <div class="household-form-container">
-            <h4 class="section-title">@(isEditHouseholdMode ? "Edit Household" : "Create A Household")</h4>
             <HouseholdForm 
                 IsEditMode="isEditHouseholdMode"
                 FormData="householdFormDto"
@@ -53,21 +78,6 @@ else
     }
     else if (showHouseholdCard && selectedHouseholdDto != null)
     {
-        <div id="householdToolContainer" class="household-tool-container">
-            <div class="ts-select-group">
-                <label for="householdSelect" class="ts-select-label">Active Household: </label>
-
-                <TsSelect TValue="Guid?"
-                          Items="householdItems"
-                          @bind-Value="selectedHouseholdId"
-                          OnChange="OnHouseholdChanged"
-                          Placeholder="Choose household" />
-            </div>
-
-            <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
-            <button class="ts-btn ts-edit-btn" @onclick="ShowUserProfile">My Profile</button>
-        </div>
-
         <div class="household-container"> 
             <div class="household-card-container">
                 <h4 class="section-title"> Household Information </h4>
@@ -104,28 +114,28 @@ else
                 </div>
             </div>
         </div>
+    }
 
-        @if (showUserProfileForm && userProfileFormDto != null)
-        {
-            <div class="household-form-container mt-3">
-                <h4 class="section-title">Edit My Profile</h4>
-                <UserProfileForm FormData="userProfileFormDto"
-                                 IsSubmitting="isSubmitting"
-                                 OnSubmit="SaveUserProfile"
-                                 OnCancel="CancelUserProfileEdit" />
+    @if (showUserProfileForm && userProfileFormDto != null)
+    {
+        <div class="household-form-container mt-3">
+            <h4 class="section-title">Edit My Profile</h4>
+            <UserProfileForm FormData="userProfileFormDto"
+                                IsSubmitting="isSubmitting"
+                                OnSubmit="SaveUserProfile"
+                                OnCancel="CancelUserProfileEdit" />
+        </div>
+    }
+    else if (showUserProfileCard && currentUser != null)
+    {
+        <div class="household-container mt-3">
+            <div class="household-card-container">
+                <h4 class="section-title">My Profile</h4>
+                <UserProfileCard User="currentUser"
+                                    OnClose="CloseUserProfile"
+                                    OnEdit="EditUserProfile" />
             </div>
-        }
-        else if (showUserProfileCard && currentUser != null)
-        {
-            <div class="household-container mt-3">
-                <div class="household-card-container">
-                    <h4 class="section-title">My Profile</h4>
-                    <UserProfileCard User="currentUser"
-                                     OnClose="CloseUserProfile"
-                                     OnEdit="EditUserProfile" />
-                </div>
-            </div>
-        }
+        </div>
     }
 }
 
@@ -521,7 +531,7 @@ else
     #endregion User Profile Management
 
     #region Member Invitation
-    
+
     private void AddMember()
     {
         if (selectedHouseholdDto == null)
@@ -532,7 +542,7 @@ else
 
         showInviteModal = true;
     }
-    
+
     private void CloseInviteModal()
     {
         showInviteModal = false;
@@ -604,6 +614,11 @@ else
         {
             errorMessage = $"Error declining invitation: {ex.Message}";
         }
+    }
+
+    private void HideInvitation()
+    {
+        StateHasChanged();
     }
     #endregion Member Invitation
 

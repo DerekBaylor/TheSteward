@@ -19,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddRazorPages();
+
 #region Services & Repositories
 builder.Services.AddScoped<INavigationService, NavigationService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));

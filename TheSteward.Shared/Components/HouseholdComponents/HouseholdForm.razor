@@ -1,10 +1,14 @@
-﻿@namespace TheSteward.Shared.Components
+﻿@namespace TheSteward.Shared.Components.HouseholdComponents
+
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
 @using TheSteward.Shared.Dtos
 
 <div id="householdForm" class="ts-card household-form-card">
-    <div class="card-body">
+    <div class="ts-card-header">
+        <h5 class="ts-card-title">@(IsEditMode ? "Edit Household" : "Create A Household")</h5>
+    </div>
+    <div class="ts-card-body">
         <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
@@ -42,11 +46,8 @@
                 </div>
             </div>
 
-            <div class="button-container">
-                @if (HasDefaultHousehold)
-                {
-                    <button type="button" class="ts-btn ts-cancel-btn ms-2 me-2" @onclick="HandleCancel">Cancel</button>
-                }
+            <div class="ts-card-btn-container">
+                <button type="button" class="ts-btn ts-cancel-btn ms-2 me-2" @onclick="HandleCancel">Cancel</button>
 
                 <button type="submit" class="ts-btn ts-submit-btn" disabled="@IsSubmitting">
                     @if (IsSubmitting)

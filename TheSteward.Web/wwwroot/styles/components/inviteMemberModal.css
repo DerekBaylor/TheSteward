@@ -1,0 +1,35 @@
+
+#inviteMemberModal .modal-dialog {
+    align-items: center;
+    display: flex;
+    margin: -3rem auto 1.75rem auto;
+    min-height: calc(100% - 3.5rem);
+    pointer-events: none;
+}
+
+#inviteMemberModal .ts-modal-content{
+    background-clip: padding-box;
+    background-color: var(--off-white);
+    border: 3px solid var(--purple);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    position: relative;
+    outline: 0;
+    width: 100%;
+}
+
+#inviteMemberModal .ts-modal-header {
+    align-items: center;
+    background-color: var(--purple);
+    color: var(--off-white);
+    display: flex;
+    flex-shrink: 0;
+    justify-content: space-between;
+    padding: 1rem 1rem;
+}
+
+#inviteMemberModal .btn-close {
+    color: red !important;
+}

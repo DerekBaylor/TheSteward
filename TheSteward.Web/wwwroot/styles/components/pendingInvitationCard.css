@@ -1,0 +1,23 @@
+﻿.pending-invitation-card-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pending-invitation-card.ts-card {
+    max-width: 550rem;
+}
+
+
+.pending-invitation-card .ts-card-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.pending-invitation-card .ts-label {
+    min-width: 18rem;
+    flex-shrink: 0;
+    font-weight: bold;
+}

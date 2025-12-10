@@ -44,12 +44,11 @@ public class UserHouseholdDto
     #endregion Permissions
 
     [Required]
-    public required string UserId { get; set; }
+    public string UserId { get; set; }
 
-    [Required]
-    public required ApplicationUser User { get; set; }
+    public ApplicationUser User { get; set; }
 
     public Guid HouseholdId { get; set; }
 
-    public required HouseholdDto Household { get; set; }
+    public HouseholdDto Household { get; set; }
 }

@@ -1,5 +1,4 @@
-﻿// Helpers/TestDataBuilders/HouseholdDtoBuilder.cs
-using TheSteward.Core.Dtos.HouseholdDtos;
+﻿using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.Models;
 
 namespace TheSteward.Tests.Helpers.TestDataBuilders;

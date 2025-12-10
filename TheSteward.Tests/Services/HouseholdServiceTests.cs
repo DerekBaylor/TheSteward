@@ -29,7 +29,6 @@ public class HouseholdServiceTests
         _mockUserHouseholdService = new Mock<IUserHouseholdService>();
         _mockMapper = new Mock<IMapper>();
 
-        // UserManager requires a lot of dependencies, so we need to mock it carefully
         var userStore = new Mock<IUserStore<ApplicationUser>>();
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
             userStore.Object, null, null, null, null, null, null, null, null);

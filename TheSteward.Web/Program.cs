@@ -12,6 +12,7 @@ using TheSteward.Shared.Interfaces;
 using TheSteward.Shared.Services;
 using TheSteward.Web.Components;
 using TheSteward.Web.Components.Account;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRazorPages();
+builder.Services.AddMudServices();
 
 #region Services & Repositories
 builder.Services.AddScoped<INavigationService, NavigationService>();

@@ -4,29 +4,37 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @using TheSteward.Shared.Components.DashboardComponets
+@using Microsoft.AspNetCore.Components.Web
+@rendermode @(new InteractiveServerRenderMode())
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Home</PageTitle>
+@if(isLoading)
+{
+    <p><em>Loading...</em></p>
+} 
+else
+{    
+    <AuthorizeView>
+        <Authorized>
+            <Dashboard />
+        </Authorized>
 
-<AuthorizeView>
-    <Authorized>
-        <Dashboard />
-    </Authorized>
-
-    <NotAuthorized>
-        <LandingPage />
-    </NotAuthorized>
-</AuthorizeView>
+        <NotAuthorized>
+            <LandingPage />
+        </NotAuthorized>
+    </AuthorizeView>
+}
 
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="alert alert-danger mt-3" role="alert">
+    <MudAlert Severity="Severity.Error" Class="mt-3">
         @errorMessage
-    </div>
+    </MudAlert>
 }
 
 @code {

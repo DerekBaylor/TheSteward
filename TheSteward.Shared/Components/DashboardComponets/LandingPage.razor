@@ -1,4 +1,4 @@
-﻿@namespace TheSteward.Shared.Components.DashboardComponets
+﻿@* @namespace TheSteward.Shared.Components.DashboardComponets
 @inject NavigationManager NavigationManager
 
 <div class="landing-container text-center mt-5">
@@ -16,4 +16,44 @@
     private void GoToLogin() => NavigationManager.NavigateTo("Account/Login", forceLoad: true);
     private void GoToRegister() => NavigationManager.NavigateTo("Account/Register", forceLoad: true);
 
+} *@
+
+
+@namespace TheSteward.Shared.Components.DashboardComponets
+@inject NavigationManager NavigationManager
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudPaper Elevation="0" Class="pa-8 text-center">
+        <MudText Typo="Typo.h2" Class="mb-4" Color="Color.Primary">
+            Welcome to The Steward
+        </MudText>
+        
+        <MudText Typo="Typo.h5" Class="mb-2">
+            Your complete household management companion.
+        </MudText>
+        
+        <MudText Typo="Typo.body1" Class="mb-6" Color="Color.Secondary">
+            Take control of your home management with tasks, calendars, and meal planning—all in one place.
+        </MudText>
+        
+        <MudStack Row Justify="Justify.Center" Spacing="3" Class="mt-6">
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       Size="Size.Large"
+                       OnClick="GoToLogin">
+                Sign In
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" 
+                       Color="Color.Primary" 
+                       Size="Size.Large"
+                       OnClick="GoToRegister">
+                Register
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private void GoToLogin() => NavigationManager.NavigateTo("Account/Login", forceLoad: true);
+    private void GoToRegister() => NavigationManager.NavigateTo("Account/Register", forceLoad: true);
 }

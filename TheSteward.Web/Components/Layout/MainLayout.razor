@@ -1,10 +1,14 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @inject INavigationService NavigationService
 
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
 <div class="app-container">
     <SidebarNav />
-
     <div class="main-content">
         @Body
     </div>

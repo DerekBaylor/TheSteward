@@ -24,9 +24,9 @@
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="alert alert-danger mt-3" role="alert">
+    <MudAlert Severity="Severity.Error" Class="mt-3">
         @errorMessage
-    </div>
+    </MudAlert>
 }
 
 @code {

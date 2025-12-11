@@ -25,6 +25,7 @@
 		<PackageVersion Include="Microsoft.AspNetCore.Components" />
 		<PackageVersion Include="Microsoft.AspNetCore.Components.Web" />
 		<PackageReference Include="AutoMapper" />
+		<PackageReference Include="MudBlazor" />
 	</ItemGroup>
 
 	<ItemGroup>

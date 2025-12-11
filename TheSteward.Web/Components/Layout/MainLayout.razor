@@ -7,12 +7,21 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<div class="app-container">
+@* <div class="app-container">
     <SidebarNav />
     <div class="main-content">
         @Body
     </div>
-</div>
+</div> *@
+
+<MudLayout class="app-container">
+    <MudDrawer Open="true">
+        <SidebarNav />
+    </MudDrawer>
+    <MudMainContent class="main-content">
+        @Body
+    </MudMainContent>
+</MudLayout>
 
 @code {
     protected override void OnInitialized()

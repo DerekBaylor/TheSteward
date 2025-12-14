@@ -1,6 +1,7 @@
 /*-------*/
 /* Pages */
 /*-------*/
+@import url('./styles/pages/login.css');
 @import url('./styles/pages/household.css');
 
 /*------------*/
@@ -87,16 +88,22 @@ body {
     margin: 0;
 }
 
+
+
 .app-container {
     display: flex;
     min-height: 100vh;
+}
+
+.mud-main-content {
+    padding: 0;
+    padding-top: 0 !important;
 }
 
 .main-content {
     flex: 1;
     margin-left: 200px;
     transition: margin-left 0.3s ease;
-    padding: 2rem;
 }
 
 h1, h2, h3, h4, h5, h6 {

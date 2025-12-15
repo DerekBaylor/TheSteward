@@ -16,32 +16,34 @@
 
 :root {
     /* New Theme */
-    /* Base hues for each primary color */
+    --hue-red: 25;
+    --hue-orange: 55;
+    --hue-yellow: 95;
     --hue-green: 144;
-    --hue-blue: 240;
-    --hue-yellow: 90;
-    --hue-purple: 310;
-    --hue-red: 30;
-    /* Lightness and chroma steps (shared across all colors) */
-    --l-1: 99%;
-    --c-1: .02;
-    --l-2: 95%;
-    --c-2: .05;
+    --hue-blue: 235;
+    --hue-purple: 330;
+    /* Shared lightness steps */
+    --l-1: 98%;
+    --l-2: 92%;
     --l-3: 85%;
-    --c-3: .10;
     --l-4: 75%;
-    --c-4: .15;
     --l-5: 65%;
-    --c-5: .18;
     --l-6: 55%;
-    --c-6: .20;
     --l-7: 45%;
-    --c-7: .18;
     --l-8: 35%;
-    --c-8: .15;
     --l-9: 25%;
-    --c-9: .10;
-    --l-10: 15%;
+    --l-10: 18%;
+    /* Chroma calibrated to match red's vibrancy */
+    --c-1: .04;
+    --c-2: .08;
+    --c-3: .14;
+    --c-4: .19;
+    --c-5: .24;
+    --c-6: .26; /* Peak chroma - matches pure red */
+    --c-7: .24;
+    --c-8: .19;
+    --c-9: .14;
+    --c-10: .08;
     --c-10: .05;
     /* Active palette (switch by changing this one variable) */
     --hue: var(--hue-green);
@@ -57,13 +59,16 @@
     --swatch-9: oklch(var(--l-9) var(--c-9) var(--hue));
     --swatch-10: oklch(var(--l-10) var(--c-10) var(--hue));
     /* Neutrals */
-    --gray-1: oklch(98% .005 var(--hue));
-    --gray-2: oklch(90% .01 var(--hue));
-    --gray-3: oklch(70% .015 var(--hue));
-    --gray-4: oklch(50% .015 var(--hue));
-    --gray-5: oklch(30% .01 var(--hue));
-    --gray-6: oklch(15% .005 var(--hue));
-
+    --gray-1: oklch(98% .005 var(--hue)); /* Nearly white */
+    --gray-2: oklch(93% .008 var(--hue));
+    --gray-3: oklch(85% .010 var(--hue));
+    --gray-4: oklch(75% .012 var(--hue));
+    --gray-5: oklch(65% .013 var(--hue));
+    --gray-6: oklch(55% .013 var(--hue)); /* Mid gray */
+    --gray-7: oklch(45% .012 var(--hue));
+    --gray-8: oklch(35% .010 var(--hue));
+    --gray-9: oklch(25% .008 var(--hue));
+    --gray-10: oklch(15% .005 var(--hue)); /* Nearly black */
     /* Primary Colors */
     --brightly-green: rgba(72, 255, 155, 1);
     --skys-the-limit: rgba(23, 188, 190, 1);
@@ -138,25 +143,36 @@ body {
     margin: 0;
 }
 
+.theme-red {
+    --hue: var(--hue-red);
+}
+.theme-orange {
+    --hue: var(--hue-orange);
+}
+.theme-yellow {
+    --hue: var(--hue-yellow);
+    --c-1: .04;
+    --c-2: .08;
+    --c-3: .14;
+    --c-4: .19;
+    --c-5: .24;
+    --c-6: .26;
+    --c-7: .24;
+    --c-8: .19;
+    --c-9: .14;
+    --c-10: .08;
+}
 .theme-green {
     --hue: var(--hue-green);
 }
-
 .theme-blue {
     --hue: var(--hue-blue);
 }
-
-.theme-yellow {
-    --hue: var(--hue-yellow);
-}
-
 .theme-purple {
     --hue: var(--hue-purple);
 }
 
-.theme-red {
-    --hue: var(--hue-red);
-}
+
 
 
 
@@ -238,4 +254,86 @@ h1, h2, h3, h4, h5, h6 {
 .card.border-tranisition {
     border: 3px solid;
     border-image: linear-gradient( to right, var(--light-green), var(--yellow-green) ) 1;
+}
+
+
+.gray-1 {
+    background-color: var(--gray-1);
+}
+
+.gray-2 {
+    background-color: var(--gray-2);
+}
+
+.gray-3 {
+    background-color: var(--gray-3);
+}
+
+.gray-4 {
+    background-color: var(--gray-4);
+}
+
+.gray-5 {
+    background-color: var(--gray-5);
+}
+
+.gray-6 {
+    background-color: var(--gray-6);
+}
+
+.gray-7 {
+    background-color: var(--gray-7);
+}
+
+.gray-8 {
+    background-color: var(--gray-8);
+}
+
+.gray-9 {
+    background-color: var(--gray-9);
+}
+
+.gray-10 {
+    background-color: var(--gray-10);
+}
+
+
+.swatch-1 {
+    background-color: oklch(var(--l-1) var(--c-1) var(--hue));
+}
+
+.swatch-2 {
+    background-color: oklch(var(--l-2) var(--c-2) var(--hue));
+}
+
+.swatch-3 {
+    background-color: oklch(var(--l-3) var(--c-3) var(--hue));
+}
+
+.swatch-4 {
+    background-color: oklch(var(--l-4) var(--c-4) var(--hue));
+}
+
+.swatch-5 {
+    background-color: oklch(var(--l-5) var(--c-5) var(--hue));
+}
+
+.swatch-6 {
+    background-color: oklch(var(--l-6) var(--c-6) var(--hue));
+}
+
+.swatch-7 {
+    background-color: oklch(var(--l-7) var(--c-7) var(--hue));
+}
+
+.swatch-8 {
+    background-color: oklch(var(--l-8) var(--c-8) var(--hue));
+}
+
+.swatch-9 {
+    background-color: oklch(var(--l-9) var(--c-9) var(--hue));
+}
+
+.swatch-10 {
+    background-color: oklch(var(--l-10) var(--c-10) var(--hue));
 }

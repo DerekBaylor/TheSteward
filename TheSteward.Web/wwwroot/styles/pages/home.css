@@ -1,0 +1,60 @@
+﻿.color-test {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    margin: 2rem;
+    gap: 1rem;
+}
+
+.color-swatch {
+    height: 4rem;
+    width: 4rem;
+}
+
+.swatch-group {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.swatch-1 {
+    background-color: oklch(var(--l-1) var(--c-1) var(--hue));
+}
+
+.swatch-2 {
+    background-color: oklch(var(--l-2) var(--c-2) var(--hue));
+}
+
+.swatch-3 {
+    background-color: oklch(var(--l-3) var(--c-3) var(--hue));
+}
+
+.swatch-4 {
+    background-color: oklch(var(--l-4) var(--c-4) var(--hue));
+}
+
+.swatch-5 {
+    background-color: oklch(var(--l-5) var(--c-5) var(--hue));
+}
+
+.swatch-6 {
+    background-color: oklch(var(--l-6) var(--c-6) var(--hue));
+}
+
+.swatch-7 {
+    background-color: oklch(var(--l-7) var(--c-7) var(--hue));
+}
+
+.swatch-8 {
+    background-color: oklch(var(--l-8) var(--c-8) var(--hue));
+}
+
+.swatch-9 {
+    background-color: oklch(var(--l-9) var(--c-9) var(--hue));
+}
+
+.swatch-10 {
+    background-color: oklch(var(--l-10) var(--c-10) var(--hue));
+}

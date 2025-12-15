@@ -2,6 +2,7 @@
 /* Pages */
 /*-------*/
 @import url('./styles/pages/login.css');
+@import url('./styles/pages/home.css');
 @import url('./styles/pages/household.css');
 
 /*------------*/
@@ -14,6 +15,55 @@
 @import url("./styles/components/pendingInvitationCard.css");
 
 :root {
+    /* New Theme */
+    /* Base hues for each primary color */
+    --hue-green: 144;
+    --hue-blue: 240;
+    --hue-yellow: 90;
+    --hue-purple: 310;
+    --hue-red: 30;
+    /* Lightness and chroma steps (shared across all colors) */
+    --l-1: 99%;
+    --c-1: .02;
+    --l-2: 95%;
+    --c-2: .05;
+    --l-3: 85%;
+    --c-3: .10;
+    --l-4: 75%;
+    --c-4: .15;
+    --l-5: 65%;
+    --c-5: .18;
+    --l-6: 55%;
+    --c-6: .20;
+    --l-7: 45%;
+    --c-7: .18;
+    --l-8: 35%;
+    --c-8: .15;
+    --l-9: 25%;
+    --c-9: .10;
+    --l-10: 15%;
+    --c-10: .05;
+    /* Active palette (switch by changing this one variable) */
+    --hue: var(--hue-green);
+    /* Generated swatches */
+    --swatch-1: oklch(var(--l-1) var(--c-1) var(--hue));
+    --swatch-2: oklch(var(--l-2) var(--c-2) var(--hue));
+    --swatch-3: oklch(var(--l-3) var(--c-3) var(--hue));
+    --swatch-4: oklch(var(--l-4) var(--c-4) var(--hue));
+    --swatch-5: oklch(var(--l-5) var(--c-5) var(--hue));
+    --swatch-6: oklch(var(--l-6) var(--c-6) var(--hue));
+    --swatch-7: oklch(var(--l-7) var(--c-7) var(--hue));
+    --swatch-8: oklch(var(--l-8) var(--c-8) var(--hue));
+    --swatch-9: oklch(var(--l-9) var(--c-9) var(--hue));
+    --swatch-10: oklch(var(--l-10) var(--c-10) var(--hue));
+    /* Neutrals */
+    --gray-1: oklch(98% .005 var(--hue));
+    --gray-2: oklch(90% .01 var(--hue));
+    --gray-3: oklch(70% .015 var(--hue));
+    --gray-4: oklch(50% .015 var(--hue));
+    --gray-5: oklch(30% .01 var(--hue));
+    --gray-6: oklch(15% .005 var(--hue));
+
     /* Primary Colors */
     --brightly-green: rgba(72, 255, 155, 1);
     --skys-the-limit: rgba(23, 188, 190, 1);
@@ -86,6 +136,26 @@
 body {
     font-family: var(--primary-font);
     margin: 0;
+}
+
+.theme-green {
+    --hue: var(--hue-green);
+}
+
+.theme-blue {
+    --hue: var(--hue-blue);
+}
+
+.theme-yellow {
+    --hue: var(--hue-yellow);
+}
+
+.theme-purple {
+    --hue: var(--hue-purple);
+}
+
+.theme-red {
+    --hue: var(--hue-red);
 }
 
 

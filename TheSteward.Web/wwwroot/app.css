@@ -70,60 +70,103 @@
     --gray-9: oklch(25% .008 var(--hue));
     --gray-10: oklch(15% .005 var(--hue)); /* Nearly black */
     /* Primary Colors */
-    --brightly-green: rgba(72, 255, 155, 1);
-    --skys-the-limit: rgba(23, 188, 190, 1);
+    /*--brightly-green: rgba(72, 255, 155, 1);
+    --skys-the-limit: rgba(23, 188, 190, 1);*/
     /* Secondary Colors */
-    --white: rgba(255, 255, 255, 1);
+    /*--white: rgba(255, 255, 255, 1);
     --teals-the-deal: rgba(1, 125, 128, 1);
     --orange: rgba(252, 152, 126, 1);
     --pink: rgba(255, 168, 190, 1);
-    --violet: rgba(192, 200, 254, 1);
+    --violet: rgba(192, 200, 254, 1);*/
     /* ----- */
     /* Fonts */
     /* ----- */
     --title-font: 'Title-Font', sans-serif;
     --primary-font: 'Primary-Font', sans-serif;
     --label-font: 'Label-Font', sans-serif;
-    /* ------ */
-    /* Colors */
-    /* ------ */
-    --off-white: #F8F9FA;
+    /* ---------------------------------------- */
+    /*                Colors                    */
+    /* ---------------------------------------- */
+    /* White / Gray */
+    --gray-1: oklch(98% .005 var(--hue)); /* Nearly white */
+    --gray-2: oklch(93% .008 var(--hue));
+    --gray-3: oklch(85% .010 var(--hue));
+    --gray-4: oklch(75% .012 var(--hue));
+    --gray-5: oklch(65% .013 var(--hue));
+    --gray-6: oklch(55% .013 var(--hue));
+    --gray-7: oklch(45% .012 var(--hue));
+    --gray-8: oklch(35% .010 var(--hue));
+    --gray-9: oklch(25% .008 var(--hue));
+    --gray-10: oklch(15% .005 var(--hue)); /* Nearly black */
+    --off-white: var(--gray-1);
     --white: rgb(255, 255, 255);
-    /* ------ */
-    --darkest-green: rgba(30, 105, 43, 1);
-    --dark-green: rgba(37, 125, 51, 1);
-    --green: rgba(5, 139, 28, 1);
-    --light-green: rgb(50, 204, 59);
-    /* ------ */
-    --dark-blue: rgba(0, 51, 88, 1);
-    --blue: rgba(0, 51, 88, 1);
-    --light-blue: rgb(31, 255, 255);
-    /* ------ */
-    --light-gray: rgba(235,235, 235, 1);
-    --dark-gray: rgb(48, 48, 48);
-    --dark-gray-25: rgba(48, 48, 48, .25);
-    --dark-gray-hover: rgba(38, 38, 38, 1);
-    --dark-gray-active: rgba(18, 18, 18, 1);
-    --shadow: rgba(10, 10, 10, 1);
-    /* ------ */
-    --darkest-orange: rgba(168, 105, 36, 1);
-    --dark-orange: rgba(188, 118, 40, 1);
-    --light-orange: rgba(235, 149, 52, 1);
-    /* ------ */
-    --dark-red: rgb(120, 0, 0);
-    --red: rgb(255, 0, 0);
-    /* ------ */
-    --yellow-green: rgb(148,200,2);
-    /* ------ */
-    --yellow: rgba(255, 239, 112, 1);
-    --dark-yellow-1: rgba(230, 210, 90, 1);
-    --dark-yellow-2: rgba(200, 180, 70, 1);
-    --dark-yellow-3: rgba(180, 150, 50, 1);
-    --dark-yellow-4: rgba(160, 130, 40, 1);
-    /* ------ */
-    --purple: rgba(140, 0, 152, 1);
-    --dark-purple: rgba(85, 0, 92, 1);
-    --light-purple: rgba(198, 87, 207, 1);
+    /*     Red        */
+    --red-1: oklch(98% .005 var(--hue-red));
+    --red-2: oklch(93% .008 var(--hue-red));
+    --red-3: oklch(85% .010 var(--hue-red));
+    --red-4: oklch(75% .012 var(--hue-red));
+    --red-5: oklch(65% .013 var(--hue-red));
+    --red-6: oklch(55% .013 var(--hue-red));
+    --red-7: oklch(45% .012 var(--hue-red));
+    --red-8: oklch(35% .010 var(--hue-red));
+    --red-9: oklch(25% .008 var(--hue-red));
+    --red-10: oklch(15% .005 var(--hue-red));
+    /*     Orange     */
+    --orange-1: oklch(98% .005 var(--hue-orange));
+    --orange-2: oklch(93% .008 var(--hue-orange));
+    --orange-3: oklch(85% .010 var(--hue-orange));
+    --orange-4: oklch(75% .012 var(--hue-orange));
+    --orange-5: oklch(65% .013 var(--hue-orange));
+    --orange-6: oklch(55% .013 var(--hue-orange));
+    --orange-7: oklch(45% .012 var(--hue-orange));
+    --orange-8: oklch(35% .010 var(--hue-orange));
+    --orange-9: oklch(25% .008 var(--hue-orange));
+    --orange-10: oklch(15% .005 var(--hue-orange));
+    /*     Yellow     */
+    --yellow-1: oklch(98% .005 var(--hue-yellow));
+    --yellow-2: oklch(93% .008 var(--hue-yellow));
+    --yellow-3: oklch(85% .010 var(--hue-yellow));
+    --yellow-4: oklch(75% .012 var(--hue-yellow));
+    --yellow-5: oklch(65% .013 var(--hue-yellow));
+    --yellow-6: oklch(55% .013 var(--hue-yellow));
+    --yellow-7: oklch(45% .012 var(--hue-yellow));
+    --yellow-8: oklch(35% .010 var(--hue-yellow));
+    --yellow-9: oklch(25% .008 var(--hue-yellow));
+    --yellow-10: oklch(15% .005 var(--hue-yellow));
+    /*     Green      */
+    --green-1: oklch(98% .005 var(--hue-green));
+    --green-2: oklch(93% .008 var(--hue-green));
+    --green-3: oklch(85% .010 var(--hue-green));
+    --green-4: oklch(75% .012 var(--hue-green));
+    --green-5: oklch(65% .013 var(--hue-green));
+    --green-6: oklch(55% .013 var(--hue-green));
+    --green-7: oklch(45% .012 var(--hue-green));
+    --green-8: oklch(35% .010 var(--hue-green));
+    --green-9: oklch(25% .008 var(--hue-green));
+    --green-10: oklch(15% .005 var(--hue-green));
+    /*     Blue       */
+    --blue-1: oklch(98% .005 var(--hue-blue));
+    --blue-2: oklch(93% .008 var(--hue-blue));
+    --blue-3: oklch(85% .010 var(--hue-blue));
+    --blue-4: oklch(75% .012 var(--hue-blue));
+    --blue-5: oklch(65% .013 var(--hue-blue));
+    --blue-6: oklch(55% .013 var(--hue-blue));
+    --blue-7: oklch(45% .012 var(--hue-blue));
+    --blue-8: oklch(35% .010 var(--hue-blue));
+    --blue-9: oklch(25% .008 var(--hue-blue));
+    --blue-10: oklch(15% .005 var(--hue-blue));
+    --dark-blue: oklch(0.2471 0.1683 265.06);
+    /*     Purple     */
+    --purple-1: oklch(98% .005 var(--hue-purple));
+    --purple-2: oklch(93% .008 var(--hue-purple));
+    --purple-3: oklch(85% .010 var(--hue-purple));
+    --purple-4: oklch(75% .012 var(--hue-purple));
+    --purple-5: oklch(65% .013 var(--hue-purple));
+    --purple-6: oklch(55% .013 var(--hue-purple));
+    --purple-7: oklch(45% .012 var(--hue-purple));
+    --purple-8: oklch(35% .010 var(--hue-purple));
+    --purple-9: oklch(25% .008 var(--hue-purple));
+    --purple-10: oklch(15% .005 var(--hue-purple));
     /* ------ */
     --border-color: var(--dark-gray-25);
     --border-radius: .5rem;
@@ -151,16 +194,6 @@ body {
 }
 .theme-yellow {
     --hue: var(--hue-yellow);
-    --c-1: .04;
-    --c-2: .08;
-    --c-3: .14;
-    --c-4: .19;
-    --c-5: .24;
-    --c-6: .26;
-    --c-7: .24;
-    --c-8: .19;
-    --c-9: .14;
-    --c-10: .08;
 }
 .theme-green {
     --hue: var(--hue-green);

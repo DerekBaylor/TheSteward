@@ -17,12 +17,12 @@
 :root {
     /* New Theme */
     --hue-red: 25;
-    --hue-orange: 55;
-    --hue-yellow: 95;
-    --hue-green: 144;
-    --hue-blue: 235;
-    --hue-purple: 330;
-    /* Shared lightness steps */
+    --hue-orange: 35;
+    --hue-yellow: 90;
+    --hue-green: 142;
+    --hue-blue: 264;
+    --hue-purple: 295;
+    /* Lightness steps */
     --l-1: 98%;
     --l-2: 92%;
     --l-3: 85%;
@@ -33,13 +33,13 @@
     --l-8: 35%;
     --l-9: 25%;
     --l-10: 18%;
-    /* Chroma calibrated to match red's vibrancy */
+    /* Chroma */
     --c-1: .04;
     --c-2: .08;
     --c-3: .14;
     --c-4: .19;
     --c-5: .24;
-    --c-6: .26; /* Peak chroma - matches pure red */
+    --c-6: .26; /* Peak chroma */
     --c-7: .24;
     --c-8: .19;
     --c-9: .14;
@@ -58,26 +58,6 @@
     --swatch-8: oklch(var(--l-8) var(--c-8) var(--hue));
     --swatch-9: oklch(var(--l-9) var(--c-9) var(--hue));
     --swatch-10: oklch(var(--l-10) var(--c-10) var(--hue));
-    /* Neutrals */
-    --gray-1: oklch(98% .005 var(--hue)); /* Nearly white */
-    --gray-2: oklch(93% .008 var(--hue));
-    --gray-3: oklch(85% .010 var(--hue));
-    --gray-4: oklch(75% .012 var(--hue));
-    --gray-5: oklch(65% .013 var(--hue));
-    --gray-6: oklch(55% .013 var(--hue)); /* Mid gray */
-    --gray-7: oklch(45% .012 var(--hue));
-    --gray-8: oklch(35% .010 var(--hue));
-    --gray-9: oklch(25% .008 var(--hue));
-    --gray-10: oklch(15% .005 var(--hue)); /* Nearly black */
-    /* Primary Colors */
-    /*--brightly-green: rgba(72, 255, 155, 1);
-    --skys-the-limit: rgba(23, 188, 190, 1);*/
-    /* Secondary Colors */
-    /*--white: rgba(255, 255, 255, 1);
-    --teals-the-deal: rgba(1, 125, 128, 1);
-    --orange: rgba(252, 152, 126, 1);
-    --pink: rgba(255, 168, 190, 1);
-    --violet: rgba(192, 200, 254, 1);*/
     /* ----- */
     /* Fonts */
     /* ----- */
@@ -134,39 +114,39 @@
     --yellow-9: oklch(25% .008 var(--hue-yellow));
     --yellow-10: oklch(15% .005 var(--hue-yellow));
     /*     Green      */
-    --green-1: oklch(98% .005 var(--hue-green));
-    --green-2: oklch(93% .008 var(--hue-green));
-    --green-3: oklch(85% .010 var(--hue-green));
-    --green-4: oklch(75% .012 var(--hue-green));
-    --green-5: oklch(65% .013 var(--hue-green));
-    --green-6: oklch(55% .013 var(--hue-green));
-    --green-7: oklch(45% .012 var(--hue-green));
-    --green-8: oklch(35% .010 var(--hue-green));
-    --green-9: oklch(25% .008 var(--hue-green));
-    --green-10: oklch(15% .005 var(--hue-green));
+    --green-1: oklch(.99 .16 var(--hue-green));
+    --green-2: oklch(.90 .16 var(--hue-green));
+    --green-3: oklch(.85 .16 var(--hue-green));
+    --green-4: oklch(.80 .26 var(--hue-green));
+    --green-5: oklch(.77 .26 var(--hue-green));
+    --green-6: oklch(.55 .26 var(--hue-green));
+    --green-7: oklch(.45 .26 var(--hue-green));
+    --green-8: oklch(.35 .26 var(--hue-green));
+    --green-9: oklch(.30 .26 var(--hue-green));
+    --green-10: oklch(.25 .26 var(--hue-green));
     /*     Blue       */
-    --blue-1: oklch(98% .005 var(--hue-blue));
-    --blue-2: oklch(93% .008 var(--hue-blue));
-    --blue-3: oklch(85% .010 var(--hue-blue));
-    --blue-4: oklch(75% .012 var(--hue-blue));
-    --blue-5: oklch(65% .013 var(--hue-blue));
-    --blue-6: oklch(55% .013 var(--hue-blue));
-    --blue-7: oklch(45% .012 var(--hue-blue));
-    --blue-8: oklch(35% .010 var(--hue-blue));
-    --blue-9: oklch(25% .008 var(--hue-blue));
-    --blue-10: oklch(15% .005 var(--hue-blue));
-    --dark-blue: oklch(0.2471 0.1683 265.06);
+    --blue-1: oklch(.90 .16 var(--hue-blue));
+    --blue-2: oklch(.80 .16 var(--hue-blue));
+    --blue-3: oklch(.70 .16 var(--hue-blue));
+    --blue-4: oklch(.60 .26 var(--hue-blue));
+    --blue-5: oklch(.50 .26 var(--hue-blue));
+    --blue-6: oklch(.35 .26 var(--hue-blue));
+    --blue-7: oklch(.30 .26 var(--hue-blue));
+    --blue-8: oklch(.25 .26 var(--hue-blue));
+    --blue-9: oklch(.20 .26 var(--hue-blue));
+    --blue-10: oklch(.15 .26 var(--hue-blue));
+    --dark-blue: var(--blue-8);
     /*     Purple     */
-    --purple-1: oklch(98% .005 var(--hue-purple));
-    --purple-2: oklch(93% .008 var(--hue-purple));
-    --purple-3: oklch(85% .010 var(--hue-purple));
-    --purple-4: oklch(75% .012 var(--hue-purple));
-    --purple-5: oklch(65% .013 var(--hue-purple));
-    --purple-6: oklch(55% .013 var(--hue-purple));
-    --purple-7: oklch(45% .012 var(--hue-purple));
-    --purple-8: oklch(35% .010 var(--hue-purple));
-    --purple-9: oklch(25% .008 var(--hue-purple));
-    --purple-10: oklch(15% .005 var(--hue-purple));
+    --purple-1: oklch(.90 .16 var(--hue-purple));
+    --purple-2: oklch(.80 .16 var(--hue-purple));
+    --purple-3: oklch(.70 .16 var(--hue-purple));
+    --purple-4: oklch(.60 .26 var(--hue-purple));
+    --purple-5: oklch(.50 .26 var(--hue-purple));
+    --purple-6: oklch(.35 .26 var(--hue-purple));
+    --purple-7: oklch(.30 .26 var(--hue-purple));
+    --purple-8: oklch(.25 .26 var(--hue-purple));
+    --purple-9: oklch(.20 .26 var(--hue-purple));
+    --purple-10: oklch(.15 .26 var(--hue-purple));
     /* ------ */
     --border-color: var(--dark-gray-25);
     --border-radius: .5rem;
@@ -179,6 +159,7 @@
     --button-background-green: rgb(32, 178, 170);
     --button-background-hover-green: rgb(0, 85, 143);
     --font-weight-med: 600;
+    --green-gradient: linear-gradient( var(--green-7), var(--green-7), var(--green-6), var(--green-5), var(--green-4));
 }
 
 body {
@@ -205,7 +186,21 @@ body {
     --hue: var(--hue-purple);
 }
 
-
+.p-green {
+    background-color: oklch(.77 .26 142);
+}
+.p-blue {
+    background-color: oklch(.35 .26 264);
+}
+.p-yellow {
+    background-color: oklch(.77 .26 90);
+}
+.p-purple {
+    background-color: oklch(.37 .26 295);
+}
+.p-orange {
+    background-color: oklch(.77 .26 35);
+}
 
 
 

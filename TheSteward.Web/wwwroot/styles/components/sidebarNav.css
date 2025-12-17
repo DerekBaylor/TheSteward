@@ -2,7 +2,7 @@
     min-width: 200px;
     width: 200px;
     min-height: 100vh;
-    background-image: linear-gradient( var(--swatch-7), var(--swatch-7), var(--swatch-6), var(--swatch-5), var(--swatch-4));
+    background-image: var(--green-gradient);
     display: flex;
     flex-direction: column;
     align-items: center;

@@ -2,6 +2,7 @@
 /* Pages */
 /*-------*/
 @import url('./styles/pages/login.css');
+@import url('./styles/pages/home.css');
 @import url('./styles/pages/household.css');
 
 /*------------*/
@@ -14,61 +15,103 @@
 @import url("./styles/components/pendingInvitationCard.css");
 
 :root {
-    /* Primary Colors */
-    --brightly-green: rgba(72, 255, 155, 1);
-    --skys-the-limit: rgba(23, 188, 190, 1);
-    /* Secondary Colors */
-    --white: rgba(255, 255, 255, 1);
-    --teals-the-deal: rgba(1, 125, 128, 1);
-    --orange: rgba(252, 152, 126, 1);
-    --pink: rgba(255, 168, 190, 1);
-    --violet: rgba(192, 200, 254, 1);
     /* ----- */
     /* Fonts */
     /* ----- */
     --title-font: 'Title-Font', sans-serif;
     --primary-font: 'Primary-Font', sans-serif;
     --label-font: 'Label-Font', sans-serif;
-    /* ------ */
-    /* Colors */
-    /* ------ */
-    --off-white: #F8F9FA;
-    --white: rgb(255, 255, 255);
-    /* ------ */
-    --darkest-green: rgba(30, 105, 43, 1);
-    --dark-green: rgba(37, 125, 51, 1);
-    --green: rgba(5, 139, 28, 1);
-    --light-green: rgb(50, 204, 59);
-    /* ------ */
-    --dark-blue: rgba(0, 51, 88, 1);
-    --blue: rgba(0, 51, 88, 1);
-    --light-blue: rgb(31, 255, 255);
-    /* ------ */
-    --light-gray: rgba(235,235, 235, 1);
-    --dark-gray: rgb(48, 48, 48);
-    --dark-gray-25: rgba(48, 48, 48, .25);
-    --dark-gray-hover: rgba(38, 38, 38, 1);
-    --dark-gray-active: rgba(18, 18, 18, 1);
-    --shadow: rgba(10, 10, 10, 1);
-    /* ------ */
-    --darkest-orange: rgba(168, 105, 36, 1);
-    --dark-orange: rgba(188, 118, 40, 1);
-    --light-orange: rgba(235, 149, 52, 1);
-    /* ------ */
-    --dark-red: rgb(120, 0, 0);
-    --red: rgb(255, 0, 0);
-    /* ------ */
-    --yellow-green: rgb(148,200,2);
-    /* ------ */
-    --yellow: rgba(255, 239, 112, 1);
-    --dark-yellow-1: rgba(230, 210, 90, 1);
-    --dark-yellow-2: rgba(200, 180, 70, 1);
-    --dark-yellow-3: rgba(180, 150, 50, 1);
-    --dark-yellow-4: rgba(160, 130, 40, 1);
-    /* ------ */
-    --purple: rgba(140, 0, 152, 1);
-    --dark-purple: rgba(85, 0, 92, 1);
-    --light-purple: rgba(198, 87, 207, 1);
+    /* ---------------------------------------- */
+    /*                Colors                    */
+    /* ---------------------------------------- */
+    /*     Gray       */
+    --base-gray: hsl(0 0% 50%);
+    --gray-1: hsl(from var(--base-gray) h s 95%);
+    --gray-2: hsl(from var(--base-gray) h s 85%);
+    --gray-3: hsl(from var(--base-gray) h s 75%);
+    --gray-4: hsl(from var(--base-gray) h s 65%);
+    --gray-5: hsl(from var(--base-gray) h s 55%);
+    --gray-6: hsl(from var(--base-gray) h s 45%);
+    --gray-7: hsl(from var(--base-gray) h s 35%);
+    --gray-8: hsl(from var(--base-gray) h s 25%);
+    --gray-9: hsl(from var(--base-gray) h s 15%);
+    --gray-10: hsl(from var(--base-gray) h s 5%);
+    /*     White       */
+    --off-white: hsl(from var(--base-gray) h s 98%);
+    --white: hsl(1 0 0);
+    /*     Red     */
+    --base-red: hsl(354.19 100% 50%);
+    --red-1: hsl(from var(--base-red) h s 95%);
+    --red-2: hsl(from var(--base-red) h s 85%);
+    --red-3: hsl(from var(--base-red) h s 75%);
+    --red-4: hsl(from var(--base-red) h s 65%);
+    --red-5: hsl(from var(--base-red) h s 55%);
+    --red-6: hsl(from var(--base-red) h s 45%);
+    --red-7: hsl(from var(--base-red) h s 35%);
+    --red-8: hsl(from var(--base-red) h s 25%);
+    --red-9: hsl(from var(--base-red) h s 15%);
+    --red-10: hsl(from var(--base-red) h s 5%);
+    /*     Orange     */
+    --base-orange: hsl(14.96 100% 50%);
+    --orange-1: hsl(from var(--base-orange) h s 95%);
+    --orange-2: hsl(from var(--base-orange) h s 85%);
+    --orange-3: hsl(from var(--base-orange) h s 75%);
+    --orange-4: hsl(from var(--base-orange) h s 65%);
+    --orange-5: hsl(from var(--base-orange) h s 55%);
+    --orange-6: hsl(from var(--base-orange) h s 45%);
+    --orange-7: hsl(from var(--base-orange) h s 35%);
+    --orange-8: hsl(from var(--base-orange) h s 25%);
+    --orange-9: hsl(from var(--base-orange) h s 15%);
+    --orange-10: hsl(from var(--base-orange) h s 5%);
+    /*     Yellow     */
+    --base-yellow: hsl(42.61 97% 50%);
+    --yellow-1: hsl(from var(--base-yellow) h s 95%);
+    --yellow-2: hsl(from var(--base-yellow) h s 85%);
+    --yellow-3: hsl(from var(--base-yellow) h s 75%);
+    --yellow-4: hsl(from var(--base-yellow) h s 65%);
+    --yellow-5: hsl(from var(--base-yellow) h s 55%);
+    --yellow-6: hsl(from var(--base-yellow) h s 45%);
+    --yellow-7: hsl(from var(--base-yellow) h s 35%);
+    --yellow-8: hsl(from var(--base-yellow) h s 25%);
+    --yellow-9: hsl(from var(--base-yellow) h s 15%);
+    --yellow-10: hsl(from var(--base-yellow) h s 5%);
+    /*     Green      */
+    --base-green: hsl(112.86 100% 50%);
+    --green-1: hsl(from var(--base-green) h s 95%);
+    --green-2: hsl(from var(--base-green) h s 85%);
+    --green-3: hsl(from var(--base-green) h s 75%);
+    --green-4: hsl(from var(--base-green) h s 65%);
+    --green-5: hsl(from var(--base-green) h s 55%);
+    --green-6: hsl(from var(--base-green) h s 45%);
+    --green-7: hsl(from var(--base-green) h s 35%);
+    --green-8: hsl(from var(--base-green) h s 25%);
+    --green-9: hsl(from var(--base-green) h s 15%);
+    --green-10: hsl(from var(--base-green) h s 5%);
+    /*     Blue       */
+    --base-blue: hsl(224.74 91% 50%);
+    --blue-1: hsl(from var(--base-blue) h s 95%);
+    --blue-2: hsl(from var(--base-blue) h s 85%);
+    --blue-3: hsl(from var(--base-blue) h s 75%);
+    --blue-4: hsl(from var(--base-blue) h s 65%);
+    --blue-5: hsl(from var(--base-blue) h s 55%);
+    --blue-6: hsl(from var(--base-blue) h s 45%);
+    --blue-7: hsl(from var(--base-blue) h s 35%);
+    --blue-8: hsl(from var(--base-blue) h s 25%);
+    --blue-9: hsl(from var(--base-blue) h s 15%);
+    --blue-10: hsl(from var(--base-blue) h s 5%);
+    --dark-blue: var(--blue-8);
+    /*     Purple     */
+    --base-purple: hsl(267.57 80% 50%);
+    --purple-1: hsl(from var(--base-purple) h s 95%);
+    --purple-2: hsl(from var(--base-purple) h s 85%);
+    --purple-3: hsl(from var(--base-purple) h s 75%);
+    --purple-4: hsl(from var(--base-purple) h s 65%);
+    --purple-5: hsl(from var(--base-purple) h s 55%);
+    --purple-6: hsl(from var(--base-purple) h s 45%);
+    --purple-7: hsl(from var(--base-purple) h s 35%);
+    --purple-8: hsl(from var(--base-purple) h s 25%);
+    --purple-9: hsl(from var(--base-purple) h s 15%);
+    --purple-10: hsl(from var(--base-purple) h s 5%);
     /* ------ */
     --border-color: var(--dark-gray-25);
     --border-radius: .5rem;
@@ -81,11 +124,47 @@
     --button-background-green: rgb(32, 178, 170);
     --button-background-hover-green: rgb(0, 85, 143);
     --font-weight-med: 600;
+    --green-gradient: linear-gradient( var(--green-8), var(--green-8), var(--green-7), var(--green-6), var(--green-5));
 }
 
 body {
     font-family: var(--primary-font);
     margin: 0;
+}
+
+.theme-red {
+    --hue: var(--hue-red);
+}
+.theme-orange {
+    --hue: var(--hue-orange);
+}
+.theme-yellow {
+    --hue: var(--hue-yellow);
+}
+.theme-green {
+    --hue: var(--hue-green);
+}
+.theme-blue {
+    --hue: var(--hue-blue);
+}
+.theme-purple {
+    --hue: var(--hue-purple);
+}
+
+.p-green {
+    background-color: oklch(.77 .26 142);
+}
+.p-blue {
+    background-color: oklch(.35 .26 264);
+}
+.p-yellow {
+    background-color: oklch(.77 .26 90);
+}
+.p-purple {
+    background-color: oklch(.37 .26 295);
+}
+.p-orange {
+    background-color: oklch(.77 .26 35);
 }
 
 
@@ -168,4 +247,86 @@ h1, h2, h3, h4, h5, h6 {
 .card.border-tranisition {
     border: 3px solid;
     border-image: linear-gradient( to right, var(--light-green), var(--yellow-green) ) 1;
+}
+
+
+.gray-1 {
+    background-color: var(--gray-1);
+}
+
+.gray-2 {
+    background-color: var(--gray-2);
+}
+
+.gray-3 {
+    background-color: var(--gray-3);
+}
+
+.gray-4 {
+    background-color: var(--gray-4);
+}
+
+.gray-5 {
+    background-color: var(--gray-5);
+}
+
+.gray-6 {
+    background-color: var(--gray-6);
+}
+
+.gray-7 {
+    background-color: var(--gray-7);
+}
+
+.gray-8 {
+    background-color: var(--gray-8);
+}
+
+.gray-9 {
+    background-color: var(--gray-9);
+}
+
+.gray-10 {
+    background-color: var(--gray-10);
+}
+
+
+.swatch-1 {
+    background-color: oklch(var(--l-1) var(--c-1) var(--hue));
+}
+
+.swatch-2 {
+    background-color: oklch(var(--l-2) var(--c-2) var(--hue));
+}
+
+.swatch-3 {
+    background-color: oklch(var(--l-3) var(--c-3) var(--hue));
+}
+
+.swatch-4 {
+    background-color: oklch(var(--l-4) var(--c-4) var(--hue));
+}
+
+.swatch-5 {
+    background-color: oklch(var(--l-5) var(--c-5) var(--hue));
+}
+
+.swatch-6 {
+    background-color: oklch(var(--l-6) var(--c-6) var(--hue));
+}
+
+.swatch-7 {
+    background-color: oklch(var(--l-7) var(--c-7) var(--hue));
+}
+
+.swatch-8 {
+    background-color: oklch(var(--l-8) var(--c-8) var(--hue));
+}
+
+.swatch-9 {
+    background-color: oklch(var(--l-9) var(--c-9) var(--hue));
+}
+
+.swatch-10 {
+    background-color: oklch(var(--l-10) var(--c-10) var(--hue));
 }

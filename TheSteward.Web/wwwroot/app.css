@@ -15,49 +15,6 @@
 @import url("./styles/components/pendingInvitationCard.css");
 
 :root {
-    /* New Theme */
-    --hue-red: 25;
-    --hue-orange: 35;
-    --hue-yellow: 90;
-    --hue-green: 142;
-    --hue-blue: 264;
-    --hue-purple: 295;
-    /* Lightness steps */
-    --l-1: 98%;
-    --l-2: 92%;
-    --l-3: 85%;
-    --l-4: 75%;
-    --l-5: 65%;
-    --l-6: 55%;
-    --l-7: 45%;
-    --l-8: 35%;
-    --l-9: 25%;
-    --l-10: 18%;
-    /* Chroma */
-    --c-1: .04;
-    --c-2: .08;
-    --c-3: .14;
-    --c-4: .19;
-    --c-5: .24;
-    --c-6: .26; /* Peak chroma */
-    --c-7: .24;
-    --c-8: .19;
-    --c-9: .14;
-    --c-10: .08;
-    --c-10: .05;
-    /* Active palette (switch by changing this one variable) */
-    --hue: var(--hue-green);
-    /* Generated swatches */
-    --swatch-1: oklch(var(--l-1) var(--c-1) var(--hue));
-    --swatch-2: oklch(var(--l-2) var(--c-2) var(--hue));
-    --swatch-3: oklch(var(--l-3) var(--c-3) var(--hue));
-    --swatch-4: oklch(var(--l-4) var(--c-4) var(--hue));
-    --swatch-5: oklch(var(--l-5) var(--c-5) var(--hue));
-    --swatch-6: oklch(var(--l-6) var(--c-6) var(--hue));
-    --swatch-7: oklch(var(--l-7) var(--c-7) var(--hue));
-    --swatch-8: oklch(var(--l-8) var(--c-8) var(--hue));
-    --swatch-9: oklch(var(--l-9) var(--c-9) var(--hue));
-    --swatch-10: oklch(var(--l-10) var(--c-10) var(--hue));
     /* ----- */
     /* Fonts */
     /* ----- */
@@ -67,86 +24,94 @@
     /* ---------------------------------------- */
     /*                Colors                    */
     /* ---------------------------------------- */
-    /* White / Gray */
-    --gray-1: oklch(98% .005 var(--hue)); /* Nearly white */
-    --gray-2: oklch(93% .008 var(--hue));
-    --gray-3: oklch(85% .010 var(--hue));
-    --gray-4: oklch(75% .012 var(--hue));
-    --gray-5: oklch(65% .013 var(--hue));
-    --gray-6: oklch(55% .013 var(--hue));
-    --gray-7: oklch(45% .012 var(--hue));
-    --gray-8: oklch(35% .010 var(--hue));
-    --gray-9: oklch(25% .008 var(--hue));
-    --gray-10: oklch(15% .005 var(--hue)); /* Nearly black */
-    --off-white: var(--gray-1);
-    --white: rgb(255, 255, 255);
-    /*     Red        */
-    --red-1: oklch(98% .005 var(--hue-red));
-    --red-2: oklch(93% .008 var(--hue-red));
-    --red-3: oklch(85% .010 var(--hue-red));
-    --red-4: oklch(75% .012 var(--hue-red));
-    --red-5: oklch(65% .013 var(--hue-red));
-    --red-6: oklch(55% .013 var(--hue-red));
-    --red-7: oklch(45% .012 var(--hue-red));
-    --red-8: oklch(35% .010 var(--hue-red));
-    --red-9: oklch(25% .008 var(--hue-red));
-    --red-10: oklch(15% .005 var(--hue-red));
+    /*     Gray       */
+    --base-gray: hsl(0 0% 50%);
+    --gray-1: hsl(from var(--base-gray) h s 95%);
+    --gray-2: hsl(from var(--base-gray) h s 85%);
+    --gray-3: hsl(from var(--base-gray) h s 75%);
+    --gray-4: hsl(from var(--base-gray) h s 65%);
+    --gray-5: hsl(from var(--base-gray) h s 55%);
+    --gray-6: hsl(from var(--base-gray) h s 45%);
+    --gray-7: hsl(from var(--base-gray) h s 35%);
+    --gray-8: hsl(from var(--base-gray) h s 25%);
+    --gray-9: hsl(from var(--base-gray) h s 15%);
+    --gray-10: hsl(from var(--base-gray) h s 5%);
+    /*     White       */
+    --off-white: hsl(from var(--base-gray) h s 98%);
+    --white: hsl(1 0 0);
+    /*     Red     */
+    --base-red: hsl(354.19 100% 50%);
+    --red-1: hsl(from var(--base-red) h s 95%);
+    --red-2: hsl(from var(--base-red) h s 85%);
+    --red-3: hsl(from var(--base-red) h s 75%);
+    --red-4: hsl(from var(--base-red) h s 65%);
+    --red-5: hsl(from var(--base-red) h s 55%);
+    --red-6: hsl(from var(--base-red) h s 45%);
+    --red-7: hsl(from var(--base-red) h s 35%);
+    --red-8: hsl(from var(--base-red) h s 25%);
+    --red-9: hsl(from var(--base-red) h s 15%);
+    --red-10: hsl(from var(--base-red) h s 5%);
     /*     Orange     */
-    --orange-1: oklch(98% .005 var(--hue-orange));
-    --orange-2: oklch(93% .008 var(--hue-orange));
-    --orange-3: oklch(85% .010 var(--hue-orange));
-    --orange-4: oklch(75% .012 var(--hue-orange));
-    --orange-5: oklch(65% .013 var(--hue-orange));
-    --orange-6: oklch(55% .013 var(--hue-orange));
-    --orange-7: oklch(45% .012 var(--hue-orange));
-    --orange-8: oklch(35% .010 var(--hue-orange));
-    --orange-9: oklch(25% .008 var(--hue-orange));
-    --orange-10: oklch(15% .005 var(--hue-orange));
+    --base-orange: hsl(14.96 100% 50%);
+    --orange-1: hsl(from var(--base-orange) h s 95%);
+    --orange-2: hsl(from var(--base-orange) h s 85%);
+    --orange-3: hsl(from var(--base-orange) h s 75%);
+    --orange-4: hsl(from var(--base-orange) h s 65%);
+    --orange-5: hsl(from var(--base-orange) h s 55%);
+    --orange-6: hsl(from var(--base-orange) h s 45%);
+    --orange-7: hsl(from var(--base-orange) h s 35%);
+    --orange-8: hsl(from var(--base-orange) h s 25%);
+    --orange-9: hsl(from var(--base-orange) h s 15%);
+    --orange-10: hsl(from var(--base-orange) h s 5%);
     /*     Yellow     */
-    --yellow-1: oklch(98% .005 var(--hue-yellow));
-    --yellow-2: oklch(93% .008 var(--hue-yellow));
-    --yellow-3: oklch(85% .010 var(--hue-yellow));
-    --yellow-4: oklch(75% .012 var(--hue-yellow));
-    --yellow-5: oklch(65% .013 var(--hue-yellow));
-    --yellow-6: oklch(55% .013 var(--hue-yellow));
-    --yellow-7: oklch(45% .012 var(--hue-yellow));
-    --yellow-8: oklch(35% .010 var(--hue-yellow));
-    --yellow-9: oklch(25% .008 var(--hue-yellow));
-    --yellow-10: oklch(15% .005 var(--hue-yellow));
+    --base-yellow: hsl(42.61 97% 50%);
+    --yellow-1: hsl(from var(--base-yellow) h s 95%);
+    --yellow-2: hsl(from var(--base-yellow) h s 85%);
+    --yellow-3: hsl(from var(--base-yellow) h s 75%);
+    --yellow-4: hsl(from var(--base-yellow) h s 65%);
+    --yellow-5: hsl(from var(--base-yellow) h s 55%);
+    --yellow-6: hsl(from var(--base-yellow) h s 45%);
+    --yellow-7: hsl(from var(--base-yellow) h s 35%);
+    --yellow-8: hsl(from var(--base-yellow) h s 25%);
+    --yellow-9: hsl(from var(--base-yellow) h s 15%);
+    --yellow-10: hsl(from var(--base-yellow) h s 5%);
     /*     Green      */
-    --green-1: oklch(.99 .16 var(--hue-green));
-    --green-2: oklch(.90 .16 var(--hue-green));
-    --green-3: oklch(.85 .16 var(--hue-green));
-    --green-4: oklch(.80 .26 var(--hue-green));
-    --green-5: oklch(.77 .26 var(--hue-green));
-    --green-6: oklch(.55 .26 var(--hue-green));
-    --green-7: oklch(.45 .26 var(--hue-green));
-    --green-8: oklch(.35 .26 var(--hue-green));
-    --green-9: oklch(.30 .26 var(--hue-green));
-    --green-10: oklch(.25 .26 var(--hue-green));
+    --base-green: hsl(112.86 100% 50%);
+    --green-1: hsl(from var(--base-green) h s 95%);
+    --green-2: hsl(from var(--base-green) h s 85%);
+    --green-3: hsl(from var(--base-green) h s 75%);
+    --green-4: hsl(from var(--base-green) h s 65%);
+    --green-5: hsl(from var(--base-green) h s 55%);
+    --green-6: hsl(from var(--base-green) h s 45%);
+    --green-7: hsl(from var(--base-green) h s 35%);
+    --green-8: hsl(from var(--base-green) h s 25%);
+    --green-9: hsl(from var(--base-green) h s 15%);
+    --green-10: hsl(from var(--base-green) h s 5%);
     /*     Blue       */
-    --blue-1: oklch(.90 .16 var(--hue-blue));
-    --blue-2: oklch(.80 .16 var(--hue-blue));
-    --blue-3: oklch(.70 .16 var(--hue-blue));
-    --blue-4: oklch(.60 .26 var(--hue-blue));
-    --blue-5: oklch(.50 .26 var(--hue-blue));
-    --blue-6: oklch(.35 .26 var(--hue-blue));
-    --blue-7: oklch(.30 .26 var(--hue-blue));
-    --blue-8: oklch(.25 .26 var(--hue-blue));
-    --blue-9: oklch(.20 .26 var(--hue-blue));
-    --blue-10: oklch(.15 .26 var(--hue-blue));
+    --base-blue: hsl(224.74 91% 50%);
+    --blue-1: hsl(from var(--base-blue) h s 95%);
+    --blue-2: hsl(from var(--base-blue) h s 85%);
+    --blue-3: hsl(from var(--base-blue) h s 75%);
+    --blue-4: hsl(from var(--base-blue) h s 65%);
+    --blue-5: hsl(from var(--base-blue) h s 55%);
+    --blue-6: hsl(from var(--base-blue) h s 45%);
+    --blue-7: hsl(from var(--base-blue) h s 35%);
+    --blue-8: hsl(from var(--base-blue) h s 25%);
+    --blue-9: hsl(from var(--base-blue) h s 15%);
+    --blue-10: hsl(from var(--base-blue) h s 5%);
     --dark-blue: var(--blue-8);
     /*     Purple     */
-    --purple-1: oklch(.90 .16 var(--hue-purple));
-    --purple-2: oklch(.80 .16 var(--hue-purple));
-    --purple-3: oklch(.70 .16 var(--hue-purple));
-    --purple-4: oklch(.60 .26 var(--hue-purple));
-    --purple-5: oklch(.50 .26 var(--hue-purple));
-    --purple-6: oklch(.35 .26 var(--hue-purple));
-    --purple-7: oklch(.30 .26 var(--hue-purple));
-    --purple-8: oklch(.25 .26 var(--hue-purple));
-    --purple-9: oklch(.20 .26 var(--hue-purple));
-    --purple-10: oklch(.15 .26 var(--hue-purple));
+    --base-purple: hsl(267.57 80% 50%);
+    --purple-1: hsl(from var(--base-purple) h s 95%);
+    --purple-2: hsl(from var(--base-purple) h s 85%);
+    --purple-3: hsl(from var(--base-purple) h s 75%);
+    --purple-4: hsl(from var(--base-purple) h s 65%);
+    --purple-5: hsl(from var(--base-purple) h s 55%);
+    --purple-6: hsl(from var(--base-purple) h s 45%);
+    --purple-7: hsl(from var(--base-purple) h s 35%);
+    --purple-8: hsl(from var(--base-purple) h s 25%);
+    --purple-9: hsl(from var(--base-purple) h s 15%);
+    --purple-10: hsl(from var(--base-purple) h s 5%);
     /* ------ */
     --border-color: var(--dark-gray-25);
     --border-radius: .5rem;
@@ -159,7 +124,7 @@
     --button-background-green: rgb(32, 178, 170);
     --button-background-hover-green: rgb(0, 85, 143);
     --font-weight-med: 600;
-    --green-gradient: linear-gradient( var(--green-7), var(--green-7), var(--green-6), var(--green-5), var(--green-4));
+    --green-gradient: linear-gradient( var(--green-8), var(--green-8), var(--green-7), var(--green-6), var(--green-5));
 }
 
 body {

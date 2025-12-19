@@ -4,7 +4,7 @@
 .ts-card {
     margin: 1rem;
     font-family: var(--primary-font);
-    border: 3px solid var(--yellow-green);
+    border: 3px solid var(--base-green);
     border-radius: var(--border-radius);
 }
 
@@ -25,15 +25,16 @@
 }
 
 .ts-card-content {
-    border: solid 3px var(--dark-gray-25);
+    border: solid 3px var(--gray-9);
     border-radius: var(--border-radius);
     padding: .5rem;
 }
 
 .ts-card-header {
     align-items: center;
-    background-color: var(--yellow-green);
+    background-color: var(--base-green);
     color: var(--off-white);
+    color: var(--green-1);
     display: flex;
     flex-shrink: 0;
     justify-content: space-between;

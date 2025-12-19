@@ -47,67 +47,69 @@
     --red-4: hsl(from var(--base-red) h s 65%);
     --red-5: hsl(from var(--base-red) h s 55%);
     --red-6: hsl(from var(--base-red) h s 45%);
+    --red-6: hsl(354.19 100% 45%);
     --red-7: hsl(from var(--base-red) h s 35%);
     --red-8: hsl(from var(--base-red) h s 25%);
     --red-9: hsl(from var(--base-red) h s 15%);
     --red-10: hsl(from var(--base-red) h s 5%);
     /*     Orange     */
-    --base-orange: hsl(14.96 100% 50%);
+    --base-orange: var(--orange-6);
     --orange-1: hsl(from var(--base-orange) h s 95%);
     --orange-2: hsl(from var(--base-orange) h s 85%);
     --orange-3: hsl(from var(--base-orange) h s 75%);
     --orange-4: hsl(from var(--base-orange) h s 65%);
     --orange-5: hsl(from var(--base-orange) h s 55%);
     --orange-6: hsl(from var(--base-orange) h s 45%);
+    --orange-6: hsl(14.96 100% 45%);
     --orange-7: hsl(from var(--base-orange) h s 35%);
     --orange-8: hsl(from var(--base-orange) h s 25%);
     --orange-9: hsl(from var(--base-orange) h s 15%);
     --orange-10: hsl(from var(--base-orange) h s 5%);
     /*     Yellow     */
-    --base-yellow: hsl(42.61 97% 50%);
+    --base-yellow: var(--yellow-6);
     --yellow-1: hsl(from var(--base-yellow) h s 95%);
     --yellow-2: hsl(from var(--base-yellow) h s 85%);
     --yellow-3: hsl(from var(--base-yellow) h s 75%);
     --yellow-4: hsl(from var(--base-yellow) h s 65%);
     --yellow-5: hsl(from var(--base-yellow) h s 55%);
-    --yellow-6: hsl(from var(--base-yellow) h s 45%);
+    --yellow-6: hsl(42.61 97% 45%);
     --yellow-7: hsl(from var(--base-yellow) h s 35%);
     --yellow-8: hsl(from var(--base-yellow) h s 25%);
     --yellow-9: hsl(from var(--base-yellow) h s 15%);
     --yellow-10: hsl(from var(--base-yellow) h s 5%);
     /*     Green      */
-    --base-green: hsl(112.86 100% 50%);
+    --base-green: var(--green-7);
     --green-1: hsl(from var(--base-green) h s 95%);
     --green-2: hsl(from var(--base-green) h s 85%);
     --green-3: hsl(from var(--base-green) h s 75%);
     --green-4: hsl(from var(--base-green) h s 65%);
     --green-5: hsl(from var(--base-green) h s 55%);
     --green-6: hsl(from var(--base-green) h s 45%);
-    --green-7: hsl(from var(--base-green) h s 35%);
+    --green-7: hsl(112.86 100% 35%);
     --green-8: hsl(from var(--base-green) h s 25%);
     --green-9: hsl(from var(--base-green) h s 15%);
     --green-10: hsl(from var(--base-green) h s 5%);
     /*     Blue       */
-    --base-blue: hsl(224.74 91% 50%);
+    --base-blue: var(--blue-6);
     --blue-1: hsl(from var(--base-blue) h s 95%);
     --blue-2: hsl(from var(--base-blue) h s 85%);
     --blue-3: hsl(from var(--base-blue) h s 75%);
     --blue-4: hsl(from var(--base-blue) h s 65%);
     --blue-5: hsl(from var(--base-blue) h s 55%);
-    --blue-6: hsl(from var(--base-blue) h s 45%);
+    --blue-6: hsl(224.74 91% 45%);
     --blue-7: hsl(from var(--base-blue) h s 35%);
     --blue-8: hsl(from var(--base-blue) h s 25%);
     --blue-9: hsl(from var(--base-blue) h s 15%);
     --blue-10: hsl(from var(--base-blue) h s 5%);
     --dark-blue: var(--blue-8);
     /*     Purple     */
-    --base-purple: hsl(267.57 80% 50%);
+    --base-purple: var(--purple-6);
     --purple-1: hsl(from var(--base-purple) h s 95%);
     --purple-2: hsl(from var(--base-purple) h s 85%);
     --purple-3: hsl(from var(--base-purple) h s 75%);
     --purple-4: hsl(from var(--base-purple) h s 65%);
     --purple-5: hsl(from var(--base-purple) h s 55%);
-    --purple-6: hsl(from var(--base-purple) h s 45%);
+    --purple-6: hsl(267.57 80% 45%);
     --purple-7: hsl(from var(--base-purple) h s 35%);
     --purple-8: hsl(from var(--base-purple) h s 25%);
     --purple-9: hsl(from var(--base-purple) h s 15%);
@@ -151,20 +153,23 @@ body {
     --hue: var(--hue-purple);
 }
 
-.p-green {
-    background-color: oklch(.77 .26 142);
-}
-.p-blue {
-    background-color: oklch(.35 .26 264);
-}
-.p-yellow {
-    background-color: oklch(.77 .26 90);
-}
-.p-purple {
-    background-color: oklch(.37 .26 295);
+.p-red {
+    background-color: var(--base-red);
 }
 .p-orange {
-    background-color: oklch(.77 .26 35);
+    background-color: var(--base-orange);
+}
+.p-yellow {
+    background-color: var(--base-yellow);
+}
+.p-green {
+    background-color: var(--base-green);
+}
+.p-blue {
+    background-color: var(--base-blue);
+}
+.p-purple {
+    background-color: var(--base-purple);
 }
 
 

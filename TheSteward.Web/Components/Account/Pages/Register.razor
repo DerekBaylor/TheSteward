@@ -16,40 +16,73 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<div class="registration-container">
+    <div id="registrationCard" class="ts-card">
+        <div class="ts-card-header">
+            <h1>Create Account</h1>
+            <p>Sign up to get started with The Steward</p>
+        </div>
 
-<div class="row">
-    <div class="col-lg-6">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <div class="alert-error">
+                <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>@Message</span>
+            </div>
+        }
+
+        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register" class="registration-form">
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="Input.Email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
+
+            <div class="form-group">
+                <label for="Input.Email" class="form-label">Email Address</label>
+                <InputText @bind-Value="Input.Email"
+                           id="Input.Email"
+                           class="form-input"
+                           type="email"
+                           autocomplete="username"
+                           placeholder="you@example.com" />
+                <ValidationMessage For="() => Input.Email" class="form-error" />
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.Password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
+
+            <div class="form-group">
+                <label for="Input.Password" class="form-label">Password</label>
+                <InputText type="password"
+                           @bind-Value="Input.Password"
+                           id="Input.Password"
+                           class="form-input"
+                           autocomplete="new-password"
+                           placeholder="Create a password" />
+                <ValidationMessage For="() => Input.Password" class="form-error" />
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.ConfirmPassword">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+
+            <div class="form-group">
+                <label for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
+                <InputText type="password"
+                           @bind-Value="Input.ConfirmPassword"
+                           id="Input.ConfirmPassword"
+                           class="form-input"
+                           autocomplete="new-password"
+                           placeholder="Confirm your password" />
+                <ValidationMessage For="() => Input.ConfirmPassword" class="form-error" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+
+            <button type="submit" class="btn-primary">
+                Create Account
+            </button>
+
+            <div class="form-footer">
+                <p>
+                    Already have an account?
+                    <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))"
+                       class="link-primary">Sign in</a>
+                </p>
+            </div>
         </EditForm>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
     </div>
 </div>
 

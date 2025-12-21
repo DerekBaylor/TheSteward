@@ -2,13 +2,18 @@
 /* Pages */
 /*-------*/
 @import url('./styles/pages/login.css');
+@import url('./styles/pages/register.css');
 @import url('./styles/pages/home.css');
 @import url('./styles/pages/household.css');
+@import url('./styles/pages/styles.css');
 
 /*------------*/
 /* Components */
 /*------------*/
 @import url("./styles/components/sidebarNav.css");
+@import url("./styles/components/landingPage.css");
+@import url("./styles/components/dashboard.css");
+@import url("./styles/components/dashboardCalendar.css");
 @import url("./styles/components/householdCard.css");
 @import url("./styles/components/householdForm.css");
 @import url("./styles/components/inviteMemberModal.css");

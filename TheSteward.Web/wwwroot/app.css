@@ -11,6 +11,7 @@
 /* Components */
 /*------------*/
 @import url("./styles/components/sidebarNav.css");
+@import url("./styles/components/landingPage.css");
 @import url("./styles/components/dashboard.css");
 @import url("./styles/components/dashboardCalendar.css");
 @import url("./styles/components/householdCard.css");

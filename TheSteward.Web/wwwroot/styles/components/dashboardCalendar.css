@@ -108,7 +108,7 @@
     }
 
     .calendar-day.today {
-        background-image: var(--green-gradient);
+        background-color: var(--base-blue);
         color: white;
         font-weight: 700;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

@@ -2,8 +2,10 @@
 /* Pages */
 /*-------*/
 @import url('./styles/pages/login.css');
+@import url('./styles/pages/register.css');
 @import url('./styles/pages/home.css');
 @import url('./styles/pages/household.css');
+@import url('./styles/pages/styles.css');
 
 /*------------*/
 /* Components */

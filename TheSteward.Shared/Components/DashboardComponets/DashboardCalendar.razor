@@ -1,115 +1,48 @@
 ﻿@namespace TheSteward.Shared.Components.DashboardComponets
 
-<MudPaper Elevation="2" Class="pa-4">
-    <MudStack Spacing="3">
-        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-            <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
-                           Size="Size.Small"
-                           OnClick="PreviousMonth" />
+<div class="calendar-card">
+    <div class="calendar-header">
+        <button class="calendar-nav-btn" @onclick="PreviousMonth">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
 
-            <MudText Typo="Typo.h6" Class="flex-grow-1 text-center">
-                @currentDate.ToString("MMMM yyyy")
-            </MudText>
+        <h3 class="calendar-month">@currentDate.ToString("MMMM yyyy")</h3>
 
-            <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
-                           Size="Size.Small"
-                           OnClick="NextMonth" />
-        </MudStack>
+        <button class="calendar-nav-btn" @onclick="NextMonth">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    </div>
 
-        <div class="calendar-grid">
-            <div class="calendar-day-header">Sun</div>
-            <div class="calendar-day-header">Mon</div>
-            <div class="calendar-day-header">Tue</div>
-            <div class="calendar-day-header">Wed</div>
-            <div class="calendar-day-header">Thu</div>
-            <div class="calendar-day-header">Fri</div>
-            <div class="calendar-day-header">Sat</div>
+    <div class="calendar-grid">
+        <div class="calendar-day-header">Sun</div>
+        <div class="calendar-day-header">Mon</div>
+        <div class="calendar-day-header">Tue</div>
+        <div class="calendar-day-header">Wed</div>
+        <div class="calendar-day-header">Thu</div>
+        <div class="calendar-day-header">Fri</div>
+        <div class="calendar-day-header">Sat</div>
 
-            @foreach (var day in calendarDays)
-            {
-                <MudPaper Elevation="0"
-                          Class="@GetDayClass(day)"
-                          Style="@GetDayStyle(day)">
-                    <MudText Typo="Typo.body2">@day.Day</MudText>
-                    @if (day.HasEvent)
-                    {
-                        <div class="event-indicator"></div>
-                    }
-                </MudPaper>
-            }
-        </div>
-    </MudStack>
-</MudPaper>
-
-<style>
-    .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 8px;
-    }
-
-    .calendar-day-header {
-        text-align: center;
-        font-weight: 600;
-        font-size: 0.875rem;
-        color: var(--mud-palette-text-secondary);
-        padding: 8px 0;
-        border-bottom: 2px solid var(--mud-palette-divider);
-    }
-
-    .calendar-day {
-        aspect-ratio: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 8px;
-        border-radius: var(--mud-default-borderradius);
-        position: relative;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-        .calendar-day:hover {
-            transform: scale(1.05);
+        @foreach (var day in calendarDays)
+        {
+            <div class="@GetDayClass(day)" @onclick="() => SelectDay(day)">
+                <span class="day-number">@day.Day</span>
+                @if (day.HasEvent)
+                {
+                    <div class="event-indicator"></div>
+                }
+            </div>
         }
-
-        .calendar-day.other-month {
-            opacity: 0.3;
-        }
-
-    .event-indicator {
-        width: 6px;
-        height: 6px;
-        background: var(--mud-palette-success);
-        border-radius: 50%;
-        position: absolute;
-        bottom: 4px;
-    }
-
-    .calendar-day.today .event-indicator {
-        background: white;
-    }
-
-    @@media (max-width: 768px) {
-        .calendar-grid {
-            gap: 4px;
-        }
-
-        .calendar-day {
-            padding: 4px;
-        }
-
-        .calendar-day-header {
-            font-size: 0.75rem;
-            padding: 4px 0;
-        }
-    }
-</style>
+    </div>
+</div>
 
 @code {
     private DateTime currentDate = DateTime.Today;
     private List<CalendarDay> calendarDays = new();
+    private CalendarDay? selectedDay;
 
     protected override void OnInitialized()
     {
@@ -123,10 +56,8 @@
         var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
         var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
-        // Get the starting day (Sunday = 0)
         int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
 
-        // Add previous month days
         var previousMonth = firstDayOfMonth.AddMonths(-1);
         var daysInPreviousMonth = DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
 
@@ -140,7 +71,6 @@
             });
         }
 
-        // Add current month days
         for (int day = 1; day <= lastDayOfMonth.Day; day++)
         {
             var date = new DateTime(currentDate.Year, currentDate.Month, day);
@@ -148,12 +78,11 @@
             {
                 Date = date,
                 IsCurrentMonth = true,
-                HasEvent = Random.Shared.Next(0, 5) == 0 // Random events for demo
+                HasEvent = Random.Shared.Next(0, 5) == 0
             });
         }
 
-        // Add next month days to fill the grid
-        int remainingDays = 42 - calendarDays.Count; // 6 rows x 7 days
+        int remainingDays = 42 - calendarDays.Count;
         var nextMonth = firstDayOfMonth.AddMonths(1);
 
         for (int day = 1; day <= remainingDays; day++)
@@ -177,17 +106,15 @@
         if (day.Date.Date == DateTime.Today)
             classes.Add("today");
 
+        if (selectedDay?.Date.Date == day.Date.Date)
+            classes.Add("selected");
+
         return string.Join(" ", classes);
     }
 
-    private string GetDayStyle(CalendarDay day)
+    private void SelectDay(CalendarDay day)
     {
-        if (day.Date.Date == DateTime.Today)
-        {
-            return "background: var(--mud-palette-primary); color: white; font-weight: bold;";
-        }
-
-        return "background: var(--mud-palette-surface);";
+        selectedDay = day;
     }
 
     private void PreviousMonth()

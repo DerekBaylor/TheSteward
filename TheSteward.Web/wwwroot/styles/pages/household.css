@@ -1,17 +1,31 @@
 ﻿
+/* Tool Container */
 .household-tool-container {
-    align-content: center;
-    align-items:center;
+    align-items: center;
+    animation: slideUp 0.4s ease-out;
     border-radius: var(--border-radius);
-    border: solid 1px var(--border-color);
+    border: solid 1px var(--gray-4);
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     gap: .5rem;
     justify-content: center;
-    margin-bottom: 1rem;
+    justify-self: center;
+    margin: 1rem 0;
     padding: .5rem;
-    width: 100%;
+    width: 90%;
+}
+
+@keyframes slideleft {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .household-form-container {
@@ -27,6 +41,7 @@
         margin-bottom: -.5rem;
     }
 
+/* Household Card Container */
 
 .household-container {
     display: flex;

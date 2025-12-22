@@ -139,7 +139,7 @@ body {
     margin: 0;
 }
 
-.theme-red {
+/*.theme-red {
     --hue: var(--hue-red);
 }
 .theme-orange {
@@ -175,7 +175,7 @@ body {
 }
 .p-purple {
     background-color: var(--base-purple);
-}
+}*/
 
 
 

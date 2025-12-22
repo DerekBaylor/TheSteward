@@ -10,6 +10,7 @@
 /*------------*/
 /* Components */
 /*------------*/
+@import url("./styles/components//tsCard.css");
 @import url("./styles/components/sidebarNav.css");
 @import url("./styles/components/landingPage.css");
 @import url("./styles/components/dashboard.css");
@@ -139,7 +140,7 @@ body {
     margin: 0;
 }
 
-.theme-red {
+/*.theme-red {
     --hue: var(--hue-red);
 }
 .theme-orange {
@@ -175,7 +176,7 @@ body {
 }
 .p-purple {
     background-color: var(--base-purple);
-}
+}*/
 
 
 

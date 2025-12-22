@@ -5,20 +5,25 @@
 @using System.Reflection
 @using TheSteward.Core.Attributes
 
-<div id="householdCard" class="ts-card">
+<MudCard id="householdCard" class="ts-tabbed-card">
     @if (HasAdminPermissions)
     {
-        <div class="ts-card-tab-btn-container">
-            <button id="editHouseholdBtn" class="ts-card-btn" @onclick="HandleEdit">Edit Household</button>
-            <button id="addMemberBtn" class="ts-card-btn ts-submit-btn" @onclick="HandleAddMember">Add Member</button>
-        </div>
+        <MudCardActions class="ts-tabbed-card-btn-container">
+            <MudButton id="editHouseholdBtn" class="ts-card-tab-btn" @onclick="HandleEdit">Edit Household</MudButton>
+            <MudButton id="addMemberBtn" class="ts-card-tab-btn" @onclick="HandleAddMember">Add Member</MudButton>
+        </MudCardActions>
     }
-    <div class="ts-card-content">
-       <h5 class="card-title"><span class="ts-label"> @HouseholdDto.HouseholdName: </span></h5>
+    <MudCardContent class="ts-card-content">
+        <MudCardHeader Class="ts-tabbed-card-header">
+            <h3 class="ts-tabbed-card-title"><span class="ts-label"> @HouseholdDto.HouseholdName: </span></h3>
+        </MudCardHeader>
        <div class="ts-card-body">
+           <section class="ts-card-section">
                 <p id="householdStatusRow" class="ts-card-row">
                     <span class="ts-row-title">Status:</span> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
                 </p>
+           </section>
+            <section class="ts-card-section">
             <p class="ts-label">Features:</p>
                 <ul id="householdFeatureList" class="ts-card-list" >
                     @foreach (var feature in GetFeatures())
@@ -31,50 +36,46 @@
                         </li>
                     }
                 </ul>
-
-            <p class="ts-label">Members:</p>
-            @if (HouseholdDto.UserHouseholdDtos != null && HouseholdDto.UserHouseholdDtos.Any())
-            {
-                <ul class="ts-card-list">
-                    @foreach (var userHousehold in HouseholdDto.UserHouseholdDtos)
-                    {
-                        @if (userHousehold.User != null)
+           </section>
+            <section class="ts-card-section">
+                <p class="ts-label">Members:</p>
+                @if (HouseholdDto.UserHouseholdDtos != null && HouseholdDto.UserHouseholdDtos.Any())
+                {
+                    <ul class="ts-card-list">
+                        @foreach (var userHousehold in HouseholdDto.UserHouseholdDtos)
                         {
-                            <li class="mb-2">
-                                @if (HasAdminPermissions)
-                                {
-                                    <button class="btn btn-link p-0 text-start" @onclick="() => HandleMemberClick(userHousehold.User)">
-                                        <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
-                                        @userHousehold.User.UserName
-                                        @if (userHousehold.User.Id == HouseholdDto.OwnerId)
-                                        {
-                                            <span class="badge ts-badge ms-2 owner-badge">Owner</span>
-                                        }
-                                    </button>
-                                }
-                                else
-                                {
-                                    <span>
-                                        <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
-                                        @userHousehold.User.UserName
-                                        @if (userHousehold.User.Id == HouseholdDto.OwnerId)
-                                        {
-                                            <span class="badge bg-primary ms-2">Owner</span>
-                                        }
-                                    </span>
-                                }
-                            </li>
+                            @if (userHousehold.User != null)
+                            {
+                                <li class="mb-2">
+                                    @if (HasAdminPermissions)
+                                    {
+                                        <button class="member-list-btn" @onclick="() => HandleMemberClick(userHousehold.User)">
+                                            <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
+                                            <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4">
+                                                @userHousehold.User.UserName
+                                            </MudBadge>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
+                                            @userHousehold.User.UserName
+                                        </span>
+                                    }
+                                </li>
+                            }
                         }
-                    }
-                </ul>
-            }
-            else
-            {
-                <p class="text-muted">No members found.</p>
-            }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">No members found.</p>
+                }
+           </section>
        </div>
-    </div>
-</div>
+    </MudCardContent>
+</MudCard>
 
 @code {
     [Parameter, EditorRequired]
@@ -91,6 +92,8 @@
 
     [Parameter]
     public EventCallback<ApplicationUser> GetMember { get; set; }
+
+    private string adminBadge = "Admin";
 
     private List<(string Name, bool IsEnabled)> GetFeatures()
     {

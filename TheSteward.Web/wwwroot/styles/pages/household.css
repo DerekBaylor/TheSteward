@@ -12,7 +12,6 @@
     flex-wrap: nowrap;
     gap: .5rem;
     justify-content: center;
-    justify-self: center;
     margin: 1rem 0;
     padding: .5rem;
     width: 90%;
@@ -43,8 +42,21 @@
         margin-bottom: -.5rem;
     }
 
-/* Household Card Container */
+/* Household Alert */
+#householdAlert.mud-alert-text-warning {
+    background-color: var(--green-1);
+    border-radius: var(--border-radius);
+    color: var(--base-green);
+}
 
+#householdAlert .mud-alert-icon {
+    padding-top: 11px;
+}
+#householdAlert .ts-submit-btn {
+    margin-left: 1rem;
+}
+
+/* Household Card Container */
 .household-container {
     display: flex;
     flex-direction: row;

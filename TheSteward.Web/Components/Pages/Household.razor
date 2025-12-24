@@ -49,9 +49,10 @@ else
 
     @if (!hasDefaultHousehold)
     {
-        <div class="alert alert-info mt-3" role="alert">
-            You are not part of a household. Please Add a household, or accept an invitation.         <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
-        </div>
+        <MudAlert id="householdAlert" Severity="Severity.Warning" role="alert">
+            You are not part of a household. Please Add a household, or accept an invitation.         
+            <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
+        </MudAlert>
     }
 
     @if (pendingInvitations.Any())

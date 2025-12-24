@@ -140,6 +140,17 @@ body {
     margin: 0;
 }
 
+.mud-drawer.mud-elevation-1 {
+    border: none;
+    box-shadow: none;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 /*.theme-red {
     --hue: var(--hue-red);
 }

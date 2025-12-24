@@ -1,26 +1,26 @@
 ﻿
-/* -------------- */
-/* Tool Container */
-/* -------------- */
-.household-tool-container {
-    align-items: center;
-    animation: slideUp 0.4s ease-out;
-    border-radius: var(--border-radius);
-    border: solid 1px var(--gray-4);
+/* ------- */
+/* Toolbar */
+/* ------- */
+.household-toolbar {
     display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: .5rem;
-    justify-content: center;
-    margin: 1rem 0;
-    padding: .5rem;
-    width: 90%;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    margin: 1.5rem 1rem;
+    animation: slideDown 0.4s ease-out;
+    font-family: var(--primary-font);
 }
 
-@keyframes slideleft {
+@keyframes slideDown {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(-20px);
     }
 
     to {
@@ -29,17 +29,170 @@
     }
 }
 
+/* Select Group */
+.toolbar-select-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.select-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gray-8);
+    white-space: nowrap;
+    margin: 0;
+}
+
+    .select-label .material-icons {
+        font-size: 20px;
+        color: var(--base-purple);
+    }
+
+/* Toolbar Actions */
+.toolbar-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Toolbar Buttons */
+.btn-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: var(--primary-font);
+}
+
+    .btn-toolbar .material-icons {
+        font-size: 18px;
+    }
+
+.btn-add {
+    background-image: linear-gradient(135deg, var(--green-5), var(--green-7));
+    color: white;
+}
+
+    .btn-add:hover {
+        background-image: linear-gradient(135deg, var(--green-6), var(--green-8));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+.btn-profile {
+    background-image: linear-gradient(135deg, var(--orange-5), var(--orange-7));
+    color: white;
+}
+
+    .btn-profile:hover {
+        background-image: linear-gradient(135deg, var(--orange-6), var(--orange-8));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+.btn-toolbar:active {
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .household-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .toolbar-select-group {
+        flex: 1 1 100%;
+        order: 1;
+    }
+
+    .toolbar-actions {
+        flex: 1 1 100%;
+        order: 2;
+        justify-content: stretch;
+    }
+
+    .btn-toolbar {
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .household-toolbar {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .toolbar-select-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .select-label {
+        font-size: 0.875rem;
+    }
+
+    .toolbar-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn-toolbar {
+        width: 100%;
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .household-toolbar {
+        padding: 0.875rem;
+        margin: 1rem 0;
+    }
+
+    .select-label .material-icons {
+        font-size: 18px;
+    }
+
+    .btn-toolbar {
+        font-size: 0.85rem;
+        padding: 0.625rem 0.875rem;
+    }
+
+        .btn-toolbar .material-icons {
+            font-size: 16px;
+        }
+}
+
+/* Household Form Container */
 .household-form-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 2rem 1rem;
 }
 
     .household-form-container .section-title {
         text-align: center;
-        align-items: center;
-        margin-bottom: -.5rem;
+        font-family: var(--label-font);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--gray-9);
+        margin-bottom: 1.5rem;
     }
 
 /* Household Alert */

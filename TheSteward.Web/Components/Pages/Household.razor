@@ -29,12 +29,14 @@
 }
 else
 {
-    <div id="householdToolContainer" class="household-tool-container">
-    @if (selectedHouseholdDto != null)
-        {            
-            <div class="ts-select-group">
-                <label for="householdSelect" class="ts-select-label">Active Household: </label>
-
+    <MudToolBar class="household-toolbar" WrapContent="true">
+        @if (selectedHouseholdDto != null)
+        {
+            <div class="toolbar-select-group">
+                <label for="householdSelect" class="select-label">
+                    <span class="material-icons">home</span>
+                    Active Household
+                </label>
                 <TsSelect TValue="Guid?"
                           Items="householdItems"
                           @bind-Value="selectedHouseholdId"
@@ -43,9 +45,17 @@ else
             </div>
         }
 
-        <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
-        <button class="ts-btn ts-edit-btn" @onclick="ShowUserProfile">My Profile</button>
-    </div>
+        <div class="toolbar-actions">
+            <button class="btn-toolbar btn-add" @onclick="OpenHouseholdForm">
+                <span class="material-icons">add</span>
+                Add Household
+            </button>
+            <button class="btn-toolbar btn-profile" @onclick="ShowUserProfile">
+                <span class="material-icons">person</span>
+                My Profile
+            </button>
+        </div>
+    </MudToolBar>
 
     @if (!hasDefaultHousehold)
     {

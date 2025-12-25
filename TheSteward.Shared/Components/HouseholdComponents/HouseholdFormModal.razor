@@ -1,0 +1,88 @@
+﻿@namespace TheSteward.Shared.Components.HouseholdComponents
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="FormData.HouseholdName"
+                          Label="Household Name"
+                          Variant="Variant.Outlined"
+                          For="@(() => FormData.HouseholdName)"
+                          Margin="Margin.Dense"
+                          Class="mb-4" />
+
+            <MudText Typo="Typo.subtitle2" Class="mb-2">Enable Modules:</MudText>
+
+            <MudSwitch @bind-Value="FormData.HasTaskManagerAccess"
+                       Label="Enable Task Manager"
+                       Color="Color.Primary"
+                       Class="mb-2" />
+
+            <MudSwitch @bind-Value="FormData.HasFinanceManagerAccess"
+                       Label="Enable Finance Manager"
+                       Color="Color.Primary"
+                       Class="mb-2" />
+
+            <MudSwitch @bind-Value="FormData.HasMealManagerAccess"
+                       Label="Enable Meal Manager"
+                       Color="Color.Primary"
+                       Class="mb-2" />
+
+            <MudSwitch @bind-Value="FormData.HasFileManagerAccess"
+                       Label="Enable File Manager"
+                       Color="Color.Primary"
+                       Class="mb-2" />
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="HandleCancel"
+                   Variant="Variant.Outlined"
+                   Color="Color.Default">
+            Cancel
+        </MudButton>
+        <MudButton OnClick="HandleSubmit"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@IsSubmitting">
+            @if (IsSubmitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+            }
+            @(IsEditMode ? "Update" : "Create")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter, EditorRequired]
+    public HouseholdFormDto FormData { get; set; } = new();
+
+    [Parameter]
+    public bool IsEditMode { get; set; }
+
+    [Parameter]
+    public bool IsSubmitting { get; set; }
+
+    [Parameter]
+    public bool HasDefaultHousehold { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+        MudDialog.Cancel();
+    }
+}

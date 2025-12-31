@@ -1,5 +1,9 @@
 ﻿@using System.Net.Http
 @using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
@@ -16,9 +20,12 @@
 @using TheSteward.Core.Models
 @using TheSteward.Core.Models.HouseholdModels
 @using TheSteward.Core.Dtos.HouseholdDtos
+@using TheSteward.Core.Dtos.UserDtos
 @using TheSteward.Core.IServices
+@using TheSteward.Infrastructure.Services
 @using TheSteward.Shared.Interfaces
 @using TheSteward.Shared.Models
 @using TheSteward.Shared.Dtos
 @using TheSteward.Shared.Services
 @using TheSteward.Shared.Components
+@using TheSteward.Shared.Components.HouseholdComponents

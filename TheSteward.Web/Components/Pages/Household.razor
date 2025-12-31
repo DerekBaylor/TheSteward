@@ -1,16 +1,5 @@
 ﻿@page "/household"
 
-@using System.ComponentModel.DataAnnotations
-@using System.Security.Claims
-@using AutoMapper
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
-@using TheSteward.Core.Dtos.HouseholdDtos
-@using TheSteward.Core.Dtos.UserDtos
-@using TheSteward.Infrastructure.Services
-@using TheSteward.Shared.Components
-@using TheSteward.Shared.Components.HouseholdComponents
-
 @inject IHouseholdService HouseholdService
 @inject IUserHouseholdService UserHouseholdService
 @inject IUserService UserService
@@ -18,6 +7,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IDialogService DialogService
 
 @attribute [Authorize]
 
@@ -46,10 +36,10 @@ else
         }
 
         <div class="toolbar-actions">
-            <button class="btn-toolbar btn-add" @onclick="OpenHouseholdForm">
+            <MudButton class="btn-toolbar btn-add" @onclick="OpenHouseholdFormModalAsync">
                 <span class="material-icons">add</span>
                 Add Household
-            </button>
+            </MudButton>
             <button class="btn-toolbar btn-profile" @onclick="ShowUserProfile">
                 <span class="material-icons">person</span>
                 My Profile
@@ -60,8 +50,8 @@ else
     @if (!hasDefaultHousehold)
     {
         <MudAlert id="householdAlert" Severity="Severity.Warning" role="alert">
-            You are not part of a household. Please Add a household, or accept an invitation.         
-            <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
+            You are not part of a household. Please Add a household, or accept an invitation.
+            <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdFormModalAsync">Add Household</button>
         </MudAlert>
     }
 
@@ -74,20 +64,7 @@ else
                             OnHide="HideInvitation" />
     }
 
-    @if (showHouseholdForm)
-    {
-        <div class="household-form-container">
-            <HouseholdForm 
-                IsEditMode="isEditHouseholdMode"
-                FormData="householdFormDto"
-                HasDefaultHousehold="hasDefaultHousehold"
-                IsSubmitting="isSubmitting"
-                OnSubmit="SaveHousehold"
-                OnCancel="CancelHouseholdEdit" />
-        </div>
-
-    }
-    else if (showHouseholdCard && selectedHouseholdDto != null)
+    @if (showHouseholdCard && selectedHouseholdDto != null)
     {
         <div class="household-container"> 
             <div class="household-card-container">
@@ -149,6 +126,12 @@ else
         </div>
     }
 }
+
+
+<HouseholdFormModal IsEditMode="isEditHouseholdMode"
+                    FormData="householdFormDto"
+                    HasDefaultHousehold="hasDefaultHousehold" />
+
 
 @if (showInviteModal && selectedHouseholdDto != null)
 {
@@ -256,7 +239,6 @@ else
                     // No household exists, household show add household form
                     hasDefaultHousehold = false;
                     showHouseholdCard = false;
-                    showHouseholdForm = true;
                     isLoading = false;
 
                     return;
@@ -278,6 +260,36 @@ else
     }
 
     #region Household Management
+
+    private async Task OpenHouseholdFormModalAsync()
+    {
+        var parameters = new DialogParameters<HouseholdFormModal>
+    {
+        { x => x.FormData, householdFormDto },
+        { x => x.IsEditMode, isEditHouseholdMode },
+        { x => x.HasDefaultHousehold, hasDefaultHousehold }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<HouseholdFormModal>(
+            isEditHouseholdMode ? "Edit Household" : "Create Household",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await SaveHousehold();
+        }
+    }
+
     private void PopulateHouseholdItems()
     {
         householdItems = households.Select(h => new SelectItem<Guid?>
@@ -338,11 +350,6 @@ else
             selectedHouseholdDto = null;
             hasAdminPermissions = false;
         }
-    }
-
-    private void OpenHouseholdForm()
-    {
-        showHouseholdForm = true;
     }
 
     private async Task SaveHousehold()
@@ -434,13 +441,13 @@ else
         };
 
         isEditHouseholdMode = true;
-        showHouseholdForm = true;
         showHouseholdCard = false;
+
+        OpenHouseholdFormModalAsync();
     }
 
     private void CancelHouseholdEdit()
     {
-        showHouseholdForm = false;
         showHouseholdCard = true;
         isEditHouseholdMode = false;
         householdFormDto = new HouseholdFormDto();

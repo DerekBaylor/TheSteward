@@ -4,6 +4,8 @@
     <DialogContent>
         <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
+            <ValidationSummary />
+
             <MudTextField @bind-Value="FormData.HouseholdName"
                           Label="Household Name"
                           Variant="Variant.Outlined"
@@ -34,6 +36,7 @@
                        Class="mb-2" />
         </EditForm>
     </DialogContent>
+
     <DialogActions>
         <MudButton OnClick="HandleCancel"
                    Variant="Variant.Outlined"
@@ -55,7 +58,7 @@
 
 @code {
     [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; }
+    private IMudDialogInstance MudDialog { get; set; } = null!;
 
     [Parameter, EditorRequired]
     public HouseholdFormDto FormData { get; set; } = new();
@@ -64,25 +67,17 @@
     public bool IsEditMode { get; set; }
 
     [Parameter]
-    public bool IsSubmitting { get; set; }
-
-    [Parameter]
     public bool HasDefaultHousehold { get; set; }
 
-    [Parameter]
-    public EventCallback OnSubmit { get; set; }
+    private bool IsSubmitting { get; set; }
 
-    [Parameter]
-    public EventCallback OnCancel { get; set; }
-
-    private async Task HandleSubmit()
+    private void HandleSubmit()
     {
-        await OnSubmit.InvokeAsync();
+        MudDialog.Close(DialogResult.Ok(FormData));
     }
 
-    private async Task HandleCancel()
+    private void HandleCancel()
     {
-        await OnCancel.InvokeAsync();
         MudDialog.Cancel();
     }
 }

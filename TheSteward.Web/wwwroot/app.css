@@ -18,6 +18,7 @@
 @import url("./styles/components/dashboardCalendar.css");
 @import url("./styles/components/householdCard.css");
 @import url("./styles/components/userHouseholdCard.css");
+@import url("./styles/components/userHouseholdFormModal.css");
 @import url("./styles/components/userProfileCard.css");
 @import url("./styles/components/inviteMemberModal.css");
 @import url("./styles/components/pendingInvitationCard.css");

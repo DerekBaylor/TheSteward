@@ -81,17 +81,7 @@ else
 
             <div class="userHousehold-container">
                 <div class="household-card-container">
-                    @if (showMemberPermissionsForm && userHouseholdFormDto != null)
-                    {
-                        <h4 class="section-title"> Member Permissions</h4>
-                        <UserHouseholdForm 
-                            FormData="userHouseholdFormDto"
-                            IsSubmitting="isSubmitting"
-                            OnSubmit="SaveUserHousehold"
-                            OnCancel="CancelUserHouseholdEdit" />
-
-                    }
-                    else if (selectedUserHouseholdDto != null && showMemberCard)
+                    @if (selectedUserHouseholdDto != null && showMemberCard)
                         {
 
                         <h4 class="section-title"> Member Information</h4>
@@ -138,7 +128,6 @@ else
 
     private UserHouseholdDto? userHouseholdDto = null;
     private UserHouseholdDto? selectedUserHouseholdDto = null;
-    private UserHouseholdFormDto? userHouseholdFormDto = null;
     private ApplicationUser? selectedMember;
 
     private List<HouseholdInvitationDto> pendingInvitations = new();
@@ -150,11 +139,9 @@ else
     private bool showHouseholdForm = false;
     private bool showHouseholdCard = false;
     private bool isEditHouseholdMode = false;
-    private bool isEditUserHouseholdMode = false;
     private bool isSubmitting = false;
     private bool hasDefaultHousehold = false;
     private bool hasAdminPermissions = false;
-    private bool showMemberPermissionsForm = false;
     private bool showMemberCard = false;
     private bool showUserProfileCard = false;
 
@@ -642,7 +629,7 @@ else
     }
     #endregion Member Invitation
 
-
+    #region UserHousehold Management  Memmber Management
     private async Task GetMember(ApplicationUser member)
     {
         if (selectedHouseholdDto == null)
@@ -690,7 +677,7 @@ else
         errorMessage = null;
     }
 
-    private void EditMemberPermissions(UserHouseholdDto userHouseholdDto)
+    private async Task EditMemberPermissions(UserHouseholdDto userHouseholdDto)
     {
         if (userHouseholdDto == null)
         {
@@ -698,7 +685,7 @@ else
             return;
         }
 
-        userHouseholdFormDto = new UserHouseholdFormDto
+        var formDto = new UserHouseholdFormDto
         {
             UserHouseholdId = userHouseholdDto.UserHouseholdId,
             MemberName = userHouseholdDto.User?.UserName ?? "Unknown",
@@ -714,20 +701,34 @@ else
             HasFileManagerWritePermission = userHouseholdDto.HasFileManagerWritePermission
         };
 
-        showMemberPermissionsForm = true;
+        var parameters = new DialogParameters<UserHouseholdFormModal>
+    {
+        { x => x.FormData, formDto }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = false
+        };
+
+        var dialog = await DialogService.ShowAsync<UserHouseholdFormModal>(
+            "Edit Member Permissions",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is UserHouseholdFormDto updatedFormDto)
+        {
+            await SaveUserHousehold(updatedFormDto);
+        }
     }
 
-    private void CancelUserHouseholdEdit()
+    private async Task SaveUserHousehold(UserHouseholdFormDto formDto)
     {
-        showMemberPermissionsForm = false;
-        isEditUserHouseholdMode = false;
-        userHouseholdFormDto = null;
-        errorMessage = null;
-    }
-
-    private async Task SaveUserHousehold()
-    {
-        if (string.IsNullOrEmpty(currentUserId) || userHouseholdFormDto == null)
+        if (string.IsNullOrEmpty(currentUserId))
         {
             errorMessage = "Invalid data for saving permissions";
             return;
@@ -739,7 +740,6 @@ else
             return;
         }
 
-        isSubmitting = true;
         errorMessage = null;
 
         try
@@ -747,19 +747,19 @@ else
             var updateUserHouseholdDto = new UpdateUserHouseholdDto
             {
                 UserId = selectedUserHouseholdDto.UserId,
-                UserHouseholdId = userHouseholdFormDto.UserHouseholdId,
-                IsHouseholdOwner = userHouseholdFormDto.IsHouseholdOwner,
+                UserHouseholdId = formDto.UserHouseholdId,
+                IsHouseholdOwner = formDto.IsHouseholdOwner,
                 HouseholdId = selectedUserHouseholdDto.HouseholdId,
                 IsDefaultUserHousehold = selectedUserHouseholdDto.IsDefaultUserHousehold,
-                HasAdminPermissions = userHouseholdFormDto.HasAdminPermissions,
-                HasFinanceManagerWritePermission = userHouseholdFormDto.HasFinanceManagerWritePermission,
-                HasFinanceManagerReadPermission = userHouseholdFormDto.HasFinanceManagerReadPermission,
-                HasKitchenManagerWritePermission = userHouseholdFormDto.HasKitchenManagerWritePermission,
-                HasKitchenManagerReadPermission = userHouseholdFormDto.HasKitchenManagerReadPermission,
-                HasTaskManagerWritePermission = userHouseholdFormDto.HasTaskManagerWritePermission,
-                HasTaskManagerReadPermission = userHouseholdFormDto.HasTaskManagerReadPermission,
-                HasFileManagerWritePermission = userHouseholdFormDto.HasFileManagerWritePermission,
-                HasFileManagerReadPermission = userHouseholdFormDto.HasFileManagerReadPermission
+                HasAdminPermissions = formDto.HasAdminPermissions,
+                HasFinanceManagerWritePermission = formDto.HasFinanceManagerWritePermission,
+                HasFinanceManagerReadPermission = formDto.HasFinanceManagerReadPermission,
+                HasKitchenManagerWritePermission = formDto.HasKitchenManagerWritePermission,
+                HasKitchenManagerReadPermission = formDto.HasKitchenManagerReadPermission,
+                HasTaskManagerWritePermission = formDto.HasTaskManagerWritePermission,
+                HasTaskManagerReadPermission = formDto.HasTaskManagerReadPermission,
+                HasFileManagerWritePermission = formDto.HasFileManagerWritePermission,
+                HasFileManagerReadPermission = formDto.HasFileManagerReadPermission
             };
 
             await UserHouseholdService.UpdateAsync(updateUserHouseholdDto);
@@ -776,18 +776,13 @@ else
                 }
             }
 
-            showMemberPermissionsForm = false;
-            isEditUserHouseholdMode = false;
-
             StateHasChanged();
         }
         catch (Exception ex)
         {
             errorMessage = $"Error saving member permissions: {ex.Message}";
         }
-        finally
-        {
-            isSubmitting = false;
-        }
     }
+
+    #endregion UserHousehold Management / Memmber Management
 }

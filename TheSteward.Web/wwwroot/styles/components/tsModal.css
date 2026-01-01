@@ -1,11 +1,13 @@
 ﻿/* Modal styling */
-.household-form-modal .mud-dialog,
-.invite-member-modal .mud-dialog {
+.ts-modal.mud-dialog,
+.household-form-modal.mud-dialog,
+.user-profile-modal.mud-dialog {
     border: 3px solid var(--base-purple);
     border-radius: var(--border-radius) !important;
 }
 
 .household-form-modal .mud-dialog-title,
+.user-profile-modal .mud-dialog,
 .invite-member-modal .mud-dialog-title {
     padding: 0;
 }

@@ -1,7 +1,16 @@
 ﻿@namespace TheSteward.Shared.Components.HouseholdComponents
 @using TheSteward.Core.Dtos.HouseholdDtos
 
-<MudDialog>
+<MudDialog Class="invite-member-modal ts-modal">
+    <TitleContent>
+        <div class="modal-header-custom">
+            <MudText Typo="Typo.h5">Invite Memeber to Household</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                           OnClick="HandleCancel"
+                           Class="modal-close-btn" />
+        </div>
+    </TitleContent>
+
     <DialogContent>
         <EditForm Model="inviteDto" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />

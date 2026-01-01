@@ -11,12 +11,14 @@
 /* Components */
 /*------------*/
 @import url("./styles/components//tsCard.css");
+@import url("./styles/components/tsModal.css");
 @import url("./styles/components/sidebarNav.css");
 @import url("./styles/components/landingPage.css");
 @import url("./styles/components/dashboard.css");
 @import url("./styles/components/dashboardCalendar.css");
 @import url("./styles/components/householdCard.css");
-@import url("./styles/components/householdForm.css");
+@import url("./styles/components/userHouseholdCard.css");
+@import url("./styles/components/userProfileCard.css");
 @import url("./styles/components/inviteMemberModal.css");
 @import url("./styles/components/pendingInvitationCard.css");
 
@@ -145,50 +147,28 @@ body {
     box-shadow: none;
 }
 
-.main-content {
+body.main-content {
+    align-items: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    font-family: var(--primary-font);
 }
 
-/*.theme-red {
-    --hue: var(--hue-red);
-}
-.theme-orange {
-    --hue: var(--hue-orange);
-}
-.theme-yellow {
-    --hue: var(--hue-yellow);
-}
-.theme-green {
-    --hue: var(--hue-green);
-}
-.theme-blue {
-    --hue: var(--hue-blue);
-}
-.theme-purple {
-    --hue: var(--hue-purple);
+/* --------------------- */
+/* Mud Blazor Overwrites */
+/* --------------------- */
+
+.mud-typography-body1 {
+    font-family: var(--primary-font) !important;
 }
 
-.p-red {
-    background-color: var(--base-red);
+.mud-input-label {
+    font-family: var(--label-font) !important;
 }
-.p-orange {
-    background-color: var(--base-orange);
-}
-.p-yellow {
-    background-color: var(--base-yellow);
-}
-.p-green {
-    background-color: var(--base-green);
-}
-.p-blue {
-    background-color: var(--base-blue);
-}
-.p-purple {
-    background-color: var(--base-purple);
-}*/
 
+.mud-button-label {
+    font-family: var(--label-font) !important;
+}
 
 
 .app-container {

@@ -1,0 +1,35 @@
+﻿/* Modal styling */
+.household-form-modal .mud-dialog,
+.invite-member-modal .mud-dialog {
+    border: 3px solid var(--base-purple);
+    border-radius: var(--border-radius) !important;
+}
+
+.household-form-modal .mud-dialog-title,
+.invite-member-modal .mud-dialog-title {
+    padding: 0;
+}
+
+.modal-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--base-purple);
+    color: white;
+    padding: 1rem 1.5rem;
+    margin: -1rem -1.5rem 1rem -1.5rem;
+}
+
+    .modal-header-custom .mud-typography {
+        color: white;
+        margin: 0;
+        font-family: var(--label-font);
+    }
+
+.modal-close-btn {
+    color: white !important;
+}
+
+    .modal-close-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }

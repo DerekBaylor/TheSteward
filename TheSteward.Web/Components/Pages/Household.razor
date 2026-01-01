@@ -105,17 +105,7 @@ else
         </div>
     }
 
-    @if (showUserProfileForm && userProfileFormDto != null)
-    {
-        <div class="household-form-container mt-3">
-            <h4 class="section-title">Edit My Profile</h4>
-            <UserProfileForm FormData="userProfileFormDto"
-                                IsSubmitting="isSubmitting"
-                                OnSubmit="SaveUserProfile"
-                                OnCancel="CancelUserProfileEdit" />
-        </div>
-    }
-    else if (showUserProfileCard && currentUser != null)
+    @if (showUserProfileCard && currentUser != null)
     {
         <div class="household-container mt-3">
             <div class="household-card-container">
@@ -153,7 +143,6 @@ else
 
     private List<HouseholdInvitationDto> pendingInvitations = new();
 
-    private UserProfileFormDto? userProfileFormDto = null;
     private ApplicationUser? currentUser = null;
 
     private bool isLoading = true;
@@ -167,7 +156,6 @@ else
     private bool hasAdminPermissions = false;
     private bool showMemberPermissionsForm = false;
     private bool showMemberCard = false;
-    private bool showUserProfileForm = false;
     private bool showUserProfileCard = false;
 
     private string? errorMessage;
@@ -440,7 +428,7 @@ else
     #endregion Household Management
 
     #region User Profile Management
-    private void EditUserProfile()
+    private async Task EditUserProfile()
     {
         if (currentUser == null)
         {
@@ -448,34 +436,52 @@ else
             return;
         }
 
-        userProfileFormDto = new UserProfileFormDto
+        var formDto = new UserProfileFormDto
         {
             UserName = currentUser.UserName ?? "",
             Email = currentUser.Email ?? "",
             PhoneNumber = currentUser.PhoneNumber
         };
 
-        showUserProfileForm = true;
-        showUserProfileCard = false;
+        var parameters = new DialogParameters<UserProfileModal>
+    {
+        { x => x.FormData, formDto }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<UserProfileModal>(
+            "Edit My Profile",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is UserProfileFormDto updatedFormDto)
+        {
+            await SaveUserProfile(updatedFormDto);
+        }
     }
 
     private void CancelUserProfileEdit()
     {
-        showUserProfileForm = false;
         showUserProfileCard = false;
-        userProfileFormDto = null;
         errorMessage = null;
     }
 
-    private async Task SaveUserProfile()
+    private async Task SaveUserProfile(UserProfileFormDto formDto)
     {
-        if (string.IsNullOrEmpty(currentUserId) || userProfileFormDto == null || currentUser == null)
+        if (string.IsNullOrEmpty(currentUserId) || currentUser == null)
         {
             errorMessage = "Invalid data for saving profile";
             return;
         }
 
-        isSubmitting = true;
         errorMessage = null;
 
         try
@@ -483,9 +489,9 @@ else
             var updateDto = new UpdateUserProfileDto
             {
                 UserId = currentUserId,
-                UserName = userProfileFormDto.UserName,
-                Email = userProfileFormDto.Email,
-                PhoneNumber = userProfileFormDto.PhoneNumber
+                UserName = formDto.UserName,
+                Email = formDto.Email,
+                PhoneNumber = formDto.PhoneNumber
             };
 
             var result = await UserService.UpdateUserProfileAsync(updateDto);
@@ -493,10 +499,7 @@ else
             if (result.Succeeded)
             {
                 currentUser = await UserService.GetUserByIdAsync(currentUserId);
-
-                showUserProfileForm = false;
                 showUserProfileCard = false;
-
                 NavigationManager.NavigateTo("/household", forceLoad: true);
             }
             else
@@ -507,10 +510,6 @@ else
         catch (Exception ex)
         {
             errorMessage = $"Error saving profile: {ex.Message}";
-        }
-        finally
-        {
-            isSubmitting = false;
         }
     }
 
@@ -524,6 +523,7 @@ else
 
         showUserProfileCard = true;
     }
+    
     private void CloseUserProfile()
     {
         showUserProfileCard = false;

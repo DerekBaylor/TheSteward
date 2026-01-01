@@ -1,33 +1,48 @@
 ﻿@namespace TheSteward.Shared.Components.HouseholdComponents
-
 @using TheSteward.Core.Dtos.HouseholdDtos
 @using TheSteward.Core.Models
 @using System.Reflection
 @using TheSteward.Core.Attributes
 
-<div class="ts-card">
-    <h5 class="card-title">@UserHouseholdDto.User.UserName</h5>
-    <div class="card-body">
-        <p class="card-text">
-            <strong>Household Owner:</strong> @UserHouseholdDto.IsHouseholdOwner
-        </p>
-        <h6 class="mt-3 ts-lable">Permissions:</h6>
-        <ul style="list-style: none; padding-left: 0;">
-            @foreach (var p in GetPermissions())
-            {
-                <li>
-                    <span class="material-icons" style="@(p.IsEnabled ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
-                        @(p.IsEnabled ? "check_circle" : "radio_button_unchecked")
-                    </span>
-                    <span style="@(p.IsEnabled ? "" : "opacity: 0.6;")">@p.Name</span>
-                </li>
-            }
-        </ul>
-    </div>
+<MudCard id="userHouseholdCard" class="ts-tabbed-card" Elevation="0">
+    <MudCardActions class="ts-tabbed-card-btn-container">
+        <MudButton id="editPermissionsBtn" class="ts-card-tab-btn" @onclick="HandleEdit">Edit Permissions</MudButton>
+        <MudButton id="closeMemberBtn" class="ts-card-tab-btn" @onclick="HandleCancel">Close</MudButton>
+    </MudCardActions>
 
-    <button type="button" class="ts-btn ts-cancel-btn" @onclick="HandleCancel">Close</button>
-    <button type="button" class="ts-btn ts-edit-btn" @onclick="HandleEdit">Edit Permissions</button>
-</div>
+    <MudCardContent class="ts-card-content">
+        <MudCardHeader Class="ts-tabbed-card-header">
+            <h3 class="ts-tabbed-card-title">
+                <span class="material-icons" style="vertical-align: middle; font-size: 24px; margin-right: 8px;">person</span>
+                <span class="ts-label">@UserHouseholdDto.User.UserName</span>
+            </h3>
+        </MudCardHeader>
+
+        <div class="ts-card-body">
+            <section class="ts-card-section">
+                <p class="ts-card-row">
+                    <span class="ts-row-title">Household Owner:</span>
+                    @(UserHouseholdDto.IsHouseholdOwner ? "Yes" : "No")
+                </p>
+            </section>
+
+            <section class="ts-card-section">
+                <p class="ts-label">Permissions:</p>
+                <ul id="memberPermissionsList" class="ts-card-list">
+                    @foreach (var permission in GetPermissions())
+                    {
+                        <li>
+                            <span style="@(permission.IsEnabled ? "" : "opacity: 0.6;")">@permission.Name</span>
+                            <span class="material-icons" style="@(permission.IsEnabled ? "color: green;" : "color: gray;") vertical-align: middle; font-size: 20px;">
+                                @(permission.IsEnabled ? "check_circle" : "radio_button_unchecked")
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </section>
+        </div>
+    </MudCardContent>
+</MudCard>
 
 @code {
     [Parameter, EditorRequired]
@@ -52,7 +67,6 @@
     private List<(string Name, bool IsEnabled)> GetPermissions()
     {
         var permission = new List<(string Name, bool IsEnabled)>();
-
         var properties = typeof(UserHouseholdDto).GetProperties()
             .Where(p => p.GetCustomAttribute<UserPermissionAttribute>() != null);
 
@@ -60,7 +74,6 @@
         {
             var attribute = property.GetCustomAttribute<UserPermissionAttribute>();
             var value = (bool)(property.GetValue(UserHouseholdDto) ?? false);
-
             permission.Add((attribute!.DisplayName, value));
         }
 

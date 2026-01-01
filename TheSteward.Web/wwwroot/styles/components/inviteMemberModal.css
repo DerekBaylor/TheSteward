@@ -10,7 +10,7 @@
 #inviteMemberModal .ts-modal-content{
     background-clip: padding-box;
     background-color: var(--off-white);
-    border: 3px solid var(--purple);
+    border: 3px solid var(--base-purple);
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -22,7 +22,7 @@
 
 #inviteMemberModal .ts-modal-header {
     align-items: center;
-    background-color: var(--purple);
+    background-color: var(--base-purple);
     color: var(--off-white);
     display: flex;
     flex-shrink: 0;

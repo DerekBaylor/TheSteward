@@ -8,6 +8,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 @attribute [Authorize]
 
@@ -128,18 +129,6 @@ else
 }
 
 
-<HouseholdFormModal IsEditMode="isEditHouseholdMode"
-                    FormData="householdFormDto"
-                    HasDefaultHousehold="hasDefaultHousehold" />
-
-
-@if (showInviteModal && selectedHouseholdDto != null)
-{
-    <InviteMemberModal HouseholdId="selectedHouseholdDto.HouseholdId"
-                       OnClose="CloseInviteModal"
-                       OnInviteSent="SendInvitation" />
-}
-
 @if (!string.IsNullOrEmpty(errorMessage))
 {
     <div class="alert alert-danger mt-3" role="alert">
@@ -178,7 +167,6 @@ else
     private bool hasAdminPermissions = false;
     private bool showMemberPermissionsForm = false;
     private bool showMemberCard = false;
-    private bool showInviteModal = false;
     private bool showUserProfileForm = false;
     private bool showUserProfileCard = false;
 
@@ -288,6 +276,9 @@ else
         {
             await SaveHousehold();
         }
+
+        isEditHouseholdMode = false;
+        householdFormDto = new HouseholdFormDto();        
     }
 
     private void PopulateHouseholdItems()
@@ -403,6 +394,7 @@ else
                     await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
 
                     hasDefaultHousehold = true;
+                    showHouseholdCard = true;
                     HouseholdState.SetHousehold(defaultUserHousehold.Household);
                 }
                 else
@@ -441,17 +433,8 @@ else
         };
 
         isEditHouseholdMode = true;
-        showHouseholdCard = false;
 
         OpenHouseholdFormModalAsync();
-    }
-
-    private void CancelHouseholdEdit()
-    {
-        showHouseholdCard = true;
-        isEditHouseholdMode = false;
-        householdFormDto = new HouseholdFormDto();
-        errorMessage = null;
     }
 
     #endregion Household Management
@@ -550,7 +533,7 @@ else
 
     #region Member Invitation
 
-    private void AddMember()
+    private async Task AddMember()
     {
         if (selectedHouseholdDto == null)
         {
@@ -558,12 +541,29 @@ else
             return;
         }
 
-        showInviteModal = true;
-    }
-
-    private void CloseInviteModal()
+        var parameters = new DialogParameters<InviteMemberModal>
     {
-        showInviteModal = false;
+        { x => x.HouseholdId, selectedHouseholdDto.HouseholdId }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<InviteMemberModal>(
+            "Invite Member to Household",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is InviteUserToHouseholdDto inviteDto)
+        {
+            await SendInvitation(inviteDto);
+        }
     }
 
     private async Task SendInvitation(InviteUserToHouseholdDto inviteDto)
@@ -578,13 +578,15 @@ else
         {
             await UserHouseholdService.InviteUserToHouseholdAsync(inviteDto, currentUserId);
             errorMessage = null;
+            Snackbar.Add("Invitation sent successfully!", Severity.Success);
         }
         catch (Exception ex)
         {
             errorMessage = $"Error sending invitation: {ex.Message}";
-            throw;
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
     }
+
 
     private async Task AcceptInvitation((Guid InvitationId, bool SetAsDefault) data)
     {

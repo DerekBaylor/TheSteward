@@ -1,28 +1,32 @@
 ﻿@namespace TheSteward.Shared.Components.HouseholdComponents
-
 @using TheSteward.Core.Models
 
-<div class="ts-card">
-    <div class="card-body">
-        <div class="mb-2">
-            <span class="ts-label">Username:</span>
-            <span>@User.UserName</span>
-        </div>
+<MudCard id="userProfileCard" class="ts-tabbed-card user-profile-card" Elevation="0">
+    <MudCardActions class="ts-tabbed-card-btn-container">
+        <MudButton id="editProfileBtn" class="ts-card-tab-btn" @onclick="HandleEdit">Edit Profile</MudButton>
+        <MudButton id="closeProfileBtn" class="ts-card-tab-btn" @onclick="HandleClose">Close</MudButton>
+    </MudCardActions>
 
-        <div class="mb-2">
-            <span class="ts-label">Email:</span>
-            <span>@User.Email</span>
-        </div>
+    <MudCardContent class="ts-card-content">
+        <MudCardHeader Class="ts-tabbed-card-header">
+            <h3 class="ts-tabbed-card-title"><span class="ts-label">My Profile</span></h3>
+        </MudCardHeader>
 
-        <div class="mb-2">
-            <span class="ts-label">Phone:</span>
-            <span>@(string.IsNullOrEmpty(User.PhoneNumber) ? "Not set" : User.PhoneNumber)</span>
+        <div class="ts-card-body">
+            <section class="ts-card-section">
+                <p class="ts-card-row">
+                    <span class="ts-row-title">Username:</span> @User.UserName
+                </p>
+                <p class="ts-card-row">
+                    <span class="ts-row-title">Email:</span> @User.Email
+                </p>
+                <p class="ts-card-row">
+                    <span class="ts-row-title">Phone:</span> @(string.IsNullOrEmpty(User.PhoneNumber) ? "Not set" : User.PhoneNumber)
+                </p>
+            </section>
         </div>
-
-        <button type="button" class="ts-btn ts-cancel-btn ms-2 me-2" @onclick="OnClose">Close</button>
-        <button class="ts-btn ts-edit-btn mt-3" @onclick="HandleEdit">Edit Profile</button>
-    </div>
-</div>
+    </MudCardContent>
+</MudCard>
 
 @code {
     [Parameter, EditorRequired]

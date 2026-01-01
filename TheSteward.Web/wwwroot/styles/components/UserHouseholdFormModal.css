@@ -1,0 +1,44 @@
+﻿/* User Household Modal (Member Permissions) */
+/*.user-household-modal.mud-dialog {
+    border: 3px solid var(--base-purple);
+    border-radius: var(--border-radius);
+    font-family: var(--primary-font);
+}
+
+.user-household-modal .mud-dialog-title {
+    padding: 0;
+}
+
+.user-household-modal .mud-dialog-content {
+    padding-top: 1rem;
+    font-family: var(--primary-font);
+}
+
+.user-household-modal .mud-input-label,
+.user-household-modal .mud-checkbox-label,
+.user-household-modal .ts-label {
+    font-family: var(--label-font);
+}
+
+.user-household-modal .mud-input,
+.user-household-modal .mud-button-root {
+    font-family: var(--primary-font);
+}
+
+.user-household-modal .mud-dialog-actions {
+    font-family: var(--primary-font);
+}
+
+.user-household-modal .permission-section {
+    padding-left: 1rem;
+    border-left: 3px solid var(--gray-3);
+}
+*/
+
+.user-household-modal.ts-modal.mud-dialog {
+    border: 3px solid var(--base-blue);
+}
+
+.user-household-modal .modal-header-custom {
+    background-color: var(--base-blue);
+}

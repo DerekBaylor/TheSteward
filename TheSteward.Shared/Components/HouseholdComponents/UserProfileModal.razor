@@ -1,0 +1,74 @@
+﻿@namespace TheSteward.Shared.Components.HouseholdComponents
+@using TheSteward.Shared.Dtos
+
+<MudDialog Class="user-profile-modal">
+    <TitleContent>
+        <div class="modal-header-custom">
+            <MudText Typo="Typo.h6">Edit My Profile</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                           OnClick="HandleCancel"
+                           Class="modal-close-btn" />
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <MudTextField @bind-Value="FormData.UserName"
+                          Label="Username"
+                          Variant="Variant.Outlined"
+                          For="@(() => FormData.UserName)"
+                          Margin="Margin.Dense"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="FormData.Email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          For="@(() => FormData.Email)"
+                          Margin="Margin.Dense"
+                          InputType="InputType.Email"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="FormData.PhoneNumber"
+                          Label="Phone Number"
+                          Variant="Variant.Outlined"
+                          For="@(() => FormData.PhoneNumber)"
+                          Margin="Margin.Dense"
+                          InputType="InputType.Telephone"
+                          Placeholder="(555) 555-5555"
+                          Class="mb-4" />
+        </EditForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="HandleCancel"
+                   Variant="Variant.Outlined"
+                   Color="Color.Default">
+            Cancel
+        </MudButton>
+        <MudButton OnClick="HandleSubmit"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary">
+            Update Profile
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public UserProfileFormDto FormData { get; set; } = new();
+
+    private void HandleSubmit()
+    {
+        MudDialog.Close(DialogResult.Ok(FormData));
+    }
+
+    private void HandleCancel()
+    {
+        MudDialog.Cancel();
+    }
+}

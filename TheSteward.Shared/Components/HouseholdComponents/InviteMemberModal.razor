@@ -1,65 +1,67 @@
 ﻿@namespace TheSteward.Shared.Components.HouseholdComponents
-
 @using TheSteward.Core.Dtos.HouseholdDtos
-@using Microsoft.AspNetCore.Components.Forms
-@using System.ComponentModel.DataAnnotations
 
-<div id="inviteMemberModal" class="modal fade show d-block" tabindex="-1" >
-    <div class="modal-dialog">
-        <div class="ts-modal-content">
-            <div class="ts-modal-header">
-                <h5 class="modal-title">Invite Member to Household</h5>
-                <button type="button" class="ts-x-btn" @onclick="HandleCancel">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <EditForm Model="inviteDto" OnValidSubmit="HandleSubmit">
-                    <DataAnnotationsValidator />
-                    
-                    <div class="mb-3 ts-form-control-group">
-                        <label for="email" class="form-label ts-label">Email:</label>
-                        <InputText id="email" class="form-control" @bind-value="inviteDto.Email" 
-                                   placeholder="user@example.com" />
-                        <ValidationMessage For="@(() => inviteDto.Email)" />
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger">@errorMessage</div>
-                    }
-
-                    @if (!string.IsNullOrEmpty(successMessage))
-                    {
-                        <div class="alert alert-success">@successMessage</div>
-                    }
-
-                    <div class="modal-footer button-container">
-                        <button type="button" class="ts-btn ts-cancel-btn" @onclick="HandleCancel">Cancel</button>
-                        <button type="submit" class="ts-btn ts-submit-btn" disabled="@isSubmitting">
-                            @if (isSubmitting)
-                            {
-                                <span class="spinner-border spinner-border-sm me-2"></span>
-                            }
-                            Send Invitation
-                        </button>
-                    </div>
-                </EditForm>
-            </div>
+<MudDialog Class="invite-member-modal ts-modal">
+    <TitleContent>
+        <div class="modal-header-custom">
+            <MudText Typo="Typo.h5">Invite Memeber to Household</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                           OnClick="HandleCancel"
+                           Class="modal-close-btn" />
         </div>
-    </div>
-</div>
+    </TitleContent>
+
+    <DialogContent>
+        <EditForm Model="inviteDto" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <MudTextField @bind-Value="inviteDto.Email"
+                          Label="Email Address"
+                          Variant="Variant.Outlined"
+                          For="@(() => inviteDto.Email)"
+                          Margin="Margin.Dense"
+                          Placeholder="user@example.com"
+                          InputType="InputType.Email"
+                          Class="mb-4" />
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-3">@errorMessage</MudAlert>
+            }
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <MudAlert Severity="Severity.Success" Class="mb-3">@successMessage</MudAlert>
+            }
+        </EditForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="HandleCancel"
+                   Variant="Variant.Outlined"
+                   Color="Color.Default"
+                   Disabled="@isSubmitting">
+            Cancel
+        </MudButton>
+        <MudButton OnClick="HandleSubmit"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@isSubmitting">
+            @if (isSubmitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+            }
+            Send Invitation
+        </MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
     [Parameter, EditorRequired]
     public Guid HouseholdId { get; set; }
-
-    [Parameter]
-    public EventCallback OnClose { get; set; }
-
-    [Parameter]
-    public EventCallback<InviteUserToHouseholdDto> OnInviteSent { get; set; }
-    //public EventCallback OnInviteSent { get; set; }
 
     private InviteUserToHouseholdDto inviteDto = new();
     private bool isSubmitting = false;
@@ -79,26 +81,18 @@
 
         try
         {
-            await OnInviteSent.InvokeAsync(inviteDto);
-            successMessage = "Invitation sent successfully!";
-            
-            inviteDto = new InviteUserToHouseholdDto { HouseholdId = HouseholdId };
-            
-            await Task.Delay(2000);
-            await HandleCancel();
+            // Close dialog with the invite data as result
+            MudDialog.Close(DialogResult.Ok(inviteDto));
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
-        }
-        finally
-        {
             isSubmitting = false;
         }
     }
 
-    private async Task HandleCancel()
+    private void HandleCancel()
     {
-        await OnClose.InvokeAsync();
+        MudDialog.Cancel();
     }
 }

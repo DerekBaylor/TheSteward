@@ -1,16 +1,5 @@
 ﻿@page "/household"
 
-@using System.ComponentModel.DataAnnotations
-@using System.Security.Claims
-@using AutoMapper
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
-@using TheSteward.Core.Dtos.HouseholdDtos
-@using TheSteward.Core.Dtos.UserDtos
-@using TheSteward.Infrastructure.Services
-@using TheSteward.Shared.Components
-@using TheSteward.Shared.Components.HouseholdComponents
-
 @inject IHouseholdService HouseholdService
 @inject IUserHouseholdService UserHouseholdService
 @inject IUserService UserService
@@ -18,6 +7,8 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 @attribute [Authorize]
 
@@ -46,10 +37,10 @@ else
         }
 
         <div class="toolbar-actions">
-            <button class="btn-toolbar btn-add" @onclick="OpenHouseholdForm">
+            <MudButton class="btn-toolbar btn-add" @onclick="OpenHouseholdFormModalAsync">
                 <span class="material-icons">add</span>
                 Add Household
-            </button>
+            </MudButton>
             <button class="btn-toolbar btn-profile" @onclick="ShowUserProfile">
                 <span class="material-icons">person</span>
                 My Profile
@@ -60,8 +51,8 @@ else
     @if (!hasDefaultHousehold)
     {
         <MudAlert id="householdAlert" Severity="Severity.Warning" role="alert">
-            You are not part of a household. Please Add a household, or accept an invitation.         
-            <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdForm">Add Household</button>
+            You are not part of a household. Please Add a household, or accept an invitation.
+            <button class="ts-btn ts-submit-btn" @onclick="OpenHouseholdFormModalAsync">Add Household</button>
         </MudAlert>
     }
 
@@ -74,20 +65,7 @@ else
                             OnHide="HideInvitation" />
     }
 
-    @if (showHouseholdForm)
-    {
-        <div class="household-form-container">
-            <HouseholdForm 
-                IsEditMode="isEditHouseholdMode"
-                FormData="householdFormDto"
-                HasDefaultHousehold="hasDefaultHousehold"
-                IsSubmitting="isSubmitting"
-                OnSubmit="SaveHousehold"
-                OnCancel="CancelHouseholdEdit" />
-        </div>
-
-    }
-    else if (showHouseholdCard && selectedHouseholdDto != null)
+    @if (showHouseholdCard && selectedHouseholdDto != null)
     {
         <div class="household-container"> 
             <div class="household-card-container">
@@ -103,17 +81,7 @@ else
 
             <div class="userHousehold-container">
                 <div class="household-card-container">
-                    @if (showMemberPermissionsForm && userHouseholdFormDto != null)
-                    {
-                        <h4 class="section-title"> Member Permissions</h4>
-                        <UserHouseholdForm 
-                            FormData="userHouseholdFormDto"
-                            IsSubmitting="isSubmitting"
-                            OnSubmit="SaveUserHousehold"
-                            OnCancel="CancelUserHouseholdEdit" />
-
-                    }
-                    else if (selectedUserHouseholdDto != null && showMemberCard)
+                    @if (selectedUserHouseholdDto != null && showMemberCard)
                         {
 
                         <h4 class="section-title"> Member Information</h4>
@@ -127,17 +95,7 @@ else
         </div>
     }
 
-    @if (showUserProfileForm && userProfileFormDto != null)
-    {
-        <div class="household-form-container mt-3">
-            <h4 class="section-title">Edit My Profile</h4>
-            <UserProfileForm FormData="userProfileFormDto"
-                                IsSubmitting="isSubmitting"
-                                OnSubmit="SaveUserProfile"
-                                OnCancel="CancelUserProfileEdit" />
-        </div>
-    }
-    else if (showUserProfileCard && currentUser != null)
+    @if (showUserProfileCard && currentUser != null)
     {
         <div class="household-container mt-3">
             <div class="household-card-container">
@@ -150,12 +108,6 @@ else
     }
 }
 
-@if (showInviteModal && selectedHouseholdDto != null)
-{
-    <InviteMemberModal HouseholdId="selectedHouseholdDto.HouseholdId"
-                       OnClose="CloseInviteModal"
-                       OnInviteSent="SendInvitation" />
-}
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -176,12 +128,10 @@ else
 
     private UserHouseholdDto? userHouseholdDto = null;
     private UserHouseholdDto? selectedUserHouseholdDto = null;
-    private UserHouseholdFormDto? userHouseholdFormDto = null;
     private ApplicationUser? selectedMember;
 
     private List<HouseholdInvitationDto> pendingInvitations = new();
 
-    private UserProfileFormDto? userProfileFormDto = null;
     private ApplicationUser? currentUser = null;
 
     private bool isLoading = true;
@@ -189,14 +139,10 @@ else
     private bool showHouseholdForm = false;
     private bool showHouseholdCard = false;
     private bool isEditHouseholdMode = false;
-    private bool isEditUserHouseholdMode = false;
     private bool isSubmitting = false;
     private bool hasDefaultHousehold = false;
     private bool hasAdminPermissions = false;
-    private bool showMemberPermissionsForm = false;
     private bool showMemberCard = false;
-    private bool showInviteModal = false;
-    private bool showUserProfileForm = false;
     private bool showUserProfileCard = false;
 
     private string? errorMessage;
@@ -256,7 +202,6 @@ else
                     // No household exists, household show add household form
                     hasDefaultHousehold = false;
                     showHouseholdCard = false;
-                    showHouseholdForm = true;
                     isLoading = false;
 
                     return;
@@ -278,6 +223,39 @@ else
     }
 
     #region Household Management
+
+    private async Task OpenHouseholdFormModalAsync()
+    {
+        var parameters = new DialogParameters<HouseholdFormModal>
+    {
+        { x => x.FormData, householdFormDto },
+        { x => x.IsEditMode, isEditHouseholdMode },
+        { x => x.HasDefaultHousehold, hasDefaultHousehold }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<HouseholdFormModal>(
+            isEditHouseholdMode ? "Edit Household" : "Create Household",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await SaveHousehold();
+        }
+
+        isEditHouseholdMode = false;
+        householdFormDto = new HouseholdFormDto();        
+    }
+
     private void PopulateHouseholdItems()
     {
         householdItems = households.Select(h => new SelectItem<Guid?>
@@ -340,11 +318,6 @@ else
         }
     }
 
-    private void OpenHouseholdForm()
-    {
-        showHouseholdForm = true;
-    }
-
     private async Task SaveHousehold()
     {
         if (string.IsNullOrEmpty(currentUserId))
@@ -396,6 +369,7 @@ else
                     await GetUserHouseholdAndPermissions(defaultUserHousehold.Household.HouseholdId);
 
                     hasDefaultHousehold = true;
+                    showHouseholdCard = true;
                     HouseholdState.SetHousehold(defaultUserHousehold.Household);
                 }
                 else
@@ -434,23 +408,14 @@ else
         };
 
         isEditHouseholdMode = true;
-        showHouseholdForm = true;
-        showHouseholdCard = false;
-    }
 
-    private void CancelHouseholdEdit()
-    {
-        showHouseholdForm = false;
-        showHouseholdCard = true;
-        isEditHouseholdMode = false;
-        householdFormDto = new HouseholdFormDto();
-        errorMessage = null;
+        OpenHouseholdFormModalAsync();
     }
 
     #endregion Household Management
 
     #region User Profile Management
-    private void EditUserProfile()
+    private async Task EditUserProfile()
     {
         if (currentUser == null)
         {
@@ -458,34 +423,52 @@ else
             return;
         }
 
-        userProfileFormDto = new UserProfileFormDto
+        var formDto = new UserProfileFormDto
         {
             UserName = currentUser.UserName ?? "",
             Email = currentUser.Email ?? "",
             PhoneNumber = currentUser.PhoneNumber
         };
 
-        showUserProfileForm = true;
-        showUserProfileCard = false;
+        var parameters = new DialogParameters<UserProfileModal>
+    {
+        { x => x.FormData, formDto }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<UserProfileModal>(
+            "Edit My Profile",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is UserProfileFormDto updatedFormDto)
+        {
+            await SaveUserProfile(updatedFormDto);
+        }
     }
 
     private void CancelUserProfileEdit()
     {
-        showUserProfileForm = false;
         showUserProfileCard = false;
-        userProfileFormDto = null;
         errorMessage = null;
     }
 
-    private async Task SaveUserProfile()
+    private async Task SaveUserProfile(UserProfileFormDto formDto)
     {
-        if (string.IsNullOrEmpty(currentUserId) || userProfileFormDto == null || currentUser == null)
+        if (string.IsNullOrEmpty(currentUserId) || currentUser == null)
         {
             errorMessage = "Invalid data for saving profile";
             return;
         }
 
-        isSubmitting = true;
         errorMessage = null;
 
         try
@@ -493,9 +476,9 @@ else
             var updateDto = new UpdateUserProfileDto
             {
                 UserId = currentUserId,
-                UserName = userProfileFormDto.UserName,
-                Email = userProfileFormDto.Email,
-                PhoneNumber = userProfileFormDto.PhoneNumber
+                UserName = formDto.UserName,
+                Email = formDto.Email,
+                PhoneNumber = formDto.PhoneNumber
             };
 
             var result = await UserService.UpdateUserProfileAsync(updateDto);
@@ -503,10 +486,7 @@ else
             if (result.Succeeded)
             {
                 currentUser = await UserService.GetUserByIdAsync(currentUserId);
-
-                showUserProfileForm = false;
                 showUserProfileCard = false;
-
                 NavigationManager.NavigateTo("/household", forceLoad: true);
             }
             else
@@ -517,10 +497,6 @@ else
         catch (Exception ex)
         {
             errorMessage = $"Error saving profile: {ex.Message}";
-        }
-        finally
-        {
-            isSubmitting = false;
         }
     }
 
@@ -534,6 +510,7 @@ else
 
         showUserProfileCard = true;
     }
+    
     private void CloseUserProfile()
     {
         showUserProfileCard = false;
@@ -543,7 +520,7 @@ else
 
     #region Member Invitation
 
-    private void AddMember()
+    private async Task AddMember()
     {
         if (selectedHouseholdDto == null)
         {
@@ -551,12 +528,29 @@ else
             return;
         }
 
-        showInviteModal = true;
-    }
-
-    private void CloseInviteModal()
+        var parameters = new DialogParameters<InviteMemberModal>
     {
-        showInviteModal = false;
+        { x => x.HouseholdId, selectedHouseholdDto.HouseholdId }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<InviteMemberModal>(
+            "Invite Member to Household",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is InviteUserToHouseholdDto inviteDto)
+        {
+            await SendInvitation(inviteDto);
+        }
     }
 
     private async Task SendInvitation(InviteUserToHouseholdDto inviteDto)
@@ -571,13 +565,15 @@ else
         {
             await UserHouseholdService.InviteUserToHouseholdAsync(inviteDto, currentUserId);
             errorMessage = null;
+            Snackbar.Add("Invitation sent successfully!", Severity.Success);
         }
         catch (Exception ex)
         {
             errorMessage = $"Error sending invitation: {ex.Message}";
-            throw;
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
     }
+
 
     private async Task AcceptInvitation((Guid InvitationId, bool SetAsDefault) data)
     {
@@ -633,7 +629,7 @@ else
     }
     #endregion Member Invitation
 
-
+    #region UserHousehold Management  Memmber Management
     private async Task GetMember(ApplicationUser member)
     {
         if (selectedHouseholdDto == null)
@@ -681,7 +677,7 @@ else
         errorMessage = null;
     }
 
-    private void EditMemberPermissions(UserHouseholdDto userHouseholdDto)
+    private async Task EditMemberPermissions(UserHouseholdDto userHouseholdDto)
     {
         if (userHouseholdDto == null)
         {
@@ -689,7 +685,7 @@ else
             return;
         }
 
-        userHouseholdFormDto = new UserHouseholdFormDto
+        var formDto = new UserHouseholdFormDto
         {
             UserHouseholdId = userHouseholdDto.UserHouseholdId,
             MemberName = userHouseholdDto.User?.UserName ?? "Unknown",
@@ -705,20 +701,34 @@ else
             HasFileManagerWritePermission = userHouseholdDto.HasFileManagerWritePermission
         };
 
-        showMemberPermissionsForm = true;
+        var parameters = new DialogParameters<UserHouseholdFormModal>
+    {
+        { x => x.FormData, formDto }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = false
+        };
+
+        var dialog = await DialogService.ShowAsync<UserHouseholdFormModal>(
+            "Edit Member Permissions",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is UserHouseholdFormDto updatedFormDto)
+        {
+            await SaveUserHousehold(updatedFormDto);
+        }
     }
 
-    private void CancelUserHouseholdEdit()
+    private async Task SaveUserHousehold(UserHouseholdFormDto formDto)
     {
-        showMemberPermissionsForm = false;
-        isEditUserHouseholdMode = false;
-        userHouseholdFormDto = null;
-        errorMessage = null;
-    }
-
-    private async Task SaveUserHousehold()
-    {
-        if (string.IsNullOrEmpty(currentUserId) || userHouseholdFormDto == null)
+        if (string.IsNullOrEmpty(currentUserId))
         {
             errorMessage = "Invalid data for saving permissions";
             return;
@@ -730,7 +740,6 @@ else
             return;
         }
 
-        isSubmitting = true;
         errorMessage = null;
 
         try
@@ -738,19 +747,19 @@ else
             var updateUserHouseholdDto = new UpdateUserHouseholdDto
             {
                 UserId = selectedUserHouseholdDto.UserId,
-                UserHouseholdId = userHouseholdFormDto.UserHouseholdId,
-                IsHouseholdOwner = userHouseholdFormDto.IsHouseholdOwner,
+                UserHouseholdId = formDto.UserHouseholdId,
+                IsHouseholdOwner = formDto.IsHouseholdOwner,
                 HouseholdId = selectedUserHouseholdDto.HouseholdId,
                 IsDefaultUserHousehold = selectedUserHouseholdDto.IsDefaultUserHousehold,
-                HasAdminPermissions = userHouseholdFormDto.HasAdminPermissions,
-                HasFinanceManagerWritePermission = userHouseholdFormDto.HasFinanceManagerWritePermission,
-                HasFinanceManagerReadPermission = userHouseholdFormDto.HasFinanceManagerReadPermission,
-                HasKitchenManagerWritePermission = userHouseholdFormDto.HasKitchenManagerWritePermission,
-                HasKitchenManagerReadPermission = userHouseholdFormDto.HasKitchenManagerReadPermission,
-                HasTaskManagerWritePermission = userHouseholdFormDto.HasTaskManagerWritePermission,
-                HasTaskManagerReadPermission = userHouseholdFormDto.HasTaskManagerReadPermission,
-                HasFileManagerWritePermission = userHouseholdFormDto.HasFileManagerWritePermission,
-                HasFileManagerReadPermission = userHouseholdFormDto.HasFileManagerReadPermission
+                HasAdminPermissions = formDto.HasAdminPermissions,
+                HasFinanceManagerWritePermission = formDto.HasFinanceManagerWritePermission,
+                HasFinanceManagerReadPermission = formDto.HasFinanceManagerReadPermission,
+                HasKitchenManagerWritePermission = formDto.HasKitchenManagerWritePermission,
+                HasKitchenManagerReadPermission = formDto.HasKitchenManagerReadPermission,
+                HasTaskManagerWritePermission = formDto.HasTaskManagerWritePermission,
+                HasTaskManagerReadPermission = formDto.HasTaskManagerReadPermission,
+                HasFileManagerWritePermission = formDto.HasFileManagerWritePermission,
+                HasFileManagerReadPermission = formDto.HasFileManagerReadPermission
             };
 
             await UserHouseholdService.UpdateAsync(updateUserHouseholdDto);
@@ -767,18 +776,13 @@ else
                 }
             }
 
-            showMemberPermissionsForm = false;
-            isEditUserHouseholdMode = false;
-
             StateHasChanged();
         }
         catch (Exception ex)
         {
             errorMessage = $"Error saving member permissions: {ex.Message}";
         }
-        finally
-        {
-            isSubmitting = false;
-        }
     }
+
+    #endregion UserHousehold Management / Memmber Management
 }

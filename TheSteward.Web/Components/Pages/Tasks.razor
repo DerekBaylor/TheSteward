@@ -1,4 +1,4 @@
-﻿@page "/budget"
+﻿@page "/tasks"
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -10,7 +10,9 @@
 
 @attribute [Authorize]
 
-<h3>Budget Dashboard</h3>
+<PageTitle>Task Dashboard</PageTitle>
+
+<h3>Task Dashboard</h3>
 <p>User Id: @currentUserId</p>
 
 
@@ -47,4 +49,8 @@
             isLoading = false;
         }
     }
+}
+
+@code {
+
 }

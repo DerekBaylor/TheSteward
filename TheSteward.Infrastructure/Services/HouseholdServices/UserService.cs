@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using TheSteward.Core.Dtos.UserDtos;
-using TheSteward.Core.IServices;
+using TheSteward.Core.IServices.HouseholdIServices;
 using TheSteward.Core.Models;
 
-namespace TheSteward.Infrastructure.Services;
+namespace TheSteward.Infrastructure.Services.HouseholdServices;
 
 public class UserService : IUserService
 {

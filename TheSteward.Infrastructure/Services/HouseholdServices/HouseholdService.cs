@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.HouseholdDtos;
-using TheSteward.Core.IRepositories;
-using TheSteward.Core.IServices;
+using TheSteward.Core.IRepositories.HouseholdIRepositories;
+using TheSteward.Core.IServices.HouseholdIServices;
 using TheSteward.Core.Models;
 using TheSteward.Core.Models.HouseholdModels;
 
-namespace TheSteward.Infrastructure.Services;
+namespace TheSteward.Infrastructure.Services.HouseholdServices;
 
 public class HouseholdService : IHouseholdService
 {
@@ -80,7 +80,7 @@ public class HouseholdService : IHouseholdService
         // Using Automapper on this block could potentially overwrite properties that aren't meant to be changed in this method, like IsHouseholdActive, OwnerId, Owner, and Members.
         currentHousehold.HasFileManagerAccess = updatedHousehold.HasFileManagerAccess;
         currentHousehold.HasFinanceManagerAccess = updatedHousehold.HasFinanceManagerAccess;
-        currentHousehold.HasMealManagerAccess = updatedHousehold.HasMealManagerAccess;
+        currentHousehold.HasKitchenManagerAccess = updatedHousehold.HasKitchenManagerAccess;
         currentHousehold.HasTaskManagerAccess = updatedHousehold.HasTaskManagerAccess;
         currentHousehold.HouseholdName = updatedHousehold.HouseholdName;
         currentHousehold.HouseholdId = currentHousehold.HouseholdId;

@@ -2,17 +2,19 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.IRepositories;
-using TheSteward.Core.IServices;
 using TheSteward.Core.Models;
 using TheSteward.Core.Profiles;
 using TheSteward.Infrastructure.Data;
 using TheSteward.Infrastructure.Repositories;
-using TheSteward.Infrastructure.Services;
 using TheSteward.Shared.Interfaces;
 using TheSteward.Shared.Services;
 using TheSteward.Web.Components;
 using TheSteward.Web.Components.Account;
 using MudBlazor.Services;
+using TheSteward.Core.IRepositories.HouseholdIRepositories;
+using TheSteward.Core.IServices.HouseholdIServices;
+using TheSteward.Infrastructure.Repositories.HouseholdRepositories;
+using TheSteward.Infrastructure.Services.HouseholdServices;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -14,5 +14,10 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />
 		<PackageReference Include="AutoMapper" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="IRepositories\FinanceManagerIRepositories\" />
+	  <Folder Include="IServices\FinanceManagerIServices\" />
+	  <Folder Include="Models\FinanceManagerModels\" />
+	</ItemGroup>
 
 </Project>

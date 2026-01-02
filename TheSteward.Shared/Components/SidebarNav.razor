@@ -122,6 +122,7 @@
             new("Budget", "finance", "/budget", true, false),
             new("Kitchen", "kitchen", "/kitchen", true, false),
             new("Tasks", "checklist", "/tasks", true, false),
+            new("Files", "folder", "/files", true, false),
             new("Register", "app_registration", "/account/register", false, false),
             new("Logout", "logout", "/", true, true),
             new("Login", "login", "/account/login", false, false),
@@ -149,10 +150,12 @@
                 "/household" => userPerms.HasAdminPermissions,
                 "/budget" => household.HasFinanceManagerAccess &&
                             userPerms.HasFinanceManagerReadPermission,
-                "/kitchen" => household.HasMealManagerAccess &&
+                "/kitchen" => household.HasKitchenManagerAccess &&
                              userPerms.HasKitchenManagerReadPermission,
                 "/tasks" => household.HasTaskManagerAccess &&
                            userPerms.HasTaskManagerReadPermission,
+                "/files" => household.HasFileManagerAccess &&
+                            userPerms.HasFileManagerReadPermission,
                 _ => true
             };
         }).ToList();

@@ -1,8 +1,8 @@
-﻿using TheSteward.Core.IRepositories;
+﻿using TheSteward.Core.IRepositories.HouseholdIRepositories;
 using TheSteward.Core.Models.HouseholdModels;
 using TheSteward.Infrastructure.Data;
 
-namespace TheSteward.Infrastructure.Repositories;
+namespace TheSteward.Infrastructure.Repositories.HouseholdRepositories;
 
 public class InvitationRepository : BaseRepository<HouseholdInvitation>, IInvitationRepository
 {

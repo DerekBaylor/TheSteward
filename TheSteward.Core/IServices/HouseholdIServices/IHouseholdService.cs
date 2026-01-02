@@ -1,6 +1,6 @@
 ﻿using TheSteward.Core.Dtos.HouseholdDtos;
 
-namespace TheSteward.Core.IServices;
+namespace TheSteward.Core.IServices.HouseholdIServices;
 
 public interface IHouseholdService
 {

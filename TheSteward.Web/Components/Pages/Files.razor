@@ -1,0 +1,50 @@
+﻿@page "/files"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+
+@attribute [Authorize]
+
+<h3>Files</h3>
+<p>User Id: @currentUserId</p>
+
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @errorMessage
+    </div>
+}
+
+@code {
+    private bool isLoading = true;
+    private string? errorMessage;
+    private string? currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading household: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

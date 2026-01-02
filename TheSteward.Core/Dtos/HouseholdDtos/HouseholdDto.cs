@@ -20,8 +20,8 @@ public class HouseholdDto
     [HouseholdFeature("Finance Manager")]
     public bool HasFinanceManagerAccess { get; set; }
 
-    [HouseholdFeature("Meal Manager")]
-    public bool HasMealManagerAccess { get; set; }
+    [HouseholdFeature("Kitchen Manager")]
+    public bool HasKitchenManagerAccess { get; set; }
 
     [HouseholdFeature("File Manager")]
     public bool HasFileManagerAccess { get; set; }

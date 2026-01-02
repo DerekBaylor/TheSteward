@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TheSteward.Core.Attributes;
 
-namespace TheSteward.Shared.Dtos;
+namespace TheSteward.Shared.Dtos.HouseholdDtos;
 
 public class UserHouseholdFormDto
 {

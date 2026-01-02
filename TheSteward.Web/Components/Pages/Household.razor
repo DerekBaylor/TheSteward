@@ -226,12 +226,12 @@ else
 
     private async Task OpenHouseholdFormModalAsync()
     {
-        var parameters = new DialogParameters<HouseholdFormModal>
-    {
-        { x => x.FormData, householdFormDto },
-        { x => x.IsEditMode, isEditHouseholdMode },
-        { x => x.HasDefaultHousehold, hasDefaultHousehold }
-    };
+        var parameters = new DialogParameters
+        {
+            { "FormData", householdFormDto },
+            { "IsEditMode", isEditHouseholdMode },
+            { "HasDefaultHousehold", hasDefaultHousehold }
+        };
 
         var options = new DialogOptions
         {
@@ -347,6 +347,11 @@ else
                 PopulateHouseholdItems();
 
                 await GetUserHouseholdAndPermissions(selectedHouseholdDto.HouseholdId);
+
+                if (selectedHouseholdDto != null)
+                {
+                    HouseholdState.SetHousehold(selectedHouseholdDto);
+                }
             }
             else // Create household
             {
@@ -370,7 +375,11 @@ else
 
                     hasDefaultHousehold = true;
                     showHouseholdCard = true;
-                    HouseholdState.SetHousehold(defaultUserHousehold.Household);
+
+                    if (selectedHouseholdDto != null)
+                    {
+                        HouseholdState.SetHousehold(selectedHouseholdDto);
+                    }
                 }
                 else
                 {
@@ -430,10 +439,10 @@ else
             PhoneNumber = currentUser.PhoneNumber
         };
 
-        var parameters = new DialogParameters<UserProfileModal>
-    {
-        { x => x.FormData, formDto }
-    };
+        var parameters = new DialogParameters
+        {
+            { "FormData", formDto }
+        };
 
         var options = new DialogOptions
         {
@@ -510,7 +519,7 @@ else
 
         showUserProfileCard = true;
     }
-    
+
     private void CloseUserProfile()
     {
         showUserProfileCard = false;
@@ -528,10 +537,10 @@ else
             return;
         }
 
-        var parameters = new DialogParameters<InviteMemberModal>
-    {
-        { x => x.HouseholdId, selectedHouseholdDto.HouseholdId }
-    };
+        var parameters = new DialogParameters
+        {
+            { "HouseholdId", selectedHouseholdDto.HouseholdId }
+        };
 
         var options = new DialogOptions
         {
@@ -701,10 +710,10 @@ else
             HasFileManagerWritePermission = userHouseholdDto.HasFileManagerWritePermission
         };
 
-        var parameters = new DialogParameters<UserHouseholdFormModal>
-    {
-        { x => x.FormData, formDto }
-    };
+        var parameters = new DialogParameters
+        {
+            { "FormData", formDto }
+        };
 
         var options = new DialogOptions
         {
@@ -733,15 +742,12 @@ else
             errorMessage = "Invalid data for saving permissions";
             return;
         }
-
         if (selectedUserHouseholdDto == null)
         {
             errorMessage = "No member selected for updating permissions";
             return;
         }
-
         errorMessage = null;
-
         try
         {
             var updateUserHouseholdDto = new UpdateUserHouseholdDto
@@ -766,21 +772,27 @@ else
 
             if (selectedHouseholdDto != null && selectedMember != null)
             {
-                var updatedUserHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(
-                    selectedHouseholdDto.HouseholdId,
-                    selectedMember.Id);
+                var updatedUserHousehold = await UserHouseholdService
+                    .GetUserHouseholdByHouseholdIdAndUserIdAsync(
+                        selectedHouseholdDto.HouseholdId,
+                        selectedMember.Id);
 
-                if (updatedUserHousehold != null)
+                if (updatedUserHousehold?.Household != null)
                 {
                     selectedUserHouseholdDto = updatedUserHousehold;
+                    selectedHouseholdDto = updatedUserHousehold.Household;
+
+                    HouseholdState.SetHousehold(updatedUserHousehold.Household);
                 }
             }
 
+            Snackbar.Add("Permissions updated successfully!", Severity.Success);
             StateHasChanged();
         }
         catch (Exception ex)
         {
             errorMessage = $"Error saving member permissions: {ex.Message}";
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
     }
 

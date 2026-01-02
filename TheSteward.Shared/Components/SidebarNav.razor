@@ -1,28 +1,31 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
 @using TheSteward.Shared.Models
 @using TheSteward.Shared.Services
 @using TheSteward.Shared.Interfaces
-@using Microsoft.AspNetCore.Identity;
+@using TheSteward.Core.Dtos.HouseholdDtos
+@using Microsoft.AspNetCore.Identity
 
 @implements IDisposable
 
 @inject INavigationService NavigationService
 @inject NavigationManager NavigationManager
+@inject HouseholdState HouseholdState
+@inject AuthenticationStateProvider AuthStateProvider
 
 @namespace TheSteward.Shared.Components
 
 <nav id="mainSidebar" class="sidebar">
 
-    <NavLink 
-        href="/" 
-        class="nav-img-container" 
-        @onclick="@(() => HandleNavClick(new NavItem("Dashboard", "dashboard", "/", true, false)))">
-        
+    <NavLink href="/"
+             class="nav-img-container"
+             @onclick="@(() => HandleNavClick(new NavItem("Dashboard", "dashboard", "/", true, false)))">
+
         <img src="/Assets/Images/TheSteward_264x563.webp" alt="a cartoon man in a black suit wearing glasses" class="nav-image" />
         <a class="nav-brand-text" href="">The Steward</a>
     </NavLink>
 
-    @foreach (var item in GetNavigationItems())
+    @foreach (var item in GetFilteredNavigationItems())
     {
         <AuthorizeView>
             <Authorized>
@@ -39,18 +42,18 @@
                             </span>
                             <span class="nav-title">@item.Title</span>
                         </NavLink>
-                    } 
+                    }
                     else
                     {
-                    <form @formname="logoutForm" method="post" action="/account/logout" class="nav-link-group-form">
-                        <AntiforgeryToken />
-                        <button type="submit" class="nav-link-group logout-button">
-                            <span class="nav-icon">
-                                <span class="material-symbols-outlined">@item.MaterialIcon</span>
-                            </span>
-                            <span class="nav-title">@item.Title</span>
-                        </button>
-                    </form>
+                        <form @formname="logoutForm" method="post" action="/account/logout" class="nav-link-group-form">
+                            <AntiforgeryToken />
+                            <button type="submit" class="nav-link-group logout-button">
+                                <span class="nav-icon">
+                                    <span class="material-symbols-outlined">@item.MaterialIcon</span>
+                                </span>
+                                <span class="nav-title">@item.Title</span>
+                            </button>
+                        </form>
                     }
                 }
             </Authorized>
@@ -58,7 +61,7 @@
                 @if (!item.RequiresAuth)
                 {
                     @if (!item.IsLogout)
-                    {                        
+                    {
                         <NavLink href="@item.Route"
                                  class="nav-link-group"
                                  Match="NavLinkMatch.All"
@@ -76,9 +79,38 @@
 </nav>
 
 @code {
-    protected override void OnInitialized()
+    private UserHouseholdDto? _currentUserHousehold;
+
+    protected override async Task OnInitializedAsync()
     {
-        NavigationService.OnChange += StateHasChanged;
+        NavigationService.OnChange += HandleStateChange;
+        HouseholdState.OnChange += HandleStateChange;
+
+        await LoadCurrentUserHousehold();
+    }
+
+    private void HandleStateChange()
+    {
+        InvokeAsync(async () =>
+        {
+            await LoadCurrentUserHousehold();
+            StateHasChanged();
+        });
+    }
+
+    private async Task LoadCurrentUserHousehold()
+    {
+        if (HouseholdState.CurrentHousehold == null) return;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId)) return;
+
+        _currentUserHousehold = HouseholdState.CurrentHousehold.UserHouseholdDtos
+            .FirstOrDefault(uh => uh.UserId == userId);
+
+        await InvokeAsync(StateHasChanged);
     }
 
     public List<NavItem> GetNavigationItems()
@@ -96,6 +128,36 @@
         };
     }
 
+    private List<NavItem> GetFilteredNavigationItems()
+    {
+        var items = GetNavigationItems();
+
+        if (HouseholdState.CurrentHousehold == null || _currentUserHousehold == null)
+            return items;
+
+        var household = HouseholdState.CurrentHousehold;
+        var userPerms = _currentUserHousehold;
+
+        return items.Where(item =>
+        {
+            if (!item.RequiresAuth) return true;
+
+            if (item.Route == "/" || item.IsLogout) return true;
+
+            return item.Route switch
+            {
+                "/household" => userPerms.HasAdminPermissions,
+                "/budget" => household.HasFinanceManagerAccess &&
+                            userPerms.HasFinanceManagerReadPermission,
+                "/kitchen" => household.HasMealManagerAccess &&
+                             userPerms.HasKitchenManagerReadPermission,
+                "/tasks" => household.HasTaskManagerAccess &&
+                           userPerms.HasTaskManagerReadPermission,
+                _ => true
+            };
+        }).ToList();
+    }
+
     private void HandleNavClick(NavItem item)
     {
         NavigationService.SetMainSection(item.Title);
@@ -103,6 +165,7 @@
 
     public void Dispose()
     {
-        NavigationService.OnChange -= StateHasChanged;
+        NavigationService.OnChange -= HandleStateChange;
+        HouseholdState.OnChange -= HandleStateChange;
     }
 }

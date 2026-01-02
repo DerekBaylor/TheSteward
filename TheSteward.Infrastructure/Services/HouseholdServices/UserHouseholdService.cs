@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.HouseholdDtos;
-using TheSteward.Core.IRepositories;
-using TheSteward.Core.IServices;
+using TheSteward.Core.IRepositories.HouseholdIRepositories;
+using TheSteward.Core.IServices.HouseholdIServices;
 using TheSteward.Core.Models;
 using TheSteward.Core.Models.HouseholdModels;
 
-namespace TheSteward.Infrastructure.Services;
+namespace TheSteward.Infrastructure.Services.HouseholdServices;
 
 public class UserHouseholdService : IUserHouseholdService
 {
@@ -298,7 +298,7 @@ public class UserHouseholdService : IUserHouseholdService
 
         var canCancel = invitation.InvitedByUserId == userId ||
                         await CanInviteMembersAsync(invitation.HouseholdId, userId) ||
-                        (user != null && user.Email?.ToLower() == invitation.InvitedUserEmail.ToLower());
+                        user != null && user.Email?.ToLower() == invitation.InvitedUserEmail.ToLower();
 
         if (!canCancel)
             throw new UnauthorizedAccessException("You don't have permission to cancel this invitation.");

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TheSteward.Shared.Dtos;
+namespace TheSteward.Shared.Dtos.HouseholdDtos;
 
 public class UserProfileFormDto
 {

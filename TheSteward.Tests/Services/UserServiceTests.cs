@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using NUnit.Framework;
 using TheSteward.Core.Models;
-using TheSteward.Infrastructure.Services;
+using TheSteward.Infrastructure.Services.HouseholdServices;
 using TheSteward.Tests.Helpers.TestDataBuilders.UserDataBuilders;
 using TheSteward.Tests.Helpers.TestDataBuilders.UserDataBuilers;
 

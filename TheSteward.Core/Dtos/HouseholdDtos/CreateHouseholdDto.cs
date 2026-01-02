@@ -15,7 +15,7 @@ public class CreateHouseholdDto
 
     public bool HasFinanceManagerAccess { get; set; }
 
-    public bool HasMealManagerAccess { get; set; }
+    public bool HasKitchenManagerAccess { get; set; }
 
     public bool HasFileManagerAccess { get; set; }
 }

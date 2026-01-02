@@ -25,5 +25,9 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" />
 		<PackageReference Include="AutoMapper" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Repositories\FinanceManagerRepositories\" />
+	  <Folder Include="Services\FinanceManagerServices\" />
+	</ItemGroup>
 
 </Project>

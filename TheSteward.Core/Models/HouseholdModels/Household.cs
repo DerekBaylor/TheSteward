@@ -21,7 +21,7 @@ public class Household
     public required bool HasFinanceManagerAccess { get; set; }
 
     [Required]
-    public required bool HasMealManagerAccess { get; set; }
+    public required bool HasKitchenManagerAccess { get; set; }
 
     [Required]
     public required bool HasFileManagerAccess { get; set; }

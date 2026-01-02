@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using NUnit.Framework;
 using TheSteward.Core.Dtos.HouseholdDtos;
-using TheSteward.Core.IRepositories;
-using TheSteward.Core.IServices;
+using TheSteward.Core.IRepositories.HouseholdIRepositories;
+using TheSteward.Core.IServices.HouseholdIServices;
 using TheSteward.Core.Models;
 using TheSteward.Core.Models.HouseholdModels;
-using TheSteward.Infrastructure.Services;
+using TheSteward.Infrastructure.Services.HouseholdServices;
 using TheSteward.Tests.Helpers.TestDataBuilders.HouseholdDataBuilders;
 using TheSteward.Tests.Helpers.TestDataBuilders.UserDataBuilers;
 

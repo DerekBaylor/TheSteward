@@ -2,7 +2,7 @@
 using TheSteward.Core.Dtos.UserDtos;
 using TheSteward.Core.Models;
 
-namespace TheSteward.Core.IServices;
+namespace TheSteward.Core.IServices.HouseholdIServices;
 
 public interface IUserService
 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TheSteward.Shared.Dtos;
+namespace TheSteward.Shared.Dtos.HouseholdDtos;
 
 public class HouseholdFormDto
 {
@@ -10,6 +10,6 @@ public class HouseholdFormDto
 
     public bool HasTaskManagerAccess { get; set; }
     public bool HasFinanceManagerAccess { get; set; }
-    public bool HasMealManagerAccess { get; set; }
+    public bool HasKitchenManagerAccess { get; set; }
     public bool HasFileManagerAccess { get; set; }
 }

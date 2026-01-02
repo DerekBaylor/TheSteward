@@ -1,4 +1,9 @@
 ﻿@page "/household"
+@using TheSteward.Core.IServices.HouseholdIServices
+@using TheSteward.Core.IServices.HouseholdIServices
+@using TheSteward.Shared.Dtos.HouseholdDtos
+@using TheSteward.Shared.Dtos.HouseholdDtos
+@using TheSteward.Shared.Dtos.HouseholdDtos
 
 @inject IHouseholdService HouseholdService
 @inject IUserHouseholdService UserHouseholdService
@@ -338,7 +343,7 @@ else
                 updateHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
                 updateHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
                 updateHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
-                updateHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
+                updateHouseholdDto.HasKitchenManagerAccess = householdFormDto.HasKitchenManagerAccess;
                 updateHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
 
                 await HouseholdService.UpdateAsync(updateHouseholdDto);
@@ -359,7 +364,7 @@ else
                 createHouseholdDto.HouseholdName = householdFormDto.HouseholdName;
                 createHouseholdDto.HasTaskManagerAccess = householdFormDto.HasTaskManagerAccess;
                 createHouseholdDto.HasFinanceManagerAccess = householdFormDto.HasFinanceManagerAccess;
-                createHouseholdDto.HasMealManagerAccess = householdFormDto.HasMealManagerAccess;
+                createHouseholdDto.HasKitchenManagerAccess = householdFormDto.HasKitchenManagerAccess;
                 createHouseholdDto.HasFileManagerAccess = householdFormDto.HasFileManagerAccess;
 
                 await HouseholdService.AddAsync(createHouseholdDto, currentUserId);
@@ -412,7 +417,7 @@ else
             HouseholdName = selectedHouseholdDto.HouseholdName,
             HasTaskManagerAccess = selectedHouseholdDto.HasTaskManagerAccess,
             HasFinanceManagerAccess = selectedHouseholdDto.HasFinanceManagerAccess,
-            HasMealManagerAccess = selectedHouseholdDto.HasMealManagerAccess,
+            HasKitchenManagerAccess = selectedHouseholdDto.HasKitchenManagerAccess,
             HasFileManagerAccess = selectedHouseholdDto.HasFileManagerAccess
         };
 

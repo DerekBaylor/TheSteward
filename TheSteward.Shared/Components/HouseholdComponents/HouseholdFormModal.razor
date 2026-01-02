@@ -1,4 +1,5 @@
 ﻿@namespace TheSteward.Shared.Components.HouseholdComponents
+@using TheSteward.Shared.Dtos.HouseholdDtos
 
 <MudDialog Class="household-form-modal ts-modal">
     <TitleContent>
@@ -28,8 +29,8 @@
                        Label="Enable Finance Manager"
                        Color="Color.Primary"
                        Class="mb-2" />
-            <MudSwitch @bind-Value="FormData.HasMealManagerAccess"
-                       Label="Enable Meal Manager"
+            <MudSwitch @bind-Value="FormData.HasKitchenManagerAccess"
+                       Label="Enable Kitchen Manager"
                        Color="Color.Primary"
                        Class="mb-2" />
             <MudSwitch @bind-Value="FormData.HasFileManagerAccess"

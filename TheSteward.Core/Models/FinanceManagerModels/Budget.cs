@@ -10,6 +10,7 @@ public class Budget
     public Guid BudgetId { get; set; }
     
     [Required]
+    [MaxLength(200)]
     public required string Name { get; set; }
 
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -28,6 +29,8 @@ public class Budget
     
     [ForeignKey("HouseholdId")]
     public required Household Household { get; set; }
+
+    public List<BudgetCategories> BudgetCategories { get; set; } = new();
 
     #endregion Navigational Properties
 }

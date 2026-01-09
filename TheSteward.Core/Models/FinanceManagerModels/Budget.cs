@@ -25,12 +25,21 @@ public class Budget
     public required string OwnerId { get; set; }
 
     #region Navigational Properties
+    [Required]
     public Guid HouseholdId { get; set; }
     
     [ForeignKey("HouseholdId")]
-    public required Household Household { get; set; }
+    public Household? Household { get; set; }
 
     public List<BudgetCategories> BudgetCategories { get; set; } = new();
+
+    public List<Credit> Credits { get; set; } = new();
+
+    public List<Expense> Expenses { get; set; } = new();
+
+    public List<Income> Incomes { get; set; } = new();
+    
+    public List<Investment> Investments { get; set; } = new();
 
     #endregion Navigational Properties
 }

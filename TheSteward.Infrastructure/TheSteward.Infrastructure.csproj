@@ -26,7 +26,6 @@
 		<PackageReference Include="AutoMapper" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Repositories\FinanceManagerRepositories\" />
 	  <Folder Include="Services\FinanceManagerServices\" />
 	</ItemGroup>
 

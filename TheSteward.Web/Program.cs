@@ -11,8 +11,10 @@ using TheSteward.Shared.Services;
 using TheSteward.Web.Components;
 using TheSteward.Web.Components.Account;
 using MudBlazor.Services;
+using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IRepositories.HouseholdIRepositories;
 using TheSteward.Core.IServices.HouseholdIServices;
+using TheSteward.Infrastructure.Repositories.FinanceManagerRepositories;
 using TheSteward.Infrastructure.Repositories.HouseholdRepositories;
 using TheSteward.Infrastructure.Services.HouseholdServices;
 
@@ -34,6 +36,14 @@ builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IUserHouseholdService, UserHouseholdService>();
+
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IBudgetCategoryRepository, BudgetCategoryRepository>();
+builder.Services.AddScoped<IBudgetSubCategoryRepository, BudgetSubCategoryRepository>();
+builder.Services.AddScoped<ICreditRepository, CreditRepository>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<IIncomeRepository, IncomeRepository>();
+builder.Services.AddScoped<IInvestmentRepository, InvestmentRepository>();
 
 builder.Services.AddSingleton<HouseholdState>();
 

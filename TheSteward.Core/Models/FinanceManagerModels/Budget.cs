@@ -11,7 +11,7 @@ public class Budget
     
     [Required]
     [MaxLength(200)]
-    public required string Name { get; set; }
+    public required string BudgetName { get; set; }
 
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     
@@ -31,7 +31,7 @@ public class Budget
     [ForeignKey("HouseholdId")]
     public Household? Household { get; set; }
 
-    public List<BudgetCategories> BudgetCategories { get; set; } = new();
+    public List<BudgetCategory> BudgetCategories { get; set; } = new();
 
     public List<Credit> Credits { get; set; } = new();
 

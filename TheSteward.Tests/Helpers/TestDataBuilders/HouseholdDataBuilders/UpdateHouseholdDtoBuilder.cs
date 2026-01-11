@@ -9,7 +9,7 @@ public class UpdateHouseholdDtoBuilder
     private bool _isDefaultHousehold = false;
     private bool _hasTaskManagerAccess = true;
     private bool _hasFinanceManagerAccess = true;
-    private bool _hasMealManagerAccess = true;
+    private bool _hasKitchenManagerAccess = true;
     private bool _hasFileManagerAccess = true;
 
     public UpdateHouseholdDtoBuilder WithId(Guid id)
@@ -44,7 +44,7 @@ public class UpdateHouseholdDtoBuilder
 
     public UpdateHouseholdDtoBuilder WithMealManagerAccess(bool hasAccess)
     {
-        _hasMealManagerAccess = hasAccess;
+        _hasKitchenManagerAccess = hasAccess;
         return this;
     }
 
@@ -58,7 +58,7 @@ public class UpdateHouseholdDtoBuilder
     {
         _hasTaskManagerAccess = true;
         _hasFinanceManagerAccess = true;
-        _hasMealManagerAccess = true;
+        _hasKitchenManagerAccess = true;
         _hasFileManagerAccess = true;
         return this;
     }
@@ -67,7 +67,7 @@ public class UpdateHouseholdDtoBuilder
     {
         _hasTaskManagerAccess = false;
         _hasFinanceManagerAccess = false;
-        _hasMealManagerAccess = false;
+        _hasKitchenManagerAccess = false;
         _hasFileManagerAccess = false;
         return this;
     }
@@ -81,7 +81,7 @@ public class UpdateHouseholdDtoBuilder
             IsDefaultHousehold = _isDefaultHousehold,
             HasTaskManagerAccess = _hasTaskManagerAccess,
             HasFinanceManagerAccess = _hasFinanceManagerAccess,
-            HasMealManagerAccess = _hasMealManagerAccess,
+            HasKitchenManagerAccess = _hasKitchenManagerAccess,
             HasFileManagerAccess = _hasFileManagerAccess
         };
     }

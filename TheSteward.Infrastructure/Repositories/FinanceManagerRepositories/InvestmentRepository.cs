@@ -6,7 +6,7 @@ namespace TheSteward.Infrastructure.Repositories.FinanceManagerRepositories;
 
 public class InvestmentRepository : BaseRepository<Investment>, IInvestmentRepository
 {
-    InvestmentRepository(TheStewardContext context) : base(context)
+    public InvestmentRepository(TheStewardContext context) : base(context)
     {
     }
 }

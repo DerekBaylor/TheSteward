@@ -41,7 +41,7 @@ public class Income
     /// </summary>
     [Required]
     [Column(TypeName = "decimal(18,2)")]
-    public decimal? EstStateIncomeTax { get; set; }
+    public decimal EstStateIncomeTax { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(18,2)")]
@@ -49,8 +49,7 @@ public class Income
 
     [Required]
     public int DisplayOrder { get; set; }
-
-
+    
     #region Navigational Properties
     [Required]
     public Guid BudgetId { get; set; }
@@ -58,8 +57,6 @@ public class Income
     [ForeignKey("BudgetId")]
     [JsonIgnore]
     public Budget? Budget { get; set; }
-
-    //TODO: Add ExpenseCategory navigation property once ExpenseCategories class is created
 
     #endregion Navigational Properties
 }

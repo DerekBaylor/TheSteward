@@ -30,11 +30,19 @@ public class Expense
     [Required]
     public Guid BudgetId { get; set; }
 
-    [ForeignKey("BudgetId")]
     [JsonIgnore]
+    [ForeignKey("BudgetId")]
     public Budget? Budget { get; set; }
 
-    //TODO: Add ExpenseCategory navigation property once ExpenseCategories class is created
+    [Required]
+    public Guid BudgetCategoryId { get; set; }
+    public BudgetCategory? BudgetCategory { get; set; }
+
+    public Guid? Credit { get; set; }
+    public Credit? LinkedCredit { get; set; }
+
+    public Guid? InvestmentId { get; set; }
+    public Investment? LinkedInvestment { get; set; }
 
     #endregion Navigation Properties
 }

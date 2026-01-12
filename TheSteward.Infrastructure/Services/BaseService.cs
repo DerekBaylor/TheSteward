@@ -57,4 +57,10 @@ public class BaseService<T> : IBaseService<T> where T : class
 
         return await _repository.GetByIdAsync(id);
     }
+
+    public virtual IQueryable<T> GetAll()
+    {
+        return _repository.GetAll();
+    }
+    
 }

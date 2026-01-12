@@ -25,5 +25,8 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" />
 		<PackageReference Include="AutoMapper" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Migrations\" />
+	</ItemGroup>
 
 </Project>

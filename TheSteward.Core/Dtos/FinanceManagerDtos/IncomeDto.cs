@@ -31,7 +31,7 @@ public class IncomeDto
     /// <summary>
     /// EstStateIncomeTax will calculate the tax rates based on 0 allowances and the YearlyGrossSalary
     /// </summary>
-    public decimal? EstStateIncomeTax { get; set; }  // ✅ Removed [Required]
+    public decimal? EstStateIncomeTax { get; set; }
 
     public decimal MonthlyNetIncome { get; set; }
 

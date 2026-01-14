@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TheSteward.Core.Dtos.FinanceManagerDtos;
 
-public class BudgetCategoryDto
+public class CreateBudgetCategoryDto
 {
     public Guid BudgetCategoryId { get; set; }
 

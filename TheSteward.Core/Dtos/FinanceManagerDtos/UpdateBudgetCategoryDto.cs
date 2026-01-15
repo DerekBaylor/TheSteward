@@ -12,7 +12,6 @@ public class UpdateBudgetCategoryDto
     
     public int DisplayOrder { get; set; }
 
+    [Required]
     public Guid BudgetId { get; set; }
-    
-    public List<BudgetSubCategoryDto> BudgetSubCategories { get; set; } = new();
 }

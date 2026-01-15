@@ -13,9 +13,11 @@ using TheSteward.Web.Components.Account;
 using MudBlazor.Services;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IRepositories.HouseholdIRepositories;
+using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.IServices.HouseholdIServices;
 using TheSteward.Infrastructure.Repositories.FinanceManagerRepositories;
 using TheSteward.Infrastructure.Repositories.HouseholdRepositories;
+using TheSteward.Infrastructure.Services.FinanceManagerServices;
 using TheSteward.Infrastructure.Services.HouseholdServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +46,10 @@ builder.Services.AddScoped<ICreditRepository, CreditRepository>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IIncomeRepository, IncomeRepository>();
 builder.Services.AddScoped<IInvestmentRepository, InvestmentRepository>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IBudgetCategoryService, BudgetCategoryService>();
+builder.Services.AddScoped<IBudgetSubCategoryService, BudgetSubCategoryService>();
+builder.Services.AddScoped<IIncomeService, IncomeService>();
 
 builder.Services.AddSingleton<HouseholdState>();
 
@@ -59,6 +65,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<HouseholdProfiles>();
+    config.AddProfile<FinanceManagerProfiles>();
 });
 #endregion  Automapper Profiles
 

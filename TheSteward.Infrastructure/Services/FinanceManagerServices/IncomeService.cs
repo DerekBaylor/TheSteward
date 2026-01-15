@@ -24,8 +24,7 @@ public class IncomeService : BaseService<Income>, IIncomeService
     {
         if (incomeDto == null)
             throw new ArgumentNullException(nameof(incomeDto));
-
-        // Create the Income entity
+        
         var income = new Income
         {
             IncomeId = Guid.NewGuid(),
@@ -35,14 +34,11 @@ public class IncomeService : BaseService<Income>, IIncomeService
             BudgetId = incomeDto.BudgetId,
             DisplayOrder = incomeDto.DisplayOrder
         };
-
-        // Calculate derived values
+        
         CalculateIncomeValues(income);
-
-        // Save to database
+        
         await _incomeRepository.AddAsync(income);
-
-        // Map to DTO and return
+        
         return _mapper.Map<IncomeDto>(income);
     }
 
@@ -50,22 +46,18 @@ public class IncomeService : BaseService<Income>, IIncomeService
     {
         if (incomeDto == null)
             throw new ArgumentNullException(nameof(incomeDto));
-
-        // Retrieve existing income
+        
         var income = await GetByIdAsync(incomeDto.IncomeId);
         if (income == null)
             throw new KeyNotFoundException($"Income with ID {incomeDto.IncomeId} not found.");
-
-        // Update properties
+        
         income.IncomeName = incomeDto.IncomeName;
         income.IncomeFrequency = incomeDto.IncomeFrequency;
         income.PayCheckGross = incomeDto.PayCheckGross;
         income.DisplayOrder = incomeDto.DisplayOrder;
-
-        // Recalculate derived values
+        
         CalculateIncomeValues(income);
-
-        // Save changes
+        
         await _incomeRepository.UpdateAsync(income);
 
         return incomeDto;

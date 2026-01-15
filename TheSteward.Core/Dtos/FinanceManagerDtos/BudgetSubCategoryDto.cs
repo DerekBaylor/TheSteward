@@ -12,6 +12,9 @@ public class BudgetSubCategoryDto
     
     public int DisplayOrder { get; set; }
     
+    [Required]
     public Guid BudgetId { get; set; }
+    
+    [Required]
     public Guid BudgetCategoryId { get; set; }
 }

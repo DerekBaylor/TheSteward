@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.IRepositories;
@@ -10,12 +11,15 @@ namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 public class IncomeService : BaseService<Income>, IIncomeService
 {
     private readonly IIncomeRepository _incomeRepository;
+    private readonly IMapper _mapper;
 
-    public IncomeService(IBaseRepository<Income> baseRepository, IIncomeRepository incomeRepository) : base(baseRepository)
+    public IncomeService(IBaseRepository<Income> baseRepository, IIncomeRepository incomeRepository, IMapper mapper) :
+        base(baseRepository)
     {
         _incomeRepository = incomeRepository;
+        _mapper = mapper;
     }
-    
+
     public async Task<IncomeDto> AddAsync(CreateIncomeDto incomeDto)
     {
         if (incomeDto == null)
@@ -36,12 +40,12 @@ public class IncomeService : BaseService<Income>, IIncomeService
         CalculateIncomeValues(income);
 
         // Save to database
-        await base.AddAsync(income);
+        await _incomeRepository.AddAsync(income);
 
         // Map to DTO and return
-        return MapToDto(income);
+        return _mapper.Map<IncomeDto>(income);
     }
-    
+
     public async Task<UpdateIncomeDto> UpdateAsync(UpdateIncomeDto incomeDto)
     {
         if (incomeDto == null)
@@ -62,11 +66,11 @@ public class IncomeService : BaseService<Income>, IIncomeService
         CalculateIncomeValues(income);
 
         // Save changes
-        await base.UpdateAsync(income);
+        await _incomeRepository.UpdateAsync(income);
 
         return incomeDto;
     }
-    
+
     public async Task DeleteAsync(Guid incomeId)
     {
         if (incomeId == Guid.Empty)
@@ -76,19 +80,19 @@ public class IncomeService : BaseService<Income>, IIncomeService
         if (income == null)
             throw new KeyNotFoundException($"Income with ID {incomeId} not found.");
 
-        await base.DeleteAsync(income);
+        await _incomeRepository.DeleteAsync(income);
     }
-    
+
     public async Task<IncomeDto?> GetAsync(Guid incomeId)
     {
         if (incomeId == Guid.Empty)
             throw new ArgumentException("Income ID cannot be empty.", nameof(incomeId));
 
         var income = await GetByIdAsync(incomeId);
-        
-        return income == null ? null : MapToDto(income);
+
+        return income == null ? null : _mapper.Map<IncomeDto>(income);
     }
-    
+
     public async Task<List<IncomeDto>> GetAllByBudgetIdAsync(Guid budgetId)
     {
         if (budgetId == Guid.Empty)
@@ -99,33 +103,29 @@ public class IncomeService : BaseService<Income>, IIncomeService
             .OrderBy(i => i.DisplayOrder)
             .ToListAsync();
 
-        return incomes.Select(MapToDto).ToList();
+        return incomes.Select(i => _mapper.Map<IncomeDto>(i)).ToList();
     }
 
     #region Private Helper Methods
-
+    
     /// <summary>
     /// Calculates all derived income values including yearly salary, taxes, and monthly net income.
     /// </summary>
     /// <param name="income">The income entity to calculate values for.</param>
     private void CalculateIncomeValues(Income income)
     {
-        // Calculate yearly gross salary
         income.YearlyGrossSalary = income.PayCheckGross * income.IncomeFrequency;
-
-        // Calculate estimated federal income tax (simplified - you'll need proper tax brackets)
+        
         income.EstFederalIncomeTax = CalculateFederalIncomeTax(income.YearlyGrossSalary);
-
-        // Calculate estimated state income tax (simplified - state-specific)
+        
         income.EstStateIncomeTax = CalculateStateIncomeTax(income.YearlyGrossSalary);
-
-        // Calculate monthly net income
+        
         var yearlyNetIncome = income.YearlyGrossSalary - income.EstFederalIncomeTax - income.EstStateIncomeTax;
         income.MonthlyNetIncome = yearlyNetIncome / 12;
     }
 
     /// <summary>
-    /// Calculates estimated federal income tax based on 2024 tax brackets (single filer, 0 allowances).
+    /// Calculates estimated federal income tax based on 2025 tax brackets (single filer, 0 allowances).
     /// </summary>
     /// <param name="yearlyGrossSalary">The gross yearly salary.</param>
     /// <returns>The estimated federal income tax amount.</returns>
@@ -135,9 +135,9 @@ public class IncomeService : BaseService<Income>, IIncomeService
     /// </remarks>
     private decimal CalculateFederalIncomeTax(decimal yearlyGrossSalary)
     {
-        // 2024 Federal Tax Brackets (Single) - Simplified
-        // This is a basic implementation - adjust based on your requirements
-        const decimal standardDeduction = 14600m; // 2024 standard deduction
+        // 2024 Federal Tax Brackets (Single Filer) - Simplified
+        // TODO: Update to take different types of deduction types.
+        const decimal standardDeduction = 15750; // 2025 Single Std. Deduction
         var taxableIncome = Math.Max(0, yearlyGrossSalary - standardDeduction);
 
         decimal tax = 0m;
@@ -186,33 +186,9 @@ public class IncomeService : BaseService<Income>, IIncomeService
     private decimal CalculateStateIncomeTax(decimal yearlyGrossSalary)
     {
         // TODO: Implement state-specific tax calculation
-        // For now, using a simple 5% rate as placeholder
-        // You might want to pass state information or retrieve it from user profile
-        const decimal stateTaxRate = 0.05m;
+        const decimal stateTaxRate = 0.06m;
         return Math.Round(yearlyGrossSalary * stateTaxRate, 2);
     }
-
-    /// <summary>
-    /// Maps an Income entity to an IncomeDto.
-    /// </summary>
-    /// <param name="income">The income entity to map.</param>
-    /// <returns>The mapped IncomeDto.</returns>
-    private IncomeDto MapToDto(Income income)
-    {
-        return new IncomeDto
-        {
-            IncomeId = income.IncomeId,
-            IncomeName = income.IncomeName,
-            IncomeFrequency = income.IncomeFrequency,
-            PayCheckGross = income.PayCheckGross,
-            YearlyGrossSalary = income.YearlyGrossSalary,
-            EstFederalIncomeTax = income.EstFederalIncomeTax,
-            EstStateIncomeTax = income.EstStateIncomeTax,
-            MonthlyNetIncome = income.MonthlyNetIncome,
-            DisplayOrder = income.DisplayOrder,
-            BudgetId = income.BudgetId
-        };
-    }
-
-    #endregion
+    
+    #endregion Private Helper Methods
 }

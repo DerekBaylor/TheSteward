@@ -22,6 +22,7 @@ public class Investment
     public decimal InterestRate { get; set; }
 
     [Required]
+    [Column(TypeName = "decimal(18,2)")]
     public decimal ContributionAmount { get; set; }
 
     /// <summary>
@@ -31,6 +32,9 @@ public class Investment
     [Column(TypeName = "decimal(18,2)")]
     public int ContributionFrequency { get; set; }
 
+    /// <summary>
+    /// Calculated on the client during Create/Update
+    /// </summary>
     public decimal EstYearlyGrowth { get; set; }
 
     [Required]
@@ -45,6 +49,7 @@ public class Investment
     public Budget? Budget { get; set; }
     
     public Guid ExpenseId { get; set; }
+    
     [JsonIgnore]
     [ForeignKey("ExpenseId")]
     public Expense? LinkedExpense { get; set; }

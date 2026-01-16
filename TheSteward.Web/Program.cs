@@ -50,6 +50,7 @@ builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IBudgetCategoryService, BudgetCategoryService>();
 builder.Services.AddScoped<IBudgetSubCategoryService, BudgetSubCategoryService>();
 builder.Services.AddScoped<ICreditService, CreditService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
 
 builder.Services.AddSingleton<HouseholdState>();

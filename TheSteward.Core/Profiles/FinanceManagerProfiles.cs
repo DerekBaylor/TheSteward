@@ -23,7 +23,11 @@ public class FinanceManagerProfiles : Profile
             .ReverseMap();
         
         CreateMap<Expense, ExpenseDto>()
-            .ReverseMap();
+            .ReverseMap()
+            .ForMember(dest => dest.Budget, opt => opt.Ignore())
+            .ForMember(dest => dest.BudgetCategory, opt => opt.Ignore())
+            .ForMember(dest => dest.LinkedCredit, opt => opt.Ignore())
+            .ForMember(dest => dest.LinkedInvestment, opt => opt.Ignore());
         
         CreateMap<Income, IncomeDto>()
             .ReverseMap();

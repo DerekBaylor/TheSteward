@@ -41,6 +41,7 @@ public class CreditService : ICreditService
         };
         
         await _creditRepository.AddAsync(credit);
+        await _creditRepository.SaveChangesAsync();
         
         return _mapper.Map<CreditDto>(credit);
     }
@@ -68,7 +69,8 @@ public class CreditService : ICreditService
         credit.ExpenseId = creditDto.ExpenseId ?? Guid.Empty;
 
         await _creditRepository.UpdateAsync(credit);
-
+        await _creditRepository.SaveChangesAsync();
+        
         return creditDto;
     }
 
@@ -82,6 +84,7 @@ public class CreditService : ICreditService
             throw new KeyNotFoundException($"Credit with ID {creditId} not found.");
 
         await _creditRepository.DeleteAsync(credit);
+        await _creditRepository.SaveChangesAsync();
     }
     public async Task<CreditDto?> GetAsync(Guid creditId)
     {

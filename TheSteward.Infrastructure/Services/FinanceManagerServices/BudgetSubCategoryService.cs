@@ -8,13 +8,13 @@ using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
-public class BudgetSubCategoryService : BaseService<BudgetSubCategory>, IBudgetSubCategoryService
+public class BudgetSubCategoryService : IBudgetSubCategoryService
 {
     private readonly IBudgetSubCategoryRepository _budgetSubCategoryRepository;
     private readonly IMapper _mapper;
 
 
-    public BudgetSubCategoryService(IBaseRepository<BudgetSubCategory> baseRepository, IBudgetSubCategoryRepository budgetSubCategoryRepository, IMapper mapper) : base(baseRepository)
+    public BudgetSubCategoryService(IBudgetSubCategoryRepository budgetSubCategoryRepository, IMapper mapper)
     {
         _budgetSubCategoryRepository = budgetSubCategoryRepository;
         _mapper = mapper;
@@ -44,7 +44,7 @@ public class BudgetSubCategoryService : BaseService<BudgetSubCategory>, IBudgetS
         if (subCategoryDto == null)
             throw new ArgumentNullException(nameof(subCategoryDto));
 
-        var subCategory = await GetByIdAsync(subCategoryDto.BudgetSubCategoryId);
+        var subCategory = await _budgetSubCategoryRepository.GetByIdAsync(subCategoryDto.BudgetSubCategoryId);
         if (subCategory == null)
             throw new KeyNotFoundException($"Budget subcategory with ID {subCategoryDto.BudgetSubCategoryId} not found.");
 
@@ -62,7 +62,7 @@ public class BudgetSubCategoryService : BaseService<BudgetSubCategory>, IBudgetS
         if (subCategoryId == Guid.Empty)
             throw new ArgumentException("Budget subcategory ID cannot be empty.", nameof(subCategoryId));
 
-        var subCategory = await GetByIdAsync(subCategoryId);
+        var subCategory = await _budgetSubCategoryRepository.GetByIdAsync(subCategoryId);
         if (subCategory == null)
             throw new KeyNotFoundException($"Budget subcategory with ID {subCategoryId} not found.");
 
@@ -74,7 +74,7 @@ public class BudgetSubCategoryService : BaseService<BudgetSubCategory>, IBudgetS
         if (subCategoryId == Guid.Empty)
             throw new ArgumentException("Budget subcategory ID cannot be empty.", nameof(subCategoryId));
 
-        var subCategory = await GetByIdAsync(subCategoryId);
+        var subCategory = await _budgetSubCategoryRepository.GetByIdAsync(subCategoryId);
 
         return subCategory == null ? null : _mapper.Map<BudgetSubCategoryDto>(subCategory);;
     }
@@ -85,7 +85,7 @@ public class BudgetSubCategoryService : BaseService<BudgetSubCategory>, IBudgetS
         if (categoryId == Guid.Empty)
             throw new ArgumentException("Category ID cannot be empty.", nameof(categoryId));
 
-        var subCategories = await GetAll()
+        var subCategories = await _budgetSubCategoryRepository.GetAll()
             .Where(sc => sc.BudgetCategoryId == categoryId)
             .OrderBy(sc => sc.DisplayOrder)
             .ToListAsync();
@@ -99,7 +99,7 @@ public class BudgetSubCategoryService : BaseService<BudgetSubCategory>, IBudgetS
         if (budgetId == Guid.Empty)
             throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
 
-        var subCategories = await GetAll()
+        var subCategories = await _budgetSubCategoryRepository.GetAll()
             .Where(sc => sc.BudgetId == budgetId)
             .OrderBy(sc => sc.DisplayOrder)
             .ToListAsync();

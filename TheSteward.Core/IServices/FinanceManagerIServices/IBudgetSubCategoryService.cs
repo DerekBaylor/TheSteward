@@ -3,7 +3,7 @@ using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Core.IServices.FinanceManagerIServices;
 
-public interface IBudgetSubCategoryService : IBaseService<BudgetSubCategory>
+public interface IBudgetSubCategoryService
 {
     
     /// <summary>
@@ -138,6 +138,4 @@ public interface IBudgetSubCategoryService : IBaseService<BudgetSubCategory>
     /// </code>
     /// </example>
     Task<List<BudgetSubCategoryDto>> GetAllByBudgetIdAsync(Guid budgetId);
-    
-    
 }

@@ -3,7 +3,7 @@ using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Core.IServices.FinanceManagerIServices;
 
-public interface IBudgetCategoryService : IBaseService<BudgetCategory>
+public interface IBudgetCategoryService
 {
 
     /// <summary>
@@ -74,7 +74,7 @@ public interface IBudgetCategoryService : IBaseService<BudgetCategory>
     /// </code>
     /// </example>
     Task DeleteAsync(Guid categoryId);
-
+    
     /// <summary>
     /// Asynchronously retrieves a single budget category by its identifier, including all subcategories.
     /// </summary>
@@ -122,10 +122,4 @@ public interface IBudgetCategoryService : IBaseService<BudgetCategory>
     /// </code>
     /// </example>
     Task<List<BudgetCategoryDto>> GetAllByBudgetIdAsync(Guid budgetId);
-
-
-
-
-
-
 }

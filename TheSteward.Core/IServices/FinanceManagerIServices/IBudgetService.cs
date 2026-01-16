@@ -3,7 +3,7 @@ using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Core.IServices.FinanceManagerIServices;
 
-public interface IBudgetService : IBaseService<Budget>
+public interface IBudgetService
 {
     Task<BudgetDto> AddAsync(CreateBudgetDto budget);
     Task<BudgetDto> AddStarterBudget(Guid UserHouseholdId);
@@ -12,5 +12,4 @@ public interface IBudgetService : IBaseService<Budget>
     Task<BudgetDto> GetByIdAsync(Guid budgetId);
     Task<List<BudgetDto>> GetBudgetsByUserHouseholdIdAsync(Guid  userHouseholdId);
     Task<BudgetDto> GetByHouseholdAsync(Guid householdId);
-    IQueryable<Budget> GetBudgets();
 }

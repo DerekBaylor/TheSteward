@@ -3,7 +3,7 @@ using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Core.IServices.FinanceManagerIServices;
 
-public interface ICreditService : IBaseService<Credit>
+public interface ICreditService
 {
     /// <summary>
     /// Asynchronously creates a new credit entry.
@@ -173,5 +173,4 @@ public interface ICreditService : IBaseService<Credit>
     /// </code>
     /// </example>
     Task<List<CreditDto>> GetAllByBudgetIdWithExpensesAsync(Guid budgetId);
-
 }

@@ -8,13 +8,12 @@ using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
-public class IncomeService : BaseService<Income>, IIncomeService
+public class IncomeService : IIncomeService
 {
     private readonly IIncomeRepository _incomeRepository;
     private readonly IMapper _mapper;
 
-    public IncomeService(IBaseRepository<Income> baseRepository, IIncomeRepository incomeRepository, IMapper mapper) :
-        base(baseRepository)
+    public IncomeService(IIncomeRepository incomeRepository, IMapper mapper)
     {
         _incomeRepository = incomeRepository;
         _mapper = mapper;
@@ -47,7 +46,7 @@ public class IncomeService : BaseService<Income>, IIncomeService
         if (incomeDto == null)
             throw new ArgumentNullException(nameof(incomeDto));
         
-        var income = await GetByIdAsync(incomeDto.IncomeId);
+        var income = await _incomeRepository.GetByIdAsync(incomeDto.IncomeId);
         if (income == null)
             throw new KeyNotFoundException($"Income with ID {incomeDto.IncomeId} not found.");
         
@@ -68,7 +67,7 @@ public class IncomeService : BaseService<Income>, IIncomeService
         if (incomeId == Guid.Empty)
             throw new ArgumentException("Income ID cannot be empty.", nameof(incomeId));
 
-        var income = await GetByIdAsync(incomeId);
+        var income = await _incomeRepository.GetByIdAsync(incomeId);
         if (income == null)
             throw new KeyNotFoundException($"Income with ID {incomeId} not found.");
 
@@ -80,7 +79,7 @@ public class IncomeService : BaseService<Income>, IIncomeService
         if (incomeId == Guid.Empty)
             throw new ArgumentException("Income ID cannot be empty.", nameof(incomeId));
 
-        var income = await GetByIdAsync(incomeId);
+        var income = await _incomeRepository.GetByIdAsync(incomeId);
 
         return income == null ? null : _mapper.Map<IncomeDto>(income);
     }
@@ -90,7 +89,7 @@ public class IncomeService : BaseService<Income>, IIncomeService
         if (budgetId == Guid.Empty)
             throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
 
-        var incomes = await GetAll()
+        var incomes = await _incomeRepository.GetAll()
             .Where(i => i.BudgetId == budgetId)
             .OrderBy(i => i.DisplayOrder)
             .ToListAsync();

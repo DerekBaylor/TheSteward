@@ -1,19 +1,18 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
-using TheSteward.Core.IRepositories;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
-public class BudgetCategoryService : BaseService<BudgetCategory>, IBudgetCategoryService
+public class BudgetCategoryService : IBudgetCategoryService
 {
     private readonly IBudgetCategoryRepository _budgetCategoryRepository;
     private readonly IMapper _mapper;
     
-    public BudgetCategoryService(IBaseRepository<BudgetCategory> baseRepository, IBudgetCategoryRepository budgetCategoryRepository, IMapper mapper) : base(baseRepository)
+    public BudgetCategoryService(IBudgetCategoryRepository budgetCategoryRepository, IMapper mapper)
     {
         _budgetCategoryRepository = budgetCategoryRepository;
         _mapper = mapper;
@@ -33,7 +32,7 @@ public class BudgetCategoryService : BaseService<BudgetCategory>, IBudgetCategor
             DisplayOrder = categoryDto.DisplayOrder
         };
 
-        await base.AddAsync(category);
+        await _budgetCategoryRepository.AddAsync(category);
 
         return MapToDto(category);
     }
@@ -43,14 +42,14 @@ public class BudgetCategoryService : BaseService<BudgetCategory>, IBudgetCategor
         if (categoryDto == null)
             throw new ArgumentNullException(nameof(categoryDto));
 
-        var category = await GetByIdAsync(categoryDto.BudgetCategoryId);
+        var category = await _budgetCategoryRepository.GetByIdAsync(categoryDto.BudgetCategoryId);
         if (category == null)
             throw new KeyNotFoundException($"Budget category with ID {categoryDto.BudgetCategoryId} not found.");
 
         category.BudgetCategoryName = categoryDto.BudgetCategoryName;
         category.DisplayOrder = categoryDto.DisplayOrder;
 
-        await base.UpdateAsync(category);
+        await _budgetCategoryRepository.UpdateAsync(category);
 
         return categoryDto;
     }
@@ -60,11 +59,11 @@ public class BudgetCategoryService : BaseService<BudgetCategory>, IBudgetCategor
         if (categoryId == Guid.Empty)
             throw new ArgumentException("Budget category ID cannot be empty.", nameof(categoryId));
 
-        var category = await GetByIdAsync(categoryId);
+        var category = await _budgetCategoryRepository.GetByIdAsync(categoryId);
         if (category == null)
             throw new KeyNotFoundException($"Budget category with ID {categoryId} not found.");
 
-        await base.DeleteAsync(category);
+        await _budgetCategoryRepository.DeleteAsync(category);
     }
 
 
@@ -73,7 +72,7 @@ public class BudgetCategoryService : BaseService<BudgetCategory>, IBudgetCategor
         if (categoryId == Guid.Empty)
             throw new ArgumentException("Budget category ID cannot be empty.", nameof(categoryId));
 
-        var category = await GetAll()
+        var category = await _budgetCategoryRepository.GetAll()
             .Include(c => c.BudgetSubCategories)
             .FirstOrDefaultAsync(c => c.BudgetCategoryId == categoryId);
 
@@ -85,7 +84,7 @@ public class BudgetCategoryService : BaseService<BudgetCategory>, IBudgetCategor
         if (budgetId == Guid.Empty)
             throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
 
-        var categories = await GetAll()
+        var categories = await _budgetCategoryRepository.GetAll()
             .Where(c => c.BudgetId == budgetId)
             .Include(c => c.BudgetSubCategories)
             .OrderBy(c => c.DisplayOrder)

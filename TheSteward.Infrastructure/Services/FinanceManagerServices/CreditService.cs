@@ -1,6 +1,5 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using TheSteward.Core.IRepositories;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
@@ -8,13 +7,12 @@ using TheSteward.Core.Dtos.FinanceManagerDtos;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
-public class CreditService : BaseService<Credit>, ICreditService
+public class CreditService : ICreditService
 {
     private readonly ICreditRepository _creditRepository;
     private readonly IMapper _mapper;
 
-    public CreditService(IBaseRepository<Credit> baseRepository, ICreditRepository creditRepository, IMapper mapper) :
-        base(baseRepository)
+    public CreditService(ICreditRepository creditRepository, IMapper mapper) 
     {
         _creditRepository = creditRepository;
         _mapper = mapper;
@@ -52,7 +50,7 @@ public class CreditService : BaseService<Credit>, ICreditService
         if (creditDto == null)
             throw new ArgumentNullException(nameof(creditDto));
 
-        var credit = await GetByIdAsync(creditDto.CreditId);
+        var credit = await _creditRepository.GetByIdAsync(creditDto.CreditId);
         if (credit == null)
             throw new KeyNotFoundException($"Credit with ID {creditDto.CreditId} not found.");
 
@@ -69,7 +67,7 @@ public class CreditService : BaseService<Credit>, ICreditService
         credit.DisplayOrder = creditDto.DisplayOrder;
         credit.ExpenseId = creditDto.ExpenseId ?? Guid.Empty;
 
-        await base.UpdateAsync(credit);
+        await _creditRepository.UpdateAsync(credit);
 
         return creditDto;
     }
@@ -79,18 +77,18 @@ public class CreditService : BaseService<Credit>, ICreditService
         if (creditId == Guid.Empty)
             throw new ArgumentException("Credit ID cannot be empty.", nameof(creditId));
 
-        var credit = await GetByIdAsync(creditId);
+        var credit = await _creditRepository.GetByIdAsync(creditId);
         if (credit == null)
             throw new KeyNotFoundException($"Credit with ID {creditId} not found.");
 
-        await base.DeleteAsync(credit);
+        await _creditRepository.DeleteAsync(credit);
     }
     public async Task<CreditDto?> GetAsync(Guid creditId)
     {
         if (creditId == Guid.Empty)
             throw new ArgumentException("Credit ID cannot be empty.", nameof(creditId));
 
-        var credit = await GetByIdAsync(creditId);
+        var credit = await _creditRepository.GetByIdAsync(creditId);
 
         return credit == null ? null : _mapper.Map<CreditDto>(credit);
     }
@@ -100,7 +98,7 @@ public class CreditService : BaseService<Credit>, ICreditService
         if (creditId == Guid.Empty)
             throw new ArgumentException("Credit ID cannot be empty.", nameof(creditId));
 
-        var credit = await GetAll()
+        var credit = await _creditRepository.GetAll()
             .Include(c => c.LinkedExpense)
             .FirstOrDefaultAsync(c => c.CreditId == creditId);
 
@@ -112,7 +110,7 @@ public class CreditService : BaseService<Credit>, ICreditService
         if (budgetId == Guid.Empty)
             throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
 
-        var credits = await GetAll()
+        var credits = await _creditRepository.GetAll()
             .Where(c => c.BudgetId == budgetId)
             .OrderBy(c => c.DisplayOrder)
             .ToListAsync();
@@ -125,7 +123,7 @@ public class CreditService : BaseService<Credit>, ICreditService
         if (budgetId == Guid.Empty)
             throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
 
-        var credits = await GetAll()
+        var credits = await _creditRepository.GetAll()
             .Where(c => c.BudgetId == budgetId)
             .Include(c => c.LinkedExpense)
             .OrderBy(c => c.DisplayOrder)

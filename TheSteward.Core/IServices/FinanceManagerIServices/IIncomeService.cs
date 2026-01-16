@@ -3,7 +3,7 @@ using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Core.IServices.FinanceManagerIServices;
 
-public interface IIncomeService : IBaseService<Income>
+public interface IIncomeService
 {
     /// <summary>
     /// Asynchronously creates a new income entry with calculated tax and salary values.

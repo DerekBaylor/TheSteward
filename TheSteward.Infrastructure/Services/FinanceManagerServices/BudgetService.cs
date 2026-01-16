@@ -6,11 +6,11 @@ using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
-public class BudgetService : BaseService<Budget>, IBudgetService
+public class BudgetService : IBudgetService
 {
     private readonly IBudgetRepository _budgetRepository;
 
-    public BudgetService(IBaseRepository<Budget> baseRepository, IBudgetRepository budgetRepository) : base(baseRepository)
+    public BudgetService(IBudgetRepository budgetRepository)
     {
         _budgetRepository = budgetRepository;
     }

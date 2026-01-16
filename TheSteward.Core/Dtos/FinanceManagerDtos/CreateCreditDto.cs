@@ -1,12 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TheSteward.Core.Dtos.FinanceManagerDtos;
 
-public class CreditDto
+public class CreateCreditDto
 {
-    public Guid CreditId { get; set; }
-    
     [Required]
     [MaxLength(200)]
     public required string CreditName { get; set; }
@@ -14,8 +11,10 @@ public class CreditDto
     [MaxLength(50)]
     public string? CreditType { get; set; }
     
+    [Required]
     public decimal InterestRate { get; set; }
     
+    [Required]
     public decimal CurrentValue { get; set; }
     
     /// <summary>
@@ -50,7 +49,6 @@ public class CreditDto
     
     [Required]
     public Guid ExpenseId { get; set; }
-    public ExpenseDto? LinkedExpenseDto { get; set; }
 
-    #endregion
+    #endregion  
 }

@@ -24,10 +24,16 @@ public class Credit
     [Column(TypeName = "decimal(18,2)")]
     public decimal CurrentValue { get; set; }
 
+    /// <summary>
+    /// Calculated during creation / update
+    /// </summary>
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal EstMonthlyInterest { get; set; }
 
+    /// <summary>
+    /// Calculated during creation / update
+    /// </summary>
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal EstYearlyInterest { get; set; }

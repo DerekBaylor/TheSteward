@@ -9,7 +9,8 @@ public class FinanceManagerProfiles : Profile
     public FinanceManagerProfiles()
     {
         CreateMap<Budget, BudgetDto>()
-        .ReverseMap();
+            .ReverseMap()
+            .ForMember(dest => dest.Household, opt => opt.Ignore());
 
         CreateMap<BudgetCategory, BudgetCategoryDto>()
             .ForMember(dest => dest.BudgetSubCategories,

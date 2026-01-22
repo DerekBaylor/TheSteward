@@ -37,6 +37,11 @@ public class Expense
     [Required]
     public Guid BudgetCategoryId { get; set; }
     public BudgetCategory? BudgetCategory { get; set; }
+    
+    public Guid? BudgetSubCategoryId { get; set; }
+    
+    [ForeignKey("BudgetSubCategoryId")]
+    public BudgetSubCategory? BudgetSubCategory { get; set; }
 
     public Guid? CreditId { get; set; }
     public Credit? LinkedCredit { get; set; }

@@ -22,6 +22,12 @@ public class ExpenseDto
     
     public Guid BudgetId { get; set; }
     
+    public Guid BudgetCategoryId { get; set; }
+    public BudgetCategoryDto BudgetCategory { get; set; }
+    
+    public Guid? BudgetSubCategoryId { get; set; }
+    public BudgetSubCategoryDto BudgetSubCategory { get; set; }
+    
     public Guid? CreditId { get; set; }
     public CreditDto? LinkedCreditDto { get; set; }
     

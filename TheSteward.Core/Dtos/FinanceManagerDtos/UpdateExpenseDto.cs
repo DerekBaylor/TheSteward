@@ -19,7 +19,7 @@ public class UpdateExpenseDto
     public int DueDay { get; set; }
     
     [Required]
-    [Range(0.01, double.MaxValue, ErrorMessage = "Amount due must be greater than 0")]
+    [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Amount due must be 0 or greater.")]
     public decimal AmountDue { get; set; }
     
     public int DisplayOrder { get; set; }
@@ -31,6 +31,8 @@ public class UpdateExpenseDto
 
     [Required]
     public Guid BudgetCategoryId { get; set; }
+    
+    public Guid? BudgetSubCategoryId { get; set; }
 
     public Guid? CreditId { get; set; }
 

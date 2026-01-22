@@ -33,6 +33,7 @@ public class ExpenseService : IExpenseService
             DisplayOrder = expenseDto.DisplayOrder,
             BudgetId = expenseDto.BudgetId,
             BudgetCategoryId = expenseDto.BudgetCategoryId,
+            BudgetSubCategoryId = expenseDto.BudgetSubCategoryId,
             CreditId = expenseDto.CreditId,
             InvestmentId = expenseDto.InvestmentId,
         };
@@ -57,6 +58,7 @@ public class ExpenseService : IExpenseService
         expense.AmountDue = expenseDto.AmountDue;
         expense.DisplayOrder = expenseDto.DisplayOrder;
         expense.BudgetCategoryId = expenseDto.BudgetCategoryId;
+        expense.BudgetSubCategoryId = expenseDto.BudgetSubCategoryId;
         expense.CreditId = expenseDto.CreditId;
         expense.InvestmentId = expenseDto.InvestmentId;
 
@@ -96,6 +98,7 @@ public class ExpenseService : IExpenseService
 
         var expense = await _expenseRepository.GetAll()
             .Include(e => e.BudgetCategory)
+            .Include (e => e.BudgetSubCategory)
             .Include(e => e.LinkedCredit)
             .Include(e => e.LinkedInvestment)
             .FirstOrDefaultAsync(e => e.ExpenseId == expenseId);
@@ -110,6 +113,8 @@ public class ExpenseService : IExpenseService
 
         var expenses = await _expenseRepository.GetAll()
             .Where(e => e.BudgetId == budgetId)
+            .Include(e => e.BudgetCategory)
+            .Include (e => e.BudgetSubCategory)
             .OrderBy(e => e.DisplayOrder)
             .ToListAsync();
 
@@ -123,6 +128,7 @@ public class ExpenseService : IExpenseService
 
         var expenses = await _expenseRepository.GetAll()
             .Where(e => e.BudgetCategoryId == categoryId)
+            .Include (e => e.BudgetSubCategory)
             .OrderBy(e => e.DisplayOrder)
             .ToListAsync();
 
@@ -137,6 +143,7 @@ public class ExpenseService : IExpenseService
         var expenses = await _expenseRepository.GetAll()
             .Where(e => e.BudgetId == budgetId)
             .Include(e => e.BudgetCategory)
+            .Include (e => e.BudgetSubCategory)
             .Include(e => e.LinkedCredit)
             .Include(e => e.LinkedInvestment)
             .OrderBy(e => e.DisplayOrder)

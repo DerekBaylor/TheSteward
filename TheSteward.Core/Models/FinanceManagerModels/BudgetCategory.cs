@@ -20,7 +20,7 @@ public class BudgetCategory
     
     [ForeignKey("BudgetId")]
     public Budget? Budget { get; set; }
-
-    public List<BudgetSubCategory> BudgetSubCategories { get; set; } = new();
+    
+    public List<BudgetSubCategory>? BudgetSubCategories { get; set; }
     #endregion Navigational Properties
 }

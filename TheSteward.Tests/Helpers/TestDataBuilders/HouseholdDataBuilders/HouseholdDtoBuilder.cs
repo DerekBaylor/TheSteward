@@ -11,7 +11,7 @@ public class HouseholdDtoBuilder
     private bool _isHouseholdActive = true;
     private bool _hasTaskManagerAccess = true;
     private bool _hasFinanceManagerAccess = true;
-    private bool _hasMealManagerAccess = true;
+    private bool _hasKitchenManagerAccess = true;
     private bool _hasFileManagerAccess = true;
     private string _ownerId = Guid.NewGuid().ToString();
     private ApplicationUser? _owner;
@@ -49,7 +49,7 @@ public class HouseholdDtoBuilder
 
     public HouseholdDtoBuilder WithMealManagerAccess(bool hasAccess)
     {
-        _hasMealManagerAccess = hasAccess;
+        _hasKitchenManagerAccess = hasAccess;
         return this;
     }
 
@@ -95,7 +95,7 @@ public class HouseholdDtoBuilder
             IsHouseholdActive = _isHouseholdActive,
             HasTaskManagerAccess = _hasTaskManagerAccess,
             HasFinanceManagerAccess = _hasFinanceManagerAccess,
-            HasMealManagerAccess = _hasMealManagerAccess,
+            HasKitchenManagerAccess = _hasKitchenManagerAccess,
             HasFileManagerAccess = _hasFileManagerAccess,
             OwnerId = _ownerId,
             Owner = _owner,

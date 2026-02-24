@@ -11,9 +11,13 @@ using TheSteward.Shared.Services;
 using TheSteward.Web.Components;
 using TheSteward.Web.Components.Account;
 using MudBlazor.Services;
+using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IRepositories.HouseholdIRepositories;
+using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.IServices.HouseholdIServices;
+using TheSteward.Infrastructure.Repositories.FinanceManagerRepositories;
 using TheSteward.Infrastructure.Repositories.HouseholdRepositories;
+using TheSteward.Infrastructure.Services.FinanceManagerServices;
 using TheSteward.Infrastructure.Services.HouseholdServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +39,21 @@ builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IUserHouseholdService, UserHouseholdService>();
 
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IBudgetCategoryRepository, BudgetCategoryRepository>();
+builder.Services.AddScoped<IBudgetSubCategoryRepository, BudgetSubCategoryRepository>();
+builder.Services.AddScoped<ICreditRepository, CreditRepository>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<IIncomeRepository, IncomeRepository>();
+builder.Services.AddScoped<IInvestmentRepository, InvestmentRepository>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IBudgetCategoryService, BudgetCategoryService>();
+builder.Services.AddScoped<IBudgetSubCategoryService, BudgetSubCategoryService>();
+builder.Services.AddScoped<ICreditService, CreditService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IIncomeService, IncomeService>();
+builder.Services.AddScoped<IInvestmentService, InvestmentService>();
+
 builder.Services.AddSingleton<HouseholdState>();
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -49,6 +68,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<HouseholdProfiles>();
+    config.AddProfile<FinanceManagerProfiles>();
 });
 #endregion  Automapper Profiles
 

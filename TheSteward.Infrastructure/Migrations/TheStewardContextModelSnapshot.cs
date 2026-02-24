@@ -17,7 +17,7 @@ namespace TheSteward.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -218,6 +218,279 @@ namespace TheSteward.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Budget", b =>
+                {
+                    b.Property<Guid>("BudgetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BudgetName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDefaultBudget")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("BudgetId");
+
+                    b.HasIndex("HouseholdId");
+
+                    b.ToTable("Budgets");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.BudgetCategory", b =>
+                {
+                    b.Property<Guid>("BudgetCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BudgetCategoryName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("BudgetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("BudgetCategoryId");
+
+                    b.HasIndex("BudgetId");
+
+                    b.ToTable("BudgetCategories");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.BudgetSubCategory", b =>
+                {
+                    b.Property<Guid>("BudgetSubCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BudgetCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BudgetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BudgetSubCategoryName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("BudgetSubCategoryId");
+
+                    b.HasIndex("BudgetCategoryId");
+
+                    b.HasIndex("BudgetId");
+
+                    b.ToTable("BudgetSubCategories");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Credit", b =>
+                {
+                    b.Property<Guid>("CreditId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BudgetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreditName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("CreditType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("CurrentValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("EstMonthlyInterest")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("EstYearlyInterest")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ExpenseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasColumnType("decimal(5,4)");
+
+                    b.Property<decimal>("PaymentAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PaymentDay")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PaymentFrequency")
+                        .HasColumnType("integer");
+
+                    b.HasKey("CreditId");
+
+                    b.HasIndex("BudgetId");
+
+                    b.HasIndex("ExpenseId")
+                        .IsUnique();
+
+                    b.ToTable("Credits");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Expense", b =>
+                {
+                    b.Property<Guid>("ExpenseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AmountDue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("BudgetCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BudgetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("Credit")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DueDay")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ExpenseName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid?>("InvestmentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ExpenseId");
+
+                    b.HasIndex("BudgetCategoryId");
+
+                    b.HasIndex("BudgetId");
+
+                    b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Income", b =>
+                {
+                    b.Property<Guid>("IncomeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BudgetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("EstFederalIncomeTax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("EstStateIncomeTax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("IncomeFrequency")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("IncomeName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("MonthlyNetIncome")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PayCheckGross")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("YearlyGrossSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("IncomeId");
+
+                    b.HasIndex("BudgetId");
+
+                    b.ToTable("Incomes");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Investment", b =>
+                {
+                    b.Property<Guid>("InvestmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BudgetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ContributionAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("ContributionFrequency")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CurrentValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("EstYearlyGrowth")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("ExpenseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasColumnType("decimal(5,4)");
+
+                    b.Property<string>("InvestmentName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("InvestmentId");
+
+                    b.HasIndex("BudgetId");
+
+                    b.HasIndex("ExpenseId")
+                        .IsUnique();
+
+                    b.ToTable("Investments");
+                });
+
             modelBuilder.Entity("TheSteward.Core.Models.HouseholdModels.Household", b =>
                 {
                     b.Property<Guid>("HouseholdId")
@@ -399,6 +672,115 @@ namespace TheSteward.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Budget", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.HouseholdModels.Household", "Household")
+                        .WithMany()
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Household");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.BudgetCategory", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Budget", "Budget")
+                        .WithMany("BudgetCategories")
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Budget");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.BudgetSubCategory", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.BudgetCategory", "BudgetCategory")
+                        .WithMany("BudgetSubCategories")
+                        .HasForeignKey("BudgetCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Budget", "Budget")
+                        .WithMany()
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Budget");
+
+                    b.Navigation("BudgetCategory");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Credit", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Budget", "Budget")
+                        .WithMany("Credits")
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Expense", "LinkedExpense")
+                        .WithOne("LinkedCredit")
+                        .HasForeignKey("TheSteward.Core.Models.FinanceManagerModels.Credit", "ExpenseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Budget");
+
+                    b.Navigation("LinkedExpense");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Expense", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.BudgetCategory", "BudgetCategory")
+                        .WithMany()
+                        .HasForeignKey("BudgetCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Budget", "Budget")
+                        .WithMany("Expenses")
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Budget");
+
+                    b.Navigation("BudgetCategory");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Income", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Budget", "Budget")
+                        .WithMany("Incomes")
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Budget");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Investment", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Budget", "Budget")
+                        .WithMany("Investments")
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Expense", "LinkedExpense")
+                        .WithOne("LinkedInvestment")
+                        .HasForeignKey("TheSteward.Core.Models.FinanceManagerModels.Investment", "ExpenseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Budget");
+
+                    b.Navigation("LinkedExpense");
+                });
+
             modelBuilder.Entity("TheSteward.Core.Models.HouseholdModels.Household", b =>
                 {
                     b.HasOne("TheSteward.Core.Models.ApplicationUser", "Owner")
@@ -446,6 +828,31 @@ namespace TheSteward.Infrastructure.Migrations
                     b.Navigation("Household");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Budget", b =>
+                {
+                    b.Navigation("BudgetCategories");
+
+                    b.Navigation("Credits");
+
+                    b.Navigation("Expenses");
+
+                    b.Navigation("Incomes");
+
+                    b.Navigation("Investments");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.BudgetCategory", b =>
+                {
+                    b.Navigation("BudgetSubCategories");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Expense", b =>
+                {
+                    b.Navigation("LinkedCredit");
+
+                    b.Navigation("LinkedInvestment");
                 });
 
             modelBuilder.Entity("TheSteward.Core.Models.HouseholdModels.Household", b =>

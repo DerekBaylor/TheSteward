@@ -306,7 +306,7 @@ public class HouseholdServiceTests
 
         updateDto.HasFileManagerAccess = false;
         updateDto.HasFinanceManagerAccess = false;
-        updateDto.HasMealManagerAccess = false;
+        updateDto.HasKitchenManagerAccess = false;
         updateDto.HasTaskManagerAccess = false;
 
         var existingHousehold = new HouseholdBuilder()
@@ -332,7 +332,7 @@ public class HouseholdServiceTests
         // Assert
         existingHousehold.HasFileManagerAccess.Should().BeFalse();
         existingHousehold.HasFinanceManagerAccess.Should().BeFalse();
-        existingHousehold.HasMealManagerAccess.Should().BeFalse();
+        existingHousehold.HasKitchenManagerAccess.Should().BeFalse();
         existingHousehold.HasTaskManagerAccess.Should().BeFalse();
     }
 

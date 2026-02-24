@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
+using MockQueryable;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
@@ -316,7 +317,7 @@ public class UserHouseholdServiceTests
             new UserHouseholdDto { UserHouseholdId = userHouseholds[1].UserHouseholdId }
         };
 
-        var mockQueryable = userHouseholds.AsQueryable().BuildMock();
+        var mockQueryable = userHouseholds.BuildMock();
 
         _mockUserHouseholdRepository!
             .Setup(r => r.GetAll())
@@ -349,7 +350,7 @@ public class UserHouseholdServiceTests
             .IsOwner(true)
             .Build();
 
-        var mockQueryable = new List<UserHousehold> { userHousehold }.AsQueryable().BuildMock();
+        var mockQueryable = new List<UserHousehold> { userHousehold }.BuildMock();
 
         _mockUserHouseholdRepository!
             .Setup(r => r.GetAll())
@@ -374,7 +375,7 @@ public class UserHouseholdServiceTests
             .WithAdminPermissions()
             .Build();
 
-        var mockQueryable = new List<UserHousehold> { userHousehold }.AsQueryable().BuildMock();
+        var mockQueryable = new List<UserHousehold> { userHousehold }.BuildMock();
 
         _mockUserHouseholdRepository!
             .Setup(r => r.GetAll())
@@ -398,7 +399,7 @@ public class UserHouseholdServiceTests
             .WithHouseholdId(householdId)
             .Build();
 
-        var mockQueryable = new List<UserHousehold> { userHousehold }.AsQueryable().BuildMock();
+        var mockQueryable = new List<UserHousehold> { userHousehold }.BuildMock();
 
         _mockUserHouseholdRepository!
             .Setup(r => r.GetAll())
@@ -418,7 +419,7 @@ public class UserHouseholdServiceTests
         var userId = Guid.NewGuid().ToString();
         var householdId = Guid.NewGuid();
 
-        var mockQueryable = new List<UserHousehold>().AsQueryable().BuildMock();
+        var mockQueryable = new List<UserHousehold>().BuildMock();
 
         _mockUserHouseholdRepository!
             .Setup(r => r.GetAll())

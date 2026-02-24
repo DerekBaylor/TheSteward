@@ -1,3 +1,4 @@
+//01/20/26
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
@@ -213,18 +214,22 @@ public class BudgetService : IBudgetService
     {
         var categories = new[]
         {
-            ("Housing", new[] { "Rent/Mortgage", "Utilities", "Internet/Cable", "Home Insurance", "Maintenance" }),
-            ("Transportation", new[] { "Car Payment", "Gas", "Car Insurance", "Maintenance", "Public Transit" }),
-            ("Food", new[] { "Groceries", "Dining Out", "Coffee Shops" }),
-            ("Personal", new[] { "Clothing", "Personal Care", "Entertainment", "Hobbies" }),
-            ("Health", new[] { "Health Insurance", "Medical", "Dental", "Gym/Fitness" }),
-            ("Savings & Debt", new[] { "Emergency Fund", "Retirement", "Debt Payment", "Investments" }),
-            ("Other", new[] { "Gifts", "Donations", "Miscellaneous" })
+            ("Housing", new[] { "House/Apt" }),
+            ("Utilities", Array.Empty<string>()),
+            ("Transportation", new[] { "Car One" }),
+            ("Living Expenses", new[] { "Food", "Personal Care" }),
+            ("Entertainment", new[] { "Streaming Services", "Hobbies" }),
+            ("Pets", Array.Empty<string>()),
+            ("Health", Array.Empty<string>()),
+            ("Savings", new[] { "Emergency Fund", "Retirement", "Investments" }),
+            ("Debts", new[] { "Credit Cards", "Student Loans" }),
+            ("Child", Array.Empty<string>()),
+            ("Other", Array.Empty<string>()),
         };
 
-        for (int i = 0; i < categories.Length; i++)
+         for (int i = 0; i < categories.Length; i++)
         {
-            var (categoryName, subCategories) = categories[i];
+            var (categoryName, subCategoryNames) = categories[i];
             
             var category = new BudgetCategory
             {
@@ -236,12 +241,13 @@ public class BudgetService : IBudgetService
 
             await _categoryRepository.AddAsync(category);
 
-            for (int j = 0; j < subCategories.Length; j++)
+            // Only create subcategories if there are names provided
+            for (int j = 0; j < subCategoryNames.Length; j++)
             {
                 var subCategory = new BudgetSubCategory
                 {
                     BudgetSubCategoryId = Guid.NewGuid(),
-                    BudgetSubCategoryName = subCategories[j],
+                    BudgetSubCategoryName = subCategoryNames[j],
                     BudgetId = budgetId,
                     BudgetCategoryId = category.BudgetCategoryId,
                     DisplayOrder = j + 1
@@ -264,9 +270,9 @@ public class BudgetService : IBudgetService
             IncomeFrequency = 26, // Bi-weekly
             PayCheckGross = 2000m,
             YearlyGrossSalary = 52000m,
-            EstFederalIncomeTax = 6240m, // Placeholder
-            EstStateIncomeTax = 2600m, // Placeholder
-            MonthlyNetIncome = 3580m, // Placeholder
+            EstFederalIncomeTax = 6240m,
+            EstStateIncomeTax = 2600m,
+            MonthlyNetIncome = 3580m,
             DisplayOrder = 1,
             BudgetId = budgetId
         };
@@ -293,7 +299,7 @@ public class BudgetService : IBudgetService
             PaymentDay = 15,
             DisplayOrder = 1,
             BudgetId = budgetId,
-            ExpenseId = Guid.Empty
+            ExpenseId = Guid.Empty //TODO: Link to a Credit Expense
         };
 
         await _creditRepository.AddAsync(credit);
@@ -304,40 +310,222 @@ public class BudgetService : IBudgetService
     /// </summary>
     private async Task CreateSampleExpensesAsync(Guid budgetId)
     {
-        // Get the first category for housing
-        var housingCategory = await _categoryRepository.GetAll()
-            .FirstOrDefaultAsync(c => c.BudgetId == budgetId && c.BudgetCategoryName == "Housing");
+        // Fetch all categories and subcategories for the budget
+        var allCategories = await _categoryRepository.GetAll()
+            .Where(c => c.BudgetId == budgetId)
+            .Include(c => c.BudgetSubCategories)
+            .ToListAsync();
 
+        // Helper to find a category by name
+        BudgetCategory? GetCategory(string name) => allCategories.FirstOrDefault(c => c.BudgetCategoryName == name);
+        // Helper to find a subcategory by category name and subcategory name
+        BudgetSubCategory? GetSubCategory(string categoryName, string subCategoryName) =>
+            GetCategory(categoryName)?.BudgetSubCategories.FirstOrDefault(sc => sc.BudgetSubCategoryName == subCategoryName);
+
+        var expensesToAdd = new List<Expense>();
+        int displayOrderCounter = 1;
+
+        // --- Housing Expenses ---
+        var housingCategory = GetCategory("Housing");
+        var houseAptSubCategory = GetSubCategory("Housing", "House/Apt");
         if (housingCategory != null)
         {
-            var expenses = new[]
+            expensesToAdd.Add(new Expense
             {
-                new Expense
-                {
-                    ExpenseId = Guid.NewGuid(),
-                    ExpenseName = "Rent",
-                    DueDay = 1,
-                    AmountDue = 1200m,
-                    DisplayOrder = 1,
-                    BudgetId = budgetId,
-                    BudgetCategoryId = housingCategory.BudgetCategoryId
-                },
-                new Expense
-                {
-                    ExpenseId = Guid.NewGuid(),
-                    ExpenseName = "Electric",
-                    DueDay = 15,
-                    AmountDue = 100m,
-                    DisplayOrder = 2,
-                    BudgetId = budgetId,
-                    BudgetCategoryId = housingCategory.BudgetCategoryId
-                }
-            };
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Rent",
+                DueDay = 1,
+                AmountDue = 1200m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = housingCategory.BudgetCategoryId,
+                BudgetSubCategoryId = houseAptSubCategory?.BudgetSubCategoryId
+            });
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Renter's Insurance",
+                DueDay = 1,
+                AmountDue = 15m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = housingCategory.BudgetCategoryId,
+                BudgetSubCategoryId = houseAptSubCategory?.BudgetSubCategoryId
+            });
+        }
 
-            foreach (var expense in expenses)
+        // --- Utilities Expenses ---
+        var utilitiesCategory = GetCategory("Utilities");
+        if (utilitiesCategory != null)
+        {
+            expensesToAdd.Add(new Expense
             {
-                await _expenseRepository.AddAsync(expense);
-            }
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Electric Bill",
+                DueDay = 15,
+                AmountDue = 100m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = utilitiesCategory.BudgetCategoryId,
+                BudgetSubCategoryId = null
+            });
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Internet Service",
+                DueDay = 20,
+                AmountDue = 70m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = utilitiesCategory.BudgetCategoryId,
+                BudgetSubCategoryId = null
+            });
+        }
+
+        // --- Transportation Expenses ---
+        var transportationCategory = GetCategory("Transportation");
+        var carOneSubCategory = GetSubCategory("Transportation", "Car One");
+        if (transportationCategory != null)
+        {
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Car Payment",
+                DueDay = 5,
+                AmountDue = 350m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = transportationCategory.BudgetCategoryId,
+                BudgetSubCategoryId = carOneSubCategory?.BudgetSubCategoryId
+            });
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Car Insurance",
+                DueDay = 10,
+                AmountDue = 120m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = transportationCategory.BudgetCategoryId,
+                BudgetSubCategoryId = carOneSubCategory?.BudgetSubCategoryId
+            });
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Gasoline",
+                DueDay = 25,
+                AmountDue = 150m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = transportationCategory.BudgetCategoryId,
+                BudgetSubCategoryId = null // No subcategory for this
+            });
+        }
+
+        // --- Living Expenses ---
+        var livingCategory = GetCategory("Living Expenses");
+        if (livingCategory != null)
+        {
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Groceries",
+                DueDay = 7,
+                AmountDue = 400m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = livingCategory.BudgetCategoryId,
+                BudgetSubCategoryId = null // No subcategory for this
+            });
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Dining Out",
+                DueDay = 18,
+                AmountDue = 150m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = livingCategory.BudgetCategoryId,
+                BudgetSubCategoryId = null // No subcategory for this
+            });
+        }
+
+        // --- Entertainment Expenses ---
+        var entertainmentCategory = GetCategory("Entertainment");
+        if (entertainmentCategory != null)
+        {
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Netflix",
+                DueDay = 10,
+                AmountDue = 15m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = entertainmentCategory.BudgetCategoryId,
+                BudgetSubCategoryId = null // No subcategory for this
+            });
+            expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Spotify Premium",
+                DueDay = 20,
+                AmountDue = 10m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = entertainmentCategory.BudgetCategoryId,
+                BudgetSubCategoryId = null // No subcategory for this
+            });
+        }
+
+        // --- Debts Expenses (Credit Card linked to the sample credit) ---
+        var debtsCategory = GetCategory("Debts");
+        var creditCardsSubCategory = GetSubCategory("Debts", "Credit Cards"); // This subcategory exists
+        var sampleCredit = await _creditRepository.GetAll()
+            .FirstOrDefaultAsync(c => c.BudgetId == budgetId && c.CreditName == "Credit Cards");
+        
+        if (debtsCategory != null && creditCardsSubCategory != null && sampleCredit != null)
+        {
+            var creditCardPaymentExpense = new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Credit Card Payment",
+                DueDay = sampleCredit.PaymentDay,
+                AmountDue = sampleCredit.PaymentAmount,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = debtsCategory.BudgetCategoryId,
+                BudgetSubCategoryId = creditCardsSubCategory.BudgetSubCategoryId,
+                CreditId = sampleCredit.CreditId // Link to the credit
+            };
+            expensesToAdd.Add(creditCardPaymentExpense);
+            
+            sampleCredit.ExpenseId = creditCardPaymentExpense.ExpenseId;
+            await _creditRepository.UpdateAsync(sampleCredit);
+        }
+
+        // --- Savings Expenses (linking to Investment for "Debt Payment" subcategory) ---
+        var savingsCategory = GetCategory("Savings");
+        var debtPaymentSubCategory = GetSubCategory("Savings", "Debt Payment"); // This subcategory exists
+        if (savingsCategory != null && debtPaymentSubCategory != null)
+        {
+             expensesToAdd.Add(new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = "Student Loan Payment",
+                DueDay = 28,
+                AmountDue = 250m,
+                DisplayOrder = displayOrderCounter++,
+                BudgetId = budgetId,
+                BudgetCategoryId = savingsCategory.BudgetCategoryId,
+                BudgetSubCategoryId = debtPaymentSubCategory.BudgetSubCategoryId
+            });
+        }
+        
+        // Add all collected expenses
+        foreach (var expense in expensesToAdd)
+        {
+            await _expenseRepository.AddAsync(expense);
         }
     }
     

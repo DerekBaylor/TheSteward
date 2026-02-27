@@ -545,7 +545,7 @@ public class BudgetService : IBudgetService
             EstYearlyGrowth = 2612.50m, // Placeholder - should be calculated on frontend
             DisplayOrder = 1,
             BudgetId = budgetId,
-            ExpenseId = null // Not linked to an expense initially
+            ExpenseId = Guid.Empty, // Not linked to an expense initially
         };
 
         await _investmentRepository.AddAsync(investment);

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36623.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheSteward.Web", "TheSteward.Web\TheSteward.Web.csproj", "{8E244832-69BD-4047-9106-C04BE32B601B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheSteward.Server", "TheSteward.Server\TheSteward.Server.csproj", "{8E244832-69BD-4047-9106-C04BE32B601B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheSteward.Core", "TheSteward.Core\TheSteward.Core.csproj", "{00578ED9-8D9A-4425-ABD8-A5494BD627AA}"
 EndProject

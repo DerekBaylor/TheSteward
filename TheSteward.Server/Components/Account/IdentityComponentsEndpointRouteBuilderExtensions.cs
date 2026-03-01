@@ -7,8 +7,8 @@ using Microsoft.Extensions.Primitives;
 using System.Security.Claims;
 using System.Text.Json;
 using TheSteward.Core.Models;
-using TheSteward.Web.Components.Account.Pages;
-using TheSteward.Web.Components.Account.Pages.Manage;
+using TheSteward.Server.Components.Account.Pages;
+using TheSteward.Server.Components.Account.Pages.Manage;
 using TheSteward.Infrastructure.Data;
 
 namespace Microsoft.AspNetCore.Routing

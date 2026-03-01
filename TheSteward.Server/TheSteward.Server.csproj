@@ -1,4 +1,4 @@
-<!-- TheSteward.Web -->
+<!-- TheSteward.Server -->
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>

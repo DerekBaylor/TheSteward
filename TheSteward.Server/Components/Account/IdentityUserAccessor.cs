@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using TheSteward.Core.Models;
 
-namespace TheSteward.Web.Components.Account;
+namespace TheSteward.Server.Components.Account;
 
 internal sealed class IdentityUserAccessor(UserManager<ApplicationUser> userManager, IdentityRedirectManager redirectManager)
 {

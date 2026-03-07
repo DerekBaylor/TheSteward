@@ -11,7 +11,7 @@
 
 <PageTitle>Budget Dashboard</PageTitle>
 
-<HouseholdToolbar OnHouseholdChanged="OnHouseholdChanged" />
+<HouseholdToolBar OnHouseholdChanged="OnHouseholdChanged" />
 
 @if (HouseholdState.CurrentUserHousehold == null)
 {
@@ -20,19 +20,32 @@
         <MudLink Href="/household">Household page</MudLink> to get started.
     </MudAlert>
 }
+else if (!HouseholdState.CurrentHousehold!.HasFinanceManagerAccess)
+{
+    <MudAlert Severity="Severity.Warning" Class="mt-4">
+        This household does not have Finance Manager enabled. An admin can enable it in
+        <MudLink Href="/household">Household Settings</MudLink>.
+    </MudAlert>
+}
 else if (!HouseholdState.HasFinanceReadPermission)
 {
     <MudAlert Severity="Severity.Error" Class="mt-4">
         You do not have permission to view finances for this household.
+        Please contact your household admin.
     </MudAlert>
 }
 else
 {
     <MudText Typo="Typo.h5" Class="mt-4">
-        Budget — @HouseholdState.CurrentHousehold?.HouseholdName
+        Budget — @HouseholdState.CurrentHousehold.HouseholdName
     </MudText>
 
     <!-- Budget content goes here -->
+    // Income Component
+    // Expense Component
+    // Invesetment Component
+    // Credit Component
+    // Budget Summary Component
 }
 
 @code {
@@ -40,15 +53,11 @@ else
 
     protected override void OnInitialized()
     {
-        HouseholdState.OnChange += () => InvokeAsync(StateHasChanged);
+        _stateChangeHandler = () => InvokeAsync(StateHasChanged);
         HouseholdState.OnChange += _stateChangeHandler;
     }
 
-    private void OnHouseholdChanged(UserHouseholdDto _)
-    {
-        // StateHasChanged is already triggered via OnChange event,
-        // but you can reload budget data here if needed
-    }
+    private void OnHouseholdChanged(UserHouseholdDto _) { }
 
-    public void Dispose() => HouseholdState.OnChange += () => InvokeAsync(StateHasChanged);
+    public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

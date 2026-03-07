@@ -93,6 +93,7 @@ public class UserHouseholdService : IUserHouseholdService
     public async Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUserAsync(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
+            .Include(uh => uh.Household)
             .Where(uh => uh.Household.IsHouseholdActive && uh.UserId == userId)
             .ToListAsync();
 

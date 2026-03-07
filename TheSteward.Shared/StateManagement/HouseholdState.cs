@@ -1,20 +1,25 @@
 ﻿using TheSteward.Core.Dtos.HouseholdDtos;
+using TheSteward.Shared.Dtos.HouseholdDtos;
 
 public class HouseholdState
 {
-    public HouseholdDto? CurrentHousehold { get; private set; }
+    public UserHouseholdDto? CurrentUserHousehold { get; private set; }
+    public HouseholdDto? CurrentHousehold => CurrentUserHousehold?.Household;
+    public bool HasAdminPermissions => CurrentUserHousehold?.HasAdminPermissions ?? false;
+    public bool HasFinanceReadPermission => CurrentUserHousehold?.HasFinanceManagerReadPermission ?? false;
+    public bool HasFinanceWritePermission => CurrentUserHousehold?.HasFinanceManagerWritePermission ?? false;
 
     public event Action? OnChange;
 
-    public void SetHousehold(HouseholdDto household)
+    public void SetUserHousehold(UserHouseholdDto userHousehold)
     {
-        CurrentHousehold = household;
+        CurrentUserHousehold = userHousehold;
         NotifyStateChanged();
     }
 
     public void ClearHousehold()
     {
-        CurrentHousehold = null;
+        CurrentUserHousehold = null;
         NotifyStateChanged();
     }
 

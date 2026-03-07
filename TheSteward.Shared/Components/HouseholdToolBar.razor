@@ -1,0 +1,125 @@
+﻿@using TheSteward.Core.Dtos.HouseholdDtos
+@using TheSteward.Core.IServices.HouseholdIServices
+@using TheSteward.Shared.Dtos.HouseholdDtos
+@using System.Security.Claims
+@using TheSteward.Shared.Dtos.HouseholdDtos
+@using TheSteward.Shared.Models
+
+@inject IUserHouseholdService UserHouseholdService
+@inject HouseholdState HouseholdState
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@implements IDisposable
+
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (householdItems.Count > 0)
+{
+    <MudToolBar Class="household-toolbar" WrapContent="true">
+        <div class="toolbar-select-group">
+            <label class="select-label">
+                <span class="material-icons">home</span>
+                Active Household
+            </label>
+            @if (householdItems.Count == 1)
+            {
+                <span class="toolbar-household-name">
+                    @HouseholdState.CurrentHousehold?.HouseholdName
+                </span>
+            }
+            else
+            {
+                <TsSelect TValue="Guid?"
+                          Items="householdItems"
+                          @bind-Value="selectedHouseholdId"
+                          OnChange="OnHouseholdChangedAsync"
+                          Placeholder="Choose household" />
+            }
+        </div>
+
+        @if (ChildContent != null)
+        {
+            <div class="toolbar-actions">
+                @ChildContent
+            </div>
+        }
+    </MudToolBar>
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<UserHouseholdDto> OnHouseholdChanged { get; set; }
+
+    private List<SelectItem<Guid?>> householdItems = new();
+    private List<UserHouseholdDto> userHouseholds = new();
+    private Guid? selectedHouseholdId;
+    private bool isLoading = true;
+    private string? currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        HouseholdState.OnChange += () => InvokeAsync(StateHasChanged);
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            isLoading = false;
+            return;
+        }
+
+        userHouseholds = await UserHouseholdService.GetAllUserHouseholdsForUserAsync(currentUserId);
+
+        if (userHouseholds.Count == 0)
+        {
+            isLoading = false;
+            return;
+        }
+
+        // --- Cold-start: seed state if empty (fresh load / refresh) ---
+        if (HouseholdState.CurrentUserHousehold == null)
+        {
+            // Prefer the one flagged as default, fall back to first
+            var defaultUh = userHouseholds.FirstOrDefault(uh => uh.IsDefaultUserHousehold)
+                            ?? userHouseholds.First();
+            HouseholdState.SetUserHousehold(defaultUh);
+        }
+        else
+        {
+            // State already has a household — make sure our local list has a matching entry.
+            // (Handles the case where the user switched on another page.)
+            var stateHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;
+            var stillValid = userHouseholds.Any(uh => uh.HouseholdId == stateHouseholdId);
+            if (!stillValid)
+            {
+                var defaultUh = userHouseholds.FirstOrDefault(uh => uh.IsDefaultUserHousehold)
+                                ?? userHouseholds.First();
+                HouseholdState.SetUserHousehold(defaultUh);
+            }
+        }
+
+        selectedHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;
+
+        householdItems = userHouseholds.Select(uh => new SelectItem<Guid?>
+        {
+            Value = uh.HouseholdId,
+            Text = uh.Household?.HouseholdName ?? "Unknown"
+        }).ToList();
+
+        isLoading = false;
+    }
+
+    private async Task OnHouseholdChangedAsync()
+    {
+        var selected = userHouseholds.FirstOrDefault(uh => uh.HouseholdId == selectedHouseholdId);
+        if (selected == null) return;
+
+        HouseholdState.SetUserHousehold(selected);
+        await OnHouseholdChanged.InvokeAsync(selected);
+    }
+
+    public void Dispose() => HouseholdState.OnChange -= StateHasChanged;
+}

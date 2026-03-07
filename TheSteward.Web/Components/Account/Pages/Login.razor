@@ -126,8 +126,7 @@
 
             if (defaultUserHousehold?.Household != null)
             {
-                var householdDto = defaultUserHousehold.Household;
-                HouseholdState.SetHousehold(householdDto);
+                HouseholdState.SetUserHousehold(defaultUserHousehold);
                 ReturnUrl = "/";
             } 
             else

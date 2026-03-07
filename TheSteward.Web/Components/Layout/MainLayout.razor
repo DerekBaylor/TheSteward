@@ -19,11 +19,11 @@
 @code {
     protected override void OnInitialized()
     {
-        NavigationService.OnChange += StateHasChanged;
+        NavigationService.OnChange += () => InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        NavigationService.OnChange -= StateHasChanged;
+        NavigationService.OnChange -= () => InvokeAsync(StateHasChanged);
     }
 }

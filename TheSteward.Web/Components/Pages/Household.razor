@@ -1,8 +1,5 @@
 ﻿@page "/household"
 @using TheSteward.Core.IServices.HouseholdIServices
-@using TheSteward.Core.IServices.HouseholdIServices
-@using TheSteward.Shared.Dtos.HouseholdDtos
-@using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Shared.Dtos.HouseholdDtos
 
 @inject IHouseholdService HouseholdService
@@ -200,7 +197,7 @@ else
                     PopulateHouseholdItems();
                     selectedHouseholdId = defaultUserHousehold.Household.HouseholdId;
 
-                    HouseholdState.SetHousehold(defaultUserHousehold.Household);
+                    HouseholdState.SetUserHousehold(defaultUserHousehold);
                 }
                 else
                 {
@@ -278,7 +275,8 @@ else
         {
             await GetUserHouseholdAndPermissions(selectedHouseholdDto.HouseholdId);
 
-            HouseholdState.SetHousehold(selectedHouseholdDto);
+            if (selectedUserHouseholdDto != null)
+                HouseholdState.SetUserHousehold(selectedUserHouseholdDto);
 
             StateHasChanged();
         }
@@ -353,9 +351,9 @@ else
 
                 await GetUserHouseholdAndPermissions(selectedHouseholdDto.HouseholdId);
 
-                if (selectedHouseholdDto != null)
+                if (selectedUserHouseholdDto != null)
                 {
-                    HouseholdState.SetHousehold(selectedHouseholdDto);
+                    HouseholdState.SetUserHousehold(selectedUserHouseholdDto);
                 }
             }
             else // Create household
@@ -381,9 +379,9 @@ else
                     hasDefaultHousehold = true;
                     showHouseholdCard = true;
 
-                    if (selectedHouseholdDto != null)
+                    if (selectedUserHouseholdDto != null)
                     {
-                        HouseholdState.SetHousehold(selectedHouseholdDto);
+                        HouseholdState.SetUserHousehold(selectedUserHouseholdDto);
                     }
                 }
                 else
@@ -787,7 +785,7 @@ else
                     selectedUserHouseholdDto = updatedUserHousehold;
                     selectedHouseholdDto = updatedUserHousehold.Household;
 
-                    HouseholdState.SetHousehold(updatedUserHousehold.Household);
+                    HouseholdState.SetUserHousehold(updatedUserHousehold);
                 }
             }
 

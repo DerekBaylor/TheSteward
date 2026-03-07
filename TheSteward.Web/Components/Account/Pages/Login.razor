@@ -128,6 +128,11 @@
             {
                 var householdDto = defaultUserHousehold.Household;
                 HouseholdState.SetHousehold(householdDto);
+                ReturnUrl = "/";
+            } 
+            else
+            {
+                ReturnUrl = "/household";                
             }
 
             RedirectManager.RedirectTo(ReturnUrl);

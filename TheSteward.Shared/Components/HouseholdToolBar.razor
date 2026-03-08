@@ -2,7 +2,6 @@
 @using TheSteward.Core.IServices.HouseholdIServices
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using System.Security.Claims
-@using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Shared.Models
 
 @inject IUserHouseholdService UserHouseholdService
@@ -57,10 +56,12 @@ else if (householdItems.Count > 0)
     private Guid? selectedHouseholdId;
     private bool isLoading = true;
     private string? currentUserId;
+    private Action? _stateChangeHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        HouseholdState.OnChange += () => InvokeAsync(StateHasChanged);
+        _stateChangeHandler = () => InvokeAsync(StateHasChanged);
+        HouseholdState.OnChange += _stateChangeHandler;
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -79,26 +80,14 @@ else if (householdItems.Count > 0)
             return;
         }
 
-        // --- Cold-start: seed state if empty (fresh load / refresh) ---
-        if (HouseholdState.CurrentUserHousehold == null)
+        var stateHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;
+        var activeInList = userHouseholds.FirstOrDefault(uh => uh.HouseholdId == stateHouseholdId);
+
+        if (activeInList == null)
         {
-            // Prefer the one flagged as default, fall back to first
             var defaultUh = userHouseholds.FirstOrDefault(uh => uh.IsDefaultUserHousehold)
                             ?? userHouseholds.First();
             HouseholdState.SetUserHousehold(defaultUh);
-        }
-        else
-        {
-            // State already has a household — make sure our local list has a matching entry.
-            // (Handles the case where the user switched on another page.)
-            var stateHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;
-            var stillValid = userHouseholds.Any(uh => uh.HouseholdId == stateHouseholdId);
-            if (!stillValid)
-            {
-                var defaultUh = userHouseholds.FirstOrDefault(uh => uh.IsDefaultUserHousehold)
-                                ?? userHouseholds.First();
-                HouseholdState.SetUserHousehold(defaultUh);
-            }
         }
 
         selectedHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;

@@ -51,4 +51,6 @@ public class UserHouseholdDto
     public Guid HouseholdId { get; set; }
 
     public HouseholdDto Household { get; set; }
+
+    public Guid? DefaultBudgetId { get; set; }
 }

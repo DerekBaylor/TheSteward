@@ -27,4 +27,6 @@ public class UpdateUserHouseholdDto
     public required string UserId { get; set; }
 
     public Guid HouseholdId { get; set; }
+
+    public Guid? DefaultBudgetId { get; set; }
 }

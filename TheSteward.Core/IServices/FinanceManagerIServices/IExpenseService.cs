@@ -6,6 +6,7 @@ namespace TheSteward.Core.IServices.FinanceManagerIServices;
 
 public interface IExpenseService
 {
+
     /// <summary>
     /// Asynchronously creates a new expense entry.
     /// </summary>
@@ -79,7 +80,8 @@ public interface IExpenseService
     /// </code>
     /// </example>
     Task DeleteAsync(Guid expenseId);
-    
+
+    #region Get Methods
     /// <summary>
     /// Asynchronously retrieves a single expense entry by its identifier.
     /// </summary>
@@ -200,4 +202,23 @@ public interface IExpenseService
     /// </code>
     /// </example>
     Task<List<ExpenseDto>> GetAllByBudgetIdWithRelatedDataAsync(Guid budgetId);
+
+    /// <summary>
+    /// Retrieves a single expense by budget ID and expense name.
+    /// </summary>
+    /// <param name="budgetId">The unique identifier of the budget to search within.</param>
+    /// <param name="expenseName">The name of the expense to retrieve.</param>
+    /// <returns>
+    /// A <see cref="ExpenseDto"/> representing the matching expense.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="budgetId"/> is an empty <see cref="Guid"/>,
+    /// or when <paramref name="expenseName"/> is null or whitespace.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when no expense with the given <paramref name="expenseName"/> exists
+    /// within the budget identified by <paramref name="budgetId"/>.
+    /// </exception>
+    Task<ExpenseDto> GetByBudgetIdAndExpenseNameAsync(Guid budgetId, string expenseNAme);
+    #endregion
 }

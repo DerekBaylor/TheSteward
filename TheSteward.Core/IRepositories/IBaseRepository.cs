@@ -1,4 +1,6 @@
-﻿namespace TheSteward.Core.IRepositories;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+
+namespace TheSteward.Core.IRepositories;
 
 public interface IBaseRepository<T> where T : class
 {
@@ -84,4 +86,34 @@ public interface IBaseRepository<T> where T : class
     /// to the database in a single transaction. If any operation fails, all changes are rolled back.
     /// </remarks>
     Task<int> SaveChangesAsync();
+
+    /// <summary>
+    /// Begins a new database transaction on the underlying <see cref="TheStewardContext"/>.
+    /// Because all repositories share the same scoped <see cref="TheStewardContext"/> instance,
+    /// a transaction started here will encompass all subsequent operations across any repository
+    /// until it is either committed or rolled back.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="IDbContextTransaction"/> representing the active transaction.
+    /// The caller is responsible for calling <see cref="IDbContextTransaction.CommitAsync"/> 
+    /// on success or <see cref="IDbContextTransaction.RollbackAsync"/> on failure.
+    /// </returns>
+    /// <remarks>
+    /// It is recommended to use this method within a try/catch block and to dispose the transaction
+    /// with <see langword="await using"/> to ensure proper cleanup regardless of outcome:
+    /// <code>
+    /// await using var transaction = await _budgetRepository.BeginTransactionAsync();
+    /// try
+    /// {
+    ///     // perform operations
+    ///     await transaction.CommitAsync();
+    /// }
+    /// catch
+    /// {
+    ///     await transaction.RollbackAsync();
+    ///     throw;
+    /// }
+    /// </code>
+    /// </remarks>
+    Task<IDbContextTransaction> BeginTransactionAsync();
 }

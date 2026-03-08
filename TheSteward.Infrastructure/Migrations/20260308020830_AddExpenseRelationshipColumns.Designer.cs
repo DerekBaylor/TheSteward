@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TheSteward.Infrastructure.Data;
@@ -11,9 +12,11 @@ using TheSteward.Infrastructure.Data;
 namespace TheSteward.Infrastructure.Migrations
 {
     [DbContext(typeof(TheStewardContext))]
-    partial class TheStewardContextModelSnapshot : ModelSnapshot
+    [Migration("20260308020830_AddExpenseRelationshipColumns")]
+    partial class AddExpenseRelationshipColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -577,9 +580,6 @@ namespace TheSteward.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("DefaultBudgetId")
-                        .HasColumnType("uuid");
-
                     b.Property<bool>("HasAdminPermissions")
                         .HasColumnType("boolean");
 
@@ -621,8 +621,6 @@ namespace TheSteward.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("UserHouseholdId");
-
-                    b.HasIndex("DefaultBudgetId");
 
                     b.HasIndex("HouseholdId");
 
@@ -829,10 +827,6 @@ namespace TheSteward.Infrastructure.Migrations
 
             modelBuilder.Entity("TheSteward.Core.Models.HouseholdModels.UserHousehold", b =>
                 {
-                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Budget", "DefaultBudget")
-                        .WithMany()
-                        .HasForeignKey("DefaultBudgetId");
-
                     b.HasOne("TheSteward.Core.Models.HouseholdModels.Household", "Household")
                         .WithMany("UserHouseholds")
                         .HasForeignKey("HouseholdId")
@@ -844,8 +838,6 @@ namespace TheSteward.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("DefaultBudget");
 
                     b.Navigation("Household");
 

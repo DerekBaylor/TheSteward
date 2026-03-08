@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Core.Models.HouseholdModels;
 
@@ -55,4 +56,9 @@ public class UserHousehold
 
     [ForeignKey(nameof(HouseholdId))]
     public Household? Household { get; set; }
+
+    public Guid? DefaultBudgetId { get; set; }
+
+    [ForeignKey("DefaultBudgetId")]
+    public Budget? DefaultBudget { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using TheSteward.Core.IRepositories;
 using TheSteward.Infrastructure.Data;
 
@@ -50,5 +51,10 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     public async Task<int> SaveChangesAsync()
     {
         return await _context.SaveChangesAsync();
+    }
+
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return await _context.Database.BeginTransactionAsync();
     }
 }

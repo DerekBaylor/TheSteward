@@ -1,4 +1,5 @@
 using TheSteward.Core.Dtos.FinanceManagerDtos;
+using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Core.IServices.FinanceManagerIServices;
@@ -57,7 +58,7 @@ public interface IBudgetService
     /// Console.WriteLine($"Categories: {starterBudget.BudgetCategories.Count}");
     /// </code>
     /// </example>
-    Task<BudgetDto> AddStarterBudget(Guid UserHouseholdId);
+    Task<BudgetDto> AddStarterBudget(UserHouseholdDto userHouseholdDto);
     
     /// <summary>
     /// Asynchronously deletes a budget by its identifier.
@@ -76,7 +77,7 @@ public interface IBudgetService
     /// </code>
     /// </example>
     Task DeleteAsync(Guid budgetId);
-    
+
     /// <summary>
     /// Asynchronously updates an existing budget.
     /// </summary>
@@ -99,8 +100,9 @@ public interface IBudgetService
     /// </code>
     /// </example>
     Task<BudgetDto> UpdateAsync(UpdateBudgetDto budgetDto);
-    
-    /// <summary>
+
+    #region Get Methods
+  /// <summary>
     /// Asynchronously retrieves a budget by its identifier with all related data.
     /// </summary>
     /// <param name="budgetId">The unique identifier of the budget to retrieve.</param>
@@ -120,7 +122,7 @@ public interface IBudgetService
     /// </example>
     Task<BudgetDto> GetByIdAsync(Guid budgetId);
     
-    /// <summary>
+  /// <summary>
     /// Asynchronously retrieves all budgets for a specific household.
     /// </summary>
     /// <param name="userHouseholdId">The unique identifier of the household.</param>
@@ -140,7 +142,7 @@ public interface IBudgetService
     /// </example>
     Task<List<BudgetDto>> GetBudgetsByUserHouseholdIdAsync(Guid  userHouseholdId);
     
-    /// <summary>
+  /// <summary>
     /// Asynchronously retrieves the default budget for a household with all related data.
     /// </summary>
     /// <param name="householdId">The unique identifier of the household.</param>
@@ -158,4 +160,8 @@ public interface IBudgetService
     /// </code>
     /// </example>
     Task<List<BudgetDto>> GetByHouseholdAsync(Guid householdId);
+
+
+    Task<List<BudgetDto>> GetBudgetsForUserHouseholdAsync(UserHouseholdDto userHouseholdDto);
+    #endregion Get Methods
 }

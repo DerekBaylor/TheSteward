@@ -22,6 +22,8 @@ public interface IUserHouseholdService
     /// <returns>A task representing the asynchronous operation.</returns>
     Task DeleteAsync(UserHousehold userHousehold);
 
+    #region Update Methods
+
     /// <summary>
     /// Updates an existing user-household relationship and permissions.
     /// </summary>
@@ -30,6 +32,22 @@ public interface IUserHouseholdService
     /// <exception cref="KeyNotFoundException">Thrown when the user-household relationship is not found.</exception>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task UpdateAsync(UpdateUserHouseholdDto updatedUserHousehold);
+
+    /// <summary>
+    /// Sets the default budget for a user household.
+    /// </summary>
+    /// <param name="userHouseholdId">The unique identifier of the user household to update.</param>
+    /// <param name="budgetId">The unique identifier of the budget to set as default.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="userHouseholdId"/> or <paramref name="budgetId"/> is empty.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when no user household matching <paramref name="userHouseholdId"/> is found.
+    /// </exception>
+    Task SetDefaultBudgetAsync(Guid userHouseholdId, Guid budgetId);
+    #endregion Update Methods
+
+    #region Get Methods
 
     /// <summary>
     /// Retrieves a user-household relationship by its unique identifier.
@@ -67,6 +85,7 @@ public interface IUserHouseholdService
     /// <param name="userId">The unique identifier of the user.</param>
     /// <returns>A task representing the asynchronous operation, containing the user-household DTO or null if not found.</returns>
     Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId);
+    #endregion Get Methods
 
     #region Invitation Methods
 

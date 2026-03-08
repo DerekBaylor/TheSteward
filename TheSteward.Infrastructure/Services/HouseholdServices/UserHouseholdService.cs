@@ -61,6 +61,7 @@ public class UserHouseholdService : IUserHouseholdService
         await _userHouseholdRepository.SaveChangesAsync();
     }
 
+    #region Update Methods
     public async Task UpdateAsync(UpdateUserHouseholdDto updatedUserHousehold)
     {
         if (updatedUserHousehold.UserHouseholdId == null)
@@ -76,6 +77,25 @@ public class UserHouseholdService : IUserHouseholdService
         await _userHouseholdRepository.UpdateAsync(currentUserHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
     }
+
+    public async Task SetDefaultBudgetAsync(Guid userHouseholdId, Guid budgetId)
+    {
+        if (userHouseholdId == Guid.Empty)
+            throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(userHouseholdId));
+
+        if (budgetId == Guid.Empty)
+            throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
+
+        var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId)
+            ?? throw new KeyNotFoundException($"UserHousehold with ID {userHouseholdId} was not found.");
+
+        userHousehold.DefaultBudgetId = budgetId;
+
+        await _userHouseholdRepository.UpdateAsync(userHousehold);
+        await _userHouseholdRepository.SaveChangesAsync();
+    }
+
+    #endregion Update Methods
 
     #region Get UserHousehold Methods
     public async Task<UserHousehold> GetByIdAsync(Guid id)

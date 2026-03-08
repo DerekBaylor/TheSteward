@@ -81,6 +81,7 @@ public class ExpenseService : IExpenseService
         await _expenseRepository.SaveChangesAsync();
     }
 
+    #region Get Methods
     public async Task<ExpenseDto?> GetAsync(Guid expenseId)
     {
         if (expenseId == Guid.Empty)
@@ -151,4 +152,23 @@ public class ExpenseService : IExpenseService
 
         return _mapper.Map<List<ExpenseDto>>(expenses);
     }
+
+    public async Task<ExpenseDto> GetByBudgetIdAndExpenseNameAsync(Guid budgetId, string expenseName)
+    {
+        if (budgetId == Guid.Empty)
+            throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
+
+        if (string.IsNullOrWhiteSpace(expenseName))
+            throw new ArgumentException("Expense name cannot be null or whitespace.", nameof(expenseName));
+
+        var expense = await _expenseRepository.GetAll()
+            .Where(e => e.BudgetId == budgetId && e.ExpenseName == expenseName)
+            .FirstOrDefaultAsync();
+
+        if (expense == null)
+            throw new KeyNotFoundException($"Expense with name '{expenseName}' not found in budget with ID {budgetId}.");
+
+        return _mapper.Map<ExpenseDto>(expense);
+    }
+    #endregion Get Methods
 }

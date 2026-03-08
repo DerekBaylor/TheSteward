@@ -1,17 +1,23 @@
 ﻿@page "/budget"
 
 @using Microsoft.AspNetCore.Authorization
+@using TheSteward.Infrastructure.Services.HouseholdServices
 @using TheSteward.Shared.Dtos.HouseholdDtos
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.IServices.FinanceManagerIServices
 
 @inject HouseholdState HouseholdState
 @inject NavigationManager NavigationManager
+@inject IBudgetService BudgetService
+@inject IUserHouseholdService UserHouseholdService
+@inject ISnackbar Snackbar
 
 @attribute [Authorize]
 @implements IDisposable
 
 <PageTitle>Budget Dashboard</PageTitle>
 
-<HouseholdToolBar OnHouseholdChanged="OnHouseholdChanged" />
+<HouseholdToolbar OnHouseholdChanged="OnHouseholdChanged" />
 
 @if (HouseholdState.CurrentUserHousehold == null)
 {
@@ -34,30 +40,376 @@ else if (!HouseholdState.HasFinanceReadPermission)
         Please contact your household admin.
     </MudAlert>
 }
+else if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+}
+else if (!hasBudget)
+{
+    <div class="d-flex flex-column align-center justify-center mt-8" style="gap: 1.5rem;">
+        <MudIcon Icon="@Icons.Material.Outlined.AccountBalanceWallet" 
+                 Style="font-size: 4rem; color: var(--mud-palette-text-secondary);" />
+        <MudText Typo="Typo.h5">Need a budget?</MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Secondary">
+            Get started by creating a budget for <strong>@HouseholdState.CurrentHousehold!.HouseholdName</strong>.
+        </MudText>
+
+        <div class="d-flex flex-row" style="gap: 1rem; flex-wrap: wrap; justify-content: center;">
+            <MudCard Style="max-width: 280px; cursor: pointer;" @onclick="CreateStarterBudget">
+                <MudCardContent Class="d-flex flex-column align-center pa-6" style="gap: 0.75rem;">
+                    <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Color="Color.Primary" Style="font-size: 2.5rem;" />
+                    <MudText Typo="Typo.h6">Starter Budget</MudText>
+                    <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary">
+                        Pre-filled with common categories and sample data to help you get started quickly.
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions Class="justify-center pb-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                               Disabled="isCreating" OnClick="CreateStarterBudget">
+                        @if (isCreating && creatingType == "starter")
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        }
+                        Use Starter Budget
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+
+            <MudCard Style="max-width: 280px; cursor: pointer;" @onclick="CreateBlankBudget">
+                <MudCardContent Class="d-flex flex-column align-center pa-6" style="gap: 0.75rem;">
+                    <MudIcon Icon="@Icons.Material.Filled.NoteAdd" Color="Color.Secondary" Style="font-size: 2.5rem;" />
+                    <MudText Typo="Typo.h6">Blank Budget</MudText>
+                    <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary">
+                        Start from scratch and build your budget exactly the way you want it.
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions Class="justify-center pb-4">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" 
+                               Disabled="isCreating" OnClick="CreateBlankBudget">
+                        @if (isCreating && creatingType == "blank")
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        }
+                        Start Blank
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </div>
+    </div>
+}
 else
 {
-    <MudText Typo="Typo.h5" Class="mt-4">
-        Budget — @HouseholdState.CurrentHousehold.HouseholdName
-    </MudText>
+    <div class="mt-4" style="display: flex; flex-direction: column; gap: 1.5rem;">
 
-    <!-- Budget content goes here -->
-    // Income Component
-    // Expense Component
-    // Invesetment Component
-    // Credit Component
-    // Budget Summary Component
+        <!-- Header -->
+        <div class="d-flex align-center justify-space-between">
+            <MudText Typo="Typo.h5">@currentBudget!.BudgetName</MudText>
+            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">
+                @(currentBudget.IsDefaultBudget ? "Default Budget" : "Budget")
+            </MudChip>
+        </div>
+
+        <!-- Summary Cards -->
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Monthly Income</MudText>
+                        <MudText Typo="Typo.h6">
+                            @currentBudget.Incomes.Sum(i => i.MonthlyNetIncome).ToString("C")
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Monthly Expenses</MudText>
+                        <MudText Typo="Typo.h6">
+                            @currentBudget.Expenses.Sum(e => e.AmountDue).ToString("C")
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Total Credit Debt</MudText>
+                        <MudText Typo="Typo.h6">
+                            @currentBudget.Credits.Sum(c => c.CurrentValue).ToString("C")
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Total Investments</MudText>
+                        <MudText Typo="Typo.h6">
+                            @currentBudget.Investments.Sum(i => i.CurrentValue).ToString("C")
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Income -->
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Income</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable Items="currentBudget.Incomes" Dense="true" Hover="true" Elevation="0">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Frequency</MudTh>
+                        <MudTh>Gross Per Check</MudTh>
+                        <MudTh>Yearly Gross</MudTh>
+                        <MudTh>Monthly Net</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.IncomeName</MudTd>
+                        <MudTd>@context.IncomeFrequency x / year</MudTd>
+                        <MudTd>@context.PayCheckGross.ToString("C")</MudTd>
+                        <MudTd>@context.YearlyGrossSalary.ToString("C")</MudTd>
+                        <MudTd>@context.MonthlyNetIncome.ToString("C")</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Expenses by Category -->
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Expenses</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @foreach (var category in currentBudget.BudgetCategories.OrderBy(c => c.DisplayOrder))
+                {
+                    var categoryExpenses = currentBudget.Expenses
+                        .Where(e => e.BudgetCategoryId == category.BudgetCategoryId)
+                        .OrderBy(e => e.DisplayOrder)
+                        .ToList();
+
+                    if (!categoryExpenses.Any()) continue;
+
+                    <MudText Typo="Typo.subtitle1" Class="mt-3 mb-1">
+                        <strong>@category.BudgetCategoryName</strong>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Inline="true" Class="ml-2">
+                            @categoryExpenses.Sum(e => e.AmountDue).ToString("C")
+                        </MudText>
+                    </MudText>
+
+                    <MudTable Items="categoryExpenses" Dense="true" Hover="true" Elevation="0" Class="mb-2">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Subcategory</MudTh>
+                            <MudTh>Due Day</MudTh>
+                            <MudTh>Amount</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.ExpenseName</MudTd>
+                            <MudTd>@(context.BudgetSubCategory?.BudgetSubCategoryName ?? "—")</MudTd>
+                            <MudTd>@(context.DueDay == 31 ? "Last day" : $"Day {context.DueDay}")</MudTd>
+                            <MudTd>@context.AmountDue.ToString("C")</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                }
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Credits -->
+        @if (currentBudget.Credits.Any())
+        {
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Credit & Debt</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudTable Items="currentBudget.Credits.OrderBy(c => c.DisplayOrder)" Dense="true" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Type</MudTh>
+                            <MudTh>Balance</MudTh>
+                            <MudTh>Interest Rate</MudTh>
+                            <MudTh>Monthly Interest</MudTh>
+                            <MudTh>Payment</MudTh>
+                            <MudTh>Due Day</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.CreditName</MudTd>
+                            <MudTd>@(context.CreditType ?? "—")</MudTd>
+                            <MudTd>@context.CurrentValue.ToString("C")</MudTd>
+                            <MudTd>@((context.InterestRate * 100).ToString("F2"))%</MudTd>
+                            <MudTd>@context.EstMonthlyInterest.ToString("C")</MudTd>
+                            <MudTd>@context.PaymentAmount.ToString("C")</MudTd>
+                            <MudTd>@(context.PaymentDay == 31 ? "Last day" : $"Day {context.PaymentDay}")</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudCardContent>
+            </MudCard>
+        }
+
+        <!-- Investments -->
+        @if (currentBudget.Investments.Any())
+        {
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Investments & Savings</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudTable Items="currentBudget.Investments.OrderBy(i => i.DisplayOrder)" Dense="true" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Current Value</MudTh>
+                            <MudTh>Interest Rate</MudTh>
+                            <MudTh>Contribution</MudTh>
+                            <MudTh>Est. Yearly Growth</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.InvestmentName</MudTd>
+                            <MudTd>@context.CurrentValue.ToString("C")</MudTd>
+                            <MudTd>@((context.InterestRate * 100).ToString("F2"))%</MudTd>
+                            <MudTd>@context.ContributionAmount.ToString("C")</MudTd>
+                            <MudTd>@context.EstYearlyGrowth.ToString("C")</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudCardContent>
+            </MudCard>
+        }
+
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mt-3">@errorMessage</MudAlert>
 }
 
 @code {
+    private bool isLoading = true;
+    private bool isCreating = false;
+    private bool hasBudget = false;
+    private string? creatingType;
+    private string? errorMessage;
+    private BudgetDto? currentBudget;
     private Action? _stateChangeHandler;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _stateChangeHandler = () => InvokeAsync(StateHasChanged);
         HouseholdState.OnChange += _stateChangeHandler;
+
+        await LoadBudgetAsync();
     }
 
-    private void OnHouseholdChanged(UserHouseholdDto _) { }
+    private async Task LoadBudgetAsync()
+    {
+        var householdId = HouseholdState.CurrentHousehold?.HouseholdId;
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+
+        if (householdId == null || userHousehold == null || !HouseholdState.HasFinanceReadPermission)
+        {
+            isLoading = false;
+            return;
+        }
+
+        try
+        {
+            isLoading = true;
+
+            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(userHousehold);
+
+            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == userHousehold.DefaultBudgetId)
+                ?? budgets.FirstOrDefault(b => b.IsDefaultBudget)
+                ?? budgets.FirstOrDefault();
+
+            hasBudget = currentBudget != null;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading budget: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateStarterBudget()
+    {
+        if (isCreating) return;
+        await CreateBudget("starter");
+    }
+
+    private async Task CreateBlankBudget()
+    {
+        if (isCreating) return;
+        await CreateBudget("blank");
+    }
+
+    private async Task CreateBudget(string type)
+    {
+        var householdId = HouseholdState.CurrentHousehold?.HouseholdId;
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+
+        if (householdId == null || userHousehold == null) return;
+
+        isCreating = true;
+        creatingType = type;
+        errorMessage = null;
+
+        try
+        {
+            if (type == "starter")
+            {
+                currentBudget = await BudgetService.AddStarterBudget(userHousehold);
+            }
+            else
+            {
+                currentBudget = await BudgetService.AddAsync(new CreateBudgetDto
+                {
+                    BudgetName = "My Budget",
+                    HouseholdId = householdId.Value,
+                    OwnerId = userHousehold.UserId,
+                    IsDefaultBudget = true,
+                    IsPublic = false
+                });
+            }
+
+            // Set as the user's default budget for this household
+            await UserHouseholdService.SetDefaultBudgetAsync(userHousehold.UserHouseholdId, currentBudget!.BudgetId);
+
+            hasBudget = true;
+            Snackbar.Add("Budget created successfully!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error creating budget: {ex.Message}";
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isCreating = false;
+            creatingType = null;
+        }
+    }
+
+    private async void OnHouseholdChanged(UserHouseholdDto _)
+    {
+        currentBudget = null;
+        hasBudget = false;
+        errorMessage = null;
+        await LoadBudgetAsync();
+    }
 
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

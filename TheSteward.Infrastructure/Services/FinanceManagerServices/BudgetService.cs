@@ -1,14 +1,12 @@
 //01/20/26
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IRepositories.HouseholdIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
-using TheSteward.Core.Models.HouseholdModels;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 

@@ -1,0 +1,130 @@
+﻿#incomeCard.ts-tabbed-card {
+    width: 25rem;
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---- Tab Buttons ---- */
+#addIncomeBtn.ts-card-tab-btn {
+    background-color: var(--green-5);
+    border-color: var(--green-5);
+    color: var(--off-white);
+}
+
+#editIncomeBtn.ts-card-tab-btn {
+    background-color: var(--green-4);
+    border-color: var(--green-4);
+    color: var(--off-white);
+}
+
+button#addIncomeBtn:hover:not([disabled]) {
+    background-color: var(--green-8);
+    color: var(--off-white);
+}
+
+button#editIncomeBtn:hover:not([disabled]) {
+    background-color: var(--green-8);
+    color: var(--off-white);
+}
+
+/* ---- Card border accent ---- */
+#incomeCard .ts-card-content {
+    border-color: var(--base-green);
+}
+
+/* ---- Income Table ---- */
+.income-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.income-th {
+    text-align: left;
+    font-family: var(--label-font);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gray-6);
+    padding: 0.25rem 0.5rem 0.5rem;
+    border-bottom: 2px solid var(--green-3);
+}
+
+.income-th-amount {
+    text-align: right;
+}
+
+.income-row {
+    transition: background-color 0.15s ease;
+}
+
+    .income-row:hover {
+        background-color: var(--green-1);
+        border-radius: var(--border-radius);
+    }
+
+.income-td {
+    padding: 0.5rem 0.5rem;
+    color: var(--gray-8);
+    border-bottom: 1px solid var(--gray-2);
+}
+
+.income-td-name {
+    font-weight: 500;
+}
+
+.income-td-amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--primary-font);
+}
+
+/* ---- Totals Footer ---- */
+.income-totals-row {
+    border-top: 2px solid var(--green-4);
+}
+
+.income-totals-label {
+    font-family: var(--label-font);
+    font-weight: 700;
+    color: var(--gray-9);
+    padding-top: 0.6rem;
+}
+
+.income-totals-value {
+    font-weight: 700;
+    color: var(--base-green);
+    padding-top: 0.6rem;
+}
+
+/* ---- Empty State ---- */
+.income-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 0;
+    color: var(--gray-5);
+}
+
+.income-empty-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.income-empty-text {
+    font-size: 0.9rem;
+    margin: 0;
+}

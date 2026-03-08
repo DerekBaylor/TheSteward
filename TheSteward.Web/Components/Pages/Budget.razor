@@ -46,6 +46,8 @@ else if (isLoading)
 }
 else if (!hasBudget)
 {
+
+
     <div class="d-flex flex-column align-center justify-center mt-8" style="gap: 1.5rem;">
         <MudIcon Icon="@Icons.Material.Outlined.AccountBalanceWallet" 
                  Style="font-size: 4rem; color: var(--mud-palette-text-secondary);" />
@@ -99,7 +101,14 @@ else if (!hasBudget)
 }
 else
 {
-    <div class="mt-4" style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <IncomeCard Incomes="currentBudget.Incomes"
+            IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+            OnAddIncome="OpenAddIncomeModal"
+            OnEditIncome="OpenEditIncomeModal" />
+
+    <!-- Mock Display -->
+    #region mock-display
+@*     <div class="mt-4" style="display: flex; flex-direction: column; gap: 1.5rem;">
 
         <!-- Header -->
         <div class="d-flex align-center justify-space-between">
@@ -285,8 +294,9 @@ else
                 </MudCardContent>
             </MudCard>
         }
-
     </div>
+ *@
+    #endregion mock-display
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -302,6 +312,22 @@ else
     private string? errorMessage;
     private BudgetDto? currentBudget;
     private Action? _stateChangeHandler;
+
+    // Income
+    private Task OpenAddIncomeModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditIncomeModal(IncomeDto income) => Task.CompletedTask; // TODO: Implement
+
+    // Investment
+    private Task OpenAddInvestmentModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditInvestmentModal(InvestmentDto investment) => Task.CompletedTask; // TODO: Implement
+
+    // Credit
+    private Task OpenAddCreditModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditCreditModal(CreditDto credit) => Task.CompletedTask; // TODO: Implement
+
+    // Expense
+    private Task OpenAddExpenseModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditExpenseModal(ExpenseDto expense) => Task.CompletedTask; // TODO: Implement
 
     protected override async Task OnInitializedAsync()
     {

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
-using TheSteward.Core.IRepositories.HouseholdIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
 
@@ -19,7 +18,6 @@ public class BudgetService : IBudgetService
     private readonly IExpenseRepository _expenseRepository;
     private readonly IIncomeRepository _incomeRepository;
     private readonly IInvestmentRepository _investmentRepository;
-    private readonly IUserHouseholdRepository _userHouseholdRepository;
     private readonly IMapper _mapper;
 
     public BudgetService(
@@ -30,7 +28,6 @@ public class BudgetService : IBudgetService
         IExpenseRepository expenseRepository,
         IIncomeRepository incomeRepository,
         IInvestmentRepository investmentRepository,
-        IUserHouseholdRepository userHouseholdRepository,
         IMapper mapper)
     {
         _budgetRepository = budgetRepository;
@@ -40,7 +37,6 @@ public class BudgetService : IBudgetService
         _creditRepository = creditRepository;
         _incomeRepository = incomeRepository;
         _investmentRepository =  investmentRepository;
-        _userHouseholdRepository = userHouseholdRepository;
         _mapper = mapper;
     }
 

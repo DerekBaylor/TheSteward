@@ -1,4 +1,5 @@
-﻿#incomeCard.ts-tabbed-card {
+﻿
+#incomeCard.ts-tabbed-card {
     width: 25rem;
     animation: slideUp 0.4s ease-out;
 }
@@ -66,6 +67,12 @@ button#editIncomeBtn:hover:not([disabled]) {
     text-align: right;
 }
 
+.income-th-action {
+    width: 2rem;
+    text-align: center;
+    padding: 0.25rem 0.25rem 0.5rem;
+}
+
 .income-row {
     transition: background-color 0.15s ease;
 }
@@ -90,6 +97,52 @@ button#editIncomeBtn:hover:not([disabled]) {
     font-variant-numeric: tabular-nums;
     font-family: var(--primary-font);
 }
+
+.income-td-action {
+    text-align: center;
+    padding: 0.25rem;
+    width: 2rem;
+}
+
+/* ---- Row Action Buttons ---- */
+.income-row-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    padding: 0.2rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.income-row:hover .income-row-btn {
+    opacity: 1;
+}
+
+.income-row-btn .material-icons {
+    font-size: 16px;
+}
+
+.income-row-btn--edit {
+    color: var(--gray-6);
+}
+
+    .income-row-btn--edit:hover {
+        background-color: var(--green-2);
+        color: var(--base-green);
+    }
+
+.income-row-btn--delete {
+    color: var(--gray-6);
+}
+
+    .income-row-btn--delete:hover {
+        background-color: var(--red-1);
+        color: var(--red-6);
+    }
 
 /* ---- Totals Footer ---- */
 .income-totals-row {

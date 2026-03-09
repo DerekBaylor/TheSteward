@@ -4,22 +4,24 @@
 
 <MudCard id="incomeCard" class="ts-tabbed-card" Elevation="0">
 
-    <MudCardActions class="ts-tabbed-card-btn-container">
-        <MudButton id="addIncomeBtn"
-                   class="ts-card-tab-btn"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="HandleAddIncome"
-                   Disabled="IsReadOnly">
-            Add Income
-        </MudButton>
-        <MudButton id="editIncomeBtn"
-                   class="ts-card-tab-btn"
-                   StartIcon="@Icons.Material.Filled.Edit"
-                   OnClick="HandleEditIncome"
-                   Disabled="IsReadOnly || !Incomes.Any()">
-            Edit Income
-        </MudButton>
-    </MudCardActions>
+    @if (!IsReadOnly)
+    {
+        <MudCardActions class="ts-tabbed-card-btn-container">
+            <MudButton id="addIncomeBtn"
+                       class="ts-card-tab-btn"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="HandleAddIncome">
+                Add Income
+            </MudButton>
+            <MudButton id="editIncomeBtn"
+                       class="ts-card-tab-btn"
+                       StartIcon="@Icons.Material.Filled.Edit"
+                       OnClick="HandleEditIncome"
+                       Disabled="!Incomes.Any()">
+                Edit Income
+            </MudButton>
+        </MudCardActions>
+    }
 
     <MudCardContent class="ts-card-content">
 
@@ -48,6 +50,11 @@
                                 <th class="income-th income-th-name">Name</th>
                                 <th class="income-th income-th-amount">Monthly Net</th>
                                 <th class="income-th income-th-amount">Yearly Net</th>
+                                @if (!IsReadOnly)
+                                {
+                                    <th class="income-th income-th-action"></th>
+                                    <th class="income-th income-th-action"></th>
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -57,6 +64,23 @@
                                     <td class="income-td income-td-name">@income.IncomeName</td>
                                     <td class="income-td income-td-amount">@income.MonthlyNetIncome.ToString("C")</td>
                                     <td class="income-td income-td-amount">@((income.MonthlyNetIncome * 12).ToString("C"))</td>
+                                    @if (!IsReadOnly)
+                                    {
+                                        <td class="income-td income-td-action">
+                                            <button class="income-row-btn income-row-btn--edit"
+                                                    title="Edit"
+                                                    @onclick="() => HandleRowEdit(income)">
+                                                <span class="material-icons">edit</span>
+                                            </button>
+                                        </td>
+                                        <td class="income-td income-td-action">
+                                            <button class="income-row-btn income-row-btn--delete"
+                                                    title="Delete"
+                                                    @onclick="() => HandleRowDelete(income)">
+                                                <span class="material-icons">delete</span>
+                                            </button>
+                                        </td>
+                                    }
                                 </tr>
                             }
                         </tbody>
@@ -69,6 +93,11 @@
                                 <td class="income-td income-td-amount income-totals-value">
                                     @Incomes.Sum(i => i.MonthlyNetIncome * 12).ToString("C")
                                 </td>
+                                @if (!IsReadOnly)
+                                {
+                                    <td class="income-td income-td-action"></td>
+                                    <td class="income-td income-td-action"></td>
+                                }
                             </tr>
                         </tfoot>
                     </table>
@@ -94,6 +123,9 @@
     [Parameter]
     public EventCallback<IncomeDto> OnEditIncome { get; set; }
 
+    [Parameter]
+    public EventCallback<IncomeDto> OnDeleteIncome { get; set; }
+
     private async Task HandleAddIncome()
     {
         await OnAddIncome.InvokeAsync();
@@ -101,9 +133,18 @@
 
     private async Task HandleEditIncome()
     {
-        // Opens edit for the first income; parent may swap this for a selection modal
         var first = Incomes.FirstOrDefault();
         if (first is not null)
             await OnEditIncome.InvokeAsync(first);
+    }
+
+    private async Task HandleRowEdit(IncomeDto income)
+    {
+        await OnEditIncome.InvokeAsync(income);
+    }
+
+    private async Task HandleRowDelete(IncomeDto income)
+    {
+        await OnDeleteIncome.InvokeAsync(income);
     }
 }

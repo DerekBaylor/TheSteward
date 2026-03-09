@@ -1,7 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
-using TheSteward.Core.IRepositories;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
@@ -23,7 +22,7 @@ public class IncomeService : IIncomeService
     {
         if (incomeDto == null)
             throw new ArgumentNullException(nameof(incomeDto));
-        
+
         var income = new Income
         {
             IncomeId = Guid.NewGuid(),
@@ -33,11 +32,11 @@ public class IncomeService : IIncomeService
             BudgetId = incomeDto.BudgetId,
             DisplayOrder = incomeDto.DisplayOrder
         };
-        
+
         CalculateIncomeValues(income);
-        
+
         await _incomeRepository.AddAsync(income);
-        
+
         return _mapper.Map<IncomeDto>(income);
     }
 
@@ -45,18 +44,18 @@ public class IncomeService : IIncomeService
     {
         if (incomeDto == null)
             throw new ArgumentNullException(nameof(incomeDto));
-        
+
         var income = await _incomeRepository.GetByIdAsync(incomeDto.IncomeId);
         if (income == null)
             throw new KeyNotFoundException($"Income with ID {incomeDto.IncomeId} not found.");
-        
+
         income.IncomeName = incomeDto.IncomeName;
         income.IncomeFrequency = incomeDto.IncomeFrequency;
         income.PayCheckGross = incomeDto.PayCheckGross;
         income.DisplayOrder = incomeDto.DisplayOrder;
-        
+
         CalculateIncomeValues(income);
-        
+
         await _incomeRepository.UpdateAsync(income);
 
         return incomeDto;
@@ -74,13 +73,13 @@ public class IncomeService : IIncomeService
         await _incomeRepository.DeleteAsync(income);
     }
 
+    #region Get Methods
     public async Task<IncomeDto?> GetAsync(Guid incomeId)
     {
         if (incomeId == Guid.Empty)
             throw new ArgumentException("Income ID cannot be empty.", nameof(incomeId));
 
         var income = await _incomeRepository.GetByIdAsync(incomeId);
-
         return income == null ? null : _mapper.Map<IncomeDto>(income);
     }
 
@@ -96,90 +95,57 @@ public class IncomeService : IIncomeService
 
         return incomes.Select(i => _mapper.Map<IncomeDto>(i)).ToList();
     }
+    #endregion Get Methods
 
     #region Private Helper Methods
-    
+
     /// <summary>
-    /// Calculates all derived income values including yearly salary, taxes, and monthly net income.
+    /// Calculates all derived values for a single income: yearly gross,
+    /// estimated federal and state taxes, and monthly net.
+    /// Note: taxes are estimated per-income in isolation. If a user has
+    /// multiple income sources, the actual combined tax burden may be higher
+    /// due to bracket progression — the client-side preview communicates this.
     /// </summary>
-    /// <param name="income">The income entity to calculate values for.</param>
-    private void CalculateIncomeValues(Income income)
+    private static void CalculateIncomeValues(Income income)
     {
         income.YearlyGrossSalary = income.PayCheckGross * income.IncomeFrequency;
-        
         income.EstFederalIncomeTax = CalculateFederalIncomeTax(income.YearlyGrossSalary);
-        
         income.EstStateIncomeTax = CalculateStateIncomeTax(income.YearlyGrossSalary);
-        
-        var yearlyNetIncome = income.YearlyGrossSalary - income.EstFederalIncomeTax - income.EstStateIncomeTax;
-        income.MonthlyNetIncome = yearlyNetIncome / 12;
+
+        var yearlyNet = income.YearlyGrossSalary
+                                  - income.EstFederalIncomeTax
+                                  - income.EstStateIncomeTax;
+        income.MonthlyNetIncome = Math.Round(yearlyNet / 12m, 2);
     }
 
     /// <summary>
-    /// Calculates estimated federal income tax based on 2025 tax brackets (single filer, 0 allowances).
+    /// 2025 federal tax brackets, single filer, $15,750 standard deduction.
     /// </summary>
-    /// <param name="yearlyGrossSalary">The gross yearly salary.</param>
-    /// <returns>The estimated federal income tax amount.</returns>
-    /// <remarks>
-    /// This is a simplified calculation. For production, consider using actual tax bracket calculations
-    /// with standard deductions and current year tax rates.
-    /// </remarks>
-    private decimal CalculateFederalIncomeTax(decimal yearlyGrossSalary)
+    private static decimal CalculateFederalIncomeTax(decimal yearlyGrossSalary)
     {
-        // 2024 Federal Tax Brackets (Single Filer) - Simplified
-        // TODO: Update to take different types of deduction types.
-        const decimal standardDeduction = 15750; // 2025 Single Std. Deduction
-        var taxableIncome = Math.Max(0, yearlyGrossSalary - standardDeduction);
+        const decimal standardDeduction = 15750m;
+        var taxable = Math.Max(0, yearlyGrossSalary - standardDeduction);
 
-        decimal tax = 0m;
-
-        if (taxableIncome <= 11600m)
+        return taxable switch
         {
-            tax = taxableIncome * 0.10m;
-        }
-        else if (taxableIncome <= 47150m)
-        {
-            tax = 1160m + ((taxableIncome - 11600m) * 0.12m);
-        }
-        else if (taxableIncome <= 100525m)
-        {
-            tax = 5426m + ((taxableIncome - 47150m) * 0.22m);
-        }
-        else if (taxableIncome <= 191950m)
-        {
-            tax = 17168.50m + ((taxableIncome - 100525m) * 0.24m);
-        }
-        else if (taxableIncome <= 243725m)
-        {
-            tax = 39110.50m + ((taxableIncome - 191950m) * 0.32m);
-        }
-        else if (taxableIncome <= 609350m)
-        {
-            tax = 55678.50m + ((taxableIncome - 243725m) * 0.35m);
-        }
-        else
-        {
-            tax = 183647.25m + ((taxableIncome - 609350m) * 0.37m);
-        }
-
-        return Math.Round(tax, 2);
+            <= 11600m => Math.Round(taxable * 0.10m, 2),
+            <= 47150m => Math.Round(1160m + (taxable - 11600m) * 0.12m, 2),
+            <= 100525m => Math.Round(5426m + (taxable - 47150m) * 0.22m, 2),
+            <= 191950m => Math.Round(17168.50m + (taxable - 100525m) * 0.24m, 2),
+            <= 243725m => Math.Round(39110.50m + (taxable - 191950m) * 0.32m, 2),
+            <= 609350m => Math.Round(55678.50m + (taxable - 243725m) * 0.35m, 2),
+            _ => Math.Round(183647.25m + (taxable - 609350m) * 0.37m, 2),
+        };
     }
 
     /// <summary>
-    /// Calculates estimated state income tax.
+    /// Placeholder state tax at 6%. Replace with state-specific logic as needed.
     /// </summary>
-    /// <param name="yearlyGrossSalary">The gross yearly salary.</param>
-    /// <returns>The estimated state income tax amount.</returns>
-    /// <remarks>
-    /// This is a placeholder implementation. You should implement state-specific tax calculations
-    /// based on the user's state of residence. Some states have no income tax.
-    /// </remarks>
-    private decimal CalculateStateIncomeTax(decimal yearlyGrossSalary)
+    private static decimal CalculateStateIncomeTax(decimal yearlyGrossSalary)
     {
-        // TODO: Implement state-specific tax calculation
         const decimal stateTaxRate = 0.06m;
         return Math.Round(yearlyGrossSalary * stateTaxRate, 2);
     }
-    
-    #endregion Private Helper Methods
+
+    #endregion
 }

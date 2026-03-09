@@ -1,6 +1,7 @@
 ﻿@page "/budget"
 
 @using Microsoft.AspNetCore.Authorization
+@using TheSteward.Infrastructure.Services.FinanceManagerServices
 @using TheSteward.Infrastructure.Services.HouseholdServices
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Core.Dtos.FinanceManagerDtos
@@ -9,8 +10,10 @@
 @inject HouseholdState HouseholdState
 @inject NavigationManager NavigationManager
 @inject IBudgetService BudgetService
+@inject IIncomeService IncomeService
 @inject IUserHouseholdService UserHouseholdService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 @attribute [Authorize]
 @implements IDisposable
@@ -102,9 +105,9 @@ else if (!hasBudget)
 else
 {
     <IncomeCard Incomes="currentBudget.Incomes"
-            IsReadOnly="!HouseholdState.HasFinanceWritePermission"
-            OnAddIncome="OpenAddIncomeModal"
-            OnEditIncome="OpenEditIncomeModal" />
+                IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+                OnAddIncome="OpenAddIncomeModal"
+                OnEditIncome="OpenEditIncomeModal" />
 
     <!-- Mock Display -->
     #region mock-display
@@ -313,10 +316,6 @@ else
     private BudgetDto? currentBudget;
     private Action? _stateChangeHandler;
 
-    // Income
-    private Task OpenAddIncomeModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditIncomeModal(IncomeDto income) => Task.CompletedTask; // TODO: Implement
-
     // Investment
     private Task OpenAddInvestmentModal() => Task.CompletedTask; // TODO: Implement
     private Task OpenEditInvestmentModal(InvestmentDto investment) => Task.CompletedTask; // TODO: Implement
@@ -336,7 +335,7 @@ else
 
         await LoadBudgetAsync();
     }
-
+    #region Budget
     private async Task LoadBudgetAsync()
     {
         var householdId = HouseholdState.CurrentHousehold?.HouseholdId;
@@ -436,6 +435,90 @@ else
         errorMessage = null;
         await LoadBudgetAsync();
     }
+    #endregion Budget
+
+    #region Income
+    private async Task OpenAddIncomeModal()
+    {
+        var formData = new IncomeFormDto
+        {
+            BudgetId = currentBudget!.BudgetId,
+            DisplayOrder = currentBudget.Incomes.Count
+        };
+
+        await OpenIncomeModal(formData);
+    }
+
+    private async Task OpenEditIncomeModal(IncomeDto income)
+    {
+        var formData = new IncomeFormDto
+        {
+            IncomeId = income.IncomeId,
+            IncomeName = income.IncomeName,
+            IncomeFrequency = income.IncomeFrequency,
+            PayCheckGross = income.PayCheckGross,
+            DisplayOrder = income.DisplayOrder,
+            BudgetId = income.BudgetId
+        };
+
+        await OpenIncomeModal(formData);
+    }
+
+    private async Task OpenIncomeModal(IncomeFormDto formData)
+    {
+        var parameters = new DialogParameters
+    {
+        { "FormData", formData },
+        { "ExistingIncomeCount", currentBudget!.Incomes.Count }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<IncomeModal>(
+            formData.IsEditMode ? "Edit Income" : "Add Income",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        if (result.Data is string signal && signal.StartsWith("delete:"))
+        {
+            var id = Guid.Parse(signal.Replace("delete:", ""));
+            await HandleDeleteIncome(id);
+            return;
+        }
+
+        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+            HouseholdState.CurrentUserHousehold!);
+
+        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+            ?? currentBudget;
+
+        StateHasChanged();
+    }
+
+    private async Task HandleDeleteIncome(Guid incomeId)
+    {
+        try
+        {
+            await IncomeService.DeleteAsync(incomeId);
+            currentBudget!.Incomes.RemoveAll(i => i.IncomeId == incomeId);
+            Snackbar.Add("Income removed.", Severity.Success);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting income: {ex.Message}", Severity.Error);
+        }
+    }
+    #endregion Income
 
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

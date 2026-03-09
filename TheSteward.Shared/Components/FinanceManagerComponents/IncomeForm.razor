@@ -1,0 +1,161 @@
+﻿@namespace TheSteward.Shared.Components.FinanceComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Shared.Utils.FinanceManagerUtils
+@using static TheSteward.Shared.Utils.FinanceManagerUtils.FinanceManagerConstants
+
+<EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="income-form">
+
+        <!-- Name -->
+        <div class="income-form-field">
+            <MudTextField @bind-Value="FormData.IncomeName"
+                          Label="Income Name"
+                          Placeholder="e.g. Primary Job, Freelance"
+                          Variant="Variant.Outlined"
+                          HelperText="A short label to identify this income source."
+                          MaxLength="200"
+                          For="@(() => FormData.IncomeName)" />
+        </div>
+
+        <!-- Frequency -->
+        <div class="income-form-field">
+            <MudSelect T="int"
+                       @bind-Value="FormData.IncomeFrequency"
+                       Label="Pay Frequency"
+                       Variant="Variant.Outlined"
+                       HelperText="How many paychecks do you receive per year?"
+                       For="@(() => FormData.IncomeFrequency)"
+                       @bind-Value:after="UpdatePreview">
+                @foreach (var freq in FrequencyOptions)
+                {
+                    <MudSelectItem T="int" Value="@freq.Value">@freq.Label</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+
+        <!-- Gross Per Paycheck -->
+        <div class="income-form-field">
+            <MudNumericField @bind-Value="FormData.PayCheckGross"
+                             Label="Gross Per Paycheck"
+                             Variant="Variant.Outlined"
+                             Format="C2"
+                             HelperText="Your pre-tax amount for each paycheck."
+                             Min="0.01m"
+                             For="@(() => FormData.PayCheckGross)"
+                             @bind-Value:after="UpdatePreview" />
+        </div>
+
+        <!-- Live Preview -->
+            <div class="income-preview income-preview--visible">
+                <p class="income-preview-title">Estimated Breakdown</p>
+                <div class="income-preview-grid">
+                    <span class="income-preview-label">Yearly Gross</span>
+                    <span class="income-preview-value">@yearlyGross.ToString("C")</span>
+
+                    <span class="income-preview-label">Est. Federal Tax</span>
+                    <span class="income-preview-value income-preview-deduction">−@estFederalTax.ToString("C")</span>
+
+                    <span class="income-preview-label">Est. State Tax (6%)</span>
+                    <span class="income-preview-value income-preview-deduction">−@estStateTax.ToString("C")</span>
+
+                    <span class="income-preview-label income-preview-net-label">Est. Monthly Net</span>
+                    <span class="income-preview-value income-preview-net-value">@estMonthlyNet.ToString("C")</span>
+                </div>
+                @if (hasMultipleIncomes)
+                {
+                    <p class="income-preview-warning">
+                        <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
+                        You have multiple income sources. Each is taxed individually here, but your
+                        combined income may push you into a higher bracket. Actual net may be lower.
+                    </p>
+                }
+                <p class="income-preview-disclaimer">
+                    Estimates only — final values are calculated on save.
+                </p>
+            </div>
+
+        <ValidationSummary />
+
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public IncomeFormDto FormData { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<IncomeFormDto> OnValidSubmit { get; set; }
+
+    /// <summary>
+    /// Total number of income sources already on the budget (including the one
+    /// being edited). Used to show the combined-income tax warning.
+    /// </summary>
+    [Parameter]
+    public int ExistingIncomeCount { get; set; } = 0;
+
+    private EditContext editContext = null!;
+    private bool hasMultipleIncomes => ExistingIncomeCount > 1
+        || (!FormData.IsEditMode && ExistingIncomeCount >= 1);
+
+    // Preview state
+    private decimal yearlyGross = 0m;
+    private decimal estFederalTax = 0m;
+    private decimal estStateTax = 0m;
+    private decimal estMonthlyNet = 0m;
+
+    private static readonly List<(string Label, int Value)> FrequencyOptions = new()
+    {
+        ("Monthly (12×/year)",   (int)FrequencyEnum.Monthly),
+        ("Bi-Monthly (24×/year)", (int)FrequencyEnum.BiMonthly),
+        ("Bi-Weekly (26×/year)", (int)FrequencyEnum.BiWeekly),
+        ("Weekly (52×/year)",    (int)FrequencyEnum.Weekly),
+    };
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(FormData);
+        UpdatePreview();
+    }
+
+    private void UpdatePreview()
+    {
+        yearlyGross = FormData.PayCheckGross * FormData.IncomeFrequency;
+        estFederalTax = EstimateFederalTax(yearlyGross);
+        estStateTax = Math.Round(yearlyGross * 0.06m, 2);
+        estMonthlyNet = Math.Round((yearlyGross - estFederalTax - estStateTax) / 12m, 2);
+    }
+
+    public async Task SubmitAsync()
+    {
+        var isValid = editContext.Validate();
+        if (isValid)
+            await OnValidSubmit.InvokeAsync(FormData);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await OnValidSubmit.InvokeAsync(FormData);
+    }
+
+    /// <summary>
+    /// Client-side preview only — mirrors server-side logic in IncomeService.
+    /// 2025 federal brackets, single filer, standard deduction $15,750.
+    /// </summary>
+    private static decimal EstimateFederalTax(decimal yearlyGross)
+    {
+        var taxable = Math.Max(0, yearlyGross - 15750m);
+        return taxable switch
+        {
+            <= 11600m => Math.Round(taxable * 0.10m, 2),
+            <= 47150m => Math.Round(1160m + (taxable - 11600m) * 0.12m, 2),
+            <= 100525m => Math.Round(5426m + (taxable - 47150m) * 0.22m, 2),
+            <= 191950m => Math.Round(17168.50m + (taxable - 100525m) * 0.24m, 2),
+            <= 243725m => Math.Round(39110.50m + (taxable - 191950m) * 0.32m, 2),
+            <= 609350m => Math.Round(55678.50m + (taxable - 243725m) * 0.35m, 2),
+            _ => Math.Round(183647.25m + (taxable - 609350m) * 0.37m, 2),
+        };
+    }
+}

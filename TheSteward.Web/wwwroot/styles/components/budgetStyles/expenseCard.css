@@ -250,3 +250,39 @@ button#addExpenseBtn:hover:not([disabled]) {
     font-size: 0.9rem;
     margin: 0;
 }
+
+/* ---- Collapsible Category Header ---- */
+.expense-category-header {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+}
+
+    .expense-category-header:hover {
+        background-color: var(--purple-2);
+    }
+
+.expense-category-header--collapsed {
+    border-radius: var(--border-radius);
+    border-left-color: var(--purple-4);
+}
+
+.expense-category-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.expense-category-chevron {
+    font-size: 1.1rem;
+    color: var(--purple-6);
+    flex-shrink: 0;
+}
+
+.expense-category-count {
+    font-size: 0.68rem;
+    color: var(--gray-5);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+}

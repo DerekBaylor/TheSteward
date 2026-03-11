@@ -37,94 +37,108 @@
             else
             {
                 @foreach (var category in Expenses
-                    .GroupBy(e => e.BudgetCategory)
+                    .GroupBy(e => e.BudgetCategoryId)
                     .OrderBy(g => g.Min(e => e.DisplayOrder)))
                 {
+                    var categoryKey = category.Key;
+                    var categoryName = category.First().BudgetCategory?.BudgetCategoryName ?? "Uncategorized";
                     var categoryTotal = category.Sum(e => e.AmountDue);
+                    var isExpanded = !collapsedCategories.Contains(categoryKey);
 
                     <section class="ts-card-section expense-category-section">
 
-                        <div class="expense-category-header">
-                            <span class="expense-category-name">
-                                @(category.Key?.BudgetCategoryName ?? "Uncategorized")
-                            </span>
+                        <div class="expense-category-header @(isExpanded ? "" : "expense-category-header--collapsed")"
+                             @onclick="() => ToggleCategory(categoryKey)">
+                            <div class="expense-category-header-left">
+                                <span class="material-icons expense-category-chevron">
+                                    @(isExpanded ? "expand_more" : "chevron_right")
+                                </span>
+                                <span class="expense-category-name">@categoryName</span>
+                                <span class="expense-category-count">
+                                    @category.Count() item@(category.Count() == 1 ? "" : "s")
+                                </span>
+                            </div>
                             <span class="expense-category-total">@categoryTotal.ToString("C")</span>
                         </div>
 
-                        <table class="expense-table">
-                            <thead>
-                                <tr>
-                                    <th class="expense-th expense-th-name">Name</th>
-                                    <th class="expense-th expense-th-text">Subcategory</th>
-                                    <th class="expense-th expense-th-text">Due</th>
-                                    <th class="expense-th expense-th-amount">Amount</th>
-                                    @if (!IsReadOnly)
-                                    {
-                                        <th class="expense-th expense-th-action"></th>
-                                        <th class="expense-th expense-th-action"></th>
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var expense in category.OrderBy(e => e.DisplayOrder))
-                                {
-                                    <tr class="expense-row">
-                                        <td class="expense-td expense-td-name">
-                                            @expense.ExpenseName
-                                            @if (expense.LinkedCreditDto != null)
-                                            {
-                                                <span class="expense-linked-badge expense-linked-badge--credit"
-                                                      title="Linked to credit: @expense.LinkedCreditDto.CreditName">
-                                                    <span class="material-icons" style="font-size: 11px;">credit_card</span>
-                                                </span>
-                                            }
-                                            @if (expense.LinkedInvestmentDto != null)
-                                            {
-                                                <span class="expense-linked-badge expense-linked-badge--investment"
-                                                      title="Linked to investment: @expense.LinkedInvestmentDto.InvestmentName">
-                                                    <span class="material-icons" style="font-size: 11px;">savings</span>
-                                                </span>
-                                            }
-                                        </td>
-                                        <td class="expense-td expense-td-text">
-                                            @if (expense.BudgetSubCategory != null)
-                                            {
-                                                <span class="expense-sub-badge">
-                                                    @expense.BudgetSubCategory.BudgetSubCategoryName
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="expense-td-empty">—</span>
-                                            }
-                                        </td>
-                                        <td class="expense-td expense-td-text expense-td-due">
-                                            @(expense.DueDay == 31 ? "Last day" : $"Day {expense.DueDay}")
-                                        </td>
-                                        <td class="expense-td expense-td-amount">
-                                            @expense.AmountDue.ToString("C")
-                                        </td>
+                        @if (isExpanded)
+                        {
+                            <table class="expense-table">
+                                <thead>
+                                    <tr>
+                                        <th class="expense-th expense-th-name">Name</th>
+                                        <th class="expense-th expense-th-text">Subcategory</th>
+                                        <th class="expense-th expense-th-text">Due</th>
+                                        <th class="expense-th expense-th-amount">Amount</th>
                                         @if (!IsReadOnly)
                                         {
-                                            <td class="expense-td expense-td-action">
-                                                <button class="expense-row-btn expense-row-btn--edit"
-                                                        title="Edit"
-                                                        @onclick="() => HandleRowEdit(expense)">
-                                                    <span class="material-icons">edit</span>
-                                                </button>
-                                            </td>
-                                            <td class="expense-td expense-td-action">
-                                                <button class="expense-row-btn expense-row-btn--delete"
-                                                        title="Delete"
-                                                        @onclick="() => HandleRowDelete(expense)">
-                                                    <span class="material-icons">delete</span>
-                                                </button>
-                                            </td>
+                                            <th class="expense-th expense-th-action"></th>
+                                            <th class="expense-th expense-th-action"></th>
                                         }
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var expense in category.OrderBy(e => e.DisplayOrder))
+                                    {
+                                        <tr class="expense-row">
+                                            <td class="expense-td expense-td-name">
+                                                @expense.ExpenseName
+                                                @if (expense.LinkedCreditDto != null)
+                                                {
+                                                    <span class="expense-linked-badge expense-linked-badge--credit"
+                                                          title="Linked to credit: @expense.LinkedCreditDto.CreditName">
+                                                        <span class="material-icons" style="font-size: 11px;">credit_card</span>
+                                                    </span>
+                                                }
+                                                @if (expense.LinkedInvestmentDto != null)
+                                                {
+                                                    <span class="expense-linked-badge expense-linked-badge--investment"
+                                                          title="Linked to investment: @expense.LinkedInvestmentDto.InvestmentName">
+                                                        <span class="material-icons" style="font-size: 11px;">savings</span>
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="expense-td expense-td-text">
+                                                @if (expense.BudgetSubCategory != null)
+                                                {
+                                                    <span class="expense-sub-badge">
+                                                        @expense.BudgetSubCategory.BudgetSubCategoryName
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="expense-td-empty">—</span>
+                                                }
+                                            </td>
+                                            <td class="expense-td expense-td-text expense-td-due">
+                                                @(expense.DueDay == 31 ? "Last day" : $"Day {expense.DueDay}")
+                                            </td>
+                                            <td class="expense-td expense-td-amount">
+                                                @expense.AmountDue.ToString("C")
+                                            </td>
+                                            @if (!IsReadOnly)
+                                            {
+                                                <td class="expense-td expense-td-action">
+                                                    <button class="expense-row-btn expense-row-btn--edit"
+                                                            title="Edit"
+                                                            @onclick="() => HandleRowEdit(expense)">
+                                                        <span class="material-icons">edit</span>
+                                                    </button>
+                                                </td>
+                                                <td class="expense-td expense-td-action">
+                                                    <button class="expense-row-btn expense-row-btn--delete"
+                                                            title="Delete"
+                                                            @onclick="() => HandleRowDelete(expense)">
+                                                        <span class="material-icons">delete</span>
+                                                    </button>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
                     </section>
                 }
 
@@ -157,6 +171,14 @@
 
     [Parameter]
     public EventCallback<ExpenseDto> OnDeleteExpense { get; set; }
+
+    private readonly HashSet<Guid> collapsedCategories = new();
+
+    private void ToggleCategory(Guid categoryId)
+    {
+        if (!collapsedCategories.Add(categoryId))
+            collapsedCategories.Remove(categoryId);
+    }
 
     private async Task HandleAddExpense() =>
         await OnAddExpense.InvokeAsync();

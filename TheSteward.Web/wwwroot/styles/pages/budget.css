@@ -1,0 +1,21 @@
+﻿.budget-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.budget-col-left {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+}
+
+.budget-col-right {
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+}
+
+

@@ -1,5 +1,169 @@
-﻿<h3>ExpenseCard</h3>
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+
+<MudCard id="expenseCard" class="ts-tabbed-card" Elevation="0">
+
+    <MudCardActions class="ts-tabbed-card-btn-container">
+        @if (!IsReadOnly)
+        {
+            <MudButton id="addExpenseBtn"
+                       class="ts-card-tab-btn"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="HandleAddExpense">
+                Add Expense
+            </MudButton>
+        }
+    </MudCardActions>
+
+    <MudCardContent class="ts-card-content">
+
+        <MudCardHeader Class="ts-tabbed-card-header">
+            <CardHeaderContent>
+                <h3 class="ts-tabbed-card-title">
+                    <span class="ts-label">Expenses</span>
+                </h3>
+            </CardHeaderContent>
+        </MudCardHeader>
+
+        <div class="ts-card-body">
+            @if (!Expenses.Any())
+            {
+                <div class="expense-empty-state">
+                    <span class="material-icons expense-empty-icon">receipt_long</span>
+                    <p class="expense-empty-text">No expenses added yet.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var category in Expenses
+                    .GroupBy(e => e.BudgetCategory)
+                    .OrderBy(g => g.Min(e => e.DisplayOrder)))
+                {
+                    var categoryTotal = category.Sum(e => e.AmountDue);
+
+                    <section class="ts-card-section expense-category-section">
+
+                        <div class="expense-category-header">
+                            <span class="expense-category-name">
+                                @(category.Key?.BudgetCategoryName ?? "Uncategorized")
+                            </span>
+                            <span class="expense-category-total">@categoryTotal.ToString("C")</span>
+                        </div>
+
+                        <table class="expense-table">
+                            <thead>
+                                <tr>
+                                    <th class="expense-th expense-th-name">Name</th>
+                                    <th class="expense-th expense-th-text">Subcategory</th>
+                                    <th class="expense-th expense-th-text">Due</th>
+                                    <th class="expense-th expense-th-amount">Amount</th>
+                                    @if (!IsReadOnly)
+                                    {
+                                        <th class="expense-th expense-th-action"></th>
+                                        <th class="expense-th expense-th-action"></th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var expense in category.OrderBy(e => e.DisplayOrder))
+                                {
+                                    <tr class="expense-row">
+                                        <td class="expense-td expense-td-name">
+                                            @expense.ExpenseName
+                                            @if (expense.LinkedCreditDto != null)
+                                            {
+                                                <span class="expense-linked-badge expense-linked-badge--credit"
+                                                      title="Linked to credit: @expense.LinkedCreditDto.CreditName">
+                                                    <span class="material-icons" style="font-size: 11px;">credit_card</span>
+                                                </span>
+                                            }
+                                            @if (expense.LinkedInvestmentDto != null)
+                                            {
+                                                <span class="expense-linked-badge expense-linked-badge--investment"
+                                                      title="Linked to investment: @expense.LinkedInvestmentDto.InvestmentName">
+                                                    <span class="material-icons" style="font-size: 11px;">savings</span>
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="expense-td expense-td-text">
+                                            @if (expense.BudgetSubCategory != null)
+                                            {
+                                                <span class="expense-sub-badge">
+                                                    @expense.BudgetSubCategory.BudgetSubCategoryName
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="expense-td-empty">—</span>
+                                            }
+                                        </td>
+                                        <td class="expense-td expense-td-text expense-td-due">
+                                            @(expense.DueDay == 31 ? "Last day" : $"Day {expense.DueDay}")
+                                        </td>
+                                        <td class="expense-td expense-td-amount">
+                                            @expense.AmountDue.ToString("C")
+                                        </td>
+                                        @if (!IsReadOnly)
+                                        {
+                                            <td class="expense-td expense-td-action">
+                                                <button class="expense-row-btn expense-row-btn--edit"
+                                                        title="Edit"
+                                                        @onclick="() => HandleRowEdit(expense)">
+                                                    <span class="material-icons">edit</span>
+                                                </button>
+                                            </td>
+                                            <td class="expense-td expense-td-action">
+                                                <button class="expense-row-btn expense-row-btn--delete"
+                                                        title="Delete"
+                                                        @onclick="() => HandleRowDelete(expense)">
+                                                    <span class="material-icons">delete</span>
+                                                </button>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </section>
+                }
+
+                <!-- Grand Total -->
+                <div class="expense-grand-total">
+                    <span class="expense-grand-total-label">Total Monthly Expenses</span>
+                    <span class="expense-grand-total-value">@Expenses.Sum(e => e.AmountDue).ToString("C")</span>
+                </div>
+            }
+        </div>
+
+    </MudCardContent>
+</MudCard>
 
 @code {
+    [Parameter, EditorRequired]
+    public List<ExpenseDto> Expenses { get; set; } = new();
 
+    [Parameter]
+    public bool IsReadOnly { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnAddExpense { get; set; }
+
+    [Parameter]
+    public EventCallback OnOpenExpenseDetails { get; set; }
+
+    [Parameter]
+    public EventCallback<ExpenseDto> OnEditExpense { get; set; }
+
+    [Parameter]
+    public EventCallback<ExpenseDto> OnDeleteExpense { get; set; }
+
+    private async Task HandleAddExpense() =>
+        await OnAddExpense.InvokeAsync();
+
+    private async Task HandleRowEdit(ExpenseDto expense) =>
+        await OnEditExpense.InvokeAsync(expense);
+
+    private async Task HandleRowDelete(ExpenseDto expense) =>
+        await OnDeleteExpense.InvokeAsync(expense);
 }

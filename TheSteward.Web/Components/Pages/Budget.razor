@@ -108,29 +108,41 @@ else if (!hasBudget)
 }
 else
 {
-    <MudPaper Elevation="0">
+    <div class="budget-layout">
 
-        <IncomeCard Incomes="currentBudget.Incomes"
-                    IsReadOnly="!HouseholdState.HasFinanceWritePermission"
-                    OnAddIncome="OpenAddIncomeModal"
-                    OnOpenIncomeDetails="OpenIncomeDetails"
-                    OnEditIncome="OpenEditIncomeModal"
-                    OnDeleteIncome="(income) => HandleDeleteIncome(income.IncomeId)" />
-
-        <InvestmentCard Investments="currentBudget.Investments"
+        <div class="budget-col-left">
+            <IncomeCard Incomes="currentBudget.Incomes"
                         IsReadOnly="!HouseholdState.HasFinanceWritePermission"
-                        OnAddInvestment="OpenAddInvestmentModal"
-                        OnOpenInvestmentDetails="OpenInvestmentDetails"
-                        OnEditInvestment="OpenEditInvestmentModal"
-                        OnDeleteInvestment="(investment) => HandleDeleteInvestment(investment.InvestmentId)" />
+                        OnAddIncome="OpenAddIncomeModal"
+                        OnOpenIncomeDetails="OpenIncomeDetails"
+                        OnEditIncome="OpenEditIncomeModal"
+                        OnDeleteIncome="(income) => HandleDeleteIncome(income.IncomeId)" />
 
-        <CreditCard Credits="currentBudget.Credits"
-                    IsReadOnly="!HouseholdState.HasFinanceWritePermission"
-                    OnAddCredit="OpenAddCreditModal"
-                    OnOpenCreditDetails="OpenCreditDetails"
-                    OnEditCredit="OpenEditCreditModal"
-                    OnDeleteCredit="(credit) => HandleDeleteCreditStub(credit.CreditId)" />
-    </MudPaper>
+            <InvestmentCard Investments="currentBudget.Investments"
+                            IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+                            OnAddInvestment="OpenAddInvestmentModal"
+                            OnOpenInvestmentDetails="OpenInvestmentDetails"
+                            OnEditInvestment="OpenEditInvestmentModal"
+                            OnDeleteInvestment="(investment) => HandleDeleteInvestment(investment.InvestmentId)" />
+
+            <CreditCard Credits="currentBudget.Credits"
+                        IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+                        OnAddCredit="OpenAddCreditModal"
+                        OnOpenCreditDetails="OpenCreditDetails"
+                        OnEditCredit="OpenEditCreditModal"
+                        OnDeleteCredit="(credit) => HandleDeleteCredit(credit.CreditId)" />
+        </div>
+
+        <div class="budget-col-right">
+            <ExpenseCard Expenses="currentBudget.Expenses"
+                         IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+                         OnAddExpense="OpenAddExpenseModal"
+                         OnOpenExpenseDetails="OpenExpenseDetails"
+                         OnEditExpense="OpenEditExpenseModal" 
+                         OnDeleteExpense="(expense) => HandleDeleteExpense(expense.ExpenseId)"/>
+                </div>
+
+        </div>
 
 
 }
@@ -520,7 +532,7 @@ else
         return Task.CompletedTask;
     }
 
-    private Task HandleDeleteCreditStub(Guid creditId)
+    private Task HandleDeleteCredit(Guid creditId)
     {
         Snackbar.Add($"Delete Credit — coming soon.", Severity.Info);
         return Task.CompletedTask;
@@ -528,9 +540,29 @@ else
     #endregion Credit
 
     #region Expense
-    // Expense
-    private Task OpenAddExpenseModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditExpenseModal(ExpenseDto expense) => Task.CompletedTask; // TODO: Implement
+    private Task OpenAddExpenseModal()
+    {
+        Snackbar.Add("Add Expense — coming soon.", Severity.Info);
+        return Task.CompletedTask;
+    }
+
+    private Task OpenExpenseDetails()
+    {
+        Snackbar.Add("Credit Expense — coming soon.", Severity.Info);
+        return Task.CompletedTask;
+    }
+
+    private Task OpenEditExpenseModal(ExpenseDto expense)
+    {
+        Snackbar.Add($"Edit Expense: {expense.ExpenseName} — coming soon.", Severity.Info);
+        return Task.CompletedTask;
+    }
+
+    private Task HandleDeleteExpense(Guid expenseId)
+    {
+        Snackbar.Add($"Delete Expense — coming soon.", Severity.Info);
+        return Task.CompletedTask;
+    }
     #endregion Expense
     
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;

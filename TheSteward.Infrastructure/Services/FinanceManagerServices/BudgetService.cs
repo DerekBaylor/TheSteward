@@ -208,8 +208,8 @@ public class BudgetService : IBudgetService
             throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(userHouseholdDto.UserHouseholdId));
 
         var budgets = await _budgetRepository.GetAll()
-            .Where(b => b.OwnerId == userHouseholdDto.UserId
-                        || (b.HouseholdId == userHouseholdDto.HouseholdId && b.IsPublic))
+            .Where(b => b.HouseholdId == userHouseholdDto.HouseholdId
+                        && (b.OwnerId == userHouseholdDto.UserId || b.IsPublic))
             .Include(b => b.BudgetCategories)
                 .ThenInclude(c => c.BudgetSubCategories)
             .Include(b => b.Incomes)

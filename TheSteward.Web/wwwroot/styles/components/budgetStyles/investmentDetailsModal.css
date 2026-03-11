@@ -1,0 +1,186 @@
+﻿/* ---- Investment Details Modal ---- */
+.investment-details-modal .mud-dialog {
+    max-width: 480px;
+    width: 100%;
+}
+
+.investment-details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.25rem 0;
+    min-width: 340px;
+}
+
+/* Per-Investment Card */
+.investment-details-card {
+    border: 1px solid var(--blue-3);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+}
+
+.investment-details-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: var(--blue-1);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--blue-3);
+}
+
+.investment-details-name-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.investment-details-name {
+    font-family: var(--label-font);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--gray-9);
+}
+
+.investment-details-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--blue-2);
+    color: var(--base-blue);
+    border: 1px solid var(--blue-4);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+}
+
+.investment-details-growth-highlight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+.investment-details-growth-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gray-5);
+}
+
+.investment-details-growth-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--base-blue);
+}
+
+/* Breakdown rows */
+.investment-details-breakdown {
+    padding: 0.6rem 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.investment-details-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.investment-details-row-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--gray-7);
+}
+
+.investment-details-gain-icon {
+    font-size: 13px;
+    color: var(--blue-5);
+    vertical-align: middle;
+}
+
+.investment-details-row-value {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--primary-font);
+    color: var(--gray-8);
+}
+
+.investment-details-row--gain .investment-details-row-label {
+    color: var(--blue-6);
+}
+
+.investment-details-row-value--gain {
+    color: var(--base-blue);
+}
+
+.investment-details-row--net .investment-details-row-label--net,
+.investment-details-row-value--net {
+    font-weight: 700;
+    color: var(--base-blue);
+    font-size: 0.9rem;
+}
+
+.investment-details-divider {
+    height: 1px;
+    background: var(--blue-2);
+    margin: 0.2rem 0;
+}
+
+/* Portfolio Totals */
+.investment-details-totals {
+    border: 1px solid var(--blue-4);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.investment-details-totals-header {
+    font-family: var(--label-font);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gray-6);
+    background: var(--blue-2);
+    padding: 0.4rem 1rem;
+    border-bottom: 1px solid var(--blue-4);
+}
+
+.investment-details-totals-grid {
+    padding: 0.6rem 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.investment-details-totals-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--gray-7);
+    font-variant-numeric: tabular-nums;
+}
+
+.investment-details-totals-row--gain {
+    color: var(--blue-6);
+}
+
+.investment-details-totals-row--net {
+    font-weight: 700;
+    color: var(--base-blue);
+}
+
+/* Disclaimer */
+.investment-details-disclaimer {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: var(--gray-4);
+    margin: 0.25rem 0 0;
+    line-height: 1.5;
+}

@@ -6,12 +6,14 @@
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 @using TheSteward.Core.IServices.FinanceManagerIServices
-@using TheSteward.Shared.Components.HouseholdComponents
+@using TheSteward.Shared.Components
+@using TheSteward.Shared.Dtos.BudgetDtos
 
 @inject HouseholdState HouseholdState
 @inject NavigationManager NavigationManager
 @inject IBudgetService BudgetService
 @inject IIncomeService IncomeService
+@inject IInvestmentService InvestmentService
 @inject IUserHouseholdService UserHouseholdService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -21,7 +23,7 @@
 
 <PageTitle>Budget Dashboard</PageTitle>
 
-<HouseholdToolbar OnHouseholdChanged="OnHouseholdChanged" />
+<HouseholdToolBar OnHouseholdChanged="OnHouseholdChanged" />
 
 @if (HouseholdState.CurrentUserHousehold == null)
 {
@@ -105,204 +107,24 @@ else if (!hasBudget)
 }
 else
 {
-    <IncomeCard Incomes="currentBudget.Incomes"
-                IsReadOnly="!HouseholdState.HasFinanceWritePermission"
-                OnAddIncome="OpenAddIncomeModal"
-                OnOpenIncomeDetails="OpenIncomeDetails"
-                OnEditIncome="OpenEditIncomeModal"
-                OnDeleteIncome="(income) => HandleDeleteIncome(income.IncomeId)" />
+    <MudPaper Elevation="0">
 
-    <!-- Mock Display -->
-    #region mock-display
-@*     <div class="mt-4" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <IncomeCard Incomes="currentBudget.Incomes"
+                    IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+                    OnAddIncome="OpenAddIncomeModal"
+                    OnOpenIncomeDetails="OpenIncomeDetails"
+                    OnEditIncome="OpenEditIncomeModal"
+                    OnDeleteIncome="(income) => HandleDeleteIncome(income.IncomeId)" />
 
-        <!-- Header -->
-        <div class="d-flex align-center justify-space-between">
-            <MudText Typo="Typo.h5">@currentBudget!.BudgetName</MudText>
-            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">
-                @(currentBudget.IsDefaultBudget ? "Default Budget" : "Budget")
-            </MudChip>
-        </div>
+        <InvestmentCard Investments="currentBudget.Investments"
+                        IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+                        OnAddInvestment="OpenAddInvestmentModal"
+                        OnOpenInvestmentDetails="OpenInvestmentDetails"
+                        OnEditInvestment="OpenEditInvestmentModal"
+                        OnDeleteInvestment="(investment) => HandleDeleteInvestment(investment.InvestmentId)" />
+    </MudPaper>
 
-        <!-- Summary Cards -->
-        <MudGrid>
-            <MudItem xs="12" sm="6" md="3">
-                <MudCard Elevation="2">
-                    <MudCardContent>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Monthly Income</MudText>
-                        <MudText Typo="Typo.h6">
-                            @currentBudget.Incomes.Sum(i => i.MonthlyNetIncome).ToString("C")
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="6" md="3">
-                <MudCard Elevation="2">
-                    <MudCardContent>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Monthly Expenses</MudText>
-                        <MudText Typo="Typo.h6">
-                            @currentBudget.Expenses.Sum(e => e.AmountDue).ToString("C")
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="6" md="3">
-                <MudCard Elevation="2">
-                    <MudCardContent>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Total Credit Debt</MudText>
-                        <MudText Typo="Typo.h6">
-                            @currentBudget.Credits.Sum(c => c.CurrentValue).ToString("C")
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="6" md="3">
-                <MudCard Elevation="2">
-                    <MudCardContent>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Total Investments</MudText>
-                        <MudText Typo="Typo.h6">
-                            @currentBudget.Investments.Sum(i => i.CurrentValue).ToString("C")
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-        </MudGrid>
 
-        <!-- Income -->
-        <MudCard Elevation="2">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">Income</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudTable Items="currentBudget.Incomes" Dense="true" Hover="true" Elevation="0">
-                    <HeaderContent>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Frequency</MudTh>
-                        <MudTh>Gross Per Check</MudTh>
-                        <MudTh>Yearly Gross</MudTh>
-                        <MudTh>Monthly Net</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@context.IncomeName</MudTd>
-                        <MudTd>@context.IncomeFrequency x / year</MudTd>
-                        <MudTd>@context.PayCheckGross.ToString("C")</MudTd>
-                        <MudTd>@context.YearlyGrossSalary.ToString("C")</MudTd>
-                        <MudTd>@context.MonthlyNetIncome.ToString("C")</MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudCardContent>
-        </MudCard>
-
-        <!-- Expenses by Category -->
-        <MudCard Elevation="2">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">Expenses</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                @foreach (var category in currentBudget.BudgetCategories.OrderBy(c => c.DisplayOrder))
-                {
-                    var categoryExpenses = currentBudget.Expenses
-                        .Where(e => e.BudgetCategoryId == category.BudgetCategoryId)
-                        .OrderBy(e => e.DisplayOrder)
-                        .ToList();
-
-                    if (!categoryExpenses.Any()) continue;
-
-                    <MudText Typo="Typo.subtitle1" Class="mt-3 mb-1">
-                        <strong>@category.BudgetCategoryName</strong>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary" Inline="true" Class="ml-2">
-                            @categoryExpenses.Sum(e => e.AmountDue).ToString("C")
-                        </MudText>
-                    </MudText>
-
-                    <MudTable Items="categoryExpenses" Dense="true" Hover="true" Elevation="0" Class="mb-2">
-                        <HeaderContent>
-                            <MudTh>Name</MudTh>
-                            <MudTh>Subcategory</MudTh>
-                            <MudTh>Due Day</MudTh>
-                            <MudTh>Amount</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd>@context.ExpenseName</MudTd>
-                            <MudTd>@(context.BudgetSubCategory?.BudgetSubCategoryName ?? "—")</MudTd>
-                            <MudTd>@(context.DueDay == 31 ? "Last day" : $"Day {context.DueDay}")</MudTd>
-                            <MudTd>@context.AmountDue.ToString("C")</MudTd>
-                        </RowTemplate>
-                    </MudTable>
-                }
-            </MudCardContent>
-        </MudCard>
-
-        <!-- Credits -->
-        @if (currentBudget.Credits.Any())
-        {
-            <MudCard Elevation="2">
-                <MudCardHeader>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Credit & Debt</MudText>
-                    </CardHeaderContent>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudTable Items="currentBudget.Credits.OrderBy(c => c.DisplayOrder)" Dense="true" Hover="true" Elevation="0">
-                        <HeaderContent>
-                            <MudTh>Name</MudTh>
-                            <MudTh>Type</MudTh>
-                            <MudTh>Balance</MudTh>
-                            <MudTh>Interest Rate</MudTh>
-                            <MudTh>Monthly Interest</MudTh>
-                            <MudTh>Payment</MudTh>
-                            <MudTh>Due Day</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd>@context.CreditName</MudTd>
-                            <MudTd>@(context.CreditType ?? "—")</MudTd>
-                            <MudTd>@context.CurrentValue.ToString("C")</MudTd>
-                            <MudTd>@((context.InterestRate * 100).ToString("F2"))%</MudTd>
-                            <MudTd>@context.EstMonthlyInterest.ToString("C")</MudTd>
-                            <MudTd>@context.PaymentAmount.ToString("C")</MudTd>
-                            <MudTd>@(context.PaymentDay == 31 ? "Last day" : $"Day {context.PaymentDay}")</MudTd>
-                        </RowTemplate>
-                    </MudTable>
-                </MudCardContent>
-            </MudCard>
-        }
-
-        <!-- Investments -->
-        @if (currentBudget.Investments.Any())
-        {
-            <MudCard Elevation="2">
-                <MudCardHeader>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Investments & Savings</MudText>
-                    </CardHeaderContent>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudTable Items="currentBudget.Investments.OrderBy(i => i.DisplayOrder)" Dense="true" Hover="true" Elevation="0">
-                        <HeaderContent>
-                            <MudTh>Name</MudTh>
-                            <MudTh>Current Value</MudTh>
-                            <MudTh>Interest Rate</MudTh>
-                            <MudTh>Contribution</MudTh>
-                            <MudTh>Est. Yearly Growth</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd>@context.InvestmentName</MudTd>
-                            <MudTd>@context.CurrentValue.ToString("C")</MudTd>
-                            <MudTd>@((context.InterestRate * 100).ToString("F2"))%</MudTd>
-                            <MudTd>@context.ContributionAmount.ToString("C")</MudTd>
-                            <MudTd>@context.EstYearlyGrowth.ToString("C")</MudTd>
-                        </RowTemplate>
-                    </MudTable>
-                </MudCardContent>
-            </MudCard>
-        }
-    </div>
- *@
-    #endregion mock-display
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -319,17 +141,6 @@ else
     private BudgetDto? currentBudget;
     private Action? _stateChangeHandler;
 
-    // Investment
-    private Task OpenAddInvestmentModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditInvestmentModal(InvestmentDto investment) => Task.CompletedTask; // TODO: Implement
-
-    // Credit
-    private Task OpenAddCreditModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditCreditModal(CreditDto credit) => Task.CompletedTask; // TODO: Implement
-
-    // Expense
-    private Task OpenAddExpenseModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditExpenseModal(ExpenseDto expense) => Task.CompletedTask; // TODO: Implement
 
     protected override async Task OnInitializedAsync()
     {
@@ -338,6 +149,16 @@ else
 
         await LoadBudgetAsync();
     }
+
+    private async void OnHouseholdChanged(UserHouseholdDto _)
+    {
+        currentBudget = null;
+        hasBudget = false;
+        errorMessage = null;
+        await LoadBudgetAsync();
+        StateHasChanged();
+    }
+
     #region Budget
     private async Task LoadBudgetAsync()
     {
@@ -429,14 +250,6 @@ else
             isCreating = false;
             creatingType = null;
         }
-    }
-
-    private async void OnHouseholdChanged(UserHouseholdDto _)
-    {
-        currentBudget = null;
-        hasBudget = false;
-        errorMessage = null;
-        await LoadBudgetAsync();
     }
     #endregion Budget
 
@@ -541,8 +354,6 @@ else
 
     private async Task HandleDeleteIncome(Guid incomeId)
     {
-        Snackbar.Add($"Deleting income", Severity.Error);
-
         try
         {
             await IncomeService.DeleteAsync(incomeId);
@@ -563,5 +374,136 @@ else
     }
     #endregion Income
 
+    #region Investment
+
+    private async Task OpenAddInvestmentModal()
+    {
+        var formData = new InvestmentFormDto
+        {
+            BudgetId = currentBudget!.BudgetId
+        };
+
+        await OpenInvestmentModal(formData);
+    }
+
+    private async Task OpenInvestmentDetails()
+    {
+        if (currentBudget == null) return;
+
+        var parameters = new DialogParameters
+    {
+        { "Investments", currentBudget.Investments }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<InvestmentDetailsModal>(
+            "Investment Details",
+            parameters,
+            options);
+    }
+
+    private async Task OpenEditInvestmentModal(InvestmentDto investment)
+    {
+        var formData = new InvestmentFormDto
+        {
+            InvestmentId = investment.InvestmentId,
+            InvestmentName = investment.InvestmentName,
+            CurrentValue = investment.CurrentValue,
+            InterestRate = investment.InterestRate,
+            ContributionAmount = investment.ContributionAmount,
+            ContributionFrequency = investment.ContributionFrequency,
+            EstYearlyGrowth = investment.EstYearlyGrowth,
+            DisplayOrder = investment.DisplayOrder,
+            BudgetId = investment.BudgetId,
+            ExpenseId = investment.ExpenseId
+        };
+
+        await OpenInvestmentModal(formData);
+    }
+
+    private async Task OpenInvestmentModal(InvestmentFormDto formData)
+    {
+        var parameters = new DialogParameters
+    {
+        { "FormData", formData },
+        { "ExistingInvestmentCount", currentBudget!.Investments.Count }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<InvestmentModal>(
+            formData.IsEditMode ? "Edit Investment" : "Add Investment",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        if (result.Data is string resultData && resultData.StartsWith("delete:"))
+        {
+            var idString = resultData["delete:".Length..];
+            if (Guid.TryParse(idString, out var investmentId))
+                await HandleDeleteInvestment(investmentId);
+            return;
+        }
+
+        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+            HouseholdState.CurrentUserHousehold!);
+
+        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+            ?? currentBudget;
+
+        StateHasChanged();
+    }
+
+    private async Task HandleDeleteInvestment(Guid investmentId)
+    {
+        Snackbar.Add("Deleting investment...", Severity.Warning);
+
+        try
+        {
+            await InvestmentService.DeleteAsync(investmentId);
+
+            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+                HouseholdState.CurrentUserHousehold!);
+
+            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+                ?? currentBudget;
+
+            Snackbar.Add("Investment removed.", Severity.Success);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting investment: {ex.Message}", Severity.Error);
+        }
+    }
+
+    #endregion Investment
+
+    #region Credit
+    // Credit
+    private Task OpenAddCreditModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditCreditModal(CreditDto credit) => Task.CompletedTask; // TODO: Implement
+    #endregion Credit
+
+    #region Expense
+    // Expense
+    private Task OpenAddExpenseModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditExpenseModal(ExpenseDto expense) => Task.CompletedTask; // TODO: Implement
+    #endregion Expense
+    
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

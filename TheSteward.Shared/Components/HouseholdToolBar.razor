@@ -3,12 +3,15 @@
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using System.Security.Claims
 @using TheSteward.Shared.Models
+@using TheSteward.Shared.Components
 
 @inject IUserHouseholdService UserHouseholdService
 @inject HouseholdState HouseholdState
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @implements IDisposable
+
+@namespace TheSteward.Shared.Components
 
 @if (isLoading)
 {
@@ -36,6 +39,7 @@ else if (householdItems.Count > 0)
                           OnChange="OnHouseholdChangedAsync"
                           Placeholder="Choose household" />
             }
+
         </div>
 
         @if (ChildContent != null)
@@ -45,6 +49,16 @@ else if (householdItems.Count > 0)
             </div>
         }
     </MudToolBar>
+}
+else
+{
+    <MudAlert Severity="Severity.Warning">
+        Toolbar: no households found for user "@currentUserId"
+    </MudAlert>
+    @if (errorMessage != null)
+    {
+        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+    }
 }
 
 @code {
@@ -58,57 +72,35 @@ else if (householdItems.Count > 0)
     private string? currentUserId;
     private Action? _stateChangeHandler;
 
-    protected override async Task OnInitializedAsync()
+    private string? errorMessage;
+
+    protected override Task OnInitializedAsync()
     {
         _stateChangeHandler = () => InvokeAsync(StateHasChanged);
         HouseholdState.OnChange += _stateChangeHandler;
 
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(currentUserId))
-        {
-            isLoading = false;
-            return;
-        }
-
-        userHouseholds = await UserHouseholdService.GetAllUserHouseholdsForUserAsync(currentUserId);
-
-        if (userHouseholds.Count == 0)
-        {
-            isLoading = false;
-            return;
-        }
-
-        var stateHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;
-        var activeInList = userHouseholds.FirstOrDefault(uh => uh.HouseholdId == stateHouseholdId);
-
-        if (activeInList == null)
-        {
-            var defaultUh = userHouseholds.FirstOrDefault(uh => uh.IsDefaultUserHousehold)
-                            ?? userHouseholds.First();
-            HouseholdState.SetUserHousehold(defaultUh);
-        }
-
-        selectedHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;
-
-        householdItems = userHouseholds.Select(uh => new SelectItem<Guid?>
+        householdItems = HouseholdState.UserHouseholds.Select(uh => new SelectItem<Guid?>
         {
             Value = uh.HouseholdId,
             Text = uh.Household?.HouseholdName ?? "Unknown"
         }).ToList();
 
+        selectedHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;
         isLoading = false;
+
+        return Task.CompletedTask;
     }
 
     private async Task OnHouseholdChangedAsync()
     {
-        var selected = userHouseholds.FirstOrDefault(uh => uh.HouseholdId == selectedHouseholdId);
+        var selected = HouseholdState.UserHouseholds  // was: userHouseholds
+            .FirstOrDefault(uh => uh.HouseholdId == selectedHouseholdId);
+        
         if (selected == null) return;
 
         HouseholdState.SetUserHousehold(selected);
         await OnHouseholdChanged.InvokeAsync(selected);
     }
 
-    public void Dispose() => HouseholdState.OnChange -= StateHasChanged;
+    public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

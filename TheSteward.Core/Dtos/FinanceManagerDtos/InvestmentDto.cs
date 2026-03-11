@@ -34,10 +34,10 @@ public class InvestmentDto
     [Required]
     public Guid BudgetId { get; set; }
     
-    [Required]
-    public Guid ExpesneId { get; set; }
+   public Guid? ExpenseId { get; set; }
     
     public ExpenseDto? LinkedExpenseDto { get; set; }
 
     #endregion
+
 }

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
-namespace TheSteward.Core.Dtos.FinanceManagerDtos;
+namespace TheSteward.Shared.Dtos.BudgetDtos;
 
 /// <summary>
 /// Shared form model used by IncomeForm for both add and edit scenarios.

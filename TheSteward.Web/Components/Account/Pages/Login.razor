@@ -126,7 +126,8 @@
 
             if (defaultUserHousehold?.Household != null)
             {
-                HouseholdState.SetUserHousehold(defaultUserHousehold);
+                var allHouseholds = await UserHouseholdService.GetAllUserHouseholdsForUserAsync(user.Id);
+                HouseholdState.SetUserHouseholds(allHouseholds);
                 ReturnUrl = "/";
             } 
             else

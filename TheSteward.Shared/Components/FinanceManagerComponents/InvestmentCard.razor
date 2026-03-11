@@ -1,0 +1,167 @@
+﻿@namespace TheSteward.Shared.Components.FinanceComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+
+<MudCard id="investmentCard" class="ts-tabbed-card" Elevation="0">
+
+    <MudCardActions class="ts-tabbed-card-btn-container">
+        @if (!IsReadOnly)
+        {
+            <MudButton id="addInvestmentBtn"
+                       class="ts-card-tab-btn"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="HandleAddInvestment">
+                Add Investment
+            </MudButton>
+        }
+        <MudButton id="showInvestmentDetails"
+                   class="ts-card-tab-btn"
+                   StartIcon="@Icons.Material.Filled.FileOpen"
+                   OnClick="HandleShowInvestmentDetails"
+                   Disabled="!Investments.Any()">
+            Investment Details
+        </MudButton>
+    </MudCardActions>
+
+    <MudCardContent class="ts-card-content">
+
+        <MudCardHeader Class="ts-tabbed-card-header">
+            <CardHeaderContent>
+                <h3 class="ts-tabbed-card-title">
+                    <span class="ts-label">Investments &amp; Savings</span>
+                </h3>
+            </CardHeaderContent>
+        </MudCardHeader>
+
+        <div class="ts-card-body">
+            @if (!Investments.Any())
+            {
+                <div class="investment-empty-state">
+                    <span class="material-icons investment-empty-icon">savings</span>
+                    <p class="investment-empty-text">No investments or savings added yet.</p>
+                </div>
+            }
+            else
+            {
+                <section class="ts-card-section">
+                    <table class="investment-table">
+                        <thead>
+                            <tr>
+                                <th class="investment-th investment-th-name">Name</th>
+                                <th class="investment-th investment-th-amount">Balance</th>
+                                <th class="investment-th investment-th-amount">Contribution</th>
+                                <th class="investment-th investment-th-amount">Est. Yearly Growth</th>
+                                @if (!IsReadOnly)
+                                {
+                                    <th class="investment-th investment-th-action"></th>
+                                    <th class="investment-th investment-th-action"></th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var investment in Investments.OrderBy(i => i.DisplayOrder))
+                            {
+                                <tr class="investment-row">
+                                    <td class="investment-td investment-td-name">@investment.InvestmentName</td>
+                                    <td class="investment-td investment-td-amount">@investment.CurrentValue.ToString("C")</td>
+                                    <td class="investment-td investment-td-amount">
+                                        @investment.ContributionAmount.ToString("C")
+                                        <span class="investment-freq-badge">
+                                            @GetFrequencyShortLabel(investment.ContributionFrequency)
+                                        </span>
+                                    </td>
+                                    <td class="investment-td investment-td-amount">@investment.EstYearlyGrowth.ToString("C")</td>
+                                    @if (!IsReadOnly)
+                                    {
+                                        <td class="investment-td investment-td-action">
+                                            <button class="investment-row-btn investment-row-btn--edit"
+                                                    title="Edit"
+                                                    @onclick="() => HandleRowEdit(investment)">
+                                                <span class="material-icons">edit</span>
+                                            </button>
+                                        </td>
+                                        <td class="investment-td investment-td-action">
+                                            <button class="investment-row-btn investment-row-btn--delete"
+                                                    title="Delete"
+                                                    @onclick="() => HandleRowDelete(investment)">
+                                                <span class="material-icons">delete</span>
+                                            </button>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="investment-totals-row">
+                                <td class="investment-td investment-td-name investment-totals-label">Total</td>
+                                <td class="investment-td investment-td-amount investment-totals-value">
+                                    @Investments.Sum(i => i.CurrentValue).ToString("C")
+                                </td>
+                                <td class="investment-td investment-td-amount investment-totals-value">
+                                    @*
+                                        Contributions have mixed frequencies so we show a dash in the
+                                        summary footer rather than a misleading sum.
+                                    *@
+                                    —
+                                </td>
+                                <td class="investment-td investment-td-amount investment-totals-value">
+                                    @Investments.Sum(i => i.EstYearlyGrowth).ToString("C")
+                                </td>
+                                @if (!IsReadOnly)
+                                {
+                                    <td class="investment-td investment-td-action"></td>
+                                    <td class="investment-td investment-td-action"></td>
+                                }
+                            </tr>
+                        </tfoot>
+                    </table>
+                </section>
+            }
+        </div>
+
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public List<InvestmentDto> Investments { get; set; } = new();
+
+    /// <summary>Hides action buttons when the user only has read access.</summary>
+    [Parameter]
+    public bool IsReadOnly { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnAddInvestment { get; set; }
+
+    [Parameter]
+    public EventCallback OnOpenInvestmentDetails { get; set; }
+
+    /// <summary>Passes the currently selected investment back so the parent can open an edit form.</summary>
+    [Parameter]
+    public EventCallback<InvestmentDto> OnEditInvestment { get; set; }
+
+    [Parameter]
+    public EventCallback<InvestmentDto> OnDeleteInvestment { get; set; }
+
+    private async Task HandleAddInvestment() =>
+        await OnAddInvestment.InvokeAsync();
+
+    private async Task HandleShowInvestmentDetails() =>
+        await OnOpenInvestmentDetails.InvokeAsync();
+
+    private async Task HandleRowEdit(InvestmentDto investment) =>
+        await OnEditInvestment.InvokeAsync(investment);
+
+    private async Task HandleRowDelete(InvestmentDto investment) =>
+        await OnDeleteInvestment.InvokeAsync(investment);
+
+    private static string GetFrequencyShortLabel(FrequencyEnum freq) => freq switch
+    {
+        FrequencyEnum.Weekly => "/ wk",
+        FrequencyEnum.BiWeekly => "/ 2wk",
+        FrequencyEnum.BiMonthly => "/ 2mo",
+        FrequencyEnum.Monthly => "/ mo",
+        _ => $"×{(int)freq}/yr"
+    };
+}

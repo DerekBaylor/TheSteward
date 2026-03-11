@@ -3,6 +3,7 @@
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 @using TheSteward.Core.Utils.FinanceManagerUtils
 @using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+@using TheSteward.Shared.Dtos.BudgetDtos
 
 <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
@@ -107,7 +108,7 @@
 
     /// <summary>
     /// Total number of income sources already on the budget (including the one
-    /// being edited). Used to show the combined-income tax warning.
+    /// being edited). Used to show the combined-income tax warning and help set the display order.
     /// </summary>
     [Parameter]
     public int ExistingIncomeCount { get; set; } = 0;

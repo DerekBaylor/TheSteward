@@ -1,0 +1,181 @@
+﻿@namespace TheSteward.Shared.Components.FinanceComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+
+<MudDialog id="investmentDetailsModal" Class="investment-details-modal">
+    <TitleContent>
+        <div class="investment-modal-title">
+            <span class="material-icons investment-modal-icon">summarize</span>
+            Investment Details
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        @if (!Investments.Any())
+        {
+            <div class="investment-empty-state">
+                <span class="material-icons investment-empty-icon">savings</span>
+                <p class="investment-empty-text">No investments or savings to display.</p>
+            </div>
+        }
+        else
+        {
+            <div class="investment-details-list">
+                @foreach (var investment in Investments.OrderBy(i => i.DisplayOrder))
+                {
+                    <div class="investment-details-card">
+
+                        <!-- Card Header -->
+                        <div class="investment-details-card-header">
+                            <div class="investment-details-name-block">
+                                <span class="investment-details-name">@investment.InvestmentName</span>
+                                <span class="investment-details-badge">
+                                    @GetFrequencyLabel(investment.ContributionFrequency)
+                                </span>
+                            </div>
+                            <div class="investment-details-growth-highlight">
+                                <span class="investment-details-growth-label">Est. Yearly Growth</span>
+                                <span class="investment-details-growth-value">
+                                    @investment.EstYearlyGrowth.ToString("C")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Breakdown Grid -->
+                        <div class="investment-details-breakdown">
+
+                            <div class="investment-details-row">
+                                <span class="investment-details-row-label">Current Balance</span>
+                                <span class="investment-details-row-value">
+                                    @investment.CurrentValue.ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="investment-details-row">
+                                <span class="investment-details-row-label">Annual Growth Rate</span>
+                                <span class="investment-details-row-value">
+                                    @((investment.InterestRate * 100).ToString("F2"))%
+                                </span>
+                            </div>
+
+                            <div class="investment-details-divider"></div>
+
+                            <div class="investment-details-row">
+                                <span class="investment-details-row-label">Contribution per Period</span>
+                                <span class="investment-details-row-value">
+                                    @investment.ContributionAmount.ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="investment-details-row">
+                                <span class="investment-details-row-label">Yearly Contributions</span>
+                                <span class="investment-details-row-value">
+                                    @GetYearlyContributions(investment).ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="investment-details-row investment-details-row--gain">
+                                <span class="investment-details-row-label">
+                                    <span class="material-icons investment-details-gain-icon">trending_up</span>
+                                    Est. Interest on Balance
+                                </span>
+                                <span class="investment-details-row-value investment-details-row-value--gain">
+                                    +@GetEstInterestGain(investment).ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="investment-details-divider"></div>
+
+                            <div class="investment-details-row investment-details-row--net">
+                                <span class="investment-details-row-label investment-details-row-label--net">
+                                    Est. Yearly Growth
+                                </span>
+                                <span class="investment-details-row-value investment-details-row-value--net">
+                                    @investment.EstYearlyGrowth.ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="investment-details-row">
+                                <span class="investment-details-row-label">Projected Balance (1 yr)</span>
+                                <span class="investment-details-row-value">
+                                    @GetProjectedBalance(investment).ToString("C")
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+
+                <!-- Portfolio Totals Footer -->
+                @if (Investments.Count > 1)
+                {
+                    <div class="investment-details-totals">
+                        <div class="investment-details-totals-header">Portfolio Totals</div>
+                        <div class="investment-details-totals-grid">
+                            <div class="investment-details-totals-row">
+                                <span>Total Balance</span>
+                                <span>@Investments.Sum(i => i.CurrentValue).ToString("C")</span>
+                            </div>
+                            <div class="investment-details-totals-row">
+                                <span>Total Yearly Contributions</span>
+                                <span>@Investments.Sum(i => GetYearlyContributions(i)).ToString("C")</span>
+                            </div>
+                            <div class="investment-details-totals-row investment-details-totals-row--gain">
+                                <span>Total Est. Interest</span>
+                                <span>+@Investments.Sum(i => GetEstInterestGain(i)).ToString("C")</span>
+                            </div>
+                            <div class="investment-details-totals-row investment-details-totals-row--net">
+                                <span>Total Est. Yearly Growth</span>
+                                <span>@Investments.Sum(i => i.EstYearlyGrowth).ToString("C")</span>
+                            </div>
+                            <div class="investment-details-totals-row investment-details-totals-row--net">
+                                <span>Projected Total Balance (1 yr)</span>
+                                <span>@Investments.Sum(i => GetProjectedBalance(i)).ToString("C")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <p class="investment-details-disclaimer">
+                    * Growth estimates assume a constant annual rate applied to the current balance only,
+                    and do not account for compounding within the year or market fluctuation.
+                </p>
+            </div>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton class="ts-card-tab-btn investment-modal-btn-cancel" OnClick="Close">
+            Close
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public List<InvestmentDto> Investments { get; set; } = new();
+
+    private void Close() => MudDialog.Cancel();
+
+    private static decimal GetYearlyContributions(InvestmentDto investment) =>
+        Math.Round(investment.ContributionAmount * (decimal)(int)investment.ContributionFrequency, 2);
+
+    private static decimal GetEstInterestGain(InvestmentDto investment) =>
+        Math.Round(investment.CurrentValue * investment.InterestRate, 2);
+
+    private static decimal GetProjectedBalance(InvestmentDto investment) =>
+        Math.Round(investment.CurrentValue + investment.EstYearlyGrowth, 2);
+
+    private static string GetFrequencyLabel(FrequencyEnum freq) => freq switch
+    {
+        FrequencyEnum.Weekly => "Weekly (52×)",
+        FrequencyEnum.BiWeekly => "Bi-Weekly (26×)",
+        FrequencyEnum.BiMonthly => "Bi-Monthly (24×)",
+        FrequencyEnum.Monthly => "Monthly (12×)",
+        _ => $"{(int)freq}× / yr"
+    };
+}

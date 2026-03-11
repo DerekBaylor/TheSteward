@@ -27,6 +27,9 @@
 @import url("./styles/components/budgetStyles/incomeCard.css");
 @import url("./styles/components/budgetStyles/incomeModal.css");
 @import url("./styles/components/budgetStyles/incomeDetailsModal.css");
+@import url("./styles/components/budgetStyles/investmentCard.css");
+@import url("./styles/components/budgetStyles/investmentModal.css");
+@import url("./styles/components/budgetStyles/investmentDetailsModal.css");
 
 :root {
     /* ----- */

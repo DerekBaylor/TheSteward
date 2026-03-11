@@ -80,6 +80,7 @@ public class InvestmentService : IInvestmentService
         await _investmentRepository.SaveChangesAsync();
     }
 
+    #region Get Methods
     public async Task<InvestmentDto?> GetAsync(Guid investmentId)
     {
         if (investmentId == Guid.Empty)
@@ -128,4 +129,6 @@ public class InvestmentService : IInvestmentService
 
         return _mapper.Map<List<InvestmentDto>>(investments);
     }
+
+    #endregion Get Methods
 }

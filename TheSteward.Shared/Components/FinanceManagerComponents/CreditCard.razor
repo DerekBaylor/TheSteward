@@ -1,0 +1,188 @@
+﻿@namespace TheSteward.Shared.Components.FinanceComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+
+<MudCard id="creditCard" class="ts-tabbed-card" Elevation="0">
+
+    <MudCardActions class="ts-tabbed-card-btn-container">
+        @if (!IsReadOnly)
+        {
+            <MudButton id="addCreditBtn"
+                       class="ts-card-tab-btn"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="HandleAddCredit">
+                Add Credit
+            </MudButton>
+        }
+        <MudButton id="showCreditDetails"
+                   class="ts-card-tab-btn"
+                   StartIcon="@Icons.Material.Filled.FileOpen"
+                   OnClick="HandleShowCreditDetails"
+                   Disabled="!Credits.Any()">
+            Credit Details
+        </MudButton>
+    </MudCardActions>
+
+    <MudCardContent class="ts-card-content">
+
+        <MudCardHeader Class="ts-tabbed-card-header">
+            <CardHeaderContent>
+                <h3 class="ts-tabbed-card-title">
+                    <span class="ts-label">Credit &amp; Debt</span>
+                </h3>
+            </CardHeaderContent>
+        </MudCardHeader>
+
+        <div class="ts-card-body">
+            @if (!Credits.Any())
+            {
+                <div class="credit-empty-state">
+                    <span class="material-icons credit-empty-icon">credit_card_off</span>
+                    <p class="credit-empty-text">No credit or debt accounts added yet.</p>
+                </div>
+            }
+            else
+            {
+                <section class="ts-card-section">
+                    <table class="credit-table">
+                        <thead>
+                            <tr>
+                                <th class="credit-th credit-th-name">Name</th>
+                                <th class="credit-th credit-th-text">Type</th>
+                                <th class="credit-th credit-th-amount">Balance</th>
+                                <th class="credit-th credit-th-amount">Rate</th>
+                                <th class="credit-th credit-th-amount">Monthly Interest</th>
+                                <th class="credit-th credit-th-amount">Payment</th>
+                                <th class="credit-th credit-th-text">Due</th>
+                                @if (!IsReadOnly)
+                                {
+                                    <th class="credit-th credit-th-action"></th>
+                                    <th class="credit-th credit-th-action"></th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var credit in Credits.OrderBy(c => c.DisplayOrder))
+                            {
+                                <tr class="credit-row">
+                                    <td class="credit-td credit-td-name">@credit.CreditName</td>
+                                    <td class="credit-td credit-td-text">
+                                        @if (!string.IsNullOrEmpty(credit.CreditType))
+                                        {
+                                            <span class="credit-type-badge">@credit.CreditType</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="credit-td-empty">—</span>
+                                        }
+                                    </td>
+                                    <td class="credit-td credit-td-amount">@credit.CurrentValue.ToString("C")</td>
+                                    <td class="credit-td credit-td-amount credit-td-rate">
+                                        @((credit.InterestRate * 100).ToString("F2"))%
+                                    </td>
+                                    <td class="credit-td credit-td-amount credit-td-interest">
+                                        @credit.EstMonthlyInterest.ToString("C")
+                                    </td>
+                                    <td class="credit-td credit-td-amount">
+                                        @credit.PaymentAmount.ToString("C")
+                                        <span class="credit-freq-badge">
+                                            @GetFrequencyShortLabel(credit.PaymentFrequency)
+                                        </span>
+                                    </td>
+                                    <td class="credit-td credit-td-text">
+                                        @(credit.PaymentDay == 31 ? "Last day" : $"Day {credit.PaymentDay}")
+                                    </td>
+                                    @if (!IsReadOnly)
+                                    {
+                                        <td class="credit-td credit-td-action">
+                                            <button class="credit-row-btn credit-row-btn--edit"
+                                                    title="Edit"
+                                                    @onclick="() => HandleRowEdit(credit)">
+                                                <span class="material-icons">edit</span>
+                                            </button>
+                                        </td>
+                                        <td class="credit-td credit-td-action">
+                                            <button class="credit-row-btn credit-row-btn--delete"
+                                                    title="Delete"
+                                                    @onclick="() => HandleRowDelete(credit)">
+                                                <span class="material-icons">delete</span>
+                                            </button>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="credit-totals-row">
+                                <td class="credit-td credit-td-name credit-totals-label">Total</td>
+                                <td class="credit-td credit-td-text"></td>
+                                <td class="credit-td credit-td-amount credit-totals-value">
+                                    @Credits.Sum(c => c.CurrentValue).ToString("C")
+                                </td>
+                                <td class="credit-td credit-td-amount"></td>
+                                <td class="credit-td credit-td-amount credit-totals-value">
+                                    @Credits.Sum(c => c.EstMonthlyInterest).ToString("C")
+                                </td>
+                                <td class="credit-td credit-td-amount credit-totals-value">
+                                    @*
+                                        Payments have mixed frequencies — show yearly total instead.
+                                    *@
+                                    @Credits.Sum(c => c.PaymentAmount * (decimal)(int)c.PaymentFrequency).ToString("C") / yr
+                                </td>
+                                <td class="credit-td credit-td-text"></td>
+                                @if (!IsReadOnly)
+                                {
+                                    <td class="credit-td credit-td-action"></td>
+                                    <td class="credit-td credit-td-action"></td>
+                                }
+                            </tr>
+                        </tfoot>
+                    </table>
+                </section>
+            }
+        </div>
+
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public List<CreditDto> Credits { get; set; } = new();
+
+    [Parameter]
+    public bool IsReadOnly { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnAddCredit { get; set; }
+
+    [Parameter]
+    public EventCallback OnOpenCreditDetails { get; set; }
+
+    [Parameter]
+    public EventCallback<CreditDto> OnEditCredit { get; set; }
+
+    [Parameter]
+    public EventCallback<CreditDto> OnDeleteCredit { get; set; }
+
+    private async Task HandleAddCredit() =>
+        await OnAddCredit.InvokeAsync();
+
+    private async Task HandleShowCreditDetails() =>
+        await OnOpenCreditDetails.InvokeAsync();
+
+    private async Task HandleRowEdit(CreditDto credit) =>
+        await OnEditCredit.InvokeAsync(credit);
+
+    private async Task HandleRowDelete(CreditDto credit) =>
+        await OnDeleteCredit.InvokeAsync(credit);
+
+    private static string GetFrequencyShortLabel(FrequencyEnum freq) => freq switch
+    {
+        FrequencyEnum.Weekly => "/ wk",
+        FrequencyEnum.BiWeekly => "/ 2wk",
+        FrequencyEnum.BiMonthly => "/ 2mo",
+        FrequencyEnum.Monthly => "/ mo",
+        _ => $"×{(int)freq}/yr"
+    };
+}

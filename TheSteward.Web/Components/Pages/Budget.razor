@@ -6,7 +6,7 @@
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 @using TheSteward.Core.IServices.FinanceManagerIServices
-@using TheSteward.Shared.Components.HouseholdComponents
+@using TheSteward.Shared.Components
 
 @inject HouseholdState HouseholdState
 @inject NavigationManager NavigationManager
@@ -21,7 +21,7 @@
 
 <PageTitle>Budget Dashboard</PageTitle>
 
-<HouseholdToolbar OnHouseholdChanged="OnHouseholdChanged" />
+<HouseholdToolBar OnHouseholdChanged="OnHouseholdChanged" />
 
 @if (HouseholdState.CurrentUserHousehold == null)
 {
@@ -327,6 +327,16 @@ else
 
         await LoadBudgetAsync();
     }
+
+    private async void OnHouseholdChanged(UserHouseholdDto _)
+    {
+        currentBudget = null;
+        hasBudget = false;
+        errorMessage = null;
+        await LoadBudgetAsync();
+        StateHasChanged();
+    }
+
     #region Budget
     private async Task LoadBudgetAsync()
     {
@@ -418,14 +428,6 @@ else
             isCreating = false;
             creatingType = null;
         }
-    }
-
-    private async void OnHouseholdChanged(UserHouseholdDto _)
-    {
-        currentBudget = null;
-        hasBudget = false;
-        errorMessage = null;
-        await LoadBudgetAsync();
     }
     #endregion Budget
 

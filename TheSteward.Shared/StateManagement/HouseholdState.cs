@@ -4,6 +4,7 @@ using TheSteward.Shared.Dtos.HouseholdDtos;
 public class HouseholdState
 {
     public UserHouseholdDto? CurrentUserHousehold { get; private set; }
+    public List<UserHouseholdDto> UserHouseholds { get; private set; } = new();
     public HouseholdDto? CurrentHousehold => CurrentUserHousehold?.Household;
     public bool HasAdminPermissions => CurrentUserHousehold?.HasAdminPermissions ?? false;
     public bool HasFinanceReadPermission => CurrentUserHousehold?.HasFinanceManagerReadPermission ?? false;
@@ -17,9 +18,18 @@ public class HouseholdState
         NotifyStateChanged();
     }
 
+    public void SetUserHouseholds(List<UserHouseholdDto> households)
+    {
+        UserHouseholds = households;
+        CurrentUserHousehold = households.FirstOrDefault(uh => uh.IsDefaultUserHousehold)
+                               ?? households.FirstOrDefault();
+        NotifyStateChanged();
+    }
+
     public void ClearHousehold()
     {
         CurrentUserHousehold = null;
+        UserHouseholds = new();
         NotifyStateChanged();
     }
 

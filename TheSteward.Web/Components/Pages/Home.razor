@@ -1,65 +1,14 @@
 ﻿@page "/"
 
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims
 @using TheSteward.Shared.Components.DashboardComponets
-@using Microsoft.AspNetCore.Components.Web
-
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Home</PageTitle>
-@if(isLoading)
-{
-    <p><em>Loading...</em></p>
-} 
-else
-{    
-    <AuthorizeView>
-        <Authorized>
-            <Dashboard />
-        </Authorized>
 
-        <NotAuthorized>
-            <LandingPage />
-        </NotAuthorized>
-    </AuthorizeView>
-}
-
-
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <MudAlert Severity="Severity.Error" Class="mt-3">
-        @errorMessage
-    </MudAlert>
-}
-
-@code {
-    private bool isLoading = true;
-    private string? errorMessage;
-    private string? currentUserId;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            if (user.Identity?.IsAuthenticated == true)
-            {
-                currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Error loading household: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
-}
+<AuthorizeView>
+    <Authorized>
+        <Dashboard />
+    </Authorized>
+    <NotAuthorized>
+        <LandingPage />
+    </NotAuthorized>
+</AuthorizeView>

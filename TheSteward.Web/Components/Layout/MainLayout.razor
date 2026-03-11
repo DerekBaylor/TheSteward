@@ -1,25 +1,62 @@
 ﻿@inherits LayoutComponentBase
 @implements IDisposable
 @inject INavigationService NavigationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserHouseholdService UserHouseholdService
+@inject HouseholdState HouseholdState
+@inject NavigationManager NavigationManager
 
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout class="app-container">
-    <MudDrawer Open="true">
-        <SidebarNav />
-    </MudDrawer>
-    <MudMainContent class="main-content">
-        @Body
-    </MudMainContent>
-</MudLayout>
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudLayout class="app-container">
+        <MudDrawer Open="true">
+            <SidebarNav />
+        </MudDrawer>
+        <MudMainContent class="main-content">
+            @Body
+        </MudMainContent>
+    </MudLayout>
+}
 
 @code {
-    protected override void OnInitialized()
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
     {
         NavigationService.OnChange += () => InvokeAsync(StateHasChanged);
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId) && HouseholdState.UserHouseholds.Count == 0)
+            {
+                var households = await UserHouseholdService.GetAllUserHouseholdsForUserAsync(userId);
+                
+                if (households.Count > 0)
+                {
+                    HouseholdState.SetUserHouseholds(households);
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/household");
+                }
+            }
+        }
+
+        isLoading = false;
     }
 
     public void Dispose()

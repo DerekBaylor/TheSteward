@@ -169,7 +169,6 @@
     public void Dispose()
     {
         NavigationService.OnChange -= HandleStateChange;
-       // HouseholdState.OnChange -= HandleStateChange;
 
         HouseholdState.OnChange += () => InvokeAsync(StateHasChanged);
     }

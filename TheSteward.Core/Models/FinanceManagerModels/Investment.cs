@@ -59,7 +59,7 @@ public class Investment
     [ForeignKey("BudgetId")]
     public Budget? Budget { get; set; }
     
-    public Guid ExpenseId { get; set; }
+    public Guid? ExpenseId { get; set; }
     
     [JsonIgnore]
     [ForeignKey("ExpenseId")]

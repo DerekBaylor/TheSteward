@@ -1,57 +1,44 @@
-﻿
-#incomeCard.ts-tabbed-card {
+﻿#investmentCard.ts-tabbed-card {
     width: 40%;
     animation: slideUp 0.4s ease-out;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* ---- Tab Buttons ---- */
-#addIncomeBtn.ts-card-tab-btn {
-    background-color: var(--green-6);
-    border-color: var(--green-6);
+#addInvestmentBtn.ts-card-tab-btn {
+    background-color: var(--blue-6);
+    border-color: var(--blue-6);
     color: var(--off-white);
 }
 
-#showIncomeDetails.ts-card-tab-btn {
-    background-color: var(--green-7);
-    border-color: var(--green-7);
+#showInvestmentDetails.ts-card-tab-btn {
+    background-color: var(--blue-7);
+    border-color: var(--blue-7);
     color: var(--off-white);
 }
 
-button#addIncomeBtn:hover:not([disabled]) {
-    background-color: var(--green-8);
+button#addInvestmentBtn:hover:not([disabled]) {
+    background-color: var(--blue-8);
     color: var(--off-white);
 }
 
-button#showIncomeDetails:hover:not([disabled]) {
-    background-color: var(--green-8);
+button#showInvestmentDetails:hover:not([disabled]) {
+    background-color: var(--blue-8);
     color: var(--off-white);
 }
 
 /* ---- Card border accent ---- */
-#incomeCard .ts-card-content {
-    border-color: var(--base-green);
+#investmentCard .ts-card-content {
+    border-color: var(--base-blue);
 }
 
-/* ---- Income Table ---- */
-.income-table {
+/* ---- Investment Table ---- */
+.investment-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
 }
 
-.income-th {
+.investment-th {
     text-align: left;
     font-family: var(--label-font);
     font-size: 0.75rem;
@@ -60,52 +47,61 @@ button#showIncomeDetails:hover:not([disabled]) {
     letter-spacing: 0.04em;
     color: var(--gray-6);
     padding: 0.25rem 0.5rem 0.5rem;
-    border-bottom: 2px solid var(--green-3);
+    border-bottom: 2px solid var(--blue-3);
 }
 
-.income-th-amount {
+.investment-th-amount {
     text-align: right;
 }
 
-.income-th-action {
+.investment-th-action {
     width: 2rem;
     text-align: center;
     padding: 0.25rem 0.25rem 0.5rem;
 }
 
-.income-row {
+.investment-row {
     transition: background-color 0.15s ease;
 }
 
-    .income-row:hover {
-        background-color: var(--green-1);
+    .investment-row:hover {
+        background-color: var(--blue-1);
         border-radius: var(--border-radius);
     }
 
-.income-td {
+.investment-td {
     padding: 0.5rem 0.5rem;
     color: var(--gray-8);
     border-bottom: 1px solid var(--gray-2);
 }
 
-.income-td-name {
+.investment-td-name {
     font-weight: 500;
 }
 
-.income-td-amount {
+.investment-td-amount {
     text-align: right;
     font-variant-numeric: tabular-nums;
     font-family: var(--primary-font);
 }
 
-.income-td-action {
+.investment-td-action {
     text-align: center;
     padding: 0.25rem;
     width: 2rem;
 }
 
+/* ---- Frequency Badge ---- */
+.investment-freq-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--gray-5);
+    margin-left: 0.3rem;
+}
+
 /* ---- Row Action Buttons ---- */
-.income-row-btn {
+.investment-row-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -118,52 +114,52 @@ button#showIncomeDetails:hover:not([disabled]) {
     transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 
-.income-row:hover .income-row-btn {
+.investment-row:hover .investment-row-btn {
     opacity: 1;
 }
 
-.income-row-btn .material-icons {
+.investment-row-btn .material-icons {
     font-size: 16px;
 }
 
-.income-row-btn--edit {
+.investment-row-btn--edit {
     color: var(--gray-6);
 }
 
-    .income-row-btn--edit:hover {
-        background-color: var(--green-2);
-        color: var(--base-green);
+    .investment-row-btn--edit:hover {
+        background-color: var(--blue-2);
+        color: var(--base-blue);
     }
 
-.income-row-btn--delete {
+.investment-row-btn--delete {
     color: var(--gray-6);
 }
 
-    .income-row-btn--delete:hover {
+    .investment-row-btn--delete:hover {
         background-color: var(--red-1);
         color: var(--red-6);
     }
 
 /* ---- Totals Footer ---- */
-.income-totals-row {
-    border-top: 2px solid var(--green-4);
+.investment-totals-row {
+    border-top: 2px solid var(--blue-4);
 }
 
-.income-totals-label {
+.investment-totals-label {
     font-family: var(--label-font);
     font-weight: 700;
     color: var(--gray-9);
     padding-top: 0.6rem;
 }
 
-.income-totals-value {
+.investment-totals-value {
     font-weight: 700;
-    color: var(--base-green);
+    color: var(--base-blue);
     padding-top: 0.6rem;
 }
 
 /* ---- Empty State ---- */
-.income-empty-state {
+.investment-empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -172,12 +168,12 @@ button#showIncomeDetails:hover:not([disabled]) {
     color: var(--gray-5);
 }
 
-.income-empty-icon {
+.investment-empty-icon {
     font-size: 2rem;
     opacity: 0.5;
 }
 
-.income-empty-text {
+.investment-empty-text {
     font-size: 0.9rem;
     margin: 0;
 }

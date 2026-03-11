@@ -1,0 +1,173 @@
+﻿@namespace TheSteward.Shared.Components.FinanceComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.Utils.FinanceManagerUtils
+@using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+@using TheSteward.Shared.Dtos.BudgetDtos
+
+<EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="investment-form">
+
+        <!-- Name -->
+        <div class="investment-form-field">
+            <MudTextField @bind-Value="FormData.InvestmentName"
+                          Label="Investment Name"
+                          Placeholder="e.g. 401(k), Roth IRA, HYSA"
+                          Variant="Variant.Outlined"
+                          HelperText="A short label to identify this investment or savings account."
+                          MaxLength="200"
+                          For="@(() => FormData.InvestmentName)" />
+        </div>
+
+        <!-- Current Value -->
+        <div class="investment-form-field">
+            <MudNumericField @bind-Value="FormData.CurrentValue"
+                             Label="Current Balance"
+                             Variant="Variant.Outlined"
+                             Format="C2"
+                             HelperText="The current value or balance of this account."
+                             Min="0m"
+                             For="@(() => FormData.CurrentValue)"
+                             @bind-Value:after="UpdatePreview" />
+        </div>
+
+        <!-- Interest / Growth Rate -->
+        <div class="investment-form-field">
+            <MudNumericField @bind-Value="interestRatePercent"
+                             Label="Annual Growth Rate (%)"
+                             Variant="Variant.Outlined"
+                             Format="F2"
+                             HelperText="Expected annual return rate (e.g. 7 for 7%). Used to estimate yearly growth."
+                             Min="0m"
+                             Max="100m"
+                             @bind-Value:after="OnInterestRateChanged" />
+        </div>
+
+        <!-- Contribution Amount -->
+        <div class="investment-form-field">
+            <MudNumericField @bind-Value="FormData.ContributionAmount"
+                             Label="Contribution per Period"
+                             Variant="Variant.Outlined"
+                             Format="C2"
+                             HelperText="How much you contribute each pay period."
+                             Min="0m"
+                             For="@(() => FormData.ContributionAmount)"
+                             @bind-Value:after="UpdatePreview" />
+        </div>
+
+        <!-- Contribution Frequency -->
+        <div class="investment-form-field">
+            <MudSelect T="FrequencyEnum"
+                       @bind-Value="FormData.ContributionFrequency"
+                       Label="Contribution Frequency"
+                       Variant="Variant.Outlined"
+                       HelperText="How often do you make contributions?"
+                       For="@(() => FormData.ContributionFrequency)"
+                       @bind-Value:after="UpdatePreview">
+                @foreach (var freq in FrequencyOptions)
+                {
+                    <MudSelectItem T="FrequencyEnum" Value="@freq.Value">@freq.Label</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="investment-preview investment-preview--visible">
+            <p class="investment-preview-title">Estimated Growth</p>
+            <div class="investment-preview-grid">
+                <span class="investment-preview-label">Yearly Contributions</span>
+                <span class="investment-preview-value">@yearlyContributions.ToString("C")</span>
+
+                <span class="investment-preview-label">Est. Interest on Balance</span>
+                <span class="investment-preview-value investment-preview-gain">+@estInterestGain.ToString("C")</span>
+
+                <span class="investment-preview-label investment-preview-net-label">Est. Yearly Growth</span>
+                <span class="investment-preview-value investment-preview-net-value">@estYearlyGrowth.ToString("C")</span>
+
+                <span class="investment-preview-label">Projected Balance (1 yr)</span>
+                <span class="investment-preview-value">@projectedBalance.ToString("C")</span>
+            </div>
+            <p class="investment-preview-disclaimer">
+                Estimates only — assumes constant rate and no compounding within the year.
+            </p>
+        </div>
+
+        <ValidationSummary />
+
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public InvestmentFormDto FormData { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<InvestmentFormDto> OnValidSubmit { get; set; }
+
+    /// <summary>
+    /// Total number of investments already on the budget (including the one
+    /// being edited). Used to help set the display order.
+    /// </summary>
+    [Parameter]
+    public int ExistingInvestmentCount { get; set; } = 0;
+
+    private EditContext editContext = null!;
+
+    private decimal interestRatePercent = 0m;
+
+    // Preview state variables
+    private decimal yearlyContributions = 0m;
+    private decimal estInterestGain = 0m;
+    private decimal estYearlyGrowth = 0m;
+    private decimal projectedBalance = 0m;
+
+    private static readonly List<(string Label, FrequencyEnum Value)> FrequencyOptions = new()
+    {
+        ("Monthly (12×/year)",    FrequencyEnum.Monthly),
+        ("Bi-Monthly (24×/year)", FrequencyEnum.BiMonthly),
+        ("Bi-Weekly (26×/year)",  FrequencyEnum.BiWeekly),
+        ("Weekly (52×/year)",     FrequencyEnum.Weekly),
+    };
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(FormData);
+        interestRatePercent = FormData.InterestRate * 100m;
+
+        if (!FormData.IsEditMode)
+            FormData.DisplayOrder = ExistingInvestmentCount;
+
+        UpdatePreview();
+    }
+
+    private void OnInterestRateChanged()
+    {
+        interestRatePercent = Math.Clamp(interestRatePercent, 0m, 100m);
+        FormData.InterestRate = Math.Round(interestRatePercent / 100m, 6);
+        UpdatePreview();
+    }
+
+    private void UpdatePreview()
+    {
+        yearlyContributions = FormData.ContributionAmount * (decimal)(int)FormData.ContributionFrequency;
+        estInterestGain = Math.Round(FormData.CurrentValue * FormData.InterestRate, 2);
+        estYearlyGrowth = Math.Round(yearlyContributions + estInterestGain, 2);
+        projectedBalance = Math.Round(FormData.CurrentValue + estYearlyGrowth, 2);
+
+        FormData.EstYearlyGrowth = estYearlyGrowth;
+    }
+
+    public async Task SubmitAsync()
+    {
+        var isValid = editContext.Validate();
+        if (isValid)
+            await OnValidSubmit.InvokeAsync(FormData);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await OnValidSubmit.InvokeAsync(FormData);
+    }
+}

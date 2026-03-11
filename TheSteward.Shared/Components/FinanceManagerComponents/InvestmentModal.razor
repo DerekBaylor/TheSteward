@@ -1,0 +1,141 @@
+﻿@namespace TheSteward.Shared.Components.FinanceComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.IServices.FinanceManagerIServices
+@using TheSteward.Shared.Dtos.BudgetDtos 
+
+@inject IInvestmentService InvestmentService
+@inject ISnackbar Snackbar
+
+<MudDialog id="investmentModal">
+    <TitleContent>
+        <div class="investment-modal-title">
+            <span class="material-icons investment-modal-icon">
+                @(FormData.IsEditMode ? "edit" : "add_circle")
+            </span>
+            @(FormData.IsEditMode ? "Edit Investment" : "Add Investment")
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        <InvestmentForm @ref="investmentForm"
+                        FormData="FormData"
+                        ExistingInvestmentCount="ExistingInvestmentCount"
+                        OnValidSubmit="HandleFormSubmit" />
+
+                        <p>Test</p>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton id="investmentCancelBtn"
+                   class="ts-card-tab-btn investment-modal-btn-cancel"
+                   OnClick="Cancel"
+                   Disabled="isSaving">
+            Cancel
+        </MudButton>
+
+        @if (FormData.IsEditMode)
+        {
+            <MudButton id="investmentDeleteBtn"
+                       class="ts-card-tab-btn investment-modal-btn-delete"
+                       OnClick="ConfirmDelete"
+                       Disabled="isSaving">
+                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">delete</span>
+                Delete
+            </MudButton>
+        }
+
+        <MudButton id="investmentSaveBtn"
+                   class="ts-card-tab-btn investment-modal-btn-save"
+                   OnClick="TriggerSubmit"
+                   Disabled="isSaving">
+            @if (isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @(FormData.IsEditMode ? "Save Changes" : "Add Investment")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public InvestmentFormDto FormData { get; set; } = null!;
+
+    [Parameter]
+    public int ExistingInvestmentCount { get; set; } = 0;
+
+    private InvestmentForm? investmentForm;
+    private bool isSaving = false;
+
+    private async Task TriggerSubmit()
+    {
+        if (investmentForm is not null)
+            await investmentForm.SubmitAsync();
+    }
+
+    private async Task HandleFormSubmit(InvestmentFormDto formData)
+    {
+        isSaving = true;
+
+        try
+        {
+            if (formData.IsEditMode)
+            {
+                var updateDto = new UpdateInvestmentDto
+                {
+                    InvestmentId = formData.InvestmentId!.Value,
+                    InvestmentName = formData.InvestmentName,
+                    CurrentValue = formData.CurrentValue,
+                    InterestRate = formData.InterestRate,
+                    ContributionAmount = formData.ContributionAmount,
+                    ContributionFrequency = formData.ContributionFrequency,
+                    EstYearlyGrowth = formData.EstYearlyGrowth,
+                    DisplayOrder = formData.DisplayOrder,
+                    ExpenseId = formData.ExpenseId
+                };
+
+                var updated = await InvestmentService.UpdateAsync(updateDto);
+                Snackbar.Add("Investment updated successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(updated));
+            }
+            else
+            {
+                var createDto = new CreateInvestmentDto
+                {
+                    InvestmentName = formData.InvestmentName,
+                    CurrentValue = formData.CurrentValue,
+                    InterestRate = formData.InterestRate,
+                    ContributionAmount = formData.ContributionAmount,
+                    ContributionFrequency = formData.ContributionFrequency,
+                    EstYearlyGrowth = formData.EstYearlyGrowth,
+                    DisplayOrder = formData.DisplayOrder,
+                    BudgetId = formData.BudgetId,
+                    ExpenseId = formData.ExpenseId
+                };
+
+                var created = await InvestmentService.AddAsync(createDto);
+                Snackbar.Add("Investment added successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(created));
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving investment: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void ConfirmDelete()
+    {
+        MudDialog.Close(DialogResult.Ok($"delete:{FormData.InvestmentId}"));
+    }
+}

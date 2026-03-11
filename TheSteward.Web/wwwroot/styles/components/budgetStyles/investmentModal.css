@@ -1,0 +1,137 @@
+﻿/* ---- Modal Title ---- */
+.investment-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--label-font);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gray-9);
+}
+
+.investment-modal-icon {
+    font-size: 1.3rem;
+    color: var(--base-blue);
+}
+
+/* ---- Modal Action Buttons ---- */
+#investmentSaveBtn.ts-card-tab-btn,
+.investment-modal-btn-save {
+    background-color: var(--blue-5);
+    border-color: var(--blue-5);
+    color: var(--off-white);
+}
+
+    #investmentSaveBtn:hover:not([disabled]),
+    .investment-modal-btn-save:hover:not([disabled]) {
+        background-color: var(--blue-8);
+    }
+
+#investmentCancelBtn.ts-card-tab-btn,
+.investment-modal-btn-cancel {
+    background-color: var(--gray-2);
+    border-color: var(--gray-3);
+    color: var(--gray-8);
+}
+
+    #investmentCancelBtn:hover:not([disabled]),
+    .investment-modal-btn-cancel:hover:not([disabled]) {
+        background-color: var(--gray-4);
+    }
+
+#investmentDeleteBtn.ts-card-tab-btn,
+.investment-modal-btn-delete {
+    background-color: transparent;
+    border-color: var(--red-4);
+    color: var(--red-6);
+}
+
+    #investmentDeleteBtn:hover:not([disabled]),
+    .investment-modal-btn-delete:hover:not([disabled]) {
+        background-color: var(--red-1);
+    }
+
+/* ---- Form Layout ---- */
+.investment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 0.25rem 0;
+    min-width: 340px;
+}
+
+.investment-form-field {
+    width: 100%;
+}
+
+/* ---- Live Preview Panel ---- */
+.investment-preview {
+    background: var(--blue-1);
+    border: 1px solid var(--blue-3);
+    border-radius: var(--border-radius);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.25s ease, max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 1rem;
+}
+
+.investment-preview--visible {
+    opacity: 1;
+    max-height: 220px;
+    padding: 0.875rem 1rem;
+}
+
+.investment-preview-title {
+    font-family: var(--label-font);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray-6);
+    margin: 0 0 0.6rem;
+}
+
+.investment-preview-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.3rem 1rem;
+    align-items: baseline;
+}
+
+.investment-preview-label {
+    font-size: 0.875rem;
+    color: var(--gray-7);
+}
+
+.investment-preview-value {
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--gray-8);
+}
+
+.investment-preview-gain {
+    color: var(--base-blue);
+}
+
+.investment-preview-net-label {
+    font-weight: 700;
+    color: var(--gray-9);
+    border-top: 1px solid var(--blue-3);
+    padding-top: 0.35rem;
+}
+
+.investment-preview-net-value {
+    font-weight: 700;
+    color: var(--base-blue);
+    border-top: 1px solid var(--blue-3);
+    padding-top: 0.35rem;
+}
+
+.investment-preview-disclaimer {
+    font-size: 0.72rem;
+    color: var(--gray-5);
+    margin: 0.5rem 0 0;
+    font-style: italic;
+}

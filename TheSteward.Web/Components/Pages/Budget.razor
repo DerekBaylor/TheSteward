@@ -319,17 +319,6 @@ else
     private BudgetDto? currentBudget;
     private Action? _stateChangeHandler;
 
-    // Investment
-    private Task OpenAddInvestmentModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditInvestmentModal(InvestmentDto investment) => Task.CompletedTask; // TODO: Implement
-
-    // Credit
-    private Task OpenAddCreditModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditCreditModal(CreditDto credit) => Task.CompletedTask; // TODO: Implement
-
-    // Expense
-    private Task OpenAddExpenseModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditExpenseModal(ExpenseDto expense) => Task.CompletedTask; // TODO: Implement
 
     protected override async Task OnInitializedAsync()
     {
@@ -563,5 +552,25 @@ else
     }
     #endregion Income
 
+    #region Investment
+    private Task OpenAddInvestmentModal() => Task.CompletedTask; // TODO: Implement
+    
+    private Task OpenEditInvestmentModal(InvestmentDto investment) => Task.CompletedTask; // TODO: Implement
+    
+    
+    #endregion Investment
+
+    #region Credit
+    // Credit
+    private Task OpenAddCreditModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditCreditModal(CreditDto credit) => Task.CompletedTask; // TODO: Implement
+    #endregion Credit
+
+    #region Expense
+    // Expense
+    private Task OpenAddExpenseModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditExpenseModal(ExpenseDto expense) => Task.CompletedTask; // TODO: Implement
+    #endregion Expense
+    
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

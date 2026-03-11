@@ -105,19 +105,21 @@ The app will be available at `https://localhost:5001`.
 
 ```
 TheSteward/
-├── TheSteward.Core/              # Domain models, DTOs, interfaces
-│   ├── Models/
-│   ├── Dtos/
-│   └── IServices/
-├── TheSteward.Infrastructure/    # EF Core, service implementations
-│   ├── Data/
-│   ├── Repositories/
-│   └── Services/
-└── TheSteward.Shared/            # Blazor components, pages, state
-    ├── Components/
-    │   └── FinanceComponents/
-    ├── Pages/
-    └── Dtos/
+├── TheSteward.Core/              # Domain layer
+│   ├── Dtos/                     # Data transfer objects
+│   ├── IServices/                # Service interfaces
+│   ├── Models/                   # Domain entities
+│   └── Profiles/                 # AutoMapper profiles
+├── TheSteward.Infrastructure/    # Data & service implementations
+│   ├── Data/                     # EF Core DbContext & migrations
+│   ├── Repositories/             # Repository implementations
+│   └── Services/                 # Service implementations
+├── TheSteward.Shared/            # Shared frontend layer
+│   ├── Components/               # Reusable Blazor components
+│   └── State/                    # Application state management
+├── TheSteward.Tests/             # Test projects
+└── TheSteward.Web/               # Web application entry point
+    └── Pages/                    # Blazor pages & routing
 ```
 
 ---
@@ -131,7 +133,7 @@ The Steward uses ASP.NET Core Identity for authentication. Within each household
 ## 🗺 Roadmap
 
 - [x] Household creation and member management
-- [x] Finance Manager — Income, Investments, Credit, Expenses
+- [ ] Finance Manager — Income, Investments, Credit, Expenses (In Progress)
 - [ ] Meal planning module
 - [ ] Chore tracking module
 - [ ] Deployment (self-hosted / cloud)

@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using TheSteward.Infrastructure.Services.FinanceManagerServices
 @using TheSteward.Infrastructure.Services.HouseholdServices
+@using TheSteward.Shared.Components.FinanceManagerComponents
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 @using TheSteward.Core.IServices.FinanceManagerIServices
@@ -122,6 +123,13 @@ else
                         OnOpenInvestmentDetails="OpenInvestmentDetails"
                         OnEditInvestment="OpenEditInvestmentModal"
                         OnDeleteInvestment="(investment) => HandleDeleteInvestment(investment.InvestmentId)" />
+
+        <CreditCard Credits="currentBudget.Credits"
+                    IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+                    OnAddCredit="OpenAddCreditModal"
+                    OnOpenCreditDetails="OpenCreditDetails"
+                    OnEditCredit="OpenEditCreditModal"
+                    OnDeleteCredit="(credit) => HandleDeleteCreditStub(credit.CreditId)" />
     </MudPaper>
 
 
@@ -494,9 +502,29 @@ else
     #endregion Investment
 
     #region Credit
-    // Credit
-    private Task OpenAddCreditModal() => Task.CompletedTask; // TODO: Implement
-    private Task OpenEditCreditModal(CreditDto credit) => Task.CompletedTask; // TODO: Implement
+    private Task OpenAddCreditModal()
+    {
+        Snackbar.Add("Add Credit — coming soon.", Severity.Info);
+        return Task.CompletedTask;
+    }
+
+    private Task OpenCreditDetails()
+    {
+        Snackbar.Add("Credit Details — coming soon.", Severity.Info);
+        return Task.CompletedTask;
+    }
+
+    private Task OpenEditCreditModal(CreditDto credit)
+    {
+        Snackbar.Add($"Edit Credit: {credit.CreditName} — coming soon.", Severity.Info);
+        return Task.CompletedTask;
+    }
+
+    private Task HandleDeleteCreditStub(Guid creditId)
+    {
+        Snackbar.Add($"Delete Credit — coming soon.", Severity.Info);
+        return Task.CompletedTask;
+    }
     #endregion Credit
 
     #region Expense

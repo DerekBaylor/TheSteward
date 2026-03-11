@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
 namespace TheSteward.Core.Dtos.FinanceManagerDtos;
 
@@ -38,7 +39,7 @@ public class UpdateCreditDto
     /// Monthly = 12, Bi-Monthly = 24, Bi-Weekly = 26, Weekly = 52
     /// </summary>
     [Required]
-    public int PaymentFrequency { get; set; }
+    public FrequencyEnum PaymentFrequency { get; set; }
     
     [Required]
     [Range(0, double.MaxValue, ErrorMessage = "Payment amount must be greater than or equal to 0")]

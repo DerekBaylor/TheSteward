@@ -107,7 +107,9 @@ else
     <IncomeCard Incomes="currentBudget.Incomes"
                 IsReadOnly="!HouseholdState.HasFinanceWritePermission"
                 OnAddIncome="OpenAddIncomeModal"
-                OnEditIncome="OpenEditIncomeModal" />
+                OnOpenIncomeDetails="OpenIncomeDetails"
+                OnEditIncome="OpenEditIncomeModal"
+                OnDeleteIncome="(income) => HandleDeleteIncome(income.IncomeId)" />
 
     <!-- Mock Display -->
     #region mock-display
@@ -444,9 +446,15 @@ else
         {
             BudgetId = currentBudget!.BudgetId,
             DisplayOrder = currentBudget.Incomes.Count
+            //TODO: Get filing status from other incomes else be single
         };
 
         await OpenIncomeModal(formData);
+    }
+
+    private async Task OpenIncomeDetails()
+    {
+        Snackbar.Add("Income Details.", Severity.Success);
     }
 
     private async Task OpenEditIncomeModal(IncomeDto income)
@@ -456,6 +464,7 @@ else
             IncomeId = income.IncomeId,
             IncomeName = income.IncomeName,
             IncomeFrequency = income.IncomeFrequency,
+            FilingStatus = income.FilingStatus,
             PayCheckGross = income.PayCheckGross,
             DisplayOrder = income.DisplayOrder,
             BudgetId = income.BudgetId
@@ -466,11 +475,18 @@ else
 
     private async Task OpenIncomeModal(IncomeFormDto formData)
     {
+        var budgetIncomes = new List<IncomeDto>();
+
+        if (currentBudget != null)
+        {            
+            budgetIncomes = currentBudget.Incomes;
+        }
+
         var parameters = new DialogParameters
-    {
-        { "FormData", formData },
-        { "ExistingIncomeCount", currentBudget!.Incomes.Count }
-    };
+        {
+            { "FormData", formData },
+            { "ExistingIncomeCount", currentBudget!.Incomes.Count }
+        };
 
         var options = new DialogOptions
         {
@@ -488,15 +504,16 @@ else
 
         if (result.Canceled) return;
 
-        if (result.Data is string signal && signal.StartsWith("delete:"))
+        if (result.Data is string resultData && resultData.StartsWith("delete:"))
         {
-            var id = Guid.Parse(signal.Replace("delete:", ""));
-            await HandleDeleteIncome(id);
+            var idString = resultData["delete:".Length..];
+            if (Guid.TryParse(idString, out var incomeId))
+                await HandleDeleteIncome(incomeId);
             return;
         }
 
         var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
-            HouseholdState.CurrentUserHousehold!);
+             HouseholdState.CurrentUserHousehold!);
 
         currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
             ?? currentBudget;
@@ -506,10 +523,18 @@ else
 
     private async Task HandleDeleteIncome(Guid incomeId)
     {
+        Snackbar.Add($"Deleting income", Severity.Error);
+
         try
         {
             await IncomeService.DeleteAsync(incomeId);
-            currentBudget!.Incomes.RemoveAll(i => i.IncomeId == incomeId);
+
+            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+                HouseholdState.CurrentUserHousehold!);
+
+            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+                ?? currentBudget;
+
             Snackbar.Add("Income removed.", Severity.Success);
             StateHasChanged();
         }

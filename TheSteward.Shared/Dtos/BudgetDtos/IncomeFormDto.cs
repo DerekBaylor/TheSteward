@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
 namespace TheSteward.Core.Dtos.FinanceManagerDtos;
 
@@ -17,7 +18,10 @@ public class IncomeFormDto
 
     [Required(ErrorMessage = "Pay frequency is required.")]
     [Range(12, 52, ErrorMessage = "Select a valid pay frequency.")]
-    public int IncomeFrequency { get; set; } = 12;
+    public FrequencyEnum IncomeFrequency { get; set; } = FrequencyEnum.Monthly;
+
+    [Required(ErrorMessage = "Filing status is required.")]
+    public FilingStatusEnum FilingStatus { get; set; } = FilingStatusEnum.Single;
 
     [Required(ErrorMessage = "Gross per paycheck is required.")]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than $0.")]

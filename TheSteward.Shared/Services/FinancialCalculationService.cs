@@ -1,12 +1,96 @@
-﻿using TheSteward.Shared.Interfaces;
+﻿using TheSteward.Core.Dtos.FinanceManagerDtos;
+using TheSteward.Shared.Interfaces;
+using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
 namespace TheSteward.Shared.Services;
 
 public class FinancialCalculationService : IFinancialCalculationService
 {
+    private Dictionary<FilingStatusEnum, List<TaxBracket>> _brackets;
+    public FinancialCalculationService()
+    {
+        InitializeBrackets();
+    }
+    #region Tax Calculations
+    private void InitializeBrackets()
+    {
+        _brackets = new Dictionary<FilingStatusEnum, List<TaxBracket>>();
+
+        // 2026 Data
+        _brackets[FilingStatusEnum.Single] = new List<TaxBracket>
+        {
+            new TaxBracket { MinIncome = 0, MaxIncome = 12400, Rate = 0.10m },
+            new TaxBracket { MinIncome = 12401, MaxIncome = 50400, Rate = 0.12m },
+            new TaxBracket { MinIncome = 50401, MaxIncome = 105700, Rate = 0.22m },
+            new TaxBracket { MinIncome = 105701, MaxIncome = 201775, Rate = 0.24m },
+            new TaxBracket { MinIncome = 201776, MaxIncome = 256225, Rate = 0.32m },
+            new TaxBracket { MinIncome = 256226, MaxIncome = 640600, Rate = 0.35m },
+            new TaxBracket { MinIncome = 640601, MaxIncome = decimal.MaxValue, Rate = 0.37m }
+        };
+
+        _brackets[FilingStatusEnum.MarriedJointly] = new List<TaxBracket>
+        {
+            new TaxBracket { MinIncome = 0, MaxIncome = 24800, Rate = 0.10m },
+            new TaxBracket { MinIncome = 24801, MaxIncome = 100800, Rate = 0.12m },
+            new TaxBracket { MinIncome = 100801, MaxIncome = 211400, Rate = 0.22m },
+            new TaxBracket { MinIncome = 211401, MaxIncome = 403550, Rate = 0.24m },
+            new TaxBracket { MinIncome = 403551, MaxIncome = 512450, Rate = 0.32m },
+            new TaxBracket { MinIncome = 512451, MaxIncome = 768700, Rate = 0.35m },
+            new TaxBracket { MinIncome = 768701, MaxIncome = decimal.MaxValue, Rate = 0.37m }
+        };
+
+        // Head of Household and Married Separate share similar structure to Single, 
+        // with different thresholds
+        _brackets[FilingStatusEnum.HeadOfHousehold] = new List<TaxBracket>
+        {
+            new TaxBracket { MinIncome = 0, MaxIncome = 17700, Rate = 0.10m },
+            new TaxBracket { MinIncome = 17701, MaxIncome = 67450, Rate = 0.12m },
+            new TaxBracket { MinIncome = 67451, MaxIncome = 105700, Rate = 0.22m },
+            new TaxBracket { MinIncome = 105701, MaxIncome = 201775, Rate = 0.24m },
+            new TaxBracket { MinIncome = 201776, MaxIncome = 256200, Rate = 0.32m },
+            new TaxBracket { MinIncome = 256201, MaxIncome = 640600, Rate = 0.35m },
+            new TaxBracket { MinIncome = 640601, MaxIncome = decimal.MaxValue, Rate = 0.37m }
+        };
+
+        // Married Separate is same as Single except top brackets
+        _brackets[FilingStatusEnum.MarriedSeparately] = _brackets[FilingStatusEnum.Single]; // Simplified
+    }
+
+    public decimal CalculateTax(decimal taxableIncome, FilingStatusEnum filingStatus)
+    {
+        if (taxableIncome <= 0) return 0;
+
+        var statusBrackets = _brackets[filingStatus];
+        decimal totalTax = 0;
+        decimal remainingIncome = taxableIncome;
+        decimal previousMax = 0;
+
+        foreach (var bracket in statusBrackets)
+        {
+            if (taxableIncome > bracket.MinIncome)
+            {
+                decimal incomeInBracket = Math.Min(taxableIncome, bracket.MaxIncome) - previousMax;
+                if (incomeInBracket > 0)
+                {
+                    totalTax += incomeInBracket * bracket.Rate;
+                }
+                previousMax = bracket.MaxIncome;
+            }
+        }
+        return totalTax;
+    }
+
+    public decimal CalculateEstimatedFederalIncomeTaxForBudget(List<IncomeDto> incomes, FilingStatusEnum filingStatus)
+    {
+        //Get all budget incomes
+        //calculate federal tax rate 
+
+        return 0m; // Placeholder for actual tax calculation logic
+    }
+    #endregion Tax Calculations
 
     #region Investment Calculations
-    
+
     public decimal CalculateFutureValue(decimal p, decimal r, int n, decimal p0)
     {
         // Convert to double for Math.Pow, then back to decimal

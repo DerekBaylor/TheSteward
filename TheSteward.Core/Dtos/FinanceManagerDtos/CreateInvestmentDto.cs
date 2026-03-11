@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
 namespace TheSteward.Core.Dtos.FinanceManagerDtos;
 
@@ -26,7 +27,7 @@ public class CreateInvestmentDto
     /// </summary>
     [Required]
     [Column(TypeName = "decimal(18,2)")]
-    public int ContributionFrequency { get; set; }
+    public FrequencyEnum ContributionFrequency { get; set; }
 
     /// <summary>
     /// Calculated on the client during Create/Update

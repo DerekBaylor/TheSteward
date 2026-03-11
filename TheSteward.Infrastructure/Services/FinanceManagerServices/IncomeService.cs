@@ -36,6 +36,7 @@ public class IncomeService : IIncomeService
         CalculateIncomeValues(income);
 
         await _incomeRepository.AddAsync(income);
+        await _incomeRepository.SaveChangesAsync();
 
         return _mapper.Map<IncomeDto>(income);
     }
@@ -57,6 +58,7 @@ public class IncomeService : IIncomeService
         CalculateIncomeValues(income);
 
         await _incomeRepository.UpdateAsync(income);
+        await _incomeRepository.SaveChangesAsync();
 
         return incomeDto;
     }
@@ -71,6 +73,7 @@ public class IncomeService : IIncomeService
             throw new KeyNotFoundException($"Income with ID {incomeId} not found.");
 
         await _incomeRepository.DeleteAsync(income);
+        await _incomeRepository.SaveChangesAsync();
     }
 
     #region Get Methods
@@ -108,7 +111,7 @@ public class IncomeService : IIncomeService
     /// </summary>
     private static void CalculateIncomeValues(Income income)
     {
-        income.YearlyGrossSalary = income.PayCheckGross * income.IncomeFrequency;
+        income.YearlyGrossSalary = income.PayCheckGross * (decimal)(int)income.IncomeFrequency;
         income.EstFederalIncomeTax = CalculateFederalIncomeTax(income.YearlyGrossSalary);
         income.EstStateIncomeTax = CalculateStateIncomeTax(income.YearlyGrossSalary);
 

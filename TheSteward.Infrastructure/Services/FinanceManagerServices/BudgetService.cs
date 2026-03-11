@@ -6,6 +6,9 @@ using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
+using TheSteward.Core.Utils.FinanceManagerUtils;
+using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
+
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
@@ -307,7 +310,8 @@ public class BudgetService : IBudgetService
         {
             IncomeId = Guid.NewGuid(),
             IncomeName = "Primary Job",
-            IncomeFrequency = 26, // Bi-weekly
+            FilingStatus = FilingStatusEnum.Single,
+            IncomeFrequency = FrequencyEnum.BiWeekly,
             PayCheckGross = 2000m,
             YearlyGrossSalary = 52000m,
             EstFederalIncomeTax = 6240m,
@@ -417,7 +421,7 @@ public class BudgetService : IBudgetService
             CurrentValue = 1000m,
             EstMonthlyInterest = 16.66m,
             EstYearlyInterest = 199.90m,
-            PaymentFrequency = 12,
+            PaymentFrequency = FrequencyEnum.Monthly,
             PaymentAmount = 50m,
             PaymentDay = 15,
             DisplayOrder = 1,
@@ -449,7 +453,7 @@ public class BudgetService : IBudgetService
             CurrentValue = 5000m,
             InterestRate = 0.0425m,
             ContributionAmount = 250m,
-            ContributionFrequency = 12,
+            ContributionFrequency = FrequencyEnum.Monthly,
             EstYearlyGrowth = 2612.50m,
             DisplayOrder = 1,
             BudgetId = budgetId,

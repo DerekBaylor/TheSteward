@@ -4,24 +4,24 @@
 
 <MudCard id="incomeCard" class="ts-tabbed-card" Elevation="0">
 
+        <MudCardActions class="ts-tabbed-card-btn-container">
     @if (!IsReadOnly)
     {
-        <MudCardActions class="ts-tabbed-card-btn-container">
             <MudButton id="addIncomeBtn"
                        class="ts-card-tab-btn"
                        StartIcon="@Icons.Material.Filled.Add"
                        OnClick="HandleAddIncome">
                 Add Income
             </MudButton>
-            <MudButton id="editIncomeBtn"
+    }
+            <MudButton id="showIncomeDetails"
                        class="ts-card-tab-btn"
-                       StartIcon="@Icons.Material.Filled.Edit"
-                       OnClick="HandleEditIncome"
+                       StartIcon="@Icons.Material.Filled.FileOpen"
+                       OnClick="HandleShowIncomeDetails"
                        Disabled="!Incomes.Any()">
-                Edit Income
+                Income Details
             </MudButton>
         </MudCardActions>
-    }
 
     <MudCardContent class="ts-card-content">
 
@@ -119,6 +119,9 @@
     [Parameter]
     public EventCallback OnAddIncome { get; set; }
 
+    [Parameter]
+    public EventCallback OnOpenIncomeDetails { get; set; }
+
     /// <summary>Passes the currently selected income back so the parent can open an edit form.</summary>
     [Parameter]
     public EventCallback<IncomeDto> OnEditIncome { get; set; }
@@ -131,11 +134,10 @@
         await OnAddIncome.InvokeAsync();
     }
 
-    private async Task HandleEditIncome()
+    private async Task HandleShowIncomeDetails()
     {
-        var first = Incomes.FirstOrDefault();
-        if (first is not null)
-            await OnEditIncome.InvokeAsync(first);
+        //TODO: Add Detialed View of all Incomes
+        await OnOpenIncomeDetails.InvokeAsync();
     }
 
     private async Task HandleRowEdit(IncomeDto income)

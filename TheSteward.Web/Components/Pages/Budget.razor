@@ -254,7 +254,6 @@ else
                 });
             }
 
-            // Set as the user's default budget for this household
             await UserHouseholdService.SetDefaultBudgetAsync(userHousehold.UserHouseholdId, currentBudget!.BudgetId);
 
             hasBudget = true;
@@ -490,8 +489,6 @@ else
 
     private async Task HandleDeleteInvestment(Guid investmentId)
     {
-        Snackbar.Add("Deleting investment...", Severity.Warning);
-
         try
         {
             await InvestmentService.DeleteAsync(investmentId);

@@ -6,6 +6,7 @@
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 @using TheSteward.Core.IServices.FinanceManagerIServices
+@using TheSteward.Shared.Components.HouseholdComponents
 
 @inject HouseholdState HouseholdState
 @inject NavigationManager NavigationManager
@@ -454,7 +455,24 @@ else
 
     private async Task OpenIncomeDetails()
     {
-        Snackbar.Add("Income Details.", Severity.Success);
+        if (currentBudget == null) return;
+
+        var parameters = new DialogParameters
+    {
+        { "Incomes", currentBudget.Incomes }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<IncomeDetailsModal>(
+            "Income Details",
+            parameters,
+            options);
     }
 
     private async Task OpenEditIncomeModal(IncomeDto income)

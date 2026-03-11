@@ -16,14 +16,17 @@
 @import url("./styles/components/landingPage.css");
 @import url("./styles/components/dashboard.css");
 @import url("./styles/components/dashboardCalendar.css");
-@import url("./styles/components/householdCard.css");
-@import url("./styles/components/userHouseholdCard.css");
-@import url("./styles/components/userHouseholdFormModal.css");
-@import url("./styles/components/userProfileCard.css");
-@import url("./styles/components/inviteMemberModal.css");
-@import url("./styles/components/pendingInvitationCard.css");
-@import url("./styles/components/incomeCard.css");
-@import url("./styles/components/incomeModal.css");
+/* household */
+@import url("./styles/components/householdStyles/householdCard.css");
+@import url("./styles/components/householdStyles/userHouseholdCard.css");
+@import url("./styles/components/householdStyles/userHouseholdFormModal.css");
+@import url("./styles/components/householdStyles/userProfileCard.css");
+@import url("./styles/components/householdStyles/inviteMemberModal.css");
+@import url("./styles/components/householdStyles/pendingInvitationCard.css");
+/* budget */
+@import url("./styles/components/budgetStyles/incomeCard.css");
+@import url("./styles/components/budgetStyles/incomeModal.css");
+@import url("./styles/components/budgetStyles/incomeDetailsModal.css");
 
 :root {
     /* ----- */

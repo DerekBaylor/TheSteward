@@ -1,0 +1,186 @@
+﻿@namespace TheSteward.Shared.Components.FinanceComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+
+<MudDialog id="incomeDetailsModal" Class="income-details-modal">
+    <TitleContent>
+        <div class="income-modal-title">
+            <span class="material-icons income-modal-icon">summarize</span>
+            Income Details
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        @if (!Incomes.Any())
+        {
+            <div class="income-empty-state">
+                <span class="material-icons income-empty-icon">account_balance_wallet</span>
+                <p class="income-empty-text">No income sources to display.</p>
+            </div>
+        }
+        else
+        {
+            <div class="income-details-list">
+                @foreach (var income in Incomes.OrderBy(i => i.DisplayOrder))
+                {
+                    <div class="income-details-card">
+
+                        <!-- Card Header -->
+                        <div class="income-details-card-header">
+                            <div class="income-details-name-block">
+                                <span class="income-details-name">@income.IncomeName</span>
+                                <span class="income-details-badge">
+                                    @GetFrequencyLabel(income.IncomeFrequency)
+                                </span>
+                                <span class="income-details-badge income-details-badge--filing">
+                                    @GetFilingStatusLabel(income.FilingStatus)
+                                </span>
+                            </div>
+                            <div class="income-details-net-highlight">
+                                <span class="income-details-net-label">Monthly Net</span>
+                                <span class="income-details-net-value">
+                                    @income.MonthlyNetIncome.ToString("C")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Breakdown Grid -->
+                        <div class="income-details-breakdown">
+
+                            <div class="income-details-row">
+                                <span class="income-details-row-label">Pay Check Gross</span>
+                                <span class="income-details-row-value">
+                                    @income.PayCheckGross.ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="income-details-row">
+                                <span class="income-details-row-label">Yearly Gross</span>
+                                <span class="income-details-row-value">
+                                    @income.YearlyGrossSalary.ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="income-details-divider"></div>
+
+                            <div class="income-details-row income-details-row--deduction">
+                                <span class="income-details-row-label">
+                                    <span class="material-icons income-details-deduction-icon">remove_circle_outline</span>
+                                    Est. Federal Tax
+                                </span>
+                                <span class="income-details-row-value income-details-row-value--deduction">
+                                    -@income.EstFederalIncomeTax.ToString("C")
+                                </span>
+                            </div>
+
+                            @if (income.EstStateIncomeTax.HasValue && income.EstStateIncomeTax.Value > 0)
+                            {
+                                <div class="income-details-row income-details-row--deduction">
+                                    <span class="income-details-row-label">
+                                        <span class="material-icons income-details-deduction-icon">remove_circle_outline</span>
+                                        Est. State Tax
+                                    </span>
+                                    <span class="income-details-row-value income-details-row-value--deduction">
+                                        -@income.EstStateIncomeTax.Value.ToString("C")
+                                    </span>
+                                </div>
+                            }
+
+                            <div class="income-details-divider"></div>
+
+                            <div class="income-details-row income-details-row--net">
+                                <span class="income-details-row-label income-details-row-label--net">
+                                    Monthly Net Income
+                                </span>
+                                <span class="income-details-row-value income-details-row-value--net">
+                                    @income.MonthlyNetIncome.ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="income-details-row income-details-row--yearly-net">
+                                <span class="income-details-row-label">Yearly Net Income</span>
+                                <span class="income-details-row-value">
+                                    @((income.MonthlyNetIncome * 12).ToString("C"))
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+
+                <!-- Household Total Footer -->
+                @if (Incomes.Count > 1)
+                {
+                    <div class="income-details-totals">
+                        <div class="income-details-totals-header">Household Totals</div>
+                        <div class="income-details-totals-grid">
+                            <div class="income-details-totals-row">
+                                <span>Combined Yearly Gross</span>
+                                <span>@Incomes.Sum(i => i.YearlyGrossSalary).ToString("C")</span>
+                            </div>
+                            <div class="income-details-totals-row income-details-totals-row--deduction">
+                                <span>Total Est. Federal Tax</span>
+                                <span>-@Incomes.Sum(i => i.EstFederalIncomeTax).ToString("C")</span>
+                            </div>
+                            @if (Incomes.Any(i => i.EstStateIncomeTax.HasValue && i.EstStateIncomeTax.Value > 0))
+                            {
+                                <div class="income-details-totals-row income-details-totals-row--deduction">
+                                    <span>Total Est. State Tax</span>
+                                    <span>-@Incomes.Sum(i => i.EstStateIncomeTax ?? 0).ToString("C")</span>
+                                </div>
+                            }
+                            <div class="income-details-totals-row income-details-totals-row--net">
+                                <span>Combined Monthly Net</span>
+                                <span>@Incomes.Sum(i => i.MonthlyNetIncome).ToString("C")</span>
+                            </div>
+                            <div class="income-details-totals-row income-details-totals-row--net">
+                                <span>Combined Yearly Net</span>
+                                <span>@Incomes.Sum(i => i.MonthlyNetIncome * 12).ToString("C")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <p class="income-details-disclaimer">
+                    * Tax estimates are based on federal brackets with 0 allowances and do not account
+                    for deductions, credits, or withholding adjustments.
+                </p>
+            </div>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton class="ts-card-tab-btn income-modal-btn-cancel" OnClick="Close">
+            Close
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public List<IncomeDto> Incomes { get; set; } = new();
+
+    private void Close() => MudDialog.Cancel();
+
+    private static string GetFrequencyLabel(FrequencyEnum freq) => freq switch
+    {
+        FrequencyEnum.Weekly => "Weekly (52×)",
+        FrequencyEnum.BiWeekly => "Bi-Weekly (26×)",
+        FrequencyEnum.BiMonthly => "Bi-Monthly (24×)",
+        FrequencyEnum.Monthly => "Monthly (12×)",
+        _ => $"{(int)freq}× / yr"
+    };
+
+    private static string GetFilingStatusLabel(FilingStatusEnum status) => status switch
+    {
+        FilingStatusEnum.Single => "Single",
+        FilingStatusEnum.MarriedJointly => "Married Jointly",
+        FilingStatusEnum.MarriedSeparately => "Married Separately",
+        FilingStatusEnum.HeadOfHousehold => "Head of Household",
+        _ => status.ToString()
+    };
+}

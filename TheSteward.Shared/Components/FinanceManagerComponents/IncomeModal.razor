@@ -1,0 +1,130 @@
+﻿@namespace TheSteward.Shared.Components.FinanceComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.IServices.FinanceManagerIServices
+
+@inject IIncomeService IncomeService
+@inject ISnackbar Snackbar
+
+<MudDialog id="incomeModal">
+    <TitleContent>
+        <div class="income-modal-title">
+            <span class="material-icons income-modal-icon">
+                @(FormData.IsEditMode ? "edit" : "add_circle")
+            </span>
+            @(FormData.IsEditMode ? "Edit Income" : "Add Income")
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        <IncomeForm @ref="incomeForm"
+                    FormData="FormData"
+                    ExistingIncomeCount="ExistingIncomeCount"
+                    OnValidSubmit="HandleFormSubmit" />
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton id="incomeCancelBtn"
+                   class="ts-card-tab-btn income-modal-btn-cancel"
+                   OnClick="Cancel"
+                   Disabled="isSaving">
+            Cancel
+        </MudButton>
+
+        @if (FormData.IsEditMode)
+        {
+            <MudButton id="incomeDeleteBtn"
+                       class="ts-card-tab-btn income-modal-btn-delete"
+                       OnClick="ConfirmDelete"
+                       Disabled="isSaving">
+                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">delete</span>
+                Delete
+            </MudButton>
+        }
+
+        <MudButton id="incomeSaveBtn"
+                   class="ts-card-tab-btn income-modal-btn-save"
+                   OnClick="TriggerSubmit"
+                   Disabled="isSaving">
+            @if (isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @(FormData.IsEditMode ? "Save Changes" : "Add Income")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public IncomeFormDto FormData { get; set; } = null!;
+
+    [Parameter]
+    public int ExistingIncomeCount { get; set; } = 0;
+
+    private IncomeForm? incomeForm;
+    private bool isSaving = false;
+
+    private async Task TriggerSubmit()
+    {
+        if (incomeForm is not null)
+            await incomeForm.SubmitAsync();
+    }
+
+    private async Task HandleFormSubmit(IncomeFormDto formData)
+    {
+        isSaving = true;
+
+        try
+        {
+            if (formData.IsEditMode)
+            {
+                var updateDto = new UpdateIncomeDto
+                {
+                    IncomeId = formData.IncomeId!.Value,
+                    IncomeName = formData.IncomeName,
+                    IncomeFrequency = formData.IncomeFrequency,
+                    PayCheckGross = formData.PayCheckGross,
+                    DisplayOrder = formData.DisplayOrder
+                };
+
+                var updated = await IncomeService.UpdateAsync(updateDto);
+                Snackbar.Add("Income updated successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(updated));
+            }
+            else
+            {
+                var createDto = new CreateIncomeDto
+                {
+                    IncomeName = formData.IncomeName,
+                    IncomeFrequency = formData.IncomeFrequency,
+                    PayCheckGross = formData.PayCheckGross,
+                    BudgetId = formData.BudgetId,
+                    DisplayOrder = formData.DisplayOrder
+                };
+
+                var created = await IncomeService.AddAsync(createDto);
+                Snackbar.Add("Income added successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(created));
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving income: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void ConfirmDelete()
+    {
+        MudDialog.Close(DialogResult.Ok($"delete:{FormData.IncomeId}"));
+    }
+}

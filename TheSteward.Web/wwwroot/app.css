@@ -22,6 +22,8 @@
 @import url("./styles/components/userProfileCard.css");
 @import url("./styles/components/inviteMemberModal.css");
 @import url("./styles/components/pendingInvitationCard.css");
+@import url("./styles/components/incomeCard.css");
+@import url("./styles/components/incomeModal.css");
 
 :root {
     /* ----- */

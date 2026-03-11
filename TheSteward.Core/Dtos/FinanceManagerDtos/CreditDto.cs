@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
 namespace TheSteward.Core.Dtos.FinanceManagerDtos;
 
@@ -31,7 +32,7 @@ public class CreditDto
     /// <summary>
     /// Monthly = 12, Bi-Monthly = 24, Bi-Weekly = 26, Weekly = 52
     /// </summary>
-    public int PaymentFrequency { get; set; }
+    public FrequencyEnum PaymentFrequency { get; set; }
     
     public decimal PaymentAmount { get; set; }
 

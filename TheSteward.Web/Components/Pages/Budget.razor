@@ -1,6 +1,7 @@
 ﻿@page "/budget"
 
 @using Microsoft.AspNetCore.Authorization
+@using TheSteward.Infrastructure.Services.FinanceManagerServices
 @using TheSteward.Infrastructure.Services.HouseholdServices
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Core.Dtos.FinanceManagerDtos
@@ -9,8 +10,10 @@
 @inject HouseholdState HouseholdState
 @inject NavigationManager NavigationManager
 @inject IBudgetService BudgetService
+@inject IIncomeService IncomeService
 @inject IUserHouseholdService UserHouseholdService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 @attribute [Authorize]
 @implements IDisposable
@@ -46,6 +49,8 @@ else if (isLoading)
 }
 else if (!hasBudget)
 {
+
+
     <div class="d-flex flex-column align-center justify-center mt-8" style="gap: 1.5rem;">
         <MudIcon Icon="@Icons.Material.Outlined.AccountBalanceWallet" 
                  Style="font-size: 4rem; color: var(--mud-palette-text-secondary);" />
@@ -99,7 +104,16 @@ else if (!hasBudget)
 }
 else
 {
-    <div class="mt-4" style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <IncomeCard Incomes="currentBudget.Incomes"
+                IsReadOnly="!HouseholdState.HasFinanceWritePermission"
+                OnAddIncome="OpenAddIncomeModal"
+                OnOpenIncomeDetails="OpenIncomeDetails"
+                OnEditIncome="OpenEditIncomeModal"
+                OnDeleteIncome="(income) => HandleDeleteIncome(income.IncomeId)" />
+
+    <!-- Mock Display -->
+    #region mock-display
+@*     <div class="mt-4" style="display: flex; flex-direction: column; gap: 1.5rem;">
 
         <!-- Header -->
         <div class="d-flex align-center justify-space-between">
@@ -285,8 +299,9 @@ else
                 </MudCardContent>
             </MudCard>
         }
-
     </div>
+ *@
+    #endregion mock-display
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -303,6 +318,18 @@ else
     private BudgetDto? currentBudget;
     private Action? _stateChangeHandler;
 
+    // Investment
+    private Task OpenAddInvestmentModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditInvestmentModal(InvestmentDto investment) => Task.CompletedTask; // TODO: Implement
+
+    // Credit
+    private Task OpenAddCreditModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditCreditModal(CreditDto credit) => Task.CompletedTask; // TODO: Implement
+
+    // Expense
+    private Task OpenAddExpenseModal() => Task.CompletedTask; // TODO: Implement
+    private Task OpenEditExpenseModal(ExpenseDto expense) => Task.CompletedTask; // TODO: Implement
+
     protected override async Task OnInitializedAsync()
     {
         _stateChangeHandler = () => InvokeAsync(StateHasChanged);
@@ -310,7 +337,7 @@ else
 
         await LoadBudgetAsync();
     }
-
+    #region Budget
     private async Task LoadBudgetAsync()
     {
         var householdId = HouseholdState.CurrentHousehold?.HouseholdId;
@@ -410,6 +437,113 @@ else
         errorMessage = null;
         await LoadBudgetAsync();
     }
+    #endregion Budget
+
+    #region Income
+    private async Task OpenAddIncomeModal()
+    {
+        var formData = new IncomeFormDto
+        {
+            BudgetId = currentBudget!.BudgetId,
+            DisplayOrder = currentBudget.Incomes.Count
+            //TODO: Get filing status from other incomes else be single
+        };
+
+        await OpenIncomeModal(formData);
+    }
+
+    private async Task OpenIncomeDetails()
+    {
+        Snackbar.Add("Income Details.", Severity.Success);
+    }
+
+    private async Task OpenEditIncomeModal(IncomeDto income)
+    {
+        var formData = new IncomeFormDto
+        {
+            IncomeId = income.IncomeId,
+            IncomeName = income.IncomeName,
+            IncomeFrequency = income.IncomeFrequency,
+            FilingStatus = income.FilingStatus,
+            PayCheckGross = income.PayCheckGross,
+            DisplayOrder = income.DisplayOrder,
+            BudgetId = income.BudgetId
+        };
+
+        await OpenIncomeModal(formData);
+    }
+
+    private async Task OpenIncomeModal(IncomeFormDto formData)
+    {
+        var budgetIncomes = new List<IncomeDto>();
+
+        if (currentBudget != null)
+        {            
+            budgetIncomes = currentBudget.Incomes;
+        }
+
+        var parameters = new DialogParameters
+        {
+            { "FormData", formData },
+            { "ExistingIncomeCount", currentBudget!.Incomes.Count }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<IncomeModal>(
+            formData.IsEditMode ? "Edit Income" : "Add Income",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        if (result.Data is string resultData && resultData.StartsWith("delete:"))
+        {
+            var idString = resultData["delete:".Length..];
+            if (Guid.TryParse(idString, out var incomeId))
+                await HandleDeleteIncome(incomeId);
+            return;
+        }
+
+        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+             HouseholdState.CurrentUserHousehold!);
+
+        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+            ?? currentBudget;
+
+        StateHasChanged();
+    }
+
+    private async Task HandleDeleteIncome(Guid incomeId)
+    {
+        Snackbar.Add($"Deleting income", Severity.Error);
+
+        try
+        {
+            await IncomeService.DeleteAsync(incomeId);
+
+            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+                HouseholdState.CurrentUserHousehold!);
+
+            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+                ?? currentBudget;
+
+            Snackbar.Add("Income removed.", Severity.Success);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting income: {ex.Message}", Severity.Error);
+        }
+    }
+    #endregion Income
 
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

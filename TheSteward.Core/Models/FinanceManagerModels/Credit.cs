@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
 namespace TheSteward.Core.Models.FinanceManagerModels;
 
@@ -39,10 +40,20 @@ public class Credit
     public decimal EstYearlyInterest { get; set; }
 
     /// <summary>
-    /// Monthly = 12, Bi-Monthly = 24, Bi-Weekly = 26, Weekly = 52
+    /// Specifies how often the Credit is paid, used to calculate.
     /// </summary>
+    /// <remarks>
+    /// Maps to <see cref="FinanceManagerConstants.FrequencyEnum"/>:
+    /// <list type="bullet">
+    ///     <item><description><b>Monthly (12)</b> — Paid once per month</description></item>
+    ///     <item><description><b>BiMonthly (24)</b> — Paid twice per month</description></item>
+    ///     <item><description><b>BiWeekly (26)</b> — Paid every two weeks</description></item>
+    ///     <item><description><b>Weekly (52)</b> — Paid every week</description></item>
+    /// </list>
+    /// The numeric value represents the number of payment periods per year.
+    /// </remarks>
     [Required]
-    public int PaymentFrequency { get; set; }
+    public FrequencyEnum PaymentFrequency { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(18,2)")]

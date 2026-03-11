@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
 namespace TheSteward.Core.Dtos.FinanceManagerDtos;
 
@@ -19,7 +20,7 @@ public class InvestmentDto
     /// <summary>
     /// Monthly = 12, Bi-Monthly = 24, Bi-Weekly = 26, Weekly = 52
     /// </summary>
-    public int ContributionFrequency { get; set; }
+    public FrequencyEnum ContributionFrequency { get; set; }
 
     /// <summary>
     /// Estimated yearly growth calculated on the client during Create/Update

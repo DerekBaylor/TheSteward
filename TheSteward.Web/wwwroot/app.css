@@ -32,6 +32,8 @@
 @import url("./styles/components/budgetStyles/investmentModal.css");
 @import url("./styles/components/budgetStyles/investmentDetailsModal.css");
 @import url("./styles/components//budgetStyles/creditCard.css");
+@import url("./styles/components/budgetStyles/creditForm.css");
+@import url("./styles/components/budgetStyles/creditDetailsModal.css");
 @import url("./styles/components/budgetStyles/expenseCard.css");
 
 :root {

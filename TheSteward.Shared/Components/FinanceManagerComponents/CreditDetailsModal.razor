@@ -1,0 +1,164 @@
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+
+<MudDialog id="creditDetailsModal" Class="credit-details-modal">
+    <TitleContent>
+        <div class="credit-modal-title">
+            <span class="material-icons credit-modal-icon">summarize</span>
+            Credit &amp; Debt Details
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        @if (!Credits.Any())
+        {
+            <div class="credit-empty-state">
+                <span class="material-icons credit-empty-icon">credit_card_off</span>
+                <p class="credit-empty-text">No credit or debt accounts to display.</p>
+            </div>
+        }
+        else
+        {
+            <div class="credit-details-list">
+                @foreach (var credit in Credits.OrderBy(c => c.DisplayOrder))
+                {
+                    <div class="credit-details-card">
+
+                        <!-- Card Header -->
+                        <div class="credit-details-card-header">
+                            <div class="credit-details-name-block">
+                                <span class="credit-details-name">@credit.CreditName</span>
+                                @if (!string.IsNullOrEmpty(credit.CreditType))
+                                {
+                                    <span class="credit-details-badge">@credit.CreditType</span>
+                                }
+                            </div>
+                            <div class="credit-details-rate-highlight">
+                                <span class="credit-details-rate-label">APR</span>
+                                <span class="credit-details-rate-value">
+                                    @((credit.InterestRate * 100).ToString("F2"))%
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Breakdown -->
+                        <div class="credit-details-breakdown">
+
+                            <div class="credit-details-row">
+                                <span class="credit-details-row-label">Current Balance</span>
+                                <span class="credit-details-row-value">@credit.CurrentValue.ToString("C")</span>
+                            </div>
+
+                            <div class="credit-details-divider"></div>
+
+                            <div class="credit-details-row credit-details-row--interest">
+                                <span class="credit-details-row-label">
+                                    <span class="material-icons credit-details-interest-icon">percent</span>
+                                    Est. Monthly Interest
+                                </span>
+                                <span class="credit-details-row-value credit-details-row-value--interest">
+                                    @credit.EstMonthlyInterest.ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="credit-details-row credit-details-row--interest">
+                                <span class="credit-details-row-label">Est. Yearly Interest</span>
+                                <span class="credit-details-row-value credit-details-row-value--interest">
+                                    @credit.EstYearlyInterest.ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="credit-details-divider"></div>
+
+                            <div class="credit-details-row">
+                                <span class="credit-details-row-label">Payment per Period</span>
+                                <span class="credit-details-row-value">
+                                    @credit.PaymentAmount.ToString("C")
+                                    <span class="credit-details-freq">@GetFrequencyLabel(credit.PaymentFrequency)</span>
+                                </span>
+                            </div>
+
+                            <div class="credit-details-row credit-details-row--net">
+                                <span class="credit-details-row-label credit-details-row-label--net">
+                                    Yearly Payments
+                                </span>
+                                <span class="credit-details-row-value credit-details-row-value--net">
+                                    @GetYearlyPayments(credit).ToString("C")
+                                </span>
+                            </div>
+
+                            <div class="credit-details-row">
+                                <span class="credit-details-row-label">Payment Due</span>
+                                <span class="credit-details-row-value">
+                                    @(credit.PaymentDay == 31 ? "Last day of month" : $"Day {credit.PaymentDay}")
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+
+                <!-- Portfolio Totals -->
+                @if (Credits.Count > 1)
+                {
+                    <div class="credit-details-totals">
+                        <div class="credit-details-totals-header">Debt Totals</div>
+                        <div class="credit-details-totals-grid">
+                            <div class="credit-details-totals-row">
+                                <span>Total Balance</span>
+                                <span>@Credits.Sum(c => c.CurrentValue).ToString("C")</span>
+                            </div>
+                            <div class="credit-details-totals-row credit-details-totals-row--interest">
+                                <span>Total Monthly Interest</span>
+                                <span>@Credits.Sum(c => c.EstMonthlyInterest).ToString("C")</span>
+                            </div>
+                            <div class="credit-details-totals-row credit-details-totals-row--interest">
+                                <span>Total Yearly Interest</span>
+                                <span>@Credits.Sum(c => c.EstYearlyInterest).ToString("C")</span>
+                            </div>
+                            <div class="credit-details-totals-row credit-details-totals-row--net">
+                                <span>Total Yearly Payments</span>
+                                <span>@Credits.Sum(c => GetYearlyPayments(c)).ToString("C")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <p class="credit-details-disclaimer">
+                    * Interest estimates assume a constant rate on the current balance and do not
+                    account for paydown, compounding, or minimum payment changes over time.
+                </p>
+            </div>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton class="ts-card-tab-btn credit-modal-btn-cancel" OnClick="Close">
+            Close
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public List<CreditDto> Credits { get; set; } = new();
+
+    private void Close() => MudDialog.Cancel();
+
+    private static decimal GetYearlyPayments(CreditDto credit) =>
+        Math.Round(credit.PaymentAmount * (decimal)(int)credit.PaymentFrequency, 2);
+
+    private static string GetFrequencyLabel(FrequencyEnum freq) => freq switch
+    {
+        FrequencyEnum.Weekly => "weekly",
+        FrequencyEnum.BiWeekly => "bi-weekly",
+        FrequencyEnum.BiMonthly => "bi-monthly",
+        FrequencyEnum.Monthly => "monthly",
+        _ => $"×{(int)freq}/yr"
+    };
+}

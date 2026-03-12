@@ -1,0 +1,177 @@
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.IServices.FinanceManagerIServices
+@using TheSteward.Shared.Dtos.BudgetDtos
+
+@inject ICreditService CreditService
+@inject IBudgetCategoryService BudgetCategoryService
+@inject ISnackbar Snackbar
+
+<MudDialog id="creditModal">
+    <TitleContent>
+        <div class="credit-modal-title">
+            <span class="material-icons credit-modal-icon">
+                @(FormData.IsEditMode ? "edit" : "add_card")
+            </span>
+            @(FormData.IsEditMode ? "Edit Credit / Debt" : "Add Credit / Debt")
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        @if (isLoadingCategories)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Warning" Class="mb-2" />
+        }
+        <CreditForm @ref="creditForm"
+                    FormData="FormData"
+                    ExistingCreditCount="ExistingCreditCount"
+                    Categories="categories"
+                    OnValidSubmit="HandleFormSubmit" />
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton id="creditCancelBtn"
+                   class="ts-card-tab-btn credit-modal-btn-cancel"
+                   OnClick="Cancel"
+                   Disabled="isSaving">
+            Cancel
+        </MudButton>
+
+        @if (FormData.IsEditMode)
+        {
+            <MudButton id="creditDeleteBtn"
+                       class="ts-card-tab-btn credit-modal-btn-delete"
+                       OnClick="ConfirmDelete"
+                       Disabled="isSaving">
+                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">delete</span>
+                Delete
+            </MudButton>
+        }
+
+        <MudButton id="creditSaveBtn"
+                   class="ts-card-tab-btn credit-modal-btn-save"
+                   OnClick="TriggerSubmit"
+                   Disabled="isSaving">
+            @if (isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @(FormData.IsEditMode ? "Save Changes" : "Add Credit")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public CreditFormDto FormData { get; set; } = null!;
+
+    [Parameter]
+    public int ExistingCreditCount { get; set; } = 0;
+
+    private CreditForm? creditForm;
+    private bool isSaving = false;
+    private bool isLoadingCategories = true;
+    private List<BudgetCategoryDto> categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Pre-load budget categories so the form can offer a picker.
+        try
+        {
+            categories = await BudgetCategoryService.GetAllByBudgetIdAsync(FormData.BudgetId);
+        }
+        catch
+        {
+            // Non-fatal: the form will fall back to a text field.
+        }
+        finally
+        {
+            isLoadingCategories = false;
+        }
+    }
+
+    private async Task TriggerSubmit()
+    {
+        if (creditForm is not null)
+            await creditForm.SubmitAsync();
+    }
+
+    private async Task HandleFormSubmit(CreditFormDto formData)
+    {
+        isSaving = true;
+
+        try
+        {
+            if (formData.IsEditMode)
+            {
+                var updateDto = new UpdateCreditDto
+                {
+                    CreditId = formData.CreditId!.Value,
+                    CreditName = formData.CreditName,
+                    CreditType = formData.CreditType,
+                    InterestRate = formData.InterestRate,
+                    CurrentValue = formData.CurrentValue,
+                    EstMonthlyInterest = formData.EstMonthlyInterest,
+                    EstYearlyInterest = formData.EstYearlyInterest,
+                    PaymentFrequency = formData.PaymentFrequency,
+                    PaymentAmount = formData.PaymentAmount,
+                    PaymentDay = formData.PaymentDay,
+                    DisplayOrder = formData.DisplayOrder,
+                    ExpenseId = formData.ExpenseId,
+                    BudgetCategoryName = formData.BudgetCategoryName,
+                    BudgetCategoryId = formData.BudgetCategoryId,
+                    BudgetSubCategoryId = formData.BudgetSubCategoryId
+                };
+
+                var updated = await CreditService.UpdateAsync(updateDto);
+                Snackbar.Add("Credit updated successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(updated));
+            }
+            else
+            {
+                var createDto = new CreateCreditDto
+                {
+                    CreditName = formData.CreditName,
+                    CreditType = formData.CreditType,
+                    InterestRate = formData.InterestRate,
+                    CurrentValue = formData.CurrentValue,
+                    EstMonthlyInterest = formData.EstMonthlyInterest,
+                    EstYearlyInterest = formData.EstYearlyInterest,
+                    PaymentFrequency = formData.PaymentFrequency,
+                    PaymentAmount = formData.PaymentAmount,
+                    PaymentDay = formData.PaymentDay,
+                    DisplayOrder = formData.DisplayOrder,
+                    BudgetId = formData.BudgetId,
+                    BudgetCategoryId = formData.BudgetCategoryId,
+                    BudgetCategoryName = formData.BudgetCategoryName,
+                    BudgetSubCategoryId = formData.BudgetSubCategoryId,
+                    BudgetSubCategoryName = formData.BudgetSubCategoryName
+                };
+
+                var created = await CreditService.AddAsync(createDto);
+                Snackbar.Add("Credit added successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(created));
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving credit: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void ConfirmDelete()
+    {
+        // Pass the delete signal back to the parent page, same pattern as InvestmentModal.
+        MudDialog.Close(DialogResult.Ok($"delete:{FormData.CreditId}"));
+    }
+}

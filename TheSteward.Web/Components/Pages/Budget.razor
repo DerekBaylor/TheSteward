@@ -15,6 +15,7 @@
 @inject IBudgetService BudgetService
 @inject IIncomeService IncomeService
 @inject IInvestmentService InvestmentService
+@inject ICreditService CreditService
 @inject IUserHouseholdService UserHouseholdService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -511,29 +512,125 @@ else
     #endregion Investment
 
     #region Credit
-    private Task OpenAddCreditModal()
+
+    private async Task OpenAddCreditModal()
     {
-        Snackbar.Add("Add Credit — coming soon.", Severity.Info);
-        return Task.CompletedTask;
+        var formData = new CreditFormDto
+        {
+            BudgetId = currentBudget!.BudgetId,
+            DisplayOrder = currentBudget.Credits.Count,
+            BudgetCategoryName = "Debt & Credit"
+        };
+
+        await OpenCreditModal(formData);
     }
 
-    private Task OpenCreditDetails()
+    private async Task OpenCreditDetails()
     {
-        Snackbar.Add("Credit Details — coming soon.", Severity.Info);
-        return Task.CompletedTask;
+        if (currentBudget == null) return;
+
+        var parameters = new DialogParameters
+        {
+            { "Credits", currentBudget.Credits }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<CreditDetailsModal>(
+            "Credit & Debt Details",
+            parameters,
+            options);
     }
 
-    private Task OpenEditCreditModal(CreditDto credit)
+    private async Task OpenEditCreditModal(CreditDto credit)
     {
-        Snackbar.Add($"Edit Credit: {credit.CreditName} — coming soon.", Severity.Info);
-        return Task.CompletedTask;
+        var formData = new CreditFormDto
+        {
+            CreditId = credit.CreditId,
+            CreditName = credit.CreditName,
+            CreditType = credit.CreditType,
+            InterestRate = credit.InterestRate,
+            CurrentValue = credit.CurrentValue,
+            PaymentAmount = credit.PaymentAmount,
+            PaymentFrequency = credit.PaymentFrequency,
+            PaymentDay = credit.PaymentDay,
+            EstMonthlyInterest = credit.EstMonthlyInterest,
+            EstYearlyInterest = credit.EstYearlyInterest,
+            DisplayOrder = credit.DisplayOrder,
+            BudgetId = credit.BudgetId,
+            ExpenseId = credit.ExpenseId
+        };
+
+        await OpenCreditModal(formData);
     }
 
-    private Task HandleDeleteCredit(Guid creditId)
+    private async Task OpenCreditModal(CreditFormDto formData)
     {
-        Snackbar.Add($"Delete Credit — coming soon.", Severity.Info);
-        return Task.CompletedTask;
+        var parameters = new DialogParameters
+        {
+            { "FormData", formData },
+            { "ExistingCreditCount", currentBudget!.Credits.Count }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<CreditModal>(
+            formData.IsEditMode ? "Edit Credit" : "Add Credit",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        if (result.Data is string resultData && resultData.StartsWith("delete:"))
+        {
+            var idString = resultData["delete:".Length..];
+            if (Guid.TryParse(idString, out var creditId))
+                await HandleDeleteCredit(creditId);
+            return;
+        }
+
+        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+            HouseholdState.CurrentUserHousehold!);
+
+        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+            ?? currentBudget;
+
+        StateHasChanged();
     }
+
+    private async Task HandleDeleteCredit(Guid creditId)
+    {
+        try
+        {
+            await CreditService.DeleteAsync(creditId);
+
+            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+                HouseholdState.CurrentUserHousehold!);
+
+            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+                ?? currentBudget;
+
+            Snackbar.Add("Credit and linked expense removed.", Severity.Success);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting credit: {ex.Message}", Severity.Error);
+        }
+    }
+
     #endregion Credit
 
     #region Expense

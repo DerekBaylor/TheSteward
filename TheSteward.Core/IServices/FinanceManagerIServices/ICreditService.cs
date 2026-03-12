@@ -6,66 +6,66 @@ namespace TheSteward.Core.IServices.FinanceManagerIServices;
 public interface ICreditService
 {
     /// <summary>
-    /// Asynchronously creates a new credit entry.
+    /// Creates a new credit account, resolves or creates the associated budget category and
+    /// optional subcategory, and generates a linked expense to represent the recurring payment
+    /// within the budget.
     /// </summary>
-    /// <param name="creditDto">The credit data for creation.</param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains the created credit as <see cref="CreditDto"/>.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="creditDto"/> is null.</exception>
     /// <remarks>
-    /// Interest calculations (EstMonthlyInterest and EstYearlyInterest) should be performed on the frontend
-    /// before calling this method.
+    /// The linked expense is created with the same name, payment amount, and due day as the
+    /// credit. After the expense is persisted, its ID is stamped back onto the credit record so
+    /// the two remain associated. If <see cref="CreateCreditDto.BudgetCategoryId"/> is supplied
+    /// it is used directly; otherwise the service will get-or-create a category by
+    /// <see cref="CreateCreditDto.BudgetCategoryName"/>, defaulting to <c>"Debt &amp; Credit"</c>
+    /// when neither is provided. The same get-or-create logic applies to the optional subcategory.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var createDto = new CreateCreditDto
-    /// {
-    ///     CreditName = "Chase Sapphire",
-    ///     CreditType = "Credit Card",
-    ///     InterestRate = 0.1999m, // 19.99%
-    ///     CurrentValue = 5000m,
-    ///     EstMonthlyInterest = 83.29m, // Calculated on frontend
-    ///     EstYearlyInterest = 999.50m, // Calculated on frontend
-    ///     PaymentFrequency = 12, // Monthly
-    ///     PaymentAmount = 150m,
-    ///     PaymentDay = 15,
-    ///     BudgetId = budgetId
-    /// };
-    /// var credit = await creditService.AddAsync(createDto);
-    /// </code>
-    /// </example>
+    /// <param name="dto">The data required to create the credit.</param>
+    /// <returns>A <see cref="CreditDto"/> representing the newly created credit.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="dto"/> is null.</exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when a <see cref="CreateCreditDto.BudgetCategoryId"/> or
+    /// <see cref="CreateCreditDto.BudgetSubCategoryId"/> is supplied but cannot be found.
+    /// </exception>
     Task<CreditDto> AddAsync(CreateCreditDto creditDto);
 
     /// <summary>
-    /// Asynchronously updates an existing credit entry.
+    /// Updates an existing credit account and synchronises all changes to its linked expense.
     /// </summary>
-    /// <param name="creditDto">The credit data with updated values.</param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains the updated credit as <see cref="UpdateCreditDto"/>.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="creditDto"/> is null.</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when the credit with the specified ID is not found.</exception>
     /// <remarks>
-    /// Interest calculations (EstMonthlyInterest and EstYearlyInterest) should be performed on the frontend
-    /// before calling this method.
+    /// <para>
+    /// The following fields are always written through to the linked expense when a valid
+    /// <see cref="UpdateCreditDto.ExpenseId"/> is present on the credit record:
+    /// <list type="bullet">
+    ///   <item><description>
+    ///     <b>Amount due</b> — kept in sync with <see cref="UpdateCreditDto.PaymentAmount"/>.
+    ///   </description></item>
+    ///   <item><description>
+    ///     <b>Due day</b> — kept in sync with <see cref="UpdateCreditDto.PaymentDay"/>.
+    ///   </description></item>
+    ///   <item><description>
+    ///     <b>Budget category</b> — resolved via <see cref="UpdateCreditDto.BudgetCategoryId"/>
+    ///     when supplied, otherwise gets-or-creates by <see cref="UpdateCreditDto.BudgetCategoryName"/>.
+    ///   </description></item>
+    ///   <item><description>
+    ///     <b>Budget subcategory</b> — resolved via <see cref="UpdateCreditDto.BudgetSubCategoryId"/>
+    ///     when supplied, gets-or-creates by <see cref="UpdateCreditDto.BudgetSubCategoryName"/>
+    ///     when a name is given, or cleared when both are null.
+    ///   </description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// If the credit has no linked expense the expense update step is skipped and only
+    /// the credit itself is saved.
+    /// </para>
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var updateDto = new UpdateCreditDto
-    /// {
-    ///     CreditId = creditId,
-    ///     CreditName = "Chase Sapphire Reserve",
-    ///     InterestRate = 0.2199m, // Rate increased
-    ///     CurrentValue = 4500m, // Balance decreased
-    ///     EstMonthlyInterest = 82.46m, // Recalculated on frontend
-    ///     EstYearlyInterest = 989.55m, // Recalculated on frontend
-    ///     PaymentAmount = 200m, // Increased payment
-    ///     // ... other fields
-    /// };
-    /// var updated = await creditService.UpdateAsync(updateDto);
-    /// </code>
-    /// </example>
+    /// <param name="dto">
+    /// The updated credit data. Must include a valid <see cref="UpdateCreditDto.CreditId"/>.
+    /// </param>
+    /// <returns>The same <paramref name="dto"/> passed in, after a successful update.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="dto"/> is null.</exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when no credit exists with <see cref="UpdateCreditDto.CreditId"/>, or when a
+    /// linked expense ID is recorded on the credit but that expense cannot be found.
+    /// </exception>
     Task<UpdateCreditDto> UpdateAsync(UpdateCreditDto creditDto);
 
     /// <summary>
@@ -79,11 +79,6 @@ public interface ICreditService
     /// This performs a hard delete, permanently removing the credit from the database.
     /// Consider the impact on linked expenses before deleting.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// await creditService.DeleteAsync(creditId);
-    /// </code>
-    /// </example>
     Task DeleteAsync(Guid creditId);
 
     /// <summary>
@@ -95,15 +90,6 @@ public interface ICreditService
     /// or null if not found.
     /// </returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="creditId"/> is empty.</exception>
-    /// <example>
-    /// <code>
-    /// var credit = await creditService.GetAsync(creditId);
-    /// if (credit == null)
-    /// {
-    ///     Console.WriteLine("Credit not found");
-    /// }
-    /// </code>
-    /// </example>
     Task<CreditDto?> GetAsync(Guid creditId);
 
     /// <summary>
@@ -118,15 +104,6 @@ public interface ICreditService
     /// <remarks>
     /// This method eagerly loads the linked expense information if it exists.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var credit = await creditService.GetWithExpenseAsync(creditId);
-    /// if (credit?.LinkedExpense != null)
-    /// {
-    ///     Console.WriteLine($"Linked to expense: {credit.LinkedExpense.ExpenseName}");
-    /// }
-    /// </code>
-    /// </example>
     Task<CreditDto?> GetWithExpenseAsync(Guid creditId);
 
     /// <summary>
@@ -142,13 +119,6 @@ public interface ICreditService
     /// Returns an empty list if no credits are found for the specified budget.
     /// Results are ordered by DisplayOrder in ascending order.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var credits = await creditService.GetAllByBudgetIdAsync(budgetId);
-    /// var totalDebt = credits.Sum(c => c.CurrentValue);
-    /// var totalMonthlyInterest = credits.Sum(c => c.EstMonthlyInterest);
-    /// </code>
-    /// </example>
     Task<List<CreditDto>> GetAllByBudgetIdAsync(Guid budgetId);
 
     /// <summary>
@@ -160,17 +130,5 @@ public interface ICreditService
     /// with their linked expenses, ordered by DisplayOrder.
     /// </returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="budgetId"/> is empty.</exception>
-    /// <example>
-    /// <code>
-    /// var credits = await creditService.GetAllByBudgetIdWithExpensesAsync(budgetId);
-    /// foreach (var credit in credits)
-    /// {
-    ///     if (credit.LinkedExpense != null)
-    ///     {
-    ///         Console.WriteLine($"{credit.CreditName} → {credit.LinkedExpense.ExpenseName}");
-    ///     }
-    /// }
-    /// </code>
-    /// </example>
     Task<List<CreditDto>> GetAllByBudgetIdWithExpensesAsync(Guid budgetId);
 }

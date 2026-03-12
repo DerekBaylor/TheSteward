@@ -1,0 +1,288 @@
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.IServices.FinanceManagerIServices
+@using TheSteward.Shared.Dtos.BudgetDtos
+@using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+
+@inject IBudgetCategoryService BudgetCategoryService
+
+<EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="credit-form">
+
+        <!-- Name -->
+        <div class="credit-form-field">
+            <MudTextField @bind-Value="FormData.CreditName"
+                          Label="Account Name"
+                          Placeholder="e.g. Chase Sapphire, Car Loan, Student Loan"
+                          Variant="Variant.Outlined"
+                          MaxLength="200"
+                          For="@(() => FormData.CreditName)" />
+        </div>
+
+        <!-- Type -->
+        <div class="credit-form-field">
+            <MudSelect T="string"
+                       @bind-Value="FormData.CreditType"
+                       Label="Account Type"
+                       Variant="Variant.Outlined"
+                       HelperText="Helps categorize the debt."
+                       Clearable="true">
+                @foreach (var t in CreditTypeOptions)
+                {
+                    <MudSelectItem T="string" Value="@t">@t</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+
+        <!-- Current Balance -->
+        <div class="credit-form-field">
+            <MudNumericField @bind-Value="FormData.CurrentValue"
+                             Label="Current Balance"
+                             Variant="Variant.Outlined"
+                             Format="C2"
+                             HelperText="The outstanding balance on this account."
+                             Min="0m"
+                             For="@(() => FormData.CurrentValue)"
+                             @bind-Value:after="UpdatePreview" />
+        </div>
+
+        <!-- APR -->
+        <div class="credit-form-field">
+            <MudNumericField @bind-Value="interestRatePercent"
+                             Label="Annual Interest Rate / APR (%)"
+                             Variant="Variant.Outlined"
+                             Format="F2"
+                             HelperText="Annual percentage rate (e.g. 19.99 for 19.99%)."
+                             Min="0m"
+                             Max="100m"
+                             @bind-Value:after="OnInterestRateChanged" />
+        </div>
+
+        <!-- Payment Amount -->
+        <div class="credit-form-field">
+            <MudNumericField @bind-Value="FormData.PaymentAmount"
+                             Label="Payment Amount"
+                             Variant="Variant.Outlined"
+                             Format="C2"
+                             HelperText="Your scheduled payment per period."
+                             Min="0m"
+                             For="@(() => FormData.PaymentAmount)"
+                             @bind-Value:after="UpdatePreview" />
+        </div>
+
+        <!-- Payment Frequency -->
+        <div class="credit-form-field">
+            <MudSelect T="FrequencyEnum"
+                       @bind-Value="FormData.PaymentFrequency"
+                       Label="Payment Frequency"
+                       Variant="Variant.Outlined"
+                       For="@(() => FormData.PaymentFrequency)"
+                       @bind-Value:after="UpdatePreview">
+                @foreach (var freq in FrequencyOptions)
+                {
+                    <MudSelectItem T="FrequencyEnum" Value="@freq.Value">@freq.Label</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+
+        <!-- Payment Due Day -->
+        <div class="credit-form-field">
+            <MudNumericField @bind-Value="FormData.PaymentDay"
+                             Label="Payment Due Day"
+                             Variant="Variant.Outlined"
+                             HelperText="Day of the month your payment is due (1–31). Use 31 for 'last day'."
+                             Min="1"
+                             Max="31"
+                             For="@(() => FormData.PaymentDay)" />
+        </div>
+
+        <!-- Budget Category -->
+        <div class="credit-form-field">
+            @if (availableCategories.Any())
+            {
+                <MudSelect T="Guid?"
+                           @bind-Value="FormData.BudgetCategoryId"
+                           Label="Expense Category"
+                           Variant="Variant.Outlined"
+                           HelperText="The budget category the linked expense will appear under."
+                           Clearable="true"
+                           @bind-Value:after="OnCategoryChanged">
+                    @foreach (var cat in availableCategories)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)cat.BudgetCategoryId)">
+                            @cat.BudgetCategoryName
+                        </MudSelectItem>
+                    }
+                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">+ New: "@FormData.BudgetCategoryName"</MudSelectItem>
+                </MudSelect>
+            }
+            else
+            {
+                <MudTextField @bind-Value="FormData.BudgetCategoryName"
+                              Label="Expense Category"
+                              Variant="Variant.Outlined"
+                              HelperText="A new category will be created with this name." />
+            }
+        </div>
+
+        <!-- Sub-Category (optional) -->
+        @if (availableSubCategories.Any())
+        {
+            <div class="credit-form-field">
+                <MudSelect T="Guid?"
+                           @bind-Value="FormData.BudgetSubCategoryId"
+                           Label="Subcategory (optional)"
+                           Variant="Variant.Outlined"
+                           Clearable="true">
+                    @foreach (var sub in availableSubCategories)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)sub.BudgetSubCategoryId)">
+                            @sub.BudgetSubCategoryName
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+        }
+
+        <!-- Live Preview -->
+        <div class="credit-preview credit-preview--visible">
+            <p class="credit-preview-title">Interest Summary</p>
+            <div class="credit-preview-grid">
+                <span class="credit-preview-label">Est. Monthly Interest</span>
+                <span class="credit-preview-value credit-preview-interest">@estMonthlyInterest.ToString("C")</span>
+
+                <span class="credit-preview-label">Est. Yearly Interest</span>
+                <span class="credit-preview-value credit-preview-interest">@estYearlyInterest.ToString("C")</span>
+
+                <span class="credit-preview-label credit-preview-net-label">Yearly Payments</span>
+                <span class="credit-preview-value credit-preview-net-value">@yearlyPayments.ToString("C")</span>
+            </div>
+            <p class="credit-preview-disclaimer">
+                Interest estimates assume a constant rate on the current balance and do not account for paydown.
+            </p>
+        </div>
+
+        <ValidationSummary />
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public CreditFormDto FormData { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<CreditFormDto> OnValidSubmit { get; set; }
+
+    [Parameter]
+    public int ExistingCreditCount { get; set; } = 0;
+
+    /// <summary>
+    /// Pre-loaded categories so the user can pick one without an extra round-trip.
+    /// Injected by the parent modal.
+    /// </summary>
+    [Parameter]
+    public List<BudgetCategoryDto> Categories { get; set; } = new();
+
+    private EditContext editContext = null!;
+    private decimal interestRatePercent = 0m;
+
+    // Preview values
+    private decimal estMonthlyInterest = 0m;
+    private decimal estYearlyInterest = 0m;
+    private decimal yearlyPayments = 0m;
+
+    private List<BudgetCategoryDto> availableCategories = new();
+    private List<BudgetSubCategoryDto> availableSubCategories = new();
+
+    private static readonly List<string> CreditTypeOptions = new()
+    {
+        "Credit Card",
+        "Auto Loan",
+        "Student Loan",
+        "Personal Loan",
+        "Mortgage",
+        "Home Equity",
+        "Medical Debt",
+        "Other"
+    };
+
+    private static readonly List<(string Label, FrequencyEnum Value)> FrequencyOptions = new()
+    {
+        ("Monthly (12×/year)",    FrequencyEnum.Monthly),
+        ("Bi-Monthly (24×/year)", FrequencyEnum.BiMonthly),
+        ("Bi-Weekly (26×/year)",  FrequencyEnum.BiWeekly),
+        ("Weekly (52×/year)",     FrequencyEnum.Weekly),
+    };
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(FormData);
+        interestRatePercent = Math.Round(FormData.InterestRate * 100m, 4);
+
+        if (!FormData.IsEditMode)
+            FormData.DisplayOrder = ExistingCreditCount;
+
+        availableCategories = Categories;
+        RefreshSubCategories();
+        UpdatePreview();
+    }
+
+    private void OnInterestRateChanged()
+    {
+        interestRatePercent = Math.Clamp(interestRatePercent, 0m, 100m);
+        FormData.InterestRate = Math.Round(interestRatePercent / 100m, 6);
+        UpdatePreview();
+    }
+
+    private void OnCategoryChanged()
+    {
+        RefreshSubCategories();
+
+        // If they picked an existing category, clear any typed new-name
+        if (FormData.BudgetCategoryId.HasValue)
+        {
+            var match = availableCategories.FirstOrDefault(c => c.BudgetCategoryId == FormData.BudgetCategoryId);
+            if (match != null)
+                FormData.BudgetCategoryName = match.BudgetCategoryName;
+        }
+    }
+
+    private void RefreshSubCategories()
+    {
+        if (FormData.BudgetCategoryId.HasValue)
+        {
+            var cat = availableCategories.FirstOrDefault(c => c.BudgetCategoryId == FormData.BudgetCategoryId);
+            availableSubCategories = cat?.BudgetSubCategories ?? new();
+        }
+        else
+        {
+            availableSubCategories = new();
+            FormData.BudgetSubCategoryId = null;
+        }
+    }
+
+    private void UpdatePreview()
+    {
+        estMonthlyInterest = Math.Round(FormData.CurrentValue * (FormData.InterestRate / 12m), 2);
+        estYearlyInterest = Math.Round(FormData.CurrentValue * FormData.InterestRate, 2);
+        yearlyPayments = Math.Round(FormData.PaymentAmount * (decimal)(int)FormData.PaymentFrequency, 2);
+
+        FormData.EstMonthlyInterest = estMonthlyInterest;
+        FormData.EstYearlyInterest = estYearlyInterest;
+    }
+
+    public async Task SubmitAsync()
+    {
+        var isValid = editContext.Validate();
+        if (isValid)
+            await OnValidSubmit.InvokeAsync(FormData);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await OnValidSubmit.InvokeAsync(FormData);
+    }
+}

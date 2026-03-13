@@ -84,6 +84,9 @@
 
 .btn-add {
     background-image: linear-gradient(135deg, var(--green-5), var(--green-7));
+}
+
+button.btn-add > span {
     color: white;
 }
 

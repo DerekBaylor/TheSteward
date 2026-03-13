@@ -17,14 +17,14 @@
         <MudCardHeader Class="ts-tabbed-card-header">
             <h3 class="ts-tabbed-card-title"><span class="ts-label"> @HouseholdDto.HouseholdName: </span></h3>
         </MudCardHeader>
-       <div class="ts-card-body">
-           <section class="ts-card-section">
+        <div class="ts-card-body">
+            <section class="ts-card-section">
                 <p id="householdStatusRow" class="ts-card-row">
                     <span class="ts-row-title">Status:</span> @(HouseholdDto.IsHouseholdActive ? "Active" : "Inactive")
                 </p>
-           </section>
+            </section>
             <section class="ts-card-section">
-            <p class="ts-label">Features:</p>
+                <p class="ts-label">Features:</p>
                 <ul id="householdFeatureList" class="ts-card-list" >
                     @foreach (var feature in GetFeatures())
                     {
@@ -36,7 +36,7 @@
                         </li>
                     }
                 </ul>
-           </section>
+            </section>
             <section class="ts-card-section">
                 <p class="ts-label">Members:</p>
                 @if (HouseholdDto.UserHouseholdDtos != null && HouseholdDto.UserHouseholdDtos.Any())
@@ -50,17 +50,23 @@
                                     @if (HasAdminPermissions)
                                     {
                                         <button class="member-list-btn" @onclick="() => HandleMemberClick(userHousehold.User)">
-                                            <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
-                                            <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4">
-                                                @userHousehold.User.UserName
-                                            </MudBadge>
+                                            <span class="material-icons">person</span>
+                                            <span>@userHousehold.User.UserName</span>
+                                            @if (userHousehold.HasAdminPermissions)
+                                            {
+                                                <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4" />
+                                            }
                                         </button>
                                     }
                                     else
                                     {
                                         <span>
-                                            <span class="material-icons" style="vertical-align: middle; font-size: 20px;">person</span>
-                                            @userHousehold.User.UserName
+                                            <span class="material-icons">person</span>
+                                            <span>@userHousehold.User.UserName</span>
+                                            @if (userHousehold.HasAdminPermissions)
+                                            {
+                                                <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4" />
+                                            }
                                         </span>
                                     }
                                 </li>
@@ -72,8 +78,8 @@
                 {
                     <p class="text-muted">No members found.</p>
                 }
-           </section>
-       </div>
+            </section>
+        </div>
     </MudCardContent>
 </MudCard>
 

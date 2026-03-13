@@ -55,7 +55,7 @@ builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IInvestmentService, InvestmentService>();
 builder.Services.AddScoped<IFinancialCalculationService, FinancialCalculationService>();
 
-builder.Services.AddSingleton<HouseholdState>();
+builder.Services.AddScoped<HouseholdState>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();

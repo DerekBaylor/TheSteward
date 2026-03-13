@@ -51,7 +51,6 @@ public class CreditDto
     
     [Required]
     public Guid ExpenseId { get; set; }
-    public ExpenseDto? LinkedExpenseDto { get; set; }
 
     #endregion
 }

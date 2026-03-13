@@ -1,18 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TheSteward.Core.Dtos.FinanceManagerDtos;
 using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
 
 namespace TheSteward.Shared.Dtos.BudgetDtos;
 
 public class CreditFormDto
 {
-    /// <summary>Only set when editing an existing credit.</summary>
     public Guid? CreditId { get; set; }
 
     [Required(ErrorMessage = "Credit name is required.")]
     [MaxLength(200, ErrorMessage = "Name cannot exceed 200 characters.")]
     public string CreditName { get; set; } = string.Empty;
 
-    /// <summary>e.g. "Credit Card", "Auto Loan", "Student Loan", "Mortgage"</summary>
+    /// <summary>
+    /// e.g. "Credit Card", "Auto Loan", "Student Loan", "Mortgage.
+    /// </summary>
     [MaxLength(100)]
     public string? CreditType { get; set; }
 
@@ -20,7 +22,9 @@ public class CreditFormDto
     [Range(0, double.MaxValue, ErrorMessage = "Balance must be $0 or greater.")]
     public decimal CurrentValue { get; set; }
 
-    /// <summary>Stored as a decimal fraction (e.g. 0.1999 = 19.99%).</summary>
+    /// <summary>
+    /// Stored as a decimal fraction (e.g. 0.1999 = 19.99%).
+    /// </summary>
     [Required(ErrorMessage = "Interest rate is required.")]
     [Range(0, 1, ErrorMessage = "Interest rate must be between 0 and 100%.")]
     public decimal InterestRate { get; set; }
@@ -32,19 +36,23 @@ public class CreditFormDto
     [Required(ErrorMessage = "Payment frequency is required.")]
     public FrequencyEnum PaymentFrequency { get; set; } = FrequencyEnum.Monthly;
 
-    /// <summary>Day of month (1–31). 31 = last day of month.</summary>
+    /// <summary>
+    /// Day of month (1–31). 31 = last day of month.
+    /// </summary>
     [Range(1, 31, ErrorMessage = "Payment day must be between 1 and 31.")]
     public int PaymentDay { get; set; } = 1;
 
-    // ---- Computed preview (calculated client-side, persisted on save) ----
 
-    /// <summary>Estimated monthly interest = CurrentValue * (InterestRate / 12).</summary>
+    /// <summary>
+    /// Estimated monthly interest = CurrentValue * (InterestRate / 12).
+    /// </summary>
     public decimal EstMonthlyInterest { get; set; }
 
-    /// <summary>Estimated yearly interest = CurrentValue * InterestRate.</summary>
+    /// <summary>
+    /// Estimated yearly interest = CurrentValue * InterestRate.
+    /// </summary>
     public decimal EstYearlyInterest { get; set; }
 
-    // ---- Budget category selection for the linked expense ----
 
     /// <summary>
     /// The budget category to assign the linked expense to.
@@ -52,15 +60,17 @@ public class CreditFormDto
     /// </summary>
     public Guid? BudgetCategoryId { get; set; }
 
-    /// <summary>Display name used when the category doesn't exist yet and must be created.</summary>
+    /// <summary>
+    /// Display name used when the category doesn't exist yet and must be created.
+    /// </summary>
     public string BudgetCategoryName { get; set; } = "Debt & Credit";
 
     public Guid? BudgetSubCategoryId { get; set; }
     public string? BudgetSubCategoryName { get; set; }
 
-    // ---- Linking / ordering ----
-
-    /// <summary>ID of the expense that mirrors this credit's payment.</summary>
+    /// <summary>
+    /// Id of the expense that mirrors this credit's payment.
+    /// </summary>
     public Guid? ExpenseId { get; set; }
 
     public int DisplayOrder { get; set; }

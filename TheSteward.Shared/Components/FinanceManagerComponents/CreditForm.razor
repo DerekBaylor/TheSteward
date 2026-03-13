@@ -101,51 +101,24 @@
 
         <!-- Budget Category -->
         <div class="credit-form-field">
-            @if (availableCategories.Any())
-            {
-                <MudSelect T="Guid?"
-                           @bind-Value="FormData.BudgetCategoryId"
-                           Label="Expense Category"
-                           Variant="Variant.Outlined"
-                           HelperText="The budget category the linked expense will appear under."
-                           Clearable="true"
-                           @bind-Value:after="OnCategoryChanged">
-                    @foreach (var cat in availableCategories)
-                    {
-                        <MudSelectItem T="Guid?" Value="@((Guid?)cat.BudgetCategoryId)">
-                            @cat.BudgetCategoryName
-                        </MudSelectItem>
-                    }
-                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">+ New: "@FormData.BudgetCategoryName"</MudSelectItem>
-                </MudSelect>
-            }
-            else
-            {
-                <MudTextField @bind-Value="FormData.BudgetCategoryName"
-                              Label="Expense Category"
-                              Variant="Variant.Outlined"
-                              HelperText="A new category will be created with this name." />
-            }
-        </div>
+            <MudSelect T="BudgetCategoryDto"
+                       Value="selectedCategory"
+                       ValueChanged="OnCategoryChanged"
+                       Label="Expense Category"
+                       Variant="Variant.Outlined"
+                       ToStringFunc="@(c => c?.BudgetCategoryName ?? "Select a category")"
+                       HelperText="The budget category the linked expense will appear under."
+                       Clearable="true">
 
-        <!-- Sub-Category (optional) -->
-        @if (availableSubCategories.Any())
-        {
-            <div class="credit-form-field">
-                <MudSelect T="Guid?"
-                           @bind-Value="FormData.BudgetSubCategoryId"
-                           Label="Subcategory (optional)"
-                           Variant="Variant.Outlined"
-                           Clearable="true">
-                    @foreach (var sub in availableSubCategories)
-                    {
-                        <MudSelectItem T="Guid?" Value="@((Guid?)sub.BudgetSubCategoryId)">
-                            @sub.BudgetSubCategoryName
-                        </MudSelectItem>
-                    }
-                </MudSelect>
-            </div>
-        }
+                @foreach (var category in BudgetCategories)
+                {
+                    <MudSelectItem Value="@category">
+                        @category.BudgetCategoryName
+                    </MudSelectItem>
+                }
+
+            </MudSelect>
+        </div>
 
         <!-- Live Preview -->
         <div class="credit-preview credit-preview--visible">
@@ -174,40 +147,22 @@
     public CreditFormDto FormData { get; set; } = null!;
 
     [Parameter]
+    public List<BudgetCategoryDto> BudgetCategories { get; set; } = new();
+
+    [Parameter]
     public EventCallback<CreditFormDto> OnValidSubmit { get; set; }
 
     [Parameter]
     public int ExistingCreditCount { get; set; } = 0;
 
-    /// <summary>
-    /// Pre-loaded categories so the user can pick one without an extra round-trip.
-    /// Injected by the parent modal.
-    /// </summary>
-    [Parameter]
-    public List<BudgetCategoryDto> Categories { get; set; } = new();
-
     private EditContext editContext = null!;
     private decimal interestRatePercent = 0m;
+    private BudgetCategoryDto? selectedCategory;
 
     // Preview values
     private decimal estMonthlyInterest = 0m;
     private decimal estYearlyInterest = 0m;
     private decimal yearlyPayments = 0m;
-
-    private List<BudgetCategoryDto> availableCategories = new();
-    private List<BudgetSubCategoryDto> availableSubCategories = new();
-
-    private static readonly List<string> CreditTypeOptions = new()
-    {
-        "Credit Card",
-        "Auto Loan",
-        "Student Loan",
-        "Personal Loan",
-        "Mortgage",
-        "Home Equity",
-        "Medical Debt",
-        "Other"
-    };
 
     private static readonly List<(string Label, FrequencyEnum Value)> FrequencyOptions = new()
     {
@@ -225,8 +180,10 @@
         if (!FormData.IsEditMode)
             FormData.DisplayOrder = ExistingCreditCount;
 
-        availableCategories = Categories;
-        RefreshSubCategories();
+        if (FormData.BudgetCategoryId.HasValue)
+            selectedCategory = BudgetCategories
+                .FirstOrDefault(c => c.BudgetCategoryId == FormData.BudgetCategoryId.Value);
+
         UpdatePreview();
     }
 
@@ -237,31 +194,11 @@
         UpdatePreview();
     }
 
-    private void OnCategoryChanged()
+    private void OnCategoryChanged(BudgetCategoryDto? selected)
     {
-        RefreshSubCategories();
-
-        // If they picked an existing category, clear any typed new-name
-        if (FormData.BudgetCategoryId.HasValue)
-        {
-            var match = availableCategories.FirstOrDefault(c => c.BudgetCategoryId == FormData.BudgetCategoryId);
-            if (match != null)
-                FormData.BudgetCategoryName = match.BudgetCategoryName;
-        }
-    }
-
-    private void RefreshSubCategories()
-    {
-        if (FormData.BudgetCategoryId.HasValue)
-        {
-            var cat = availableCategories.FirstOrDefault(c => c.BudgetCategoryId == FormData.BudgetCategoryId);
-            availableSubCategories = cat?.BudgetSubCategories ?? new();
-        }
-        else
-        {
-            availableSubCategories = new();
-            FormData.BudgetSubCategoryId = null;
-        }
+        selectedCategory = selected;
+        FormData.BudgetCategoryId = selected?.BudgetCategoryId;
+        FormData.BudgetCategoryName = selected?.BudgetCategoryName ?? "Debt & Credit";
     }
 
     private void UpdatePreview()

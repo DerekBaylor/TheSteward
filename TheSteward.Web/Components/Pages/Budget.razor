@@ -161,7 +161,7 @@ else
     private string? errorMessage;
     private BudgetDto? currentBudget;
     private Action? _stateChangeHandler;
-
+    private List<BudgetCategoryDto>? BudgetCategories = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -201,6 +201,9 @@ else
             currentBudget = budgets.FirstOrDefault(b => b.BudgetId == userHousehold.DefaultBudgetId)
                 ?? budgets.FirstOrDefault(b => b.IsDefaultBudget)
                 ?? budgets.FirstOrDefault();
+
+            if (currentBudget != null)
+                BudgetCategories = currentBudget.BudgetCategories;
 
             hasBudget = currentBudget != null;
         }
@@ -549,6 +552,8 @@ else
 
     private async Task OpenEditCreditModal(CreditDto credit)
     {
+        var linkedExpense = credit.ExpenseId != Guid.Empty ? currentBudget!.Expenses.FirstOrDefault(e => e.ExpenseId == credit.ExpenseId) : null;
+
         var formData = new CreditFormDto
         {
             CreditId = credit.CreditId,
@@ -563,7 +568,11 @@ else
             EstYearlyInterest = credit.EstYearlyInterest,
             DisplayOrder = credit.DisplayOrder,
             BudgetId = credit.BudgetId,
-            ExpenseId = credit.ExpenseId
+            ExpenseId = credit.ExpenseId,
+            BudgetCategoryId = linkedExpense?.BudgetCategoryId,
+            BudgetCategoryName = linkedExpense?.BudgetCategory?.BudgetCategoryName ?? "Debt & Credit",
+            BudgetSubCategoryId = linkedExpense?.BudgetSubCategoryId,
+            BudgetSubCategoryName = linkedExpense?.BudgetSubCategory?.BudgetSubCategoryName,
         };
 
         await OpenCreditModal(formData);
@@ -574,7 +583,8 @@ else
         var parameters = new DialogParameters
         {
             { "FormData", formData },
-            { "ExistingCreditCount", currentBudget!.Credits.Count }
+            { "ExistingCreditCount", currentBudget!.Credits.Count },
+            { "BudgetCategories", BudgetCategories }
         };
 
         var options = new DialogOptions

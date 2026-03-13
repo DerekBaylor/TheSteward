@@ -19,14 +19,10 @@
     </TitleContent>
 
     <DialogContent>
-        @if (isLoadingCategories)
-        {
-            <MudProgressLinear Indeterminate="true" Color="Color.Warning" Class="mb-2" />
-        }
         <CreditForm @ref="creditForm"
                     FormData="FormData"
                     ExistingCreditCount="ExistingCreditCount"
-                    Categories="categories"
+                    BudgetCategories="BudgetCategories"
                     OnValidSubmit="HandleFormSubmit" />
     </DialogContent>
 
@@ -72,27 +68,11 @@
     [Parameter]
     public int ExistingCreditCount { get; set; } = 0;
 
+    [Parameter]
+    public List<BudgetCategoryDto> BudgetCategories { get; set; } = new();
+
     private CreditForm? creditForm;
     private bool isSaving = false;
-    private bool isLoadingCategories = true;
-    private List<BudgetCategoryDto> categories = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Pre-load budget categories so the form can offer a picker.
-        try
-        {
-            categories = await BudgetCategoryService.GetAllByBudgetIdAsync(FormData.BudgetId);
-        }
-        catch
-        {
-            // Non-fatal: the form will fall back to a text field.
-        }
-        finally
-        {
-            isLoadingCategories = false;
-        }
-    }
 
     private async Task TriggerSubmit()
     {
@@ -111,6 +91,7 @@
                 var updateDto = new UpdateCreditDto
                 {
                     CreditId = formData.CreditId!.Value,
+                    BudgetId = formData.BudgetId,
                     CreditName = formData.CreditName,
                     CreditType = formData.CreditType,
                     InterestRate = formData.InterestRate,

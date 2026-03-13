@@ -103,10 +103,6 @@ public class CreditService : ICreditService
 
         var subCategory = await ResolveSubCategoryAsync(budgetId, category.BudgetCategoryId, dto.BudgetSubCategoryId, dto.BudgetSubCategoryName);
 
-        Console.WriteLine($"[CreditService.UpdateAsync] Resolved CategoryId: {category.BudgetCategoryId}");
-        Console.WriteLine($"[CreditService.UpdateAsync] Resolved CategoryName: {category.BudgetCategoryName}");
-
-
         // --- Update the credit ---
         credit.CreditName = dto.CreditName;
         credit.CreditType = dto.CreditType;

@@ -33,6 +33,19 @@ public static class FinanceManagerConstants
         HeadOfHousehold
     }
 
+    public static readonly List<string> CreditTypeOptions = new()
+    {
+        "Credit Card",
+        "Auto Loan",
+        "Student Loan",
+        "Personal Loan",
+        "Line of Credit",
+        "Mortgage",
+        "Home Equity",
+        "Medical Debt",
+        "Other"
+    };
+
     public class TaxBracket
     {
         public decimal MinIncome { get; set; }

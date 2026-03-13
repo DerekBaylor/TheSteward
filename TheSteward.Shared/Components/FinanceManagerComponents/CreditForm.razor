@@ -6,6 +6,7 @@
 @using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
 
 @inject IBudgetCategoryService BudgetCategoryService
+@inject IFinancialCalculationService FinancialCalculationService
 
 <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
@@ -203,8 +204,10 @@
 
     private void UpdatePreview()
     {
-        estMonthlyInterest = Math.Round(FormData.CurrentValue * (FormData.InterestRate / 12m), 2);
-        estYearlyInterest = Math.Round(FormData.CurrentValue * FormData.InterestRate, 2);
+        var aprPercent = FormData.InterestRate * 100m;
+
+        estMonthlyInterest = FinancialCalculationService.CalculateCreditMonthlyInterest(FormData.CurrentValue, FormData.InterestRate);
+        estYearlyInterest = FinancialCalculationService.CalculateCreditYearlyInterest(FormData.CurrentValue, FormData.InterestRate);
         yearlyPayments = Math.Round(FormData.PaymentAmount * (decimal)(int)FormData.PaymentFrequency, 2);
 
         FormData.EstMonthlyInterest = estMonthlyInterest;

@@ -3,6 +3,8 @@
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 @using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
 
+@inject IFinancialCalculationService FinancialCalculationService
+
 <MudDialog id="creditDetailsModal" Class="credit-details-modal">
     <TitleContent>
         <div class="credit-modal-title">
@@ -71,6 +73,24 @@
                             </div>
 
                             <div class="credit-details-divider"></div>
+
+                            @{
+                                var months = GetMonthsToPayOff(credit);
+                            }
+
+                            <div class="credit-details-row">
+                                <span class="credit-details-row-label">Est. Payoff Time</span>
+                                <span class="credit-details-row-value">
+                                    @if (months == -1)
+                                    {
+                                        <span style="color: var(--mud-palette-error)">Payment too low to pay off</span>
+                                    }
+                                    else
+                                    {
+                                        @($"{months / 12} yr {months % 12} mo")
+                                    }
+                                </span>
+                            </div>
 
                             <div class="credit-details-row">
                                 <span class="credit-details-row-label">Payment per Period</span>
@@ -161,4 +181,15 @@
         FrequencyEnum.Monthly => "monthly",
         _ => $"×{(int)freq}/yr"
     };
+
+    private int GetMonthsToPayOff(CreditDto credit)
+    {
+        if (credit.PaymentFrequency == FrequencyEnum.Monthly)
+            return FinancialCalculationService.CalculateMonthsToPayOff(
+                credit.CurrentValue, credit.PaymentAmount, credit.InterestRate);
+
+        decimal monthlyEquivalent = credit.PaymentAmount * (decimal)(int)credit.PaymentFrequency / 12m;
+        return FinancialCalculationService.CalculateMonthsToPayOff(
+            credit.CurrentValue, monthlyEquivalent, credit.InterestRate);
+    }
 }

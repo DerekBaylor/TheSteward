@@ -44,14 +44,18 @@ else
             if (!string.IsNullOrEmpty(userId) && HouseholdState.UserHouseholds.Count == 0)
             {
                 var households = await UserHouseholdService.GetAllUserHouseholdsForUserAsync(userId);
-                
+
                 if (households.Count > 0)
                 {
                     HouseholdState.SetUserHouseholds(households);
                 }
                 else
                 {
-                    NavigationManager.NavigateTo("/household");
+                    var currentPath = new Uri(NavigationManager.Uri).AbsolutePath;
+                    if (!currentPath.Equals("/household", StringComparison.OrdinalIgnoreCase))
+                    {
+                        NavigationManager.NavigateTo("/household");
+                    }
                 }
             }
         }

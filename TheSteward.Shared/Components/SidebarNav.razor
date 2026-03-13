@@ -134,7 +134,13 @@
         var items = GetNavigationItems();
 
         if (HouseholdState.CurrentHousehold == null || _currentUserHousehold == null)
-            return items;
+        {
+            return items.Where(item =>
+                !item.RequiresAuth ||
+                item.Route == "/household" ||
+                item.IsLogout
+            ).ToList();
+        }
 
         var household = HouseholdState.CurrentHousehold;
         var userPerms = _currentUserHousehold;
@@ -147,7 +153,7 @@
 
             return item.Route switch
             {
-                "/household" => userPerms.HasAdminPermissions,
+                "/household" => true,
                 "/budget" => household.HasFinanceManagerAccess &&
                             userPerms.HasFinanceManagerReadPermission,
                 "/kitchen" => household.HasKitchenManagerAccess &&
@@ -170,6 +176,6 @@
     {
         NavigationService.OnChange -= HandleStateChange;
 
-        HouseholdState.OnChange += () => InvokeAsync(StateHasChanged);
+        HouseholdState.OnChange -= () => InvokeAsync(StateHasChanged);
     }
 }

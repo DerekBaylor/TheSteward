@@ -1,5 +1,4 @@
-﻿
-#householdCard.ts-tabbed-card {
+﻿#householdCard.ts-tabbed-card {
     width: 25rem;
     animation: slideUp 0.4s ease-out;
 }
@@ -43,7 +42,7 @@ button#addMemberBtn:hover {
 /* Content */
 /* ------- */
 
-#householdCard .ts-card-content{
+#householdCard .ts-card-content {
     border-color: var(--base-purple);
 }
 
@@ -66,7 +65,6 @@ button#addMemberBtn:hover {
     max-width: 15rem;
 }
 
-
 ul#householdFeatureList li {
     display: flex;
     flex-direction: row;
@@ -82,7 +80,38 @@ ul#householdFeatureList li {
     }
 
 
-.member-list-btn:hover {
-    background-color: var(--purple-3);
+/* Members */
+/* ------- */
+
+#householdCard .member-list-btn {
+    align-items: center;
+    background: none;
+    border: none;
     border-radius: var(--border-radius);
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    gap: 0.5rem;
+    height: 2rem;
+    justify-content: flex-start;
+    padding: 0.25rem 0.5rem;
+    text-align: left;
+    width: 70%;
+}
+
+#householdCard .member-list-btn:hover {
+    background-color: var(--purple-3);
+}
+
+#householdCard li > span {
+    align-items: center;
+    gap: 0.5rem;
+    display: flex;
+    padding: 0.25rem 0.5rem;
+}
+
+#householdCard .material-icons {
+    flex-shrink: 0;
+    font-size: 20px;
+    vertical-align: middle;
 }

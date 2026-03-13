@@ -201,6 +201,7 @@ body.main-content {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--label-font);
+    outline: none;
 }
 
 @media (max-width: 768px) {

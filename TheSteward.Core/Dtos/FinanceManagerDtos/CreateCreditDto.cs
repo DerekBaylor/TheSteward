@@ -20,7 +20,9 @@ public class CreateCreditDto
     public FrequencyEnum PaymentFrequency { get; set; }
     public decimal PaymentAmount { get; set; }
 
-    /// <summary>Day of month (1–31). 31 = last day of month.</summary>
+    /// <summary>
+    /// Day of month (1–31). 31 = last day of month.
+    /// </summary>
     public int PaymentDay { get; set; } = 1;
 
     public int DisplayOrder { get; set; }
@@ -35,16 +37,22 @@ public class CreateCreditDto
     /// If null the service will get-or-create by <see cref="BudgetCategoryName"/>.
     /// </summary>
     public Guid? BudgetCategoryId { get; set; }
-
-    /// <summary>Used to get-or-create the expense category when <see cref="BudgetCategoryId"/> is not supplied.</summary>
+    
+    /// <summary>
+    /// Used to get-or-create the expense category when <see cref="BudgetCategoryId"/> is not supplied.
+    /// </summary>
     public string BudgetCategoryName { get; set; } = "Debt & Credit";
 
     public Guid? BudgetSubCategoryId { get; set; }
 
-    /// <summary>Used to get-or-create a subcategory when <see cref="BudgetSubCategoryId"/> is not supplied.</summary>
+    /// <summary>
+    /// Used to get-or-create a subcategory when <see cref="BudgetSubCategoryId"/> is not supplied.
+    /// </summary>
     public string? BudgetSubCategoryName { get; set; }
 
-    /// <summary>Set by the service after the expense is created. Should not be populated by callers.</summary>
+    /// <summary>
+    /// Set by the service after the expense is created. Should not be populated by callers.
+    /// </summary>
     public Guid? ExpenseId { get; set; }
 
     #endregion  

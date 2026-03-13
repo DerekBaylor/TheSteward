@@ -152,7 +152,6 @@
 
     private void ConfirmDelete()
     {
-        // Pass the delete signal back to the parent page, same pattern as InvestmentModal.
         MudDialog.Close(DialogResult.Ok($"delete:{FormData.CreditId}"));
     }
 }

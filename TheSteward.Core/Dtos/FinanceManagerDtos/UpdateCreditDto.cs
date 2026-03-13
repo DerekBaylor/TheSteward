@@ -23,7 +23,9 @@ public class UpdateCreditDto
     public FrequencyEnum PaymentFrequency { get; set; }
     public decimal PaymentAmount { get; set; }
 
-    /// <summary>Day of month (1–31). 31 = last day of month.</summary>
+    /// <summary>
+    /// Day of month (1–31). 31 = last day of month.
+    /// </summary>
     public int PaymentDay { get; set; } = 1;
 
     public int DisplayOrder { get; set; }
@@ -41,12 +43,16 @@ public class UpdateCreditDto
     /// </summary>
     public Guid? BudgetCategoryId { get; set; }
 
-    /// <summary>Used to get-or-create the expense category when <see cref="BudgetCategoryId"/> is not supplied.</summary>
+    /// <summary>
+    /// Used to get-or-create the expense category when <see cref="BudgetCategoryId"/> is not supplied.
+    /// </summary>
     public string BudgetCategoryName { get; set; } = "Debt & Credit";
 
     public Guid? BudgetSubCategoryId { get; set; }
 
-    /// <summary>Used to get-or-create a subcategory when <see cref="BudgetSubCategoryId"/> is not supplied.</summary>
+    /// <summary>
+    /// Used to get-or-create a subcategory when <see cref="BudgetSubCategoryId"/> is not supplied.
+    /// </summary>
     public string? BudgetSubCategoryName { get; set; }
 
     #endregion Navigation Properties

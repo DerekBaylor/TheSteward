@@ -83,37 +83,37 @@ public class CreditService : ICreditService
         return creditDto;
     }
 
-    public async Task<UpdateCreditDto> UpdateAsync(UpdateCreditDto dto)
+    public async Task<UpdateCreditDto> UpdateAsync(UpdateCreditDto updateCreditDto)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
+        if (updateCreditDto == null)
+            throw new ArgumentNullException(nameof(updateCreditDto));
 
-        var credit = await _creditRepository.GetByIdAsync(dto.CreditId);
+        var credit = await _creditRepository.GetByIdAsync(updateCreditDto.CreditId);
 
         if (credit == null)
-            throw new KeyNotFoundException($"Credit with ID {dto.CreditId} not found.");
+            throw new KeyNotFoundException($"Credit with ID {updateCreditDto.CreditId} not found.");
 
-        var budgetId = dto.BudgetId != Guid.Empty ? dto.BudgetId : credit.BudgetId;
+        var budgetId = updateCreditDto.BudgetId != Guid.Empty ? updateCreditDto.BudgetId : credit.BudgetId;
 
         if (budgetId == Guid.Empty)
-            throw new ArgumentException($"BudgetId could not be resolved for credit {dto.CreditId}.");
+            throw new ArgumentException($"BudgetId could not be resolved for credit {updateCreditDto.CreditId}.");
 
         // --- Resolve category & subcategory (mirrors AddAsync) ---
-        var category = await ResolveCategoryAsync(budgetId, dto.BudgetCategoryId, dto.BudgetCategoryName);
+        var category = await ResolveCategoryAsync(budgetId, updateCreditDto.BudgetCategoryId, updateCreditDto.BudgetCategoryName);
 
-        var subCategory = await ResolveSubCategoryAsync(budgetId, category.BudgetCategoryId, dto.BudgetSubCategoryId, dto.BudgetSubCategoryName);
+        var subCategory = await ResolveSubCategoryAsync(budgetId, category.BudgetCategoryId, updateCreditDto.BudgetSubCategoryId, updateCreditDto.BudgetSubCategoryName);
 
         // --- Update the credit ---
-        credit.CreditName = dto.CreditName;
-        credit.CreditType = dto.CreditType;
-        credit.InterestRate = dto.InterestRate;
-        credit.CurrentValue = dto.CurrentValue;
-        credit.EstMonthlyInterest = dto.EstMonthlyInterest;
-        credit.EstYearlyInterest = dto.EstYearlyInterest;
-        credit.PaymentFrequency = dto.PaymentFrequency;
-        credit.PaymentAmount = dto.PaymentAmount;
-        credit.PaymentDay = dto.PaymentDay;
-        credit.DisplayOrder = dto.DisplayOrder;
+        credit.CreditName = updateCreditDto.CreditName;
+        credit.CreditType = updateCreditDto.CreditType;
+        credit.InterestRate = updateCreditDto.InterestRate;
+        credit.CurrentValue = updateCreditDto.CurrentValue;
+        credit.EstMonthlyInterest = updateCreditDto.EstMonthlyInterest;
+        credit.EstYearlyInterest = updateCreditDto.EstYearlyInterest;
+        credit.PaymentFrequency = updateCreditDto.PaymentFrequency;
+        credit.PaymentAmount = updateCreditDto.PaymentAmount;
+        credit.PaymentDay = updateCreditDto.PaymentDay;
+        credit.DisplayOrder = updateCreditDto.DisplayOrder;
 
         await _creditRepository.UpdateAsync(credit);
 
@@ -123,18 +123,18 @@ public class CreditService : ICreditService
             var expense = await _expenseService.GetAsync(credit.ExpenseId);
 
             if (expense == null)
-                throw new KeyNotFoundException($"Linked expense with ID {credit.ExpenseId} not found for credit {dto.CreditId}.");
+                throw new KeyNotFoundException($"Linked expense with ID {credit.ExpenseId} not found for credit {updateCreditDto.CreditId}.");
 
             var updateExpenseDto = new UpdateExpenseDto
             {
                 ExpenseId = expense.ExpenseId,
-                ExpenseName = dto.CreditName,
-                AmountDue = dto.PaymentAmount,
-                DueDay = dto.PaymentDay,
-                DisplayOrder = dto.DisplayOrder,
+                ExpenseName = updateCreditDto.CreditName,
+                AmountDue = updateCreditDto.PaymentAmount,
+                DueDay = updateCreditDto.PaymentDay,
+                DisplayOrder = updateCreditDto.DisplayOrder,
                 BudgetCategoryId = category.BudgetCategoryId,
                 BudgetSubCategoryId = subCategory?.BudgetSubCategoryId,
-                CreditId = dto.CreditId,
+                CreditId = updateCreditDto.CreditId,
                 InvestmentId = expense.InvestmentId,
             };
 
@@ -143,7 +143,7 @@ public class CreditService : ICreditService
 
         await _creditRepository.SaveChangesAsync();
 
-        return dto;
+        return updateCreditDto;
     }
 
     public async Task DeleteAsync(Guid creditId)

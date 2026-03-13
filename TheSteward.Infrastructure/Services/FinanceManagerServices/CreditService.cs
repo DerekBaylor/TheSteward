@@ -155,8 +155,14 @@ public class CreditService : ICreditService
         if (credit == null)
             throw new KeyNotFoundException($"Credit with ID {creditId} not found.");
 
+        var expenseId = credit.ExpenseId;
+
+        // Delete the credit first to release the FK, then clean up the expense
         await _creditRepository.DeleteAsync(credit);
         await _creditRepository.SaveChangesAsync();
+
+        if (expenseId != Guid.Empty)
+            await _expenseService.DeleteAsync(expenseId);
     }
     public async Task<CreditDto?> GetAsync(Guid creditId)
     {

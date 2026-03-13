@@ -63,12 +63,14 @@ public class BudgetSubCategoryService : IBudgetSubCategoryService
             throw new ArgumentException("Budget subcategory ID cannot be empty.", nameof(subCategoryId));
 
         var subCategory = await _budgetSubCategoryRepository.GetByIdAsync(subCategoryId);
+
         if (subCategory == null)
             throw new KeyNotFoundException($"Budget subcategory with ID {subCategoryId} not found.");
 
         await _budgetSubCategoryRepository.DeleteAsync(subCategory);
     }
 
+    #region Get Methods
     public async Task<BudgetSubCategoryDto?> GetAsync(Guid subCategoryId)
     {
         if (subCategoryId == Guid.Empty)
@@ -106,4 +108,43 @@ public class BudgetSubCategoryService : IBudgetSubCategoryService
 
         return subCategories.Select(i => _mapper.Map<BudgetSubCategoryDto>(i)).ToList();
     }
+
+    public async Task<BudgetSubCategoryDto> GetByIdOrCreateSubCategoryAsync(Guid budgetId, Guid budgetCategoryId, string subCategoryName)
+    {
+        if (budgetId == Guid.Empty)
+            throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
+
+        if (budgetCategoryId == Guid.Empty)
+            throw new ArgumentException("Budget Category ID cannot be empty.", nameof(budgetCategoryId));
+
+        if (string.IsNullOrWhiteSpace(subCategoryName))
+            throw new ArgumentException("SubCategory name cannot be null or whitespace.", nameof(subCategoryName));
+
+        var existing = await _budgetSubCategoryRepository.GetAll()
+            .FirstOrDefaultAsync(sc => sc.BudgetId == budgetId
+                                    && sc.BudgetCategoryId == budgetCategoryId
+                                    && sc.BudgetSubCategoryName == subCategoryName);
+
+        if (existing != null)
+            return _mapper.Map<BudgetSubCategoryDto>(existing);
+
+        var displayOrder = await _budgetSubCategoryRepository.GetAll()
+            .CountAsync(sc => sc.BudgetCategoryId == budgetCategoryId);
+
+        var newSubCategory = new BudgetSubCategory
+        {
+            BudgetSubCategoryId = Guid.NewGuid(),
+            BudgetSubCategoryName = subCategoryName,
+            BudgetId = budgetId,
+            BudgetCategoryId = budgetCategoryId,
+            DisplayOrder = displayOrder
+        };
+
+        await _budgetSubCategoryRepository.AddAsync(newSubCategory);
+
+        return _mapper.Map<BudgetSubCategoryDto>(newSubCategory);
+
+    }
+
+    #endregion Get Methods
 }

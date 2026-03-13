@@ -5,7 +5,7 @@ namespace TheSteward.Core.IServices.FinanceManagerIServices;
 
 public interface IBudgetSubCategoryService
 {
-    
+
     /// <summary>
     /// Asynchronously creates a new budget subcategory.
     /// </summary>
@@ -18,18 +18,6 @@ public interface IBudgetSubCategoryService
     /// Creates a new subcategory under an existing budget category.
     /// Both BudgetId and BudgetCategoryId must reference existing entities.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var createDto = new CreateBudgetSubCategoryDto
-    /// {
-    ///     BudgetSubCategoryName = "Rent",
-    ///     BudgetId = budgetId,
-    ///     BudgetCategoryId = housingCategoryId,
-    ///     DisplayOrder = 1
-    /// };
-    /// var subCategory = await budgetSubCategoryService.AddAsync(createDto);
-    /// </code>
-    /// </example>
     Task<BudgetSubCategoryDto> AddAsync(CreateBudgetSubCategoryDto subCategoryDto);
 
     /// <summary>
@@ -44,19 +32,6 @@ public interface IBudgetSubCategoryService
     /// <remarks>
     /// Updates the subcategory name, display order, and parent category association.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var updateDto = new UpdateBudgetSubCategoryDto
-    /// {
-    ///     BudgetSubCategoryId = subCategoryId,
-    ///     BudgetSubCategoryName = "Mortgage Payment",
-    ///     BudgetId = budgetId,
-    ///     BudgetCategoryId = housingCategoryId,
-    ///     DisplayOrder = 1
-    /// };
-    /// var updated = await budgetSubCategoryService.UpdateAsync(updateDto);
-    /// </code>
-    /// </example>
     Task<UpdateBudgetSubCategoryDto> UpdateAsync(UpdateBudgetSubCategoryDto subCategoryDto);
 
     /// <summary>
@@ -69,13 +44,9 @@ public interface IBudgetSubCategoryService
     /// <remarks>
     /// This performs a hard delete, permanently removing the subcategory from the database.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// await budgetSubCategoryService.DeleteAsync(subCategoryId);
-    /// </code>
-    /// </example>
     Task DeleteAsync(Guid subCategoryId);
 
+    #region Get Methods
     /// <summary>
     /// Asynchronously retrieves a single budget subcategory by its identifier.
     /// </summary>
@@ -85,15 +56,6 @@ public interface IBudgetSubCategoryService
     /// or null if not found.
     /// </returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="subCategoryId"/> is empty.</exception>
-    /// <example>
-    /// <code>
-    /// var subCategory = await budgetSubCategoryService.GetAsync(subCategoryId);
-    /// if (subCategory == null)
-    /// {
-    ///     Console.WriteLine("Subcategory not found");
-    /// }
-    /// </code>
-    /// </example>
     Task<BudgetSubCategoryDto?> GetAsync(Guid subCategoryId);
 
     /// <summary>
@@ -109,12 +71,6 @@ public interface IBudgetSubCategoryService
     /// Returns an empty list if no subcategories are found for the specified category.
     /// Results are ordered by DisplayOrder in ascending order.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var subCategories = await budgetSubCategoryService.GetAllByCategoryIdAsync(categoryId);
-    /// Console.WriteLine($"Found {subCategories.Count} subcategories");
-    /// </code>
-    /// </example>
     Task<List<BudgetSubCategoryDto>> GetAllByCategoryIdAsync(Guid categoryId);
 
     /// <summary>
@@ -131,11 +87,31 @@ public interface IBudgetSubCategoryService
     /// This returns all subcategories across all categories within the budget.
     /// Results are ordered by DisplayOrder in ascending order.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var allSubCategories = await budgetSubCategoryService.GetAllByBudgetIdAsync(budgetId);
-    /// Console.WriteLine($"Total subcategories in budget: {allSubCategories.Count}");
-    /// </code>
-    /// </example>
     Task<List<BudgetSubCategoryDto>> GetAllByBudgetIdAsync(Guid budgetId);
+
+    /// <summary>
+    /// Retrieves an existing subcategory by name within a budget category, or creates and
+    /// persists a new one if no match is found.
+    /// </summary>
+    /// <remarks>
+    /// Matching is performed against both <paramref name="budgetId"/> and
+    /// <paramref name="budgetCategoryId"/> to prevent collisions across categories that share
+    /// a subcategory name. The display order of a newly created subcategory is set to the
+    /// current subcategory count for that parent category, placing it at the end of the list.
+    /// </remarks>
+    /// <param name="budgetId">The unique identifier of the budget.</param>
+    /// <param name="budgetCategoryId">The unique identifier of the parent category.</param>
+    /// <param name="subCategoryName">
+    /// The name of the subcategory to find or create. Must not be null or whitespace.
+    /// </param>
+    /// <returns>
+    /// A <see cref="BudgetSubCategoryDto"/> for the matched or newly created subcategory.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="budgetId"/> or <paramref name="budgetCategoryId"/> is an
+    /// empty <see cref="Guid"/>, or <paramref name="subCategoryName"/> is null or whitespace.
+    /// </exception>
+    Task<BudgetSubCategoryDto> GetByIdOrCreateSubCategoryAsync(Guid budgetId, Guid budgetCategoryId, string subCategoryName);
+
+    #endregion GetMethods
 }

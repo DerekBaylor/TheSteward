@@ -37,8 +37,8 @@
             else
             {
                 @foreach (var category in Expenses
-                    .GroupBy(e => e.BudgetCategoryId)
-                    .OrderBy(g => g.Min(e => e.DisplayOrder)))
+                   .GroupBy(e => e.BudgetCategoryId)
+                   .OrderBy(g => g.First().BudgetCategory?.DisplayOrder ?? int.MaxValue))
                 {
                     var categoryKey = category.Key;
                     var categoryName = category.First().BudgetCategory?.BudgetCategoryName ?? "Uncategorized";
@@ -78,7 +78,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var expense in category.OrderBy(e => e.DisplayOrder))
+                                    @foreach (var expense in category
+                                        .OrderBy(e => e.BudgetSubCategory?.DisplayOrder ?? int.MaxValue)
+                                        .ThenBy(e => e.DisplayOrder))
                                     {
                                         <tr class="expense-row">
                                             <td class="expense-td expense-td-name">

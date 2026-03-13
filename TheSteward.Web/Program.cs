@@ -53,6 +53,7 @@ builder.Services.AddScoped<ICreditService, CreditService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IInvestmentService, InvestmentService>();
+builder.Services.AddScoped<IFinancialCalculationService, FinancialCalculationService>();
 
 builder.Services.AddSingleton<HouseholdState>();
 

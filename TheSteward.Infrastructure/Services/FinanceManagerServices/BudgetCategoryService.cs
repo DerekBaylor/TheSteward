@@ -66,7 +66,7 @@ public class BudgetCategoryService : IBudgetCategoryService
         await _budgetCategoryRepository.DeleteAsync(category);
     }
 
-
+    #region Get Methods
     public async Task<BudgetCategoryDto?> GetAsync(Guid categoryId)
     {
         if (categoryId == Guid.Empty)
@@ -92,6 +92,38 @@ public class BudgetCategoryService : IBudgetCategoryService
 
         return categories.Select(MapToDto).ToList();
     }
+    
+    public async Task<BudgetCategoryDto> GetByIdOrCreateAsync(Guid budgetId, string categoryName)
+    {
+        if (budgetId == Guid.Empty)
+            throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
+
+        if (string.IsNullOrWhiteSpace(categoryName))
+            throw new ArgumentException("Category name cannot be null or whitespace.", nameof(categoryName));
+
+        var existing = await _budgetCategoryRepository.GetAll()
+            .FirstOrDefaultAsync(c => c.BudgetId == budgetId
+                                   && c.BudgetCategoryName == categoryName);
+
+        if (existing != null)
+            return MapToDto(existing);
+
+        var displayOrder = await _budgetCategoryRepository.GetAll()
+            .CountAsync(c => c.BudgetId == budgetId);
+
+        var newCategory = new BudgetCategory
+        {
+            BudgetCategoryId = Guid.NewGuid(),
+            BudgetCategoryName = categoryName,
+            BudgetId = budgetId,
+            DisplayOrder = displayOrder
+        };
+
+        await _budgetCategoryRepository.AddAsync(newCategory);
+
+        return MapToDto(newCategory);
+    }
+    #endregion Get Methods
 
     #region Private Helper Methods
 

@@ -18,17 +18,6 @@ public interface IBudgetCategoryService
     /// Creates a new budget category associated with the specified budget. 
     /// The category is created without subcategories initially; use the BudgetSubCategoryService to add subcategories.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var createDto = new CreateBudgetCategoryDto
-    /// {
-    ///     BudgetCategoryName = "Housing",
-    ///     BudgetId = budgetId,
-    ///     DisplayOrder = 1
-    /// };
-    /// var category = await budgetCategoryService.AddAsync(createDto);
-    /// </code>
-    /// </example>
     Task<BudgetCategoryDto> AddAsync(CreateBudgetCategoryDto categoryDto);
 
     /// <summary>
@@ -43,18 +32,6 @@ public interface IBudgetCategoryService
     /// <remarks>
     /// Updates the category name and display order. Does not affect associated subcategories.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var updateDto = new UpdateBudgetCategoryDto
-    /// {
-    ///     BudgetCategoryId = categoryId,
-    ///     BudgetCategoryName = "Housing & Utilities",
-    ///     BudgetId = budgetId,
-    ///     DisplayOrder = 1
-    /// };
-    /// var updated = await budgetCategoryService.UpdateAsync(updateDto);
-    /// </code>
-    /// </example>
     Task<UpdateBudgetCategoryDto> UpdateAsync(UpdateBudgetCategoryDto categoryDto);
 
     /// <summary>
@@ -68,13 +45,10 @@ public interface IBudgetCategoryService
     /// This performs a hard delete. Be aware that this will also delete all associated subcategories 
     /// if your database is configured with cascade delete.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// await budgetCategoryService.DeleteAsync(categoryId);
-    /// </code>
-    /// </example>
     Task DeleteAsync(Guid categoryId);
-    
+
+    #region Get Methods
+
     /// <summary>
     /// Asynchronously retrieves a single budget category by its identifier, including all subcategories.
     /// </summary>
@@ -87,15 +61,6 @@ public interface IBudgetCategoryService
     /// <remarks>
     /// This method eagerly loads all associated subcategories and includes them in the returned DTO.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var category = await budgetCategoryService.GetAsync(categoryId);
-    /// if (category != null)
-    /// {
-    ///     Console.WriteLine($"Category has {category.BudgetSubCategories.Count} subcategories");
-    /// }
-    /// </code>
-    /// </example>
     Task<BudgetCategoryDto?> GetAsync(Guid categoryId);
     
     /// <summary>
@@ -112,14 +77,27 @@ public interface IBudgetCategoryService
     /// Results are ordered by DisplayOrder in ascending order.
     /// Each category includes its associated subcategories.
     /// </remarks>
-    /// <example>
-    /// <code>
-    /// var categories = await budgetCategoryService.GetAllByBudgetIdAsync(budgetId);
-    /// foreach (var category in categories)
-    /// {
-    ///     Console.WriteLine($"{category.BudgetCategoryName}: {category.BudgetSubCategories.Count} subcategories");
-    /// }
-    /// </code>
-    /// </example>
     Task<List<BudgetCategoryDto>> GetAllByBudgetIdAsync(Guid budgetId);
+
+    /// <summary>
+    /// Retrieves an existing budget category by name within a budget, or creates and persists
+    /// a new one if no match is found.
+    /// </summary>
+    /// <remarks>
+    /// The display order of a newly created category is set to the current category count for
+    /// that budget, placing it at the end of the list.
+    /// </remarks>
+    /// <param name="budgetId">The unique identifier of the budget to search within.</param>
+    /// <param name="categoryName">
+    /// The name of the category to find or create. Must not be null or whitespace.
+    /// </param>
+    /// <returns>
+    /// A <see cref="BudgetCategoryDto"/> for the matched or newly created category.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="budgetId"/> is an empty <see cref="Guid"/>, or
+    /// <paramref name="categoryName"/> is null or whitespace.
+    /// </exception>
+    Task<BudgetCategoryDto> GetByIdOrCreateAsync(Guid budgetId, string categoryName);
+    #endregion Get Methods
 }

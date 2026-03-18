@@ -61,25 +61,25 @@
 
             <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">File Manager:</MudText>
             <MudSwitch @bind-Value="FormData.HasFileManagerReadPermission"
-                       Label="Read Permission"
-                       Color="Color.Primary"
-                       Class="mb-2" />
+                       Label="Read Permission" 
+                       Color="Color.Primary" 
+                       Class="mb-3" />
             <MudSwitch @bind-Value="FormData.HasFileManagerWritePermission"
-                       Label="Write Permission"
-                       Color="Color.Primary"
+                       Label="Write Permission" 
+                       Color="Color.Primary" 
                        Class="mb-2" />
         </EditForm>
     </DialogContent>
 
     <DialogActions>
-        <MudButton OnClick="HandleCancel"
-                   Variant="Variant.Outlined"
-                   Color="Color.Default">
+        <MudButton Class="cancel-btn"
+                    OnClick="HandleCancel"
+                   Variant="Variant.Outlined">
             Cancel
         </MudButton>
-        <MudButton OnClick="HandleSubmit"
-                   Variant="Variant.Filled"
-                   Color="Color.Primary">
+        <MudButton Class="submit-btn"
+                    OnClick="HandleSubmit"
+                   Variant="Variant.Filled" >
             Update Permissions
         </MudButton>
     </DialogActions>

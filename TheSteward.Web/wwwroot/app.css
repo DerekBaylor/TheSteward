@@ -24,6 +24,7 @@
 @import url("./styles/components/householdStyles/userProfileCard.css");
 @import url("./styles/components/householdStyles/inviteMemberModal.css");
 @import url("./styles/components/householdStyles/pendingInvitationCard.css");
+@import url("./styles/components//householdStyles/userProfileModal.css");
 /* budget */
 @import url("./styles/components/budgetStyles/incomeCard.css");
 @import url("./styles/components/budgetStyles/incomeModal.css");

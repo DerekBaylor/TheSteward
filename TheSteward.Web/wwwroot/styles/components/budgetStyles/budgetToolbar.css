@@ -1,0 +1,21 @@
+﻿.budget-toolbar {
+    align-items: center;
+    animation: slideDown 0.4s ease-out;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-wrap: wrap;
+    font-family: var(--primary-font);
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 1rem;
+    padding: 1rem 1.5rem;
+}
+
+
+.budget-toolbar .toolbar-select-group {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+}

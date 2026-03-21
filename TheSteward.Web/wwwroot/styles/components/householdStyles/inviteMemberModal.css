@@ -6,3 +6,12 @@
 .invite-member-modal .modal-header-custom {
     background-color: var(--base-blue);
 }
+
+.card-btn.send-btn {
+    background-color: var(--base-blue);
+    color: var(--off-white);
+}
+
+.card-btn.send-btn:hover {
+    background-color: var(--blue-8);
+}

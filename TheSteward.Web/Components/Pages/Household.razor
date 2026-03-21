@@ -25,8 +25,8 @@ else
     <MudToolBar class="household-toolbar" WrapContent="true">
         @if (selectedHouseholdDto != null)
         {
-            <div class="toolbar-select-group">
-                <label for="householdSelect" class="select-label">
+            <div class="household-toolbar-select-group">
+                <label for="householdSelect" class="select-label household-select">
                     <span class="material-icons">home</span>
                     Active Household
                 </label>
@@ -34,19 +34,21 @@ else
                           Items="householdItems"
                           @bind-Value="selectedHouseholdId"
                           OnChange="OnHouseholdChanged"
-                          Placeholder="Choose household" />
+                          Placeholder="Choose household" 
+                          Variant="purple"/>
             </div>
         }
 
         <div class="toolbar-actions">
-            <MudButton class="btn-toolbar btn-add" @onclick="OpenHouseholdFormModalAsync">
+            <MudButton Class="toolbar-btn btn-add" @onclick="OpenHouseholdFormModalAsync">
                 <span class="material-icons">add</span>
                 Add Household
             </MudButton>
-            <button class="btn-toolbar btn-profile" @onclick="ShowUserProfile">
+
+            <MudButton Class="toolbar-btn btn-profile" @onclick="ShowUserProfile">
                 <span class="material-icons">person</span>
                 My Profile
-            </button>
+            </MudButton>
         </div>
     </MudToolBar>
 

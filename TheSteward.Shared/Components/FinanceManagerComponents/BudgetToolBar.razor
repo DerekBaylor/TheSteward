@@ -19,7 +19,7 @@
 }
 else if (householdItems.Count > 0)
 {
-    <MudToolBar Class="household-toolbar" WrapContent="true">
+    <MudToolBar Class="budget-toolbar" >
         <div class="toolbar-select-group">
             <label class="select-label">
                 <span class="material-icons">home</span>
@@ -34,10 +34,11 @@ else if (householdItems.Count > 0)
             else
             {
                 <TsSelect TValue="Guid?"
-                          Items="householdItems"
-                          @bind-Value="selectedHouseholdId"
-                          OnChange="OnHouseholdChangedAsync"
-                          Placeholder="Choose household" />
+                            Items="householdItems"
+                            @bind-Value="selectedHouseholdId"
+                            OnChange="OnHouseholdChangedAsync"
+                            Placeholder="Choose household" 
+                            Variant="purple" />
             }
 
         </div>
@@ -93,7 +94,7 @@ else
 
     private async Task OnHouseholdChangedAsync()
     {
-        var selected = HouseholdState.UserHouseholds  // was: userHouseholds
+        var selected = HouseholdState.UserHouseholds
             .FirstOrDefault(uh => uh.HouseholdId == selectedHouseholdId);
         
         if (selected == null) return;

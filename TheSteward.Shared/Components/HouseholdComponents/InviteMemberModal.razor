@@ -45,8 +45,8 @@
         </MudButton>
         <MudButton OnClick="HandleSubmit"
                    Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   Disabled="@isSubmitting">
+                   Disabled="@isSubmitting"
+                   Class="card-btn send-btn">
             @if (isSubmitting)
             {
                 <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />

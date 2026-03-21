@@ -35,3 +35,18 @@
     .modal-close-btn:hover {
         background-color: rgba(255, 255, 255, 0.1);
     }
+
+.ts-modal-body {
+    padding: 0.5rem 0;
+}
+
+.ts-modal-body-text {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.ts-modal-subtext {
+    font-size: 0.875rem;
+    opacity: 0.75;
+    line-height: 1.5;
+}

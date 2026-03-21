@@ -18,9 +18,9 @@ public interface IUserHouseholdService
     /// <summary>
     /// Deletes a user-household relationship, removing the user from the household.
     /// </summary>
-    /// <param name="userHousehold">The user-household entity to delete.</param>
+    /// <param name="userHouseholdId">The unique identifier of the user household to update.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task DeleteAsync(UserHousehold userHousehold);
+    Task DeleteAsync(Guid userHouseholdId);
 
     #region Update Methods
 
@@ -45,6 +45,18 @@ public interface IUserHouseholdService
     /// Thrown when no user household matching <paramref name="userHouseholdId"/> is found.
     /// </exception>
     Task SetDefaultBudgetAsync(Guid userHouseholdId, Guid budgetId);
+
+    /// <summary>
+    /// Deactivates a user-household relationship, marking it as inactive without deleting the record.
+    /// </summary>
+    /// <param name="userHouseholdId">The unique identifier of the user household to update.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="userHouseholdId"/> or <paramref name="budgetId"/> is empty.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when no user household matching <paramref name="userHouseholdId"/> is found.
+    /// </exception>
+    Task DeactivateUserAsync(Guid userHouseholdId);
     #endregion Update Methods
 
     #region Get Methods

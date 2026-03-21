@@ -79,7 +79,8 @@ else
                     HasAdminPermissions="hasAdminPermissions"
                     OnEditHosuehold="EditHousehold"
                     OnAddMember="AddMember"
-                    GetMember="GetMember" />
+                    GetMember="GetMember" 
+                    OnRemoveMember="RemoveMember" />
     
             </div>
 
@@ -424,6 +425,66 @@ else
         isEditHouseholdMode = true;
 
         OpenHouseholdFormModalAsync();
+    }
+
+    private async Task RemoveMember(ApplicationUser member)
+    {
+        if (selectedHouseholdDto == null) return;
+
+        var parameters = new DialogParameters
+        {
+            { "MemberName", member.UserName ?? "this member" }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<RemoveUserHouseholdModal>(
+            "Remove or Deactivate Member",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result == null || result.Canceled || result.Data is not string resultData) return;
+
+        try
+        {
+            var userHousehold = await UserHouseholdService
+                .GetUserHouseholdByHouseholdIdAndUserIdAsync(
+                    selectedHouseholdDto.HouseholdId,
+                    member.Id);
+
+            if (userHousehold == null)
+            {
+                errorMessage = "Could not find member record.";
+                return;
+            }
+
+            if (resultData.StartsWith("delete:"))
+            {
+                await UserHouseholdService.DeleteAsync(userHousehold.UserHouseholdId);
+                Snackbar.Add($"{member.UserName} has been removed.", Severity.Success);
+            }
+            else if (resultData.StartsWith("deactivate:"))
+            {
+                await UserHouseholdService.DeactivateUserAsync(userHousehold.UserHouseholdId);
+                Snackbar.Add($"{member.UserName} has been deactivated.", Severity.Info);
+            }
+
+            await GetUserHouseholdAndPermissions(selectedHouseholdDto.HouseholdId);
+            ClearSelectedMember();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error updating member: {ex.Message}";
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
     }
 
     #endregion Household Management

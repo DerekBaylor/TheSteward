@@ -35,46 +35,45 @@
     padding: .375rem .750rem;
 }
 
-.ts-edit-btn {
+.ts-btn.ts-edit-btn {
     background-color: var(--orange-4);
     color: var(--dark-blue);
     border-color: var(--orange-4);
-    
 }
-    .ts-edit-btn:hover {
+    .ts-btn.ts-edit-btn:hover {
         background-color: var(--orange-8);
         color: var(--off-white);
     }
 
-    .ts-edit-btn:active {
+    .ts-btn.ts-edit-btn:active {
         background-color: var(--orange-9);
         color: var(--off-white);
     }
 
-.ts-cancel-btn {
-    background-color: var(--gray-6);
-    color: var(--off-white);
-    border-color: var(--gray-6);
+.ts-btn.ts-cancel-btn {
+    background-color: var(--gray-2);
+    border: solid 1px var(--gray-3);
+    color: var(--gray-8);
 }
-    .ts-cancel-btn:hover {
-        background-color: var(--dark-gray-8);
+    .ts-btn.ts-cancel-btn:hover {
+        background-color: var(--gray-5);
     }
 
-    .ts-cancel-btn:active {
-        background-color: var(--dark-gray-9);
+    .ts-btn.ts-cancel-btn:active {
+        background-color: var(--gray-3);
     }
 
-.ts-submit-btn {
+.ts-btn.ts-submit-btn {
     background-color: var(--base-green);
     color: var(--off-white);
     border-color: var(--base-green);
 }
 
-    .ts-submit-btn:hover {
+    .ts-btn.ts-submit-btn:hover {
         background-color: var(--green-8);
     }
 
-    .ts-submit-btn:active {
+    .ts-btn.ts-submit-btn:active {
         background-color: var(--green-9);
     }
 

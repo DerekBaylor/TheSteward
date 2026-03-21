@@ -12,6 +12,8 @@ public class UpdateHouseholdDto
 
     public bool IsDefaultHousehold { get; set; } = false;
 
+    public bool IsActive { get; set; }
+
     public bool HasTaskManagerAccess { get; set; }
 
     public bool HasFinanceManagerAccess { get; set; }

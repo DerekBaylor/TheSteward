@@ -38,6 +38,7 @@ public class UserHouseholdService : IUserHouseholdService
             UserHouseholdId = Guid.NewGuid(),
             IsDefaultUserHousehold = newUserHousehold.IsDefaultUserHousehold,
             IsHouseholdOwner = newUserHousehold.IsHouseholdOwner,
+            IsActive = true,
             HasAdminPermissions = newUserHousehold.HasAdminPermissions,
             HasFinanceManagerWritePermission = newUserHousehold.HasFinanceManagerWritePermission,
             HasFinanceManagerReadPermission = newUserHousehold.HasFinanceManagerReadPermission,
@@ -55,8 +56,11 @@ public class UserHouseholdService : IUserHouseholdService
         await _userHouseholdRepository.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(UserHousehold userHousehold)
+    public async Task DeleteAsync(Guid userHouseholdId)
     {
+        var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId)
+            ?? throw new KeyNotFoundException($"UserHousehold with ID {userHouseholdId} was not found.");
+
         await _userHouseholdRepository.DeleteAsync(userHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
     }
@@ -91,6 +95,20 @@ public class UserHouseholdService : IUserHouseholdService
 
         userHousehold.DefaultBudgetId = budgetId;
 
+        await _userHouseholdRepository.UpdateAsync(userHousehold);
+        await _userHouseholdRepository.SaveChangesAsync();
+    }
+
+    public async Task DeactivateUserAsync(Guid userHouseholdId)
+    {
+        if (userHouseholdId == Guid.Empty)
+            throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(userHouseholdId));
+
+        var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId)
+            ?? throw new KeyNotFoundException($"UserHousehold with ID {userHouseholdId} was not found.");
+
+        userHousehold.IsActive = false;
+        
         await _userHouseholdRepository.UpdateAsync(userHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
     }

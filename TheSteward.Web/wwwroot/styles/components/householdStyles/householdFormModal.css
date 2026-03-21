@@ -1,0 +1,56 @@
+﻿.household-form-modal.ts-modal {
+    border: 3px solid var(--base-purple);
+}
+
+
+.household-form-modal div.mud-input-control > div > div > fieldset {
+    border-color: var(--gray-3) !important;
+}
+
+.household-form-modal div.mud-input-control:hover > div > div > fieldset {
+    border-color: var(--purple-4) !important;
+}
+
+.household-form-modal div.mud-input-control:focus-within > div > div > fieldset {
+    border-color: var(--base-purple) !important;
+    color: var(--gray-5);
+}
+
+.household-form-modal .mud-input-label {
+    color: var(--gray-6) !important;
+    background-color: var(--off-white);
+}
+
+.household-form-modal div.mud-input-control:focus-within .mud-input-label {
+    color: var(--gray-6) !important;
+}
+
+    .household-form-modal .ts-text-field .mud-input-outlined-border {
+        border-color: red;
+    }
+
+    .household-form-modal .mud-switch-track.mud-default {
+        background-color: var(--base-purple);
+    }
+
+    .household-form-modal .mud-switch-base.mud-checked .mud-switch-thumb {
+        background-color: var(--base-purple);
+    }
+
+    .household-form-modal .mud-switch-base.mud-checked {
+        color: var(--base-purple);
+    }
+
+
+    .ts-btn.household-update-btn {
+        background-color: var(--base-purple);
+        color: var(--off-white);
+    }
+
+        .ts-btn.household-update-btn:hover {
+            background-color: var(--purple-8);
+        }
+
+        .ts-btn.household-update-btn:active {
+            background-color: var(--purple-6);
+        }

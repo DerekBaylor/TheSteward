@@ -31,6 +31,9 @@
     border-color: var(--gray-3) !important;
 }
 
+.user-profile-modal div.mud-input-control:hover > div > div > fieldset {
+    border-color: var(--blue-4) !important;
+}
 
 .user-profile-modal div.mud-input-control:focus-within > div > div > fieldset {
     border-color: var(--base-blue) !important;
@@ -39,6 +42,7 @@
 
 .user-profile-modal .mud-input-label {
     color: var(--gray-6) !important;
+    background-color: var(--off-white);
 }
 
 .user-profile-modal div.mud-input-control:focus-within .mud-input-label {

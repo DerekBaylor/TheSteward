@@ -15,3 +15,25 @@
 .card-btn.send-btn:hover {
     background-color: var(--blue-8);
 }
+
+.invite-member-modal div.mud-input-control > div > div > fieldset {
+    border-color: var(--gray-3) !important;
+}
+
+.invite-member-modal div.mud-input-control:hover > div > div > fieldset {
+    border-color: var(--blue-4) !important;
+}
+
+.invite-member-modal div.mud-input-control:focus-within > div > div > fieldset {
+    border-color: var(--base-blue) !important;
+    color: var(--gray-5);
+}
+
+.invite-member-modal .mud-input-label {
+    color: var(--gray-6) !important;
+    background-color: var(--off-white);
+}
+
+.invite-member-modal div.mud-input-control:focus-within .mud-input-label {
+    color: var(--gray-6) !important;
+}

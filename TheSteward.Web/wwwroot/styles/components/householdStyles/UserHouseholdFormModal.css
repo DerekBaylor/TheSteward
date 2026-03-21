@@ -26,14 +26,16 @@
     background-color: var(--gray-5);
 }
 
-.user-household-modal .mud-switch-track.mud-primary {
-    background-color: var(--base-blue) !important;
+
+
+.user-household-modal .mud-switch-track.mud-default {
+    background-color: var(--base-blue);
 }
 
 .user-household-modal .mud-switch-base.mud-checked .mud-switch-thumb {
-    background-color: var(--base-blue) !important;
+    background-color: var(--base-blue);
 }
 
 .user-household-modal .mud-switch-base.mud-checked {
-    color: var(--base-blue) !important;
+    color: var(--base-blue) ;
 }

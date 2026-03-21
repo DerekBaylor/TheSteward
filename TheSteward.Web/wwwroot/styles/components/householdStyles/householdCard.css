@@ -115,3 +115,16 @@ ul#householdFeatureList li {
     font-size: 20px;
     vertical-align: middle;
 }
+
+
+.member-list-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.member-remove-btn {
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+    color: var(--base-red);
+}

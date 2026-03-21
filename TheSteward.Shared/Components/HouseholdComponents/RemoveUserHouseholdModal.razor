@@ -1,0 +1,46 @@
+﻿@namespace TheSteward.Shared.Components.HouseholdComponents
+
+<MudDialog Class="remove-member-modal ts-modal">
+    <DialogContent>
+        <div class="ts-modal-body">
+            <p class="ts-modal-body-text">
+                What would you like to do with <strong>@MemberName</strong>?
+            </p>
+            <p class="ts-modal-subtext">
+                <strong>Deactivate</strong> keeps the member record but revokes their access.
+            </p>
+            <p class="ts-modal-subtext">
+                <strong>Remove</strong> permanently deletes them from this household.
+            </p>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Class="ts-btn ts-cancel-btn" 
+                   OnClick="Cancel">
+            Cancel
+        </MudButton>
+@*         <MudButton Class="ts-btn ts-secondary-btn" 
+                   OnClick="HandleDeactivate">
+            Deactivate
+        </MudButton> *@
+        <MudButton Class="ts-btn ts-delete-btn" 
+                   OnClick="HandleRemove">
+            Remove
+    </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string MemberName { get; set; } = string.Empty;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void HandleDeactivate() => 
+        MudDialog.Close(DialogResult.Ok($"deactivate:{MemberName}"));
+    private void HandleRemove() =>
+        MudDialog.Close(DialogResult.Ok($"delete:{MemberName}"));
+}

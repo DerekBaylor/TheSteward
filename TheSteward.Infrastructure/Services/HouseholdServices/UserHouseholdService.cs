@@ -33,26 +33,14 @@ public class UserHouseholdService : IUserHouseholdService
         if (owner == null)
             throw new KeyNotFoundException($"User with ID {ownerId} not found.");
 
-        var userHousehold = new UserHousehold
-        {
-            UserHouseholdId = Guid.NewGuid(),
-            IsDefaultUserHousehold = newUserHousehold.IsDefaultUserHousehold,
-            IsHouseholdOwner = newUserHousehold.IsHouseholdOwner,
-            IsActive = true,
-            HasAdminPermissions = newUserHousehold.HasAdminPermissions,
-            HasFinanceManagerWritePermission = newUserHousehold.HasFinanceManagerWritePermission,
-            HasFinanceManagerReadPermission = newUserHousehold.HasFinanceManagerReadPermission,
-            HasKitchenManagerWritePermission = newUserHousehold.HasKitchenManagerWritePermission,
-            HasKitchenManagerReadPermission = newUserHousehold.HasKitchenManagerReadPermission,
-            HasTaskManagerWritePermission = newUserHousehold.HasTaskManagerWritePermission,
-            HasTaskManagerReadPermission = newUserHousehold.HasTaskManagerReadPermission,
-            HasFileManagerWritePermission = newUserHousehold.HasFileManagerWritePermission,
-            HasFileManagerReadPermission = newUserHousehold.HasFileManagerReadPermission,
-            UserId = newUserHousehold.UserId,
-            HouseholdId = newUserHousehold.HouseholdId
-        };
+        await CreateUserHouseholdAsync(
+            newUserHousehold.HouseholdId,
+            newUserHousehold.UserId,
+            newUserHousehold.IsDefaultUserHousehold,
+            newUserHousehold.IsHouseholdOwner,
+            newUserHousehold.HasAdminPermissions,
+            hasAllPermissions: true);
 
-        await _userHouseholdRepository.AddAsync(userHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
     }
 
@@ -284,25 +272,13 @@ public class UserHouseholdService : IUserHouseholdService
                 setAsDefault = true;
         }
 
-        var userHousehold = new UserHousehold
-        {
-            UserHouseholdId = Guid.NewGuid(),
-            UserId = userId,
-            HouseholdId = invitation.HouseholdId,
-            IsDefaultUserHousehold = setAsDefault,
-            IsHouseholdOwner = false,
-            HasAdminPermissions = false,
-            HasFinanceManagerWritePermission = false,
-            HasFinanceManagerReadPermission = false,
-            HasKitchenManagerWritePermission = false,
-            HasKitchenManagerReadPermission = false,
-            HasTaskManagerWritePermission = false,
-            HasTaskManagerReadPermission = false,
-            HasFileManagerWritePermission = false,
-            HasFileManagerReadPermission = false
-        };
-
-        await _userHouseholdRepository.AddAsync(userHousehold);
+        await CreateUserHouseholdAsync(
+            invitation.HouseholdId,
+            userId,
+            isDefaultUserHousehold: setAsDefault,
+            isHouseholdOwner: false,
+            hasAdminPermissions: false,
+            hasAllPermissions: false);
 
         invitation.IsAccepted = true;
         invitation.AcceptedDate = DateTime.UtcNow;
@@ -360,6 +336,45 @@ public class UserHouseholdService : IUserHouseholdService
     #endregion Invitation Methods
 
     #region Private Helper Methods
+
+    /// <summary>
+    /// Builds and stages a new <see cref="UserHousehold"/> entity for insertion without calling SaveChangesAsync.
+    /// This allows callers to control when the transaction is committed, ensuring atomicity when
+    /// multiple changes need to be persisted together.
+    /// </summary>
+    /// <param name="householdId">The unique identifier of the household.</param>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="isDefaultUserHousehold">Whether this should be the user's default household.</param>
+    /// <param name="isHouseholdOwner">Whether the user is the owner of the household.</param>
+    /// <param name="hasAdminPermissions">Whether the user has admin permissions.</param>
+    /// <param name="hasAllPermissions">
+    /// When true, all feature read and write permissions are granted.
+    /// When false, all permissions are set to false — used for invited members who start with no access.
+    /// </param>
+    private async Task CreateUserHouseholdAsync(Guid householdId, string userId, bool isDefaultUserHousehold, bool isHouseholdOwner, bool hasAdminPermissions, bool hasAllPermissions)
+    {
+        var userHousehold = new UserHousehold
+        {
+            UserHouseholdId = Guid.NewGuid(),
+            UserId = userId,
+            HouseholdId = householdId,
+            IsDefaultUserHousehold = isDefaultUserHousehold,
+            IsHouseholdOwner = isHouseholdOwner,
+            IsActive = true,
+            HasAdminPermissions = hasAdminPermissions,
+            HasFinanceManagerWritePermission = hasAllPermissions,
+            HasFinanceManagerReadPermission = hasAllPermissions,
+            HasKitchenManagerWritePermission = hasAllPermissions,
+            HasKitchenManagerReadPermission = hasAllPermissions,
+            HasTaskManagerWritePermission = hasAllPermissions,
+            HasTaskManagerReadPermission = hasAllPermissions,
+            HasFileManagerWritePermission = hasAllPermissions,
+            HasFileManagerReadPermission = hasAllPermissions,
+        };
+
+        await _userHouseholdRepository.AddAsync(userHousehold);
+    }
+
     /// <summary>
     /// Checks whether the given user-household relationship is the user's current default, and if so,
     /// reassigns the default to the first available active household the user belongs to.

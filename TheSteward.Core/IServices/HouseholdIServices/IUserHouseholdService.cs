@@ -7,6 +7,7 @@ public interface IUserHouseholdService
 {
     /// <summary>
     /// Creates a new user-household relationship with specified permissions.
+    /// Owners are granted full permissions; all other setup is delegated to the internal helper.
     /// </summary>
     /// <param name="newUserHousehold">The user-household data transfer object containing relationship details and permissions.</param>
     /// <param name="ownerId">The ID of the user who owns or is creating this relationship.</param>
@@ -128,13 +129,18 @@ public interface IUserHouseholdService
     Task<HouseholdInvitationDto> InviteUserToHouseholdAsync(InviteUserToHouseholdDto inviteDto, string invitingUserId);
 
     /// <summary>
-    /// Accepts a household invitation and adds the user to the household.
+    /// Accepts a household invitation and adds the user to the household with no permissions by default.
+    /// Permissions can be granted separately by a household admin after joining.
+    /// The user-household record and the invitation acceptance are committed in a single transaction
+    /// to ensure neither change is persisted without the other.
     /// </summary>
     /// <param name="invitationId">The invitation ID to accept.</param>
     /// <param name="userId">The ID of the user accepting the invitation.</param>
     /// <param name="setAsDefault">Whether to set this as the user's default household.</param>
-    /// <exception cref="KeyNotFoundException">Thrown when invitation not found.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when invitation is expired or already accepted.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when the invitation is not found.</exception>
+    /// <exception cref="UnauthorizedAccessException">Thrown when the invitation does not belong to the user.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the invitation is expired or already accepted.</exception>
+    /// <returns>A task representing the asynchronous operation.</returns>
     Task AcceptInvitationAsync(Guid invitationId, string userId, bool setAsDefault);
 
     /// <summary>

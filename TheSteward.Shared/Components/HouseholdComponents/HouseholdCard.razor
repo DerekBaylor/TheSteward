@@ -52,8 +52,14 @@
                                         <div class="member-list-row">
                                             <button class="member-list-btn" @onclick="() => HandleMemberClick(userHousehold.User)">
                                                 <span class="material-icons">person</span>
-                                                <span>@userHousehold.User.UserName</span>
-                                                @if (userHousehold.HasAdminPermissions)
+                                                <span class="@(!userHousehold.IsActive ? "member-name member-name--inactive" : "member-name")">
+                                                    @userHousehold.User.UserName
+                                                </span>
+                                                @if (!userHousehold.IsActive)
+                                                {
+                                                    <span class="member-inactive-badge">Inactive</span>
+                                                }
+                                                @if (userHousehold.IsActive && userHousehold.HasAdminPermissions)
                                                 {
                                                     <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4" />
                                                 }
@@ -69,8 +75,14 @@
                                     {
                                         <span>
                                             <span class="material-icons">person</span>
-                                            <span>@userHousehold.User.UserName</span>
-                                            @if (userHousehold.HasAdminPermissions)
+                                            <span class="@(!userHousehold.IsActive ? "member-name member-name--inactive" : "member-name")">
+                                                @userHousehold.User.UserName
+                                            </span>
+                                            @if (!userHousehold.IsActive)
+                                            {
+                                                <span class="member-inactive-badge">Inactive</span>
+                                            }
+                                            @if (userHousehold.IsActive && userHousehold.HasAdminPermissions)
                                             {
                                                 <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4" />
                                             }

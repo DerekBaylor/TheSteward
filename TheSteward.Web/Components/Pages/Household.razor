@@ -74,13 +74,13 @@ else
         <div class="household-container"> 
             <div class="household-card-container">
                 <h4 class="section-title"> Household Information </h4>
-
                 <HouseholdCard HouseholdDto="selectedHouseholdDto"
-                    HasAdminPermissions="hasAdminPermissions"
-                    OnEditHosuehold="EditHousehold"
-                    OnAddMember="AddMember"
-                    GetMember="GetMember" 
-                    OnRemoveMember="RemoveMember" />
+                               HasAdminPermissions="hasAdminPermissions"
+                               CurrentUserId="@(currentUserId ?? string.Empty)"
+                               OnEditHosuehold="EditHousehold"
+                               OnAddMember="AddMember"
+                               GetMember="GetMember"
+                               OnRemoveMember="RemoveMember" />
     
             </div>
 
@@ -88,7 +88,6 @@ else
                 <div class="household-card-container">
                     @if (selectedUserHouseholdDto != null && showMemberCard)
                         {
-
                         <h4 class="section-title"> Member Information</h4>
                         <UserHouseholdCard 
                             UserHouseholdDto="selectedUserHouseholdDto"
@@ -131,7 +130,7 @@ else
     private HouseholdDto? selectedHouseholdDto = null;
     private List<SelectItem<Guid?>> householdItems = new();
 
-    private UserHouseholdDto? userHouseholdDto = null;
+    //private UserHouseholdDto? userHouseholdDto = null;
     private UserHouseholdDto? selectedUserHouseholdDto = null;
     private ApplicationUser? selectedMember;
 
@@ -252,7 +251,7 @@ else
 
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result !=null && !result.Canceled)
         {
             await SaveHousehold();
         }
@@ -409,7 +408,7 @@ else
         }
     }
 
-    private void EditHousehold()
+    private async Task EditHousehold()
     {
         if (selectedHouseholdDto == null) return;
 
@@ -424,16 +423,25 @@ else
 
         isEditHouseholdMode = true;
 
-        OpenHouseholdFormModalAsync();
+        await OpenHouseholdFormModalAsync();
     }
 
     private async Task RemoveMember(ApplicationUser member)
     {
         if (selectedHouseholdDto == null) return;
 
+        var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(selectedHouseholdDto.HouseholdId, member.Id, activeOnly: false);
+
+        if (userHousehold == null)
+        {
+            errorMessage = "Could not find member record.";
+            return;
+        }
+
         var parameters = new DialogParameters
         {
-            { "MemberName", member.UserName ?? "this member" }
+            { "MemberName", member.UserName ?? "this member" },
+            { "IsActive", userHousehold.IsActive }
         };
 
         var options = new DialogOptions
@@ -443,10 +451,7 @@ else
             FullWidth = true
         };
 
-        var dialog = await DialogService.ShowAsync<RemoveUserHouseholdModal>(
-            "Remove or Deactivate Member",
-            parameters,
-            options);
+        var dialog = await DialogService.ShowAsync<ManageUserHouseholdModal>("Manage Member", parameters, options);
 
         var result = await dialog.Result;
 
@@ -454,14 +459,6 @@ else
 
         try
         {
-            var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(selectedHouseholdDto.HouseholdId, member.Id, activeOnly: false);
-
-            if (userHousehold == null)
-            {
-                errorMessage = "Could not find member record.";
-                return;
-            }
-
             if (resultData.StartsWith("delete:"))
             {
                 await UserHouseholdService.DeleteAsync(userHousehold.UserHouseholdId);
@@ -471,6 +468,11 @@ else
             {
                 await UserHouseholdService.DeactivateUserAsync(userHousehold.UserHouseholdId);
                 Snackbar.Add($"{member.UserName} has been deactivated.", Severity.Info);
+            }
+            else if (resultData.StartsWith("reactivate:"))
+            {
+                await UserHouseholdService.ReactivateUserAsync(userHousehold.UserHouseholdId);
+                Snackbar.Add($"{member.UserName} has been reactivated.", Severity.Success);
             }
 
             await GetUserHouseholdAndPermissions(selectedHouseholdDto.HouseholdId);
@@ -521,7 +523,7 @@ else
 
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is UserProfileFormDto updatedFormDto)
+        if (result != null && !result.Canceled && result.Data is UserProfileFormDto updatedFormDto)
         {
             await SaveUserProfile(updatedFormDto);
         }
@@ -619,7 +621,7 @@ else
 
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is InviteUserToHouseholdDto inviteDto)
+        if (result != null && !result.Canceled && result.Data is InviteUserToHouseholdDto inviteDto)
         {
             await SendInvitation(inviteDto);
         }
@@ -792,7 +794,7 @@ else
 
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is UserHouseholdFormDto updatedFormDto)
+        if (result != null && !result.Canceled && result.Data is UserHouseholdFormDto updatedFormDto)
         {
             await SaveUserHousehold(updatedFormDto);
         }

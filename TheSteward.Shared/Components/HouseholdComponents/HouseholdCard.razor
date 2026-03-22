@@ -64,11 +64,14 @@
                                                     <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4" />
                                                 }
                                             </button>
-                                            <button class="member-remove-btn"
-                                                    title="Remove or deactivate member"
-                                                    @onclick="() => HandleRemoveMemberClick(userHousehold.User)">
-                                                <span class="material-icons">delete</span>
-                                            </button>
+                                            @if (userHousehold.User.Id != CurrentUserId)
+                                            {
+                                                <button class="member-remove-btn @(!userHousehold.IsActive ? "member-remove-btn--reactivate" : "")"
+                                                        title="@(!userHousehold.IsActive ? "Reactivate or remove member" : "Deactivate or remove member")"
+                                                        @onclick="() => HandleRemoveMemberClick(userHousehold.User)">
+                                                    <span class="material-icons">@(!userHousehold.IsActive ? "manage_accounts" : "delete")</span>
+                                                </button>
+                                            }
                                         </div>
                                     }
                                     else
@@ -120,6 +123,9 @@
 
     [Parameter]
     public EventCallback<ApplicationUser> OnRemoveMember { get; set; }
+
+    [Parameter, EditorRequired]
+    public string CurrentUserId { get; set; } = string.Empty;
 
     private string adminBadge = "Admin";
 

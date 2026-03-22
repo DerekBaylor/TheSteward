@@ -144,3 +144,7 @@ ul#householdFeatureList li {
     padding: 0.1rem 0.4rem;
     flex-shrink: 0;
 }
+
+.member-remove-btn--reactivate {
+    color: var(--base-green);
+}

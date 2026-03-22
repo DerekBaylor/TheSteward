@@ -67,6 +67,16 @@ public interface IUserHouseholdService
     /// </exception>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task DeactivateUserAsync(Guid userHouseholdId);
+
+    /// <summary>
+    /// Reactivates a previously deactivated user-household relationship, restoring the user's
+    /// access to the household. Does not update any permissions.
+    /// </summary>
+    /// <param name="userHouseholdId">The unique identifier of the user household to reactivate.</param>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="userHouseholdId"/> is empty.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when no user household matching <paramref name="userHouseholdId"/> is found.</exception>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ReactivateUserAsync(Guid userHouseholdId);
     #endregion Update Methods
 
     #region Get Methods

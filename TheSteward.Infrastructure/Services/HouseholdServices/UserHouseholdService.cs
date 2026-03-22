@@ -105,6 +105,20 @@ public class UserHouseholdService : IUserHouseholdService
         await _userHouseholdRepository.SaveChangesAsync();
     }
 
+    public async Task ReactivateUserAsync(Guid userHouseholdId) 
+    {
+        if (userHouseholdId == Guid.Empty)
+            throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(userHouseholdId));
+
+        var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId)
+            ?? throw new KeyNotFoundException($"UserHousehold with ID {userHouseholdId} was not found.");
+
+        userHousehold.IsActive = true;
+
+        await _userHouseholdRepository.UpdateAsync(userHousehold);
+        await _userHouseholdRepository.SaveChangesAsync();
+    }
+
     #endregion Update Methods
 
     #region Get UserHousehold Methods

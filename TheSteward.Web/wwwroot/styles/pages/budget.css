@@ -6,6 +6,18 @@
     padding: 1.5rem;
 }
 
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .budget-col-left {
     display: flex;
     flex-direction: column;

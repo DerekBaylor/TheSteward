@@ -49,21 +49,40 @@
                                 <li class="mb-2">
                                     @if (HasAdminPermissions)
                                     {
-                                        <button class="member-list-btn" @onclick="() => HandleMemberClick(userHousehold.User)">
-                                            <span class="material-icons">person</span>
-                                            <span>@userHousehold.User.UserName</span>
-                                            @if (userHousehold.HasAdminPermissions)
-                                            {
-                                                <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4" />
-                                            }
-                                        </button>
+                                        <div class="member-list-row">
+                                            <button class="member-list-btn" @onclick="() => HandleMemberClick(userHousehold.User)">
+                                                <span class="material-icons">person</span>
+                                                <span class="@(!userHousehold.IsActive ? "member-name member-name--inactive" : "member-name")">
+                                                    @userHousehold.User.UserName
+                                                </span>
+                                                @if (!userHousehold.IsActive)
+                                                {
+                                                    <span class="member-inactive-badge">Inactive</span>
+                                                }
+                                                @if (userHousehold.IsActive && userHousehold.HasAdminPermissions)
+                                                {
+                                                    <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4" />
+                                                }
+                                            </button>
+                                            <button class="member-remove-btn"
+                                                    title="Remove or deactivate member"
+                                                    @onclick="() => HandleRemoveMemberClick(userHousehold.User)">
+                                                <span class="material-icons">delete</span>
+                                            </button>
+                                        </div>
                                     }
                                     else
                                     {
                                         <span>
                                             <span class="material-icons">person</span>
-                                            <span>@userHousehold.User.UserName</span>
-                                            @if (userHousehold.HasAdminPermissions)
+                                            <span class="@(!userHousehold.IsActive ? "member-name member-name--inactive" : "member-name")">
+                                                @userHousehold.User.UserName
+                                            </span>
+                                            @if (!userHousehold.IsActive)
+                                            {
+                                                <span class="member-inactive-badge">Inactive</span>
+                                            }
+                                            @if (userHousehold.IsActive && userHousehold.HasAdminPermissions)
                                             {
                                                 <MudBadge Content="adminBadge" Color="Color.Primary" Overlap="false" Class="mx-6 my-4" />
                                             }
@@ -99,6 +118,9 @@
     [Parameter]
     public EventCallback<ApplicationUser> GetMember { get; set; }
 
+    [Parameter]
+    public EventCallback<ApplicationUser> OnRemoveMember { get; set; }
+
     private string adminBadge = "Admin";
 
     private List<(string Name, bool IsEnabled)> GetFeatures()
@@ -132,5 +154,10 @@
     private async Task HandleMemberClick(ApplicationUser member)
     {
         await GetMember.InvokeAsync(member);
+    }
+
+    private async Task HandleRemoveMemberClick(ApplicationUser member)
+    {
+        await OnRemoveMember.InvokeAsync(member);
     }
 }

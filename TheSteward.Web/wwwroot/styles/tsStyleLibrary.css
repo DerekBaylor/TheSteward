@@ -35,46 +35,45 @@
     padding: .375rem .750rem;
 }
 
-.ts-edit-btn {
+.ts-btn.ts-edit-btn {
     background-color: var(--orange-4);
     color: var(--dark-blue);
     border-color: var(--orange-4);
-    
 }
-    .ts-edit-btn:hover {
+    .ts-btn.ts-edit-btn:hover {
         background-color: var(--orange-8);
         color: var(--off-white);
     }
 
-    .ts-edit-btn:active {
+    .ts-btn.ts-edit-btn:active {
         background-color: var(--orange-9);
         color: var(--off-white);
     }
 
-.ts-cancel-btn {
-    background-color: var(--gray-6);
-    color: var(--off-white);
-    border-color: var(--gray-6);
+.ts-btn.ts-cancel-btn {
+    background-color: var(--gray-2);
+    border: solid 1px var(--gray-3);
+    color: var(--gray-8);
 }
-    .ts-cancel-btn:hover {
-        background-color: var(--dark-gray-8);
+    .ts-btn.ts-cancel-btn:hover {
+        background-color: var(--gray-5);
     }
 
-    .ts-cancel-btn:active {
-        background-color: var(--dark-gray-9);
+    .ts-btn.ts-cancel-btn:active {
+        background-color: var(--gray-3);
     }
 
-.ts-submit-btn {
+.ts-btn.ts-submit-btn {
     background-color: var(--base-green);
     color: var(--off-white);
     border-color: var(--base-green);
 }
 
-    .ts-submit-btn:hover {
+    .ts-btn.ts-submit-btn:hover {
         background-color: var(--green-8);
     }
 
-    .ts-submit-btn:active {
+    .ts-btn.ts-submit-btn:active {
         background-color: var(--green-9);
     }
 
@@ -93,7 +92,7 @@
 
     .ts-x-btn:hover {
         background: var(--off-white);
-        color: var(--gray-8);
+        color: var(--gray-9);
     }
 
     .ts-x-btn:active {
@@ -110,163 +109,6 @@
         outline: 2px solid var(--gray-8);
         outline-offset: 2px;
     }
-
-/* ----------------------------- */
-/* Single Select Razor Component */
-/* ----------------------------- */
-.ts-select-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.75rem;
-    flex: 1;
-    min-width: 0;
-}
-
-.ts-select-label {
-    font-weight: 600;
-    font-size: 0.95rem;
-    white-space: nowrap;
-    font-family: var(--label-font);
-    color: var(--gray-8);
-    margin: 0;
-}
-
-.ts-custom-select-container {
-    position: relative;
-    width: 100%;
-    min-width: 200px;
-}
-
-.ts-select-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 0.625rem 1rem;
-    padding-right: 2.75rem;
-    border-radius: 8px;
-    border: 2px solid var(--base-green);
-    background-color: var(--green-1);
-    font-size: 0.95rem;
-    color: var(--gray-8);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    font-family: var(--primary-font);
-}
-
-    .ts-select-header:hover {
-        border-color: var(--green-8);
-        background-color: var(--green-2);
-    }
-
-    .ts-select-header:focus,
-    .ts-custom-select-container.open .ts-select-header {
-        border-color: var(--green-8);
-        background-color: white;
-        box-shadow: 0 0 0 3px var(--green-2);
-        outline: none;
-    }
-
-    .ts-select-header::placeholder {
-        color: var(--gray-5);
-    }
-
-.ts-chevron {
-    position: absolute;
-    right: 0.75rem;
-    font-size: 1.5rem;
-    color: var(--base-green);
-    pointer-events: none;
-    transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.ts-select-header:hover .ts-chevron {
-    color: var(--green-8);
-}
-
-.ts-custom-select-container.open .ts-chevron,
-.ts-chevron.rotated {
-    transform: rotate(180deg);
-    color: var(--base-green);
-}
-
-.ts-select-options {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    margin: 0;
-    padding: 0.5rem 0;
-    list-style: none;
-    background-color: var(--off-white);
-    border: 2px solid var(--base-green);
-    border-radius: 8px;
-    max-height: 240px;
-    overflow-y: auto;
-    z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    animation: dropdownSlide 0.2s ease-out;
-}
-
-@keyframes dropdownSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.ts-select-options li {
-    padding: 0.625rem 1rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    color: var(--gray-8);
-    font-size: 0.95rem;
-}
-
-    .ts-select-options li:hover {
-        background-color: var(--green-1);
-        color: var(--green-8);
-    }
-
-    .ts-select-options li.selected {
-        background-color: var(--green-2);
-        color: var(--green-8);
-        font-weight: 600;
-    }
-
-    .ts-select-options li:active {
-        background-color: var(--green-3);
-    }
-
-.ts-select-options::-webkit-scrollbar {
-    width: 8px;
-}
-
-.ts-select-options::-webkit-scrollbar-track {
-    background: var(--gray-1);
-    border-radius: 0 6px 6px 0;
-}
-
-.ts-select-options::-webkit-scrollbar-thumb {
-    background: var(--gray-4);
-    border-radius: 4px;
-}
-
-    .ts-select-options::-webkit-scrollbar-thumb:hover {
-        background: var(--base-green);
-    }
-
-.ts-select-options {
-    scrollbar-width: thin;
-    scrollbar-color: var(--gray-4) var(--gray-1);
-}
 
 
 /* ------------ */

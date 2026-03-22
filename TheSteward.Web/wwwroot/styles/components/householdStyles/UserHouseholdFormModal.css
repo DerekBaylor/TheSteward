@@ -1,44 +1,41 @@
-﻿/* User Household Modal (Member Permissions) */
-/*.user-household-modal.mud-dialog {
-    border: 3px solid var(--base-purple);
-    border-radius: var(--border-radius);
-    font-family: var(--primary-font);
-}
-
-.user-household-modal .mud-dialog-title {
-    padding: 0;
-}
-
-.user-household-modal .mud-dialog-content {
-    padding-top: 1rem;
-    font-family: var(--primary-font);
-}
-
-.user-household-modal .mud-input-label,
-.user-household-modal .mud-checkbox-label,
-.user-household-modal .ts-label {
-    font-family: var(--label-font);
-}
-
-.user-household-modal .mud-input,
-.user-household-modal .mud-button-root {
-    font-family: var(--primary-font);
-}
-
-.user-household-modal .mud-dialog-actions {
-    font-family: var(--primary-font);
-}
-
-.user-household-modal .permission-section {
-    padding-left: 1rem;
-    border-left: 3px solid var(--gray-3);
-}
-*/
-
-.user-household-modal.ts-modal.mud-dialog {
+﻿.user-household-modal.ts-modal.mud-dialog {
     border: 3px solid var(--base-blue);
 }
 
 .user-household-modal .modal-header-custom {
     background-color: var(--base-blue);
+}
+
+.user-household-modal .submit-btn {
+    background-color: var(--base-blue);
+    color: white;
+}
+
+.user-household-modal .submit-btn:hover {    
+    background-color: var(--blue-8);
+    color: white;
+}
+
+.user-household-modal .cancel-btn {
+    background-color: var(--gray-2);
+    border-color: var(--gray-3);
+    color: var(--gray-8);
+}
+
+.user-household-modal .cancel-btn:hover {
+    background-color: var(--gray-5);
+}
+
+
+
+.user-household-modal .mud-switch-track.mud-default {
+    background-color: var(--base-blue);
+}
+
+.user-household-modal .mud-switch-base.mud-checked .mud-switch-thumb {
+    background-color: var(--base-blue);
+}
+
+.user-household-modal .mud-switch-base.mud-checked {
+    color: var(--base-blue) ;
 }

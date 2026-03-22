@@ -115,3 +115,32 @@ ul#householdFeatureList li {
     font-size: 20px;
     vertical-align: middle;
 }
+
+
+.member-list-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.member-remove-btn {
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+    color: var(--base-red);
+}
+
+
+.member-name--inactive {
+    opacity: 0.5;
+}
+
+.member-inactive-badge {
+    font-family: var(--label-font);
+    font-size: 0.65rem;
+    font-weight: 600;
+    background-color: var(--gray-4);
+    color: var(--off-white);
+    border-radius: var(--border-radius);
+    padding: 0.1rem 0.4rem;
+    flex-shrink: 0;
+}

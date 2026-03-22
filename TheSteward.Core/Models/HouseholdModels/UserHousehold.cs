@@ -15,8 +15,11 @@ public class UserHousehold
     [Required]
     public required bool IsHouseholdOwner { get; set; }
 
+    [Required]
+    public bool IsActive { get; set; }
+
     #region Permissions
-    
+
     [Required]
     public required bool HasAdminPermissions { get; set; }
 

@@ -12,6 +12,8 @@ public class UserHouseholdDto
 
     public bool IsHouseholdOwner { get; set; }
 
+    public bool IsActive { get; set; }
+
     #region Permissions
 
     [UserPermission("Admin Permissions", "General")]

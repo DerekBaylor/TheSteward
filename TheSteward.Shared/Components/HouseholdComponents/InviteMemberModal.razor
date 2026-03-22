@@ -40,13 +40,14 @@
         <MudButton OnClick="HandleCancel"
                    Variant="Variant.Outlined"
                    Color="Color.Default"
-                   Disabled="@isSubmitting">
+                   Disabled="@isSubmitting"
+                   Class="ts-btn ts-cancel-btn">
             Cancel
         </MudButton>
         <MudButton OnClick="HandleSubmit"
                    Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   Disabled="@isSubmitting">
+                   Disabled="@isSubmitting"
+                   Class="ts-btn card-btn send-btn">
             @if (isSubmitting)
             {
                 <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />

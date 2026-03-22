@@ -6,7 +6,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 1.5rem;
     padding: 1rem 1.5rem;
     background: white;
@@ -30,11 +30,10 @@
 }
 
 /* Select Group */
-.toolbar-select-group {
+.household-toolbar-select-group {
     display: flex;
     align-items: center;
     gap: 1rem;
-    flex: 1;
     min-width: 0;
 }
 
@@ -62,54 +61,34 @@
 }
 
 /* Toolbar Buttons */
-.btn-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    font-family: var(--primary-font);
+.toolbar-btn .material-icons {
+    font-size: 18px;
 }
 
-    .btn-toolbar .material-icons {
-        font-size: 18px;
-    }
-
-.btn-add {
-    background-image: linear-gradient(135deg, var(--green-5), var(--green-7));
+.toolbar-btn.btn-add {
+    background-color: var(--base-purple);
+    color: var(--off-white);
+    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-button.btn-add > span {
-    color: white;
-}
-
-    .btn-add:hover {
-        background-image: linear-gradient(135deg, var(--green-6), var(--green-8));
+    .toolbar-btn.btn-add:hover {
+        background-color: var(--purple-8);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-.btn-profile {
-    background-image: linear-gradient(135deg, var(--orange-5), var(--orange-7));
+
+.toolbar-btn.btn-profile {
+    background-color: var(--base-blue);
     color: white;
+    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-    .btn-profile:hover {
-        background-image: linear-gradient(135deg, var(--orange-6), var(--orange-8));
+    .toolbar-btn.btn-profile:hover {
+        background-color: var(--blue-8);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-
-.btn-toolbar:active {
-    transform: translateY(0);
-}
 
 /* Responsive Design */
 @media (max-width: 1024px) {

@@ -1,17 +1,16 @@
 ﻿@typeparam TValue
 @using TheSteward.Shared.Models;
-
 @namespace TheSteward.Shared.Components
 
-<div class="ts-custom-select-container">
-    <div class="ts-select-header" @onclick="ToggleDropdown">
+<div class="ts-custom-select-container @(IsOpen ? "open" : "")">
+    <div class="ts-select-header ts-select--@Variant" @onclick="ToggleDropdown">
         <span>@GetDisplayText()</span>
         <span class="material-icons ts-chevron @(IsOpen ? "rotated" : "")">expand_more</span>
     </div>
 
     @if (IsOpen)
     {
-        <ul class="ts-select-options">
+        <ul class="ts-select-options ts-select--@Variant">
             @foreach (var item in Items)
             {
                 <li @onclick="() => SelectItemHandler(item)">
@@ -40,6 +39,10 @@
     [Parameter] 
     public EventCallback OnChange { get; set; }
 
+    [Parameter] 
+    public string Variant { get; set; } = "green";
+
+    
     private void ToggleDropdown() => IsOpen = !IsOpen;
 
     private async Task SelectItemHandler(SelectItem<TValue> item)

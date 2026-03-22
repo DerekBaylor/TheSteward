@@ -10,6 +10,7 @@ public class CreateUserHouseholdDto
     public Guid? UserHouseholdId { get; set; }
     public bool IsDefaultUserHousehold { get; set; }
     public bool IsHouseholdOwner { get; set; }
+    public bool IsActive { get; set; }
 
     #region Permissions
     public bool HasAdminPermissions { get; set; }

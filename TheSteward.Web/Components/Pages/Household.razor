@@ -454,10 +454,7 @@ else
 
         try
         {
-            var userHousehold = await UserHouseholdService
-                .GetUserHouseholdByHouseholdIdAndUserIdAsync(
-                    selectedHouseholdDto.HouseholdId,
-                    member.Id);
+            var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(selectedHouseholdDto.HouseholdId, member.Id, activeOnly: false);
 
             if (userHousehold == null)
             {
@@ -704,7 +701,7 @@ else
     }
     #endregion Member Invitation
 
-    #region UserHousehold Management  Memmber Management
+    #region UserHousehold Management / Memmber Management
     private async Task GetMember(ApplicationUser member)
     {
         if (selectedHouseholdDto == null)
@@ -720,7 +717,7 @@ else
 
         try
         {
-            var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(selectedHouseholdDto.HouseholdId, member.Id);
+            var userHousehold = await UserHouseholdService.GetUserHouseholdByHouseholdIdAndUserIdAsync(selectedHouseholdDto.HouseholdId, member.Id, activeOnly: false);
 
             if (userHousehold != null)
             {

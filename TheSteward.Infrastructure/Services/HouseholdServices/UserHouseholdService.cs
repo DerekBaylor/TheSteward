@@ -61,6 +61,8 @@ public class UserHouseholdService : IUserHouseholdService
         var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId)
             ?? throw new KeyNotFoundException($"UserHousehold with ID {userHouseholdId} was not found.");
 
+        await ReassignDefaultIfNeededAsync(userHousehold);
+
         await _userHouseholdRepository.DeleteAsync(userHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
     }
@@ -107,8 +109,10 @@ public class UserHouseholdService : IUserHouseholdService
         var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId)
             ?? throw new KeyNotFoundException($"UserHousehold with ID {userHouseholdId} was not found.");
 
+        await ReassignDefaultIfNeededAsync(userHousehold);
+
         userHousehold.IsActive = false;
-        
+
         await _userHouseholdRepository.UpdateAsync(userHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
     }
@@ -132,12 +136,10 @@ public class UserHouseholdService : IUserHouseholdService
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
-            .Where(uh => uh.Household.IsHouseholdActive && uh.UserId == userId)
+            .Where(uh => uh.Household.IsHouseholdActive && uh.UserId == userId && uh.IsActive)
             .ToListAsync();
 
-        var userHouseholdDto = _mapper.Map<List<UserHouseholdDto>>(userHousehold);
-
-        return userHouseholdDto;
+        return _mapper.Map<List<UserHouseholdDto>>(userHousehold);
     }
 
     public async Task<List<HouseholdDto>> GetAllHouseholdsForUserAsync(string userId)
@@ -145,13 +147,12 @@ public class UserHouseholdService : IUserHouseholdService
         var households = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
             .Where(uh => uh.UserId == userId &&
-                   uh.Household.IsHouseholdActive)
+                   uh.Household.IsHouseholdActive &&
+                   uh.IsActive)
             .Select(uh => uh.Household)
             .ToListAsync();
 
-        var householdDtos = _mapper.Map<List<HouseholdDto>>(households);
-
-        return householdDtos;
+        return _mapper.Map<List<HouseholdDto>>(households);
     }
 
     public async Task<UserHouseholdDto?> GetDefaultUserHouseholdForUserAsync(string userId)
@@ -159,29 +160,30 @@ public class UserHouseholdService : IUserHouseholdService
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
             .ThenInclude(h => h.UserHouseholds)
-            .Where(uh => 
-                uh.UserId == userId && 
-                uh.IsDefaultUserHousehold && 
+            .Where(uh =>
+                uh.UserId == userId &&
+                uh.IsDefaultUserHousehold &&
+                uh.IsActive &&
                 uh.Household.IsHouseholdActive)
             .FirstOrDefaultAsync();
 
-        var userHouseholdDto = _mapper.Map<UserHouseholdDto>(userHousehold);
-
-        return userHouseholdDto;
+        return _mapper.Map<UserHouseholdDto>(userHousehold);
     }
 
-    public async Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId)
+    public async Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId, bool activeOnly = true)
     {
-        var userHousehold = await _userHouseholdRepository.GetAll()
+        var query = _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
                 .ThenInclude(h => h.UserHouseholds)
                     .ThenInclude(uh => uh.User)
-            .Where(uh => uh.UserId == userId && uh.HouseholdId == householdId)
-            .FirstOrDefaultAsync();
+            .Where(uh => uh.UserId == userId && uh.HouseholdId == householdId);
 
-        var userHouseholdDto = _mapper.Map<UserHouseholdDto>(userHousehold);
+        if (activeOnly)
+            query = query.Where(uh => uh.IsActive);
 
-        return userHouseholdDto;
+        var userHousehold = await query.FirstOrDefaultAsync();
+
+        return _mapper.Map<UserHouseholdDto>(userHousehold);
     }
     #endregion Get UserHousehold Methods
 
@@ -323,7 +325,6 @@ public class UserHouseholdService : IUserHouseholdService
         return _mapper.Map<List<HouseholdInvitationDto>>(invitations);
     }
 
-
     public async Task CancelInvitationAsync(Guid invitationId, string userId)
     {
         var invitation = await _invitationRepository.GetAll()
@@ -357,4 +358,34 @@ public class UserHouseholdService : IUserHouseholdService
         return userHousehold.IsHouseholdOwner || userHousehold.HasAdminPermissions;
     }
     #endregion Invitation Methods
+
+    #region Private Helper Methods
+    /// <summary>
+    /// Checks whether the given user-household relationship is the user's current default, and if so,
+    /// reassigns the default to the first available active household the user belongs to.
+    /// Called before deleting or deactivating a membership to ensure the user always has a
+    /// valid default household if one is available.
+    /// </summary>
+    /// <param name="userHousehold">The user-household relationship that is about to be deleted or deactivated.</param>
+    private async Task ReassignDefaultIfNeededAsync(UserHousehold userHousehold)
+    {
+        if (!userHousehold.IsDefaultUserHousehold) return;
+
+        var newDefault = await _userHouseholdRepository.GetAll()
+            .Include(uh => uh.Household)
+            .Where(uh =>
+                uh.UserId == userHousehold.UserId &&
+                uh.UserHouseholdId != userHousehold.UserHouseholdId &&
+                uh.IsActive &&
+                uh.Household.IsHouseholdActive)
+            .OrderBy(uh => uh.UserHouseholdId)
+            .FirstOrDefaultAsync();
+
+        if (newDefault != null)
+        {
+            newDefault.IsDefaultUserHousehold = true;
+            await _userHouseholdRepository.UpdateAsync(newDefault);
+        }
+    }
+    #endregion Private Helper Methods
 }

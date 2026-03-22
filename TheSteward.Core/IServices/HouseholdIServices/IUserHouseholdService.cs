@@ -16,9 +16,14 @@ public interface IUserHouseholdService
     Task AddAsync(CreateUserHouseholdDto newUserHousehold, string ownerId);
 
     /// <summary>
-    /// Deletes a user-household relationship, removing the user from the household.
+    /// Deletes a user-household relationship, permanently removing the user from the household.
+    /// If the deleted membership was the user's default household and the user belongs to other
+    /// active households, the first available active household will be set as the new default.
     /// </summary>
-    /// <param name="userHouseholdId">The unique identifier of the user household to update.</param>
+    /// <param name="userHouseholdId">The unique identifier of the user household to delete.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when no user household matching <paramref name="userHouseholdId"/> is found.
+    /// </exception>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task DeleteAsync(Guid userHouseholdId);
 
@@ -47,15 +52,19 @@ public interface IUserHouseholdService
     Task SetDefaultBudgetAsync(Guid userHouseholdId, Guid budgetId);
 
     /// <summary>
-    /// Deactivates a user-household relationship, marking it as inactive without deleting the record.
+    /// Deactivates a user-household relationship, revoking the user's access to the household
+    /// without permanently deleting the record. If the deactivated membership was the user's
+    /// default household and the user belongs to other active households, the first available
+    /// active household will be set as the new default.
     /// </summary>
-    /// <param name="userHouseholdId">The unique identifier of the user household to update.</param>
+    /// <param name="userHouseholdId">The unique identifier of the user household to deactivate.</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="userHouseholdId"/> or <paramref name="budgetId"/> is empty.
+    /// Thrown when <paramref name="userHouseholdId"/> is empty.
     /// </exception>
     /// <exception cref="KeyNotFoundException">
     /// Thrown when no user household matching <paramref name="userHouseholdId"/> is found.
     /// </exception>
+    /// <returns>A task representing the asynchronous operation.</returns>
     Task DeactivateUserAsync(Guid userHouseholdId);
     #endregion Update Methods
 
@@ -71,20 +80,23 @@ public interface IUserHouseholdService
 
     /// <summary>
     /// Retrieves all active user-household relationships for a specific user.
+    /// Inactive user-household relationships are excluded.
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>
-    /// <returns>A task representing the asynchronous operation, containing a list of user-household DTOs.</returns>
+    /// <returns>A task representing the asynchronous operation, containing a list of active user-household DTOs.</returns>
     Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUserAsync(string userId);
 
     /// <summary>
-    /// Retrieves all active households that a user is a member of.
+    /// Retrieves all active households that a user is an active member of.
+    /// Households where the user's membership is inactive are excluded.
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>
     /// <returns>A task representing the asynchronous operation, containing a list of household DTOs.</returns>
     Task<List<HouseholdDto>> GetAllHouseholdsForUserAsync(string userId);
 
     /// <summary>
-    /// Retrieves the default household for a specific user, including all household members.
+    /// Retrieves the default active household for a specific user, including all household members.
+    /// Returns null if the user has no active default household.
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>
     /// <returns>A task representing the asynchronous operation, containing the default user-household DTO or null if not found.</returns>
@@ -95,8 +107,12 @@ public interface IUserHouseholdService
     /// </summary>
     /// <param name="householdId">The unique identifier of the household.</param>
     /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="activeOnly">
+    /// When true (default), only returns the relationship if the user's membership is active.
+    /// Pass false to allow admins to retrieve and manage inactive memberships.
+    /// </param>
     /// <returns>A task representing the asynchronous operation, containing the user-household DTO or null if not found.</returns>
-    Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId);
+    Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId, bool activeOnly = true);
     #endregion Get Methods
 
     #region Invitation Methods

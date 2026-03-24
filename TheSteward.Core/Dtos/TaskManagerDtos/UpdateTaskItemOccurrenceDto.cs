@@ -4,6 +4,7 @@ namespace TheSteward.Core.Dtos.TaskManagerDtos;
 
 public class UpdateTaskItemOccurrenceDto
 {
+    public Guid TaskItemOccurrenceId { get; set; }
     public TaskItemStatus Status { get; set; }
 
     public DateTime? CompletedDate { get; set; }

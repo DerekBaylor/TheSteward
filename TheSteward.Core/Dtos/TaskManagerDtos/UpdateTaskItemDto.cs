@@ -4,6 +4,7 @@ namespace TheSteward.Core.Dtos.TaskManagerDtos;
 
 public class UpdateTaskItemDto
 {
+    public Guid TaskItemId { get; set; }
     public required string TaskItemName { get; set; }
     
     public string? Description { get; set; }

@@ -8,6 +8,9 @@ public class UserHouseholdDto
 {
     public Guid UserHouseholdId { get; set; }
 
+    [Required]
+    public string UserName { get; set; }
+
     public bool IsDefaultUserHousehold { get; set; }
 
     public bool IsHouseholdOwner { get; set; }
@@ -19,29 +22,32 @@ public class UserHouseholdDto
     [UserPermission("Admin Permissions", "General")]
     public bool HasAdminPermissions { get; set; }
 
-    [UserPermission("Finance Manager - Write", "Finance")]
-    public bool HasFinanceManagerWritePermission { get; set; }
-
     [UserPermission("Finance Manager - Read", "Finance")]
     public bool HasFinanceManagerReadPermission { get; set; }
 
-    [UserPermission("Kitchen Manager - Write", "Kitchen")]
-    public bool HasKitchenManagerWritePermission { get; set; }
+    [UserPermission("Finance Manager - Write", "Finance")]
+    public bool HasFinanceManagerWritePermission { get; set; }
 
     [UserPermission("Kitchen Manager - Read", "Kitchen")]
     public bool HasKitchenManagerReadPermission { get; set; }
 
-    [UserPermission("Task Manager - Write", "Tasks")]
-    public bool HasTaskManagerWritePermission { get; set; }
+    [UserPermission("Kitchen Manager - Write", "Kitchen")]
+    public bool HasKitchenManagerWritePermission { get; set; }
 
     [UserPermission("Task Manager - Read", "Tasks")]
     public bool HasTaskManagerReadPermission { get; set; }
 
-    [UserPermission("File Manager - Write", "Files")]
-    public bool HasFileManagerWritePermission { get; set; }
+    [UserPermission("Task Manager - Complete", "Tasks")]
+    public bool HasTaskManagerCompletePermission { get; set; }
+
+    [UserPermission("Task Manager - Write", "Tasks")]
+    public bool HasTaskManagerWritePermission { get; set; }
 
     [UserPermission("File Manager - Read")]
     public bool HasFileManagerReadPermission { get; set; }
+
+    [UserPermission("File Manager - Write", "Files")]
+    public bool HasFileManagerWritePermission { get; set; }
 
     #endregion Permissions
 

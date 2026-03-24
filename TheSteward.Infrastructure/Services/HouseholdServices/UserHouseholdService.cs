@@ -36,6 +36,7 @@ public class UserHouseholdService : IUserHouseholdService
         await CreateUserHouseholdAsync(
             newUserHousehold.HouseholdId,
             newUserHousehold.UserId,
+            newUserHousehold.UserName,
             newUserHousehold.IsDefaultUserHousehold,
             newUserHousehold.IsHouseholdOwner,
             newUserHousehold.HasAdminPermissions,
@@ -267,14 +268,14 @@ public class UserHouseholdService : IUserHouseholdService
 
         if (setAsDefault)
         {
-            var existingDefaults = await _userHouseholdRepository.GetAll()
+            var userHouseholds = await _userHouseholdRepository.GetAll()
                 .Where(uh => uh.UserId == userId && uh.IsDefaultUserHousehold)
                 .ToListAsync();
 
-            foreach (var existing in existingDefaults)
+            foreach (var userHousehold in userHouseholds)
             {
-                existing.IsDefaultUserHousehold = false;
-                await _userHouseholdRepository.UpdateAsync(existing);
+                userHousehold.IsDefaultUserHousehold = false;
+                await _userHouseholdRepository.UpdateAsync(userHousehold);
             }
         }
         else
@@ -289,6 +290,7 @@ public class UserHouseholdService : IUserHouseholdService
         await CreateUserHouseholdAsync(
             invitation.HouseholdId,
             userId,
+            user.UserName,
             isDefaultUserHousehold: setAsDefault,
             isHouseholdOwner: false,
             hasAdminPermissions: false,
@@ -358,6 +360,7 @@ public class UserHouseholdService : IUserHouseholdService
     /// </summary>
     /// <param name="householdId">The unique identifier of the household.</param>
     /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="userName">The display name of the user.</param>
     /// <param name="isDefaultUserHousehold">Whether this should be the user's default household.</param>
     /// <param name="isHouseholdOwner">Whether the user is the owner of the household.</param>
     /// <param name="hasAdminPermissions">Whether the user has admin permissions.</param>
@@ -365,25 +368,27 @@ public class UserHouseholdService : IUserHouseholdService
     /// When true, all feature read and write permissions are granted.
     /// When false, all permissions are set to false — used for invited members who start with no access.
     /// </param>
-    private async Task CreateUserHouseholdAsync(Guid householdId, string userId, bool isDefaultUserHousehold, bool isHouseholdOwner, bool hasAdminPermissions, bool hasAllPermissions)
+    private async Task CreateUserHouseholdAsync(Guid householdId, string userId, string userName, bool isDefaultUserHousehold, bool isHouseholdOwner, bool hasAdminPermissions, bool hasAllPermissions)
     {
         var userHousehold = new UserHousehold
         {
             UserHouseholdId = Guid.NewGuid(),
             UserId = userId,
+            UserName = userName,
             HouseholdId = householdId,
             IsDefaultUserHousehold = isDefaultUserHousehold,
             IsHouseholdOwner = isHouseholdOwner,
             IsActive = true,
             HasAdminPermissions = hasAdminPermissions,
-            HasFinanceManagerWritePermission = hasAllPermissions,
             HasFinanceManagerReadPermission = hasAllPermissions,
-            HasKitchenManagerWritePermission = hasAllPermissions,
+            HasFinanceManagerWritePermission = hasAllPermissions,
             HasKitchenManagerReadPermission = hasAllPermissions,
-            HasTaskManagerWritePermission = hasAllPermissions,
+            HasKitchenManagerWritePermission = hasAllPermissions,
             HasTaskManagerReadPermission = hasAllPermissions,
-            HasFileManagerWritePermission = hasAllPermissions,
+            HasTaskManagerCompletePermission = hasAllPermissions,
+            HasTaskManagerWritePermission = hasAllPermissions,
             HasFileManagerReadPermission = hasAllPermissions,
+            HasFileManagerWritePermission = hasAllPermissions,
         };
 
         await _userHouseholdRepository.AddAsync(userHousehold);

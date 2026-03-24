@@ -10,6 +10,10 @@ public class UserHousehold
     public Guid UserHouseholdId { get; set; }
 
     [Required]
+    [MaxLength(200)]
+    public required string UserName { get; set; }
+
+    [Required]
     public required bool IsDefaultUserHousehold { get; set; }
 
     [Required]
@@ -24,28 +28,31 @@ public class UserHousehold
     public required bool HasAdminPermissions { get; set; }
 
     [Required]
-    public required bool HasFinanceManagerWritePermission { get; set; }
-
-    [Required]
     public required bool HasFinanceManagerReadPermission { get; set; }
 
     [Required]
-    public required bool HasKitchenManagerWritePermission { get; set; }
+    public required bool HasFinanceManagerWritePermission { get; set; }
 
     [Required]
     public required bool HasKitchenManagerReadPermission { get; set; }
 
     [Required]
-    public required bool HasTaskManagerWritePermission { get; set; }
+    public required bool HasKitchenManagerWritePermission { get; set; }
 
     [Required]
     public required bool HasTaskManagerReadPermission { get; set; }
 
     [Required]
-    public required bool HasFileManagerWritePermission { get; set; }
+    public required bool HasTaskManagerCompletePermission { get; set; }
+
+    [Required]
+    public required bool HasTaskManagerWritePermission { get; set; }
 
     [Required]
     public required bool HasFileManagerReadPermission { get; set; }
+
+    [Required]
+    public required bool HasFileManagerWritePermission { get; set; }
 
     #endregion Permissions
 

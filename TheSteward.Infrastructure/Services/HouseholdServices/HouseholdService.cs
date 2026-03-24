@@ -44,15 +44,16 @@ public class HouseholdService : IHouseholdService
         {
             IsDefaultUserHousehold = newHousehold.IsDefaultHousehold,
             IsHouseholdOwner = true,
+            UserName = owner.UserName,
             HasAdminPermissions = true,
-            HasFinanceManagerWritePermission = true,
             HasFinanceManagerReadPermission = true,
-            HasKitchenManagerWritePermission = true,
+            HasFinanceManagerWritePermission = true,
             HasKitchenManagerReadPermission = true,
-            HasTaskManagerWritePermission = true,
+            HasKitchenManagerWritePermission = true,
             HasTaskManagerReadPermission = true,
-            HasFileManagerWritePermission = true,
+            HasTaskManagerWritePermission = true,
             HasFileManagerReadPermission = true,
+            HasFileManagerWritePermission = true,
             UserId = ownerId,
             User = owner,
             HouseholdId = household.HouseholdId,
@@ -77,7 +78,6 @@ public class HouseholdService : IHouseholdService
         if (currentHousehold == null)
             throw new KeyNotFoundException($"Household with ID {updatedHousehold.HouseholdId} not found.");
 
-        // Using Automapper on this block could potentially overwrite properties that aren't meant to be changed in this method, like IsHouseholdActive, OwnerId, Owner, and Members.
         currentHousehold.HasFileManagerAccess = updatedHousehold.HasFileManagerAccess;
         currentHousehold.HasFinanceManagerAccess = updatedHousehold.HasFinanceManagerAccess;
         currentHousehold.HasKitchenManagerAccess = updatedHousehold.HasKitchenManagerAccess;

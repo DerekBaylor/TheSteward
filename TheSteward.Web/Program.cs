@@ -65,6 +65,7 @@ builder.Services.AddScoped<ITaskItemCategoryRepository, TaskItemCategoryReposito
 builder.Services.AddScoped<IRecurrenceRuleRepository, RecurrenceRuleRepository>();
 builder.Services.AddScoped<IRecurrenceRuleService, RecurrenceRuleService>();
 builder.Services.AddScoped<ITaskItemCategoryService, TaskItemCategoryService>();
+builder.Services.AddScoped<ITaskItemService, TaskItemService>();
 
 builder.Services.AddScoped<HouseholdState>();
 

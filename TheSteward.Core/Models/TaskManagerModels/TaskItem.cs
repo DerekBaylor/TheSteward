@@ -24,6 +24,8 @@ public class TaskItem
     public DateTime CreatedDate { get; set; }
     
     public DateTime UpdatedDate { get; set; }
+    
+    public bool IsArchived { get; set; }
 
     #region Navigation Properties
     public required Guid CreatedByUserHouseholdId { get; set; }
@@ -44,7 +46,7 @@ public class TaskItem
     public Guid TaskItemCategoryId { get; set; }
     
     [ForeignKey("TaskItemCategoryId")]
-    public required TaskItemCategory TaskItemCategory { get; set; }
+    public TaskItemCategory? TaskItemCategory { get; set; }
     public Guid? ExpenseId { get; set; }
 
     [ForeignKey("ExpenseId")]

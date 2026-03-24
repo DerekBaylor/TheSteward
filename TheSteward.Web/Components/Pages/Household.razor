@@ -818,6 +818,7 @@ else
             var updateUserHouseholdDto = new UpdateUserHouseholdDto
             {
                 UserId = selectedUserHouseholdDto.UserId,
+                UserName = selectedUserHouseholdDto.User?.UserName ?? "Unknown",
                 UserHouseholdId = formDto.UserHouseholdId,
                 IsHouseholdOwner = formDto.IsHouseholdOwner,
                 HouseholdId = selectedUserHouseholdDto.HouseholdId,

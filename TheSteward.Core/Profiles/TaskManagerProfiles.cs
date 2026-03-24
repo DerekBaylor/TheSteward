@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using TheSteward.Core.Dtos.TaskItemDtos;
+using TheSteward.Core.Dtos.TaskManagerDtos;
 using TheSteward.Core.Models.TaskManagerModels;
 
 namespace TheSteward.Core.Profiles;

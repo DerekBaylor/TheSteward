@@ -1,7 +1,7 @@
-﻿namespace TheSteward.Core.Dtos.TaskItemDtos;
+﻿namespace TheSteward.Core.Dtos.TaskManagerDtos;
 
-public class CreateTaskItemCategoryDto
-{    
+public class UpdateTaskItemCategoryDto
+{
     public required string TaskItemCategoryName { get; set; }
     
     public string? IconName { get; set; }

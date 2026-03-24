@@ -1,7 +1,7 @@
 ﻿using TheSteward.Core.Dtos.FinanceManagerDtos;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
-namespace TheSteward.Core.Dtos.TaskItemDtos;
+namespace TheSteward.Core.Dtos.TaskManagerDtos;
 
 public class TaskItemDto
 {

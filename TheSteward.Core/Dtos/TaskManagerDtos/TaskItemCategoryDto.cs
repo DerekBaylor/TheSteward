@@ -1,4 +1,4 @@
-﻿namespace TheSteward.Core.Dtos.TaskItemDtos;
+﻿namespace TheSteward.Core.Dtos.TaskManagerDtos;
 
 public class TaskItemCategoryDto
 {

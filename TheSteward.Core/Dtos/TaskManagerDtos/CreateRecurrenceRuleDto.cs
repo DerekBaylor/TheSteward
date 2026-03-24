@@ -1,11 +1,9 @@
 ﻿using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
-namespace TheSteward.Core.Dtos.TaskItemDtos;
+namespace TheSteward.Core.Dtos.TaskManagerDtos;
 
-public class RecurrenceRuleDto
+public class CreateRecurrenceRuleDto
 {
-    public Guid RecurrenceRuleId { get; set; }
-    
     public RecurrenceFrequency RecurrenceFrequency { get; set; }
     
     public DaysOfWeek? RecurrenceDays { get; set; }
@@ -15,8 +13,4 @@ public class RecurrenceRuleDto
     public DateTime StartDateTime { get; set; }
     
     public DateTime? EndDateTime { get; set; }
-    
-    public DateTime LastGeneratedDateTime { get; set; }
-    
-    public IList<TaskItemDto>? TaskItems { get; set; }
 }

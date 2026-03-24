@@ -21,6 +21,8 @@ using TheSteward.Infrastructure.Services.FinanceManagerServices;
 using TheSteward.Infrastructure.Services.HouseholdServices;
 using TheSteward.Infrastructure.Repositories.TaskManagerRepositories;
 using TheSteward.Core.IRepositories.ITaskManagerRepositories;
+using TheSteward.Infrastructure.Services.TaskManagerServices;
+using TheSteward.Core.IServices.TaskManagerIServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +63,7 @@ builder.Services.AddScoped<ITaskItemRepository, TaskItemRepository>();
 builder.Services.AddScoped<ITaskItemOccurenceRepository, TaskItemOccurrenceRepository>();
 builder.Services.AddScoped<ITaskItemCategoryRepository, TaskItemCategoryRepository>();
 builder.Services.AddScoped<IRecurrenceRuleRepository, RecurrenceRuleRepository>();
+builder.Services.AddScoped<IRecurrenceRuleService, RecurrenceRuleService>();
 
 builder.Services.AddScoped<HouseholdState>();
 

@@ -1,5 +1,3 @@
-
-
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 
 namespace TheSteward.Core.IServices.FinanceManagerIServices;

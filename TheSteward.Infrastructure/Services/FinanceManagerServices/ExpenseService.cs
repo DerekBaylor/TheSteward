@@ -1,21 +1,27 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
-using TheSteward.Core.IRepositories;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
+using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
+using TheSteward.Core.Models.TaskManagerModels;
+using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
 public class ExpenseService : IExpenseService
 {
-    private readonly IBaseRepository<Expense> _expenseRepository;
+    private readonly IExpenseRepository _expenseRepository;
+    private readonly ITaskItemRepository _taskItemRepository;
+    private readonly ITaskItemCategoryRepository _taskItemCategoryRepository;
     private readonly IMapper _mapper;
 
-    public ExpenseService(IExpenseRepository expenseRepository, IMapper mapper)
+    public ExpenseService(IExpenseRepository expenseRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository,  IMapper mapper)
     {
         _expenseRepository = expenseRepository;
+        _taskItemRepository = taskItemRepository;
+        _taskItemCategoryRepository = taskItemCategoryRepository;
         _mapper = mapper;
     }
 
@@ -24,24 +30,38 @@ public class ExpenseService : IExpenseService
         if (expenseDto == null)
             throw new ArgumentNullException(nameof(expenseDto));
 
-        var expense = new Expense
+        await using var transaction = await _expenseRepository.BeginTransactionAsync();
+
+        try
         {
-            ExpenseId = Guid.NewGuid(),
-            ExpenseName = expenseDto.ExpenseName,
-            DueDay = expenseDto.DueDay,
-            AmountDue = expenseDto.AmountDue,
-            DisplayOrder = expenseDto.DisplayOrder,
-            BudgetId = expenseDto.BudgetId,
-            BudgetCategoryId = expenseDto.BudgetCategoryId,
-            BudgetSubCategoryId = expenseDto.BudgetSubCategoryId,
-            CreditId = expenseDto.CreditId,
-            InvestmentId = expenseDto.InvestmentId,
-        };
-        
-        await _expenseRepository.AddAsync(expense);
-        await _expenseRepository.SaveChangesAsync();
-        
-        return _mapper.Map<ExpenseDto>(expense);
+            var expense = new Expense
+            {
+                ExpenseId = Guid.NewGuid(),
+                ExpenseName = expenseDto.ExpenseName,
+                DueDay = expenseDto.DueDay,
+                AmountDue = expenseDto.AmountDue,
+                DisplayOrder = expenseDto.DisplayOrder,
+                BudgetId = expenseDto.BudgetId,
+                BudgetCategoryId = expenseDto.BudgetCategoryId,
+                BudgetSubCategoryId = expenseDto.BudgetSubCategoryId,
+                CreditId = expenseDto.CreditId,
+                InvestmentId = expenseDto.InvestmentId,
+            };
+
+            await _expenseRepository.AddAsync(expense);
+            await _expenseRepository.SaveChangesAsync();
+
+            await CreateLinkedTaskAsync(expense, expenseDto.CreatedByUserHouseholdId);
+
+            await transaction.CommitAsync();
+
+            return _mapper.Map<ExpenseDto>(expense);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<UpdateExpenseDto> UpdateAsync(UpdateExpenseDto expenseDto)
@@ -171,4 +191,73 @@ public class ExpenseService : IExpenseService
         return _mapper.Map<ExpenseDto>(expense);
     }
     #endregion Get Methods
+
+    #region Private Helper Methods
+
+    private async Task CreateLinkedTaskAsync(Expense expense, Guid createdByUserHouseholdId)
+    {
+        var category = await _taskItemCategoryRepository.GetAll()
+       .FirstOrDefaultAsync(c => c.TaskItemCategoryName == "Bills & Payments");
+
+        if (category == null)
+        {
+            category = new TaskItemCategory
+            {
+                TaskItemCategoryId = Guid.NewGuid(),
+                TaskItemCategoryName = "Bills & Payments",
+                ColorHex = "#1a56db",
+                IconName = "receipt_long"
+            };
+
+            await _taskItemCategoryRepository.AddAsync(category);
+            await _taskItemCategoryRepository.SaveChangesAsync();
+        }
+
+        var dueDate = GetNextDueDateFromDueDay(expense.DueDay);
+
+        var taskItem = new TaskItem
+        {
+            TaskItemId = Guid.NewGuid(),
+            TaskItemName = $"Pay {expense.ExpenseName}",
+            Description = $"Amount due: {expense.AmountDue:C}",
+            Status = TaskItemStatus.Pending,
+            Priority = TaskItemPriority.Medium,
+            DueDate = dueDate,
+            CreatedDate = DateTime.UtcNow,
+            UpdatedDate = DateTime.UtcNow,
+            CreatedByUserHouseholdId = createdByUserHouseholdId,
+            AssignedToUserHouseholdId = createdByUserHouseholdId,
+            TaskItemCategoryId = category.TaskItemCategoryId,
+            ExpenseId = expense.ExpenseId,
+            IsArchived = false
+        };
+
+        await _taskItemRepository.AddAsync(taskItem);
+        await _taskItemRepository.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Calculates the next occurrence of the given due day in the current or next month.
+    /// Handles DueDay 31 as the last day of the month.
+    /// </summary>
+    private static DateTime GetNextDueDateFromDueDay(int dueDay)
+    {
+        var now = DateTime.UtcNow;
+        var daysInCurrentMonth = DateTime.DaysInMonth(now.Year, now.Month);
+        var resolvedDay = dueDay > daysInCurrentMonth ? daysInCurrentMonth : dueDay;
+        var candidateDate = new DateTime(now.Year, now.Month, resolvedDay, 0, 0, 0, DateTimeKind.Utc);
+
+        // If due day has already passed this month, roll to next month
+        if (candidateDate <= now)
+        {
+            var nextMonth = now.AddMonths(1);
+            var daysInNextMonth = DateTime.DaysInMonth(nextMonth.Year, nextMonth.Month);
+            resolvedDay = dueDay > daysInNextMonth ? daysInNextMonth : dueDay;
+            candidateDate = new DateTime(nextMonth.Year, nextMonth.Month, resolvedDay, 0, 0, 0, DateTimeKind.Utc);
+        }
+
+        return candidateDate;
+    }
+
+    #endregion Private Helper Methods
 }

@@ -1,0 +1,90 @@
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Shared.Dtos.BudgetDtos
+
+<EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="budget-form">
+
+        @if (!FormData.IsEditMode)
+        {
+            <div class="budget-form-type-picker">
+                <button type="button"
+                        class="budget-type-btn @(FormData.CreationType == "blank" ? "active" : "")"
+                        @onclick='() => FormData.CreationType = "blank"'>
+                    <span class="material-icons">note_add</span>
+                    <span class="budget-type-btn-label">Blank Budget</span>
+                    <span class="budget-type-btn-desc">Start from scratch</span>
+                </button>
+                <button type="button"
+                        class="budget-type-btn @(FormData.CreationType == "starter" ? "active" : "")"
+                        @onclick='() => FormData.CreationType = "starter"'>
+                    <span class="material-icons">auto_awesome</span>
+                    <span class="budget-type-btn-label">Starter Budget</span>
+                    <span class="budget-type-btn-desc">Pre-filled with common categories</span>
+                </button>
+            </div>
+        }
+
+        <div class="budget-form-field">
+            <MudTextField @bind-Value="FormData.BudgetName"
+                          Label="Budget Name"
+                          Placeholder="e.g. My Budget, 2026 Budget"
+                          Variant="Variant.Outlined"
+                          MaxLength="200"
+                          For="@(() => FormData.BudgetName)"
+                          @bind-Value:after="EnsureName" />
+        </div>
+
+        <div class="budget-form-field">
+            <MudCheckBox @bind-Value="FormData.IsDefaultBudget"
+                         Label="Set as default budget"
+                         Color="Color.Primary" />
+            <p class="budget-form-helper">Your default budget loads automatically when you visit the budget page.</p>
+        </div>
+
+        <div class="budget-form-field">
+            <MudCheckBox @bind-Value="FormData.IsPublic"
+                         Label="Make budget public to household"
+                         Color="Color.Primary" />
+            <p class="budget-form-helper">Public budgets are visible to all members of your household.</p>
+        </div>
+
+        <ValidationSummary />
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public BudgetFormDto FormData { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<BudgetFormDto> OnValidSubmit { get; set; }
+
+    private EditContext editContext = null!;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(FormData);
+    }
+
+    private void EnsureName()
+    {
+        if (string.IsNullOrWhiteSpace(FormData.BudgetName))
+            FormData.BudgetName = "New Budget";
+    }
+
+    public async Task SubmitAsync()
+    {
+        EnsureName();
+        if (editContext.Validate())
+            await OnValidSubmit.InvokeAsync(FormData);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        EnsureName();
+        await OnValidSubmit.InvokeAsync(FormData);
+    }
+}

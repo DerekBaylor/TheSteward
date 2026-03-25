@@ -1,0 +1,122 @@
+﻿.budget-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--label-font);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gray-9);
+}
+
+.budget-modal-icon {
+    font-size: 1.3rem;
+    color: var(--base-green);
+}
+
+#budgetSaveBtn.ts-card-tab-btn,
+.budget-modal-btn-save {
+    background-color: var(--base-green);
+    border-color: var(--base-green);
+    color: var(--off-white);
+}
+
+    #budgetSaveBtn:hover:not([disabled]),
+    .budget-modal-btn-save:hover:not([disabled]) {
+        background-color: var(--green-8);
+    }
+
+#budgetCancelBtn.ts-card-tab-btn,
+.budget-modal-btn-cancel {
+    background-color: var(--gray-2);
+    border-color: var(--gray-3);
+    color: var(--gray-8);
+}
+
+    #budgetCancelBtn:hover:not([disabled]),
+    .budget-modal-btn-cancel:hover:not([disabled]) {
+        background-color: var(--gray-4);
+    }
+
+#budgetDeleteBtn.ts-card-tab-btn,
+.budget-modal-btn-delete {
+    background-color: transparent;
+    border-color: var(--red-4);
+    color: var(--red-6);
+}
+
+    #budgetDeleteBtn:hover:not([disabled]),
+    .budget-modal-btn-delete:hover:not([disabled]) {
+        background-color: var(--red-1);
+    }
+
+.budget-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 0.25rem 0;
+    min-width: 340px;
+}
+
+.budget-form-field {
+    width: 100%;
+}
+
+.budget-form-helper {
+    font-size: 0.78rem;
+    color: var(--gray-5);
+    margin: 0.25rem 0 0 0.25rem;
+}
+
+
+
+/* ---- Creation Type Picker ---- */
+.budget-form-type-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.budget-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem 0.75rem;
+    border-radius: 10px;
+    border: 2px solid var(--gray-2);
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+    .budget-type-btn:hover {
+        border-color: var(--gray-4);
+        background: var(--gray-1);
+    }
+
+    .budget-type-btn.active {
+        border-color: var(--base-green);
+        background: var(--green-1);
+    }
+
+    .budget-type-btn .material-icons {
+        font-size: 1.5rem;
+        color: var(--gray-5);
+    }
+
+    .budget-type-btn.active .material-icons {
+        color: var(--base-green);
+    }
+
+.budget-type-btn-label {
+    font-family: var(--label-font);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gray-8);
+}
+
+.budget-type-btn-desc {
+    font-size: 0.72rem;
+    color: var(--gray-5);
+}

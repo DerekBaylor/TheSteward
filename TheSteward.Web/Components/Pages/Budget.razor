@@ -26,7 +26,13 @@
 
 <PageTitle>Budget Dashboard</PageTitle>
 
-<BudgetToolBar OnHouseholdChanged="OnHouseholdChanged" />
+<BudgetToolBar OnHouseholdChanged="OnHouseholdChanged"
+               AvailableBudgets="availableBudgets"
+               CurrentBudget="currentBudget"
+               HasWritePermission="HouseholdState.HasFinanceWritePermission"
+               OnBudgetSelected="SelectBudget"
+               OnAddBudget="OpenAddBudgetModal"
+               OnEditBudget="OpenEditBudgetModal" />
 
 @if (HouseholdState.CurrentUserHousehold == null)
 {
@@ -160,6 +166,7 @@ else
     private string? creatingType;
     private string? errorMessage;
     private BudgetDto? currentBudget;
+    private List<BudgetDto> availableBudgets = new();
     private Action? _stateChangeHandler;
     private List<BudgetCategoryDto>? BudgetCategories = new();
 
@@ -196,16 +203,16 @@ else
         {
             isLoading = true;
 
-            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(userHousehold);
+            availableBudgets = await BudgetService.GetBudgetsForUserHouseholdAsync(userHousehold);
 
-            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == userHousehold.DefaultBudgetId)
-                ?? budgets.FirstOrDefault(b => b.IsDefaultBudget)
-                ?? budgets.FirstOrDefault();
+            currentBudget = availableBudgets.FirstOrDefault(b => b.BudgetId == userHousehold.DefaultBudgetId)
+                         ?? availableBudgets.FirstOrDefault(b => b.IsDefaultBudget)
+                         ?? availableBudgets.FirstOrDefault();
 
             if (currentBudget != null)
                 BudgetCategories = currentBudget.BudgetCategories;
 
-            hasBudget = currentBudget != null;
+            hasBudget = availableBudgets.Any();
         }
         catch (Exception ex)
         {
@@ -250,7 +257,7 @@ else
             {
                 currentBudget = await BudgetService.AddAsync(new CreateBudgetDto
                 {
-                    BudgetName = "My Budget",
+                    BudgetName = "My New Budget",
                     HouseholdId = householdId.Value,
                     OwnerId = userHousehold.UserId,
                     IsDefaultBudget = true,
@@ -259,6 +266,8 @@ else
             }
 
             await UserHouseholdService.SetDefaultBudgetAsync(userHousehold.UserHouseholdId, currentBudget!.BudgetId);
+
+            await RefreshBudgetAsync();
 
             hasBudget = true;
             Snackbar.Add("Budget created successfully!", Severity.Success);
@@ -274,6 +283,127 @@ else
             creatingType = null;
         }
     }
+    
+    private void SelectBudget(BudgetDto budget)
+    {
+        currentBudget = budget;
+        BudgetCategories = currentBudget.BudgetCategories;
+        StateHasChanged();
+    }
+
+    private async Task OpenAddBudgetModal()
+    {
+        var userHousehold = HouseholdState.CurrentUserHousehold!;
+
+        var formData = new BudgetFormDto
+        {
+            HouseholdId = userHousehold.HouseholdId,
+            OwnerId = userHousehold.UserId,
+            IsDefaultBudget = !availableBudgets.Any()
+        };
+
+        await OpenBudgetModal(formData);
+    }
+
+    private async Task OpenEditBudgetModal()
+    {
+        if (currentBudget == null) return;
+
+        var formData = new BudgetFormDto
+        {
+            BudgetId = currentBudget.BudgetId,
+            BudgetName = currentBudget.BudgetName,
+            IsDefaultBudget = currentBudget.IsDefaultBudget,
+            IsPublic = currentBudget.IsPublic,
+            HouseholdId = currentBudget.HouseholdId,
+            OwnerId = currentBudget.OwnerId
+        };
+
+        await OpenBudgetModal(formData);
+    }
+
+    private async Task OpenBudgetModal(BudgetFormDto formData)
+    {
+        var parameters = new DialogParameters
+        {
+            { "FormData", formData },
+            { "UserHousehold", HouseholdState.CurrentUserHousehold! }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<BudgetModal>(
+            formData.IsEditMode ? "Edit Budget" : "Add Budget",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        if (result.Data is string resultData && resultData.StartsWith("delete:"))
+        {
+            var idString = resultData["delete:".Length..];
+            if (Guid.TryParse(idString, out var budgetId))
+                await HandleDeleteBudget(budgetId);
+            return;
+        }
+
+        await RefreshBudgetAsync();
+
+        if (result.Data is BudgetDto savedBudget)
+            SelectBudget(availableBudgets.FirstOrDefault(b => b.BudgetId == savedBudget.BudgetId)
+                ?? availableBudgets.First());
+    }
+
+    private async Task RefreshBudgetAsync()
+    {
+        availableBudgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+            HouseholdState.CurrentUserHousehold!);
+
+        currentBudget = availableBudgets.FirstOrDefault(b => b.BudgetId == currentBudget?.BudgetId)
+            ?? availableBudgets.FirstOrDefault(b => b.IsDefaultBudget)
+            ?? availableBudgets.OrderByDescending(b => b.CreatedDate).FirstOrDefault();
+
+        BudgetCategories = currentBudget?.BudgetCategories ?? new();
+        hasBudget = availableBudgets.Any();
+
+        StateHasChanged();
+    }
+
+    private async Task HandleDeleteBudget(Guid budgetId)
+    {
+        try
+        {
+            var wasCurrentBudget = currentBudget?.BudgetId == budgetId;
+
+            await BudgetService.DeleteAsync(budgetId);
+
+            availableBudgets.RemoveAll(b => b.BudgetId == budgetId);
+
+            if (wasCurrentBudget)
+            {
+                currentBudget = availableBudgets.FirstOrDefault(b => b.IsDefaultBudget)
+                    ?? availableBudgets.FirstOrDefault();
+
+                BudgetCategories = currentBudget?.BudgetCategories ?? new();
+                hasBudget = availableBudgets.Any();
+            }
+
+            Snackbar.Add("Budget deleted.", Severity.Success);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting budget: {ex.Message}", Severity.Error);
+        }
+    }
+    
     #endregion Budget
 
     #region Income
@@ -696,19 +826,6 @@ else
         }
     }
     #endregion Expense
-
-    private async Task RefreshBudgetAsync()
-    {
-        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
-            HouseholdState.CurrentUserHousehold!);
-
-        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
-            ?? currentBudget;
-
-        BudgetCategories = currentBudget?.BudgetCategories ?? new();
-
-        StateHasChanged();
-    }
-    
+ 
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

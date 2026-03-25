@@ -1,0 +1,142 @@
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.IServices.FinanceManagerIServices
+@using TheSteward.Shared.Dtos.BudgetDtos
+
+@inject IExpenseService ExpenseService
+@inject ISnackbar Snackbar
+
+<MudDialog id="expenseModal">
+    <TitleContent>
+        <div class="expense-modal-title">
+            <span class="material-icons expense-modal-icon">
+                @(FormData.IsEditMode ? "edit" : "receipt_long")
+            </span>
+            @(FormData.IsEditMode ? "Edit Expense" : "Add Expense")
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        <ExpenseForm @ref="expenseForm"
+                     FormData="FormData"
+                     ExistingExpenseCount="ExistingExpenseCount"
+                     BudgetCategories="BudgetCategories"
+                     OnValidSubmit="HandleFormSubmit" />
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton id="expenseCancelBtn"
+                   class="ts-card-tab-btn expense-modal-btn-cancel"
+                   OnClick="Cancel"
+                   Disabled="isSaving">
+            Cancel
+        </MudButton>
+
+        @if (FormData.IsEditMode)
+        {
+            <MudButton id="expenseDeleteBtn"
+                       class="ts-card-tab-btn expense-modal-btn-delete"
+                       OnClick="ConfirmDelete"
+                       Disabled="isSaving">
+                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">delete</span>
+                Delete
+            </MudButton>
+        }
+
+        <MudButton id="expenseSaveBtn"
+                   class="ts-card-tab-btn expense-modal-btn-save"
+                   OnClick="TriggerSubmit"
+                   Disabled="isSaving">
+            @if (isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @(FormData.IsEditMode ? "Save Changes" : "Add Expense")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public ExpenseFormDto FormData { get; set; } = null!;
+
+    [Parameter]
+    public int ExistingExpenseCount { get; set; } = 0;
+
+    [Parameter]
+    public List<BudgetCategoryDto> BudgetCategories { get; set; } = new();
+
+    private ExpenseForm? expenseForm;
+    private bool isSaving = false;
+
+    private async Task TriggerSubmit()
+    {
+        if (expenseForm is not null)
+            await expenseForm.SubmitAsync();
+    }
+
+    private async Task HandleFormSubmit(ExpenseFormDto formData)
+    {
+        isSaving = true;
+
+        try
+        {
+            if (formData.IsEditMode)
+            {
+                var updateDto = new UpdateExpenseDto
+                {
+                    ExpenseId = formData.ExpenseId!.Value,
+                    ExpenseName = formData.ExpenseName,
+                    DueDay = formData.DueDay,
+                    AmountDue = formData.AmountDue,
+                    DisplayOrder = formData.DisplayOrder,
+                    BudgetCategoryId = formData.BudgetCategoryId!.Value,
+                    BudgetSubCategoryId = formData.BudgetSubCategoryId,
+                    CreditId = formData.CreditId,
+                    InvestmentId = formData.InvestmentId
+                };
+
+                var updated = await ExpenseService.UpdateAsync(updateDto);
+                Snackbar.Add("Expense updated successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(updated));
+            }
+            else
+            {
+                var createDto = new CreateExpenseDto
+                {
+                    ExpenseName = formData.ExpenseName,
+                    DueDay = formData.DueDay,
+                    AmountDue = formData.AmountDue,
+                    DisplayOrder = formData.DisplayOrder,
+                    BudgetId = formData.BudgetId,
+                    BudgetCategoryId = formData.BudgetCategoryId!.Value,
+                    BudgetSubCategoryId = formData.BudgetSubCategoryId,
+                    CreatedByUserHouseholdId = formData.CreatedByUserHouseholdId
+                };
+
+                var created = await ExpenseService.AddAsync(createDto);
+                Snackbar.Add("Expense added successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(created));
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving expense: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void ConfirmDelete()
+    {
+        MudDialog.Close(DialogResult.Ok($"delete:{FormData.ExpenseId}"));
+    }
+}

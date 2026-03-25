@@ -20,19 +20,24 @@ public class CreateExpenseDto
     
     public int DisplayOrder { get; set; }
 
-    #region Navigation Properties
-    
+    #region Scaler Properties
+
     [Required]
     public Guid BudgetId { get; set; }
-    
+    public Guid? CreditId { get; set; }
+
+    public Guid? InvestmentId { get; set; }
+
+    public required Guid CreatedByUserHouseholdId { get; set; }
+
+    #endregion Scaler Properties
+
+    #region Navigation Properties
+
     [Required]
     public Guid BudgetCategoryId { get; set; }
     
-    public Guid? BudgetSubCategoryId { get; set; }
-    
-    public Guid? CreditId { get; set; }
-    
-    public Guid? InvestmentId { get; set; }
+    public Guid? BudgetSubCategoryId { get; set; }    
     
     #endregion Navigation Properties
 }

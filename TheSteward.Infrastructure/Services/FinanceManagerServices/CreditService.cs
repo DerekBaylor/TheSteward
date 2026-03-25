@@ -55,6 +55,7 @@ public class CreditService : ICreditService
             BudgetCategoryId = category.BudgetCategoryId,
             BudgetSubCategoryId = subCategory?.BudgetSubCategoryId,
             CreditId = creditId,
+            CreatedByUserHouseholdId = createCreditDto.CreatedByUserHouseholdId,
         };
 
         var expense = await _expenseService.AddAsync(expenseDto);

@@ -1,4 +1,5 @@
-﻿@using TheSteward.Core.Dtos.HouseholdDtos
+﻿@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.Dtos.HouseholdDtos
 @using TheSteward.Core.IServices.HouseholdIServices
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using System.Security.Claims
@@ -19,7 +20,7 @@
 }
 else if (householdItems.Count > 0)
 {
-    <MudToolBar Class="budget-toolbar" >
+    <MudToolBar Class="budget-toolbar">
         <div class="toolbar-select-group">
             <label class="select-label">
                 <span class="material-icons">home</span>
@@ -34,14 +35,60 @@ else if (householdItems.Count > 0)
             else
             {
                 <TsSelect TValue="Guid?"
-                            Items="householdItems"
-                            @bind-Value="selectedHouseholdId"
-                            OnChange="OnHouseholdChangedAsync"
-                            Placeholder="Choose household" 
-                            Variant="purple" />
+                          Items="householdItems"
+                          @bind-Value="selectedHouseholdId"
+                          OnChange="OnHouseholdChangedAsync"
+                          Placeholder="Choose household"
+                          Variant="purple" />
             }
-
         </div>
+
+        @if (AvailableBudgets.Any())
+        {
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-budget-group">
+                <label class="select-label">
+                    <span class="material-icons">account_balance_wallet</span>
+                    Budget
+                </label>
+                <div class="toolbar-budget-pills">
+                    @foreach (var budget in AvailableBudgets)
+                    {
+                        <button class="budget-pill-btn @(CurrentBudget?.BudgetId == budget.BudgetId ? "active" : "")"
+                                @onclick="() => OnBudgetSelected.InvokeAsync(budget)">
+                            @budget.BudgetName
+                            @if (budget.IsDefaultBudget)
+                            {
+                                <span class="budget-pill-btn-default-badge">default</span>
+                            }
+                            @if (budget.IsPublic)
+                            {
+                                <span class="material-icons budget-pill-public-icon" title="Public">public</span>
+                            }
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @if (HasWritePermission)
+            {
+                <MudSpacer />
+                <div class="toolbar-budget-actions">
+                    <button class="budget-action-btn budget-action-btn--edit"
+                            @onclick="OnEditBudget"
+                            disabled="@(CurrentBudget == null)">
+                        <span class="material-icons">settings</span>
+                        Edit Budget
+                    </button>
+                    <button class="budget-action-btn budget-action-btn--add"
+                            @onclick="OnAddBudget">
+                        <span class="material-icons">add</span>
+                        New Budget
+                    </button>
+                </div>
+            }
+        }
 
         @if (ChildContent != null)
         {
@@ -63,8 +110,29 @@ else
 }
 
 @code {
-    [Parameter] public RenderFragment? ChildContent { get; set; }
-    [Parameter] public EventCallback<UserHouseholdDto> OnHouseholdChanged { get; set; }
+    [Parameter] 
+    public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter] 
+    public EventCallback<UserHouseholdDto> OnHouseholdChanged { get; set; }
+
+    [Parameter] 
+    public List<BudgetDto> AvailableBudgets { get; set; } = new();
+    
+    [Parameter] 
+    public BudgetDto? CurrentBudget { get; set; }
+    
+    [Parameter] 
+    public bool HasWritePermission { get; set; }
+    
+    [Parameter] 
+    public EventCallback<BudgetDto> OnBudgetSelected { get; set; }
+    
+    [Parameter] 
+    public EventCallback OnAddBudget { get; set; }
+    
+    [Parameter] 
+    public EventCallback OnEditBudget { get; set; }
 
     private List<SelectItem<Guid?>> householdItems = new();
     private List<UserHouseholdDto> userHouseholds = new();
@@ -72,7 +140,6 @@ else
     private bool isLoading = true;
     private string? currentUserId;
     private Action? _stateChangeHandler;
-
     private string? errorMessage;
 
     protected override Task OnInitializedAsync()
@@ -96,7 +163,7 @@ else
     {
         var selected = HouseholdState.UserHouseholds
             .FirstOrDefault(uh => uh.HouseholdId == selectedHouseholdId);
-        
+
         if (selected == null) return;
 
         HouseholdState.SetUserHousehold(selected);

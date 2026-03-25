@@ -1,0 +1,149 @@
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.IServices.FinanceManagerIServices
+@using TheSteward.Shared.Dtos.BudgetDtos
+@using TheSteward.Shared.Dtos.HouseholdDtos
+@using TheSteward.Core.Dtos.HouseholdDtos
+
+@inject IBudgetService BudgetService
+@inject ISnackbar Snackbar
+
+<MudDialog id="budgetModal">
+    <TitleContent>
+        <div class="budget-modal-title">
+            <span class="material-icons budget-modal-icon">
+                @(FormData.IsEditMode ? "edit" : "add_card")
+            </span>
+            @(FormData.IsEditMode ? "Edit Budget" : "Add Budget")
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        <BudgetForm @ref="budgetForm"
+                    FormData="FormData"
+                    OnValidSubmit="HandleFormSubmit" />
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton id="budgetCancelBtn"
+                   class="ts-card-tab-btn budget-modal-btn-cancel"
+                   OnClick="Cancel"
+                   Disabled="isSaving">
+            Cancel
+        </MudButton>
+
+        @if (FormData.IsEditMode)
+        {
+            <MudButton id="budgetDeleteBtn"
+                       class="ts-card-tab-btn budget-modal-btn-delete"
+                       OnClick="ConfirmDelete"
+                       Disabled="isSaving">
+                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">delete</span>
+                Delete
+            </MudButton>
+        }
+
+        <MudButton id="budgetSaveBtn"
+                   class="ts-card-tab-btn budget-modal-btn-save"
+                   OnClick="TriggerSubmit"
+                   Disabled="isSaving">
+            @if (isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @(FormData.IsEditMode ? "Save Changes" : "Add Budget")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public BudgetFormDto FormData { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public UserHouseholdDto UserHousehold { get; set; } = null!;
+
+    private BudgetForm? budgetForm;
+    private bool isSaving = false;
+
+    private async Task TriggerSubmit()
+    {
+        if (budgetForm is not null)
+            await budgetForm.SubmitAsync();
+    }
+
+    private async Task HandleFormSubmit(BudgetFormDto formData)
+    {
+        isSaving = true;
+
+        try
+        {
+            if (formData.IsEditMode)
+            {
+                var updateDto = new UpdateBudgetDto
+                {
+                    BudgetId = formData.BudgetId!.Value,
+                    BudgetName = formData.BudgetName,
+                    IsDefaultBudget = formData.IsDefaultBudget,
+                    IsPublic = formData.IsPublic
+                };
+
+                var updated = await BudgetService.UpdateAsync(updateDto);
+                Snackbar.Add("Budget updated successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(updated));
+            }
+            else
+            {
+                BudgetDto created;
+
+                if (formData.CreationType == "starter")
+                {
+                    created = await BudgetService.AddStarterBudget(UserHousehold);
+
+                    var updateDto = new UpdateBudgetDto
+                    {
+                        BudgetId = created.BudgetId,
+                        BudgetName = formData.BudgetName,
+                        IsDefaultBudget = formData.IsDefaultBudget,
+                        IsPublic = formData.IsPublic
+                    };
+                    created = await BudgetService.UpdateAsync(updateDto);
+                }
+                else
+                {
+                    var createDto = new CreateBudgetDto
+                    {
+                        BudgetName = formData.BudgetName,
+                        HouseholdId = formData.HouseholdId,
+                        OwnerId = formData.OwnerId,
+                        IsDefaultBudget = formData.IsDefaultBudget,
+                        IsPublic = formData.IsPublic
+                    };
+                    created = await BudgetService.AddAsync(createDto);
+                }
+
+                Snackbar.Add("Budget created successfully!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(created));
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving budget: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void ConfirmDelete()
+    {
+        MudDialog.Close(DialogResult.Ok($"delete:{FormData.BudgetId}"));
+    }
+}

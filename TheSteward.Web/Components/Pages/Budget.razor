@@ -16,6 +16,7 @@
 @inject IIncomeService IncomeService
 @inject IInvestmentService InvestmentService
 @inject ICreditService CreditService
+@inject IExpenseService ExpenseService
 @inject IUserHouseholdService UserHouseholdService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -138,7 +139,6 @@ else
             <ExpenseCard Expenses="currentBudget.Expenses"
                          IsReadOnly="!HouseholdState.HasFinanceWritePermission"
                          OnAddExpense="OpenAddExpenseModal"
-                         OnOpenExpenseDetails="OpenExpenseDetails"
                          OnEditExpense="OpenEditExpenseModal" 
                          OnDeleteExpense="(expense) => HandleDeleteExpense(expense.ExpenseId)"/>
                 </div>
@@ -366,13 +366,7 @@ else
             return;
         }
 
-        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
-             HouseholdState.CurrentUserHousehold!);
-
-        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
-            ?? currentBudget;
-
-        StateHasChanged();
+        await RefreshBudgetAsync();
     }
 
     private async Task HandleDeleteIncome(Guid incomeId)
@@ -381,14 +375,9 @@ else
         {
             await IncomeService.DeleteAsync(incomeId);
 
-            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
-                HouseholdState.CurrentUserHousehold!);
-
-            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
-                ?? currentBudget;
+            await RefreshBudgetAsync();
 
             Snackbar.Add("Income removed.", Severity.Success);
-            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -482,13 +471,7 @@ else
             return;
         }
 
-        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
-            HouseholdState.CurrentUserHousehold!);
-
-        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
-            ?? currentBudget;
-
-        StateHasChanged();
+        await RefreshBudgetAsync();
     }
 
     private async Task HandleDeleteInvestment(Guid investmentId)
@@ -497,14 +480,9 @@ else
         {
             await InvestmentService.DeleteAsync(investmentId);
 
-            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
-                HouseholdState.CurrentUserHousehold!);
-
-            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
-                ?? currentBudget;
+            await RefreshBudgetAsync();
 
             Snackbar.Add("Investment removed.", Severity.Success);
-            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -611,13 +589,7 @@ else
             return;
         }
 
-        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
-            HouseholdState.CurrentUserHousehold!);
-
-        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
-            ?? currentBudget;
-
-        StateHasChanged();
+        await RefreshBudgetAsync();
     }
 
     private async Task HandleDeleteCredit(Guid creditId)
@@ -626,14 +598,9 @@ else
         {
             await CreditService.DeleteAsync(creditId);
 
-            var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
-                HouseholdState.CurrentUserHousehold!);
-
-            currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
-                ?? currentBudget;
+            await RefreshBudgetAsync();
 
             Snackbar.Add("Credit and linked expense removed.", Severity.Success);
-            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -644,30 +611,104 @@ else
     #endregion Credit
 
     #region Expense
-    private Task OpenAddExpenseModal()
+    private async Task OpenAddExpenseModal()
     {
-        Snackbar.Add("Add Expense — coming soon.", Severity.Info);
-        return Task.CompletedTask;
+        var formData = new ExpenseFormDto
+        {
+            BudgetId = currentBudget!.BudgetId,
+            CreatedByUserHouseholdId = HouseholdState.CurrentUserHousehold!.UserHouseholdId,
+            DisplayOrder = currentBudget.Expenses.Count + 1
+        };
+
+        await OpenExpenseModal(formData);
     }
 
-    private Task OpenExpenseDetails()
+    private async Task OpenEditExpenseModal(ExpenseDto expense)
     {
-        Snackbar.Add("Credit Expense — coming soon.", Severity.Info);
-        return Task.CompletedTask;
+        var formData = new ExpenseFormDto
+        {
+            ExpenseId = expense.ExpenseId,
+            ExpenseName = expense.ExpenseName,
+            DueDay = expense.DueDay,
+            AmountDue = expense.AmountDue,
+            DisplayOrder = expense.DisplayOrder,
+            BudgetId = expense.BudgetId,
+            CreatedByUserHouseholdId = HouseholdState.CurrentUserHousehold!.UserHouseholdId,
+            BudgetCategoryId = expense.BudgetCategoryId,
+            BudgetCategoryName = expense.BudgetCategory?.BudgetCategoryName ?? string.Empty,
+            BudgetSubCategoryId = expense.BudgetSubCategoryId,
+            BudgetSubCategoryName = expense.BudgetSubCategory?.BudgetSubCategoryName,
+            CreditId = expense.CreditId,
+            InvestmentId = expense.InvestmentId
+        };
+
+        await OpenExpenseModal(formData);
     }
 
-    private Task OpenEditExpenseModal(ExpenseDto expense)
+    private async Task OpenExpenseModal(ExpenseFormDto formData)
     {
-        Snackbar.Add($"Edit Expense: {expense.ExpenseName} — coming soon.", Severity.Info);
-        return Task.CompletedTask;
+        var parameters = new DialogParameters
+    {
+        { "FormData", formData },
+        { "ExistingExpenseCount", currentBudget!.Expenses.Count },
+        { "BudgetCategories", BudgetCategories }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<ExpenseModal>(
+            formData.IsEditMode ? "Edit Expense" : "Add Expense",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        if (result.Data is string resultData && resultData.StartsWith("delete:"))
+        {
+            var idString = resultData["delete:".Length..];
+            if (Guid.TryParse(idString, out var expenseId))
+                await HandleDeleteExpense(expenseId);
+            return;
+        }
+
+        await RefreshBudgetAsync();
     }
 
-    private Task HandleDeleteExpense(Guid expenseId)
+    private async Task HandleDeleteExpense(Guid expenseId)
     {
-        Snackbar.Add($"Delete Expense — coming soon.", Severity.Info);
-        return Task.CompletedTask;
+        try
+        {
+            await ExpenseService.DeleteAsync(expenseId);
+            await RefreshBudgetAsync();
+            
+            Snackbar.Add("Expense and linked task removed.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting expense: {ex.Message}", Severity.Error);
+        }
     }
     #endregion Expense
+
+    private async Task RefreshBudgetAsync()
+    {
+        var budgets = await BudgetService.GetBudgetsForUserHouseholdAsync(
+            HouseholdState.CurrentUserHousehold!);
+
+        currentBudget = budgets.FirstOrDefault(b => b.BudgetId == currentBudget!.BudgetId)
+            ?? currentBudget;
+
+        BudgetCategories = currentBudget?.BudgetCategories ?? new();
+
+        StateHasChanged();
+    }
     
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
 }

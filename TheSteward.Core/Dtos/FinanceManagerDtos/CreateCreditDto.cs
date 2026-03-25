@@ -27,7 +27,7 @@ public class CreateCreditDto
 
     public int DisplayOrder { get; set; }
 
-    #region Navigation Properties
+    #region Scaler Properties
 
     [Required]
     public Guid BudgetId { get; set; }
@@ -55,5 +55,7 @@ public class CreateCreditDto
     /// </summary>
     public Guid? ExpenseId { get; set; }
 
-    #endregion  
+    public Guid CreatedByUserHouseholdId { get; set; }
+
+    #endregion  Scaler Properties
 }

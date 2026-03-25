@@ -1,0 +1,65 @@
+﻿/* ---- Modal Title ---- */
+.expense-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--label-font);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gray-9);
+}
+
+.expense-modal-icon {
+    font-size: 1.3rem;
+    color: var(--base-purple);
+}
+
+/* ---- Modal Action Buttons ---- */
+#expenseSaveBtn.ts-card-tab-btn,
+.expense-modal-btn-save {
+    background-color: var(--purple-6);
+    border-color: var(--purple-6);
+    color: var(--off-white);
+}
+
+    #expenseSaveBtn:hover:not([disabled]),
+    .expense-modal-btn-save:hover:not([disabled]) {
+        background-color: var(--purple-8);
+    }
+
+#expenseCancelBtn.ts-card-tab-btn,
+.expense-modal-btn-cancel {
+    background-color: var(--gray-2);
+    border-color: var(--gray-3);
+    color: var(--gray-8);
+}
+
+    #expenseCancelBtn:hover:not([disabled]),
+    .expense-modal-btn-cancel:hover:not([disabled]) {
+        background-color: var(--gray-4);
+    }
+
+#expenseDeleteBtn.ts-card-tab-btn,
+.expense-modal-btn-delete {
+    background-color: transparent;
+    border-color: var(--red-4);
+    color: var(--red-6);
+}
+
+    #expenseDeleteBtn:hover:not([disabled]),
+    .expense-modal-btn-delete:hover:not([disabled]) {
+        background-color: var(--red-1);
+    }
+
+/* ---- Form Layout ---- */
+.expense-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 0.25rem 0;
+    min-width: 340px;
+}
+
+.expense-form-field {
+    width: 100%;
+}

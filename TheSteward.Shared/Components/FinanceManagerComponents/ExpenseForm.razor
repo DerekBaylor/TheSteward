@@ -1,5 +1,145 @@
-﻿<h3>ExpenseForm</h3>
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Shared.Dtos.BudgetDtos
+
+<EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="expense-form">
+
+        <!-- Name -->
+        <div class="expense-form-field">
+            <MudTextField @bind-Value="FormData.ExpenseName"
+                          Label="Expense Name"
+                          Placeholder="e.g. Rent, Electric Bill, Netflix"
+                          Variant="Variant.Outlined"
+                          MaxLength="200"
+                          For="@(() => FormData.ExpenseName)" />
+        </div>
+
+        <!-- Amount Due -->
+        <div class="expense-form-field">
+            <MudNumericField @bind-Value="FormData.AmountDue"
+                             Label="Amount Due"
+                             Variant="Variant.Outlined"
+                             Format="C2"
+                             HelperText="The amount owed each billing period."
+                             Min="0m"
+                             For="@(() => FormData.AmountDue)" />
+        </div>
+
+        <!-- Due Day -->
+        <div class="expense-form-field">
+            <MudNumericField @bind-Value="FormData.DueDay"
+                             Label="Due Day"
+                             Variant="Variant.Outlined"
+                             HelperText="Day of the month this expense is due (1–31). Use 31 for 'last day'."
+                             Min="1"
+                             Max="31"
+                             For="@(() => FormData.DueDay)" />
+        </div>
+
+        <!-- Budget Category -->
+        <div class="expense-form-field">
+            <MudSelect T="BudgetCategoryDto"
+                       Value="selectedCategory"
+                       ValueChanged="OnCategoryChanged"
+                       Label="Budget Category"
+                       Variant="Variant.Outlined"
+                       ToStringFunc="@(c => c?.BudgetCategoryName ?? "Select a category")"
+                       HelperText="The budget category this expense belongs to."
+                       Clearable="true">
+                @foreach (var category in BudgetCategories)
+                {
+                    <MudSelectItem Value="@category">@category.BudgetCategoryName</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+
+        <!-- Budget Subcategory -->
+        @if (selectedCategory?.BudgetSubCategories?.Any() == true)
+        {
+            <div class="expense-form-field">
+                <MudSelect T="BudgetSubCategoryDto"
+                           Value="selectedSubCategory"
+                           ValueChanged="OnSubCategoryChanged"
+                           Label="Subcategory (Optional)"
+                           Variant="Variant.Outlined"
+                           ToStringFunc="@(s => s?.BudgetSubCategoryName ?? "Select a subcategory")"
+                           Clearable="true">
+                    @foreach (var sub in selectedCategory.BudgetSubCategories)
+                    {
+                        <MudSelectItem Value="@sub">@sub.BudgetSubCategoryName</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+        }
+
+        <ValidationSummary />
+    </div>
+</EditForm>
 
 @code {
+    [Parameter, EditorRequired]
+    public ExpenseFormDto FormData { get; set; } = null!;
 
+    [Parameter, EditorRequired]
+    public List<BudgetCategoryDto> BudgetCategories { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<ExpenseFormDto> OnValidSubmit { get; set; }
+
+    [Parameter]
+    public int ExistingExpenseCount { get; set; } = 0;
+
+    private EditContext editContext = null!;
+    private BudgetCategoryDto? selectedCategory;
+    private BudgetSubCategoryDto? selectedSubCategory;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(FormData);
+
+        if (!FormData.IsEditMode)
+            FormData.DisplayOrder = ExistingExpenseCount + 1;
+
+        if (FormData.BudgetCategoryId.HasValue)
+        {
+            selectedCategory = BudgetCategories
+                .FirstOrDefault(c => c.BudgetCategoryId == FormData.BudgetCategoryId.Value);
+
+            if (selectedCategory != null && FormData.BudgetSubCategoryId.HasValue)
+                selectedSubCategory = selectedCategory.BudgetSubCategories
+                    ?.FirstOrDefault(s => s.BudgetSubCategoryId == FormData.BudgetSubCategoryId.Value);
+        }
+    }
+
+    private void OnCategoryChanged(BudgetCategoryDto? selected)
+    {
+        selectedCategory = selected;
+        selectedSubCategory = null;
+        FormData.BudgetCategoryId = selected?.BudgetCategoryId;
+        FormData.BudgetCategoryName = selected?.BudgetCategoryName ?? string.Empty;
+        FormData.BudgetSubCategoryId = null;
+        FormData.BudgetSubCategoryName = null;
+    }
+
+    private void OnSubCategoryChanged(BudgetSubCategoryDto? selected)
+    {
+        selectedSubCategory = selected;
+        FormData.BudgetSubCategoryId = selected?.BudgetSubCategoryId;
+        FormData.BudgetSubCategoryName = selected?.BudgetSubCategoryName;
+    }
+
+    public async Task SubmitAsync()
+    {
+        if (editContext.Validate())
+            await OnValidSubmit.InvokeAsync(FormData);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await OnValidSubmit.InvokeAsync(FormData);
+    }
 }

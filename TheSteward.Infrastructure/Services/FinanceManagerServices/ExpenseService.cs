@@ -15,13 +15,15 @@ public class ExpenseService : IExpenseService
     private readonly IExpenseRepository _expenseRepository;
     private readonly ITaskItemRepository _taskItemRepository;
     private readonly ITaskItemCategoryRepository _taskItemCategoryRepository;
+    private readonly IRecurrenceRuleRepository _recurrenceRuleRepository;
     private readonly IMapper _mapper;
 
-    public ExpenseService(IExpenseRepository expenseRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository,  IMapper mapper)
+    public ExpenseService(IExpenseRepository expenseRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository,  IMapper mapper)
     {
         _expenseRepository = expenseRepository;
         _taskItemRepository = taskItemRepository;
         _taskItemCategoryRepository = taskItemCategoryRepository;
+        _recurrenceRuleRepository = recurrenceRuleRepository;
         _mapper = mapper;
     }
 
@@ -93,12 +95,49 @@ public class ExpenseService : IExpenseService
         if (expenseId == Guid.Empty)
             throw new ArgumentException("Expense ID cannot be empty.", nameof(expenseId));
 
-        var expense = await _expenseRepository.GetByIdAsync(expenseId);
-        if (expense == null)
-            throw new KeyNotFoundException($"Expense with ID {expenseId} not found.");
+        await using var transaction = await _expenseRepository.BeginTransactionAsync();
 
-        await _expenseRepository.DeleteAsync(expense);
-        await _expenseRepository.SaveChangesAsync();
+        try
+        {
+            var expense = await _expenseRepository.GetByIdAsync(expenseId);
+            if (expense == null)
+                throw new KeyNotFoundException($"Expense with ID {expenseId} not found.");
+
+            var linkedTask = await _taskItemRepository.GetAll()
+                .FirstOrDefaultAsync(t => t.ExpenseId == expenseId);
+
+            if (linkedTask != null)
+            {
+                // Delete the recurrence rule before the task since task holds the FK
+                if (linkedTask.RecurrenceId.HasValue)
+                {
+                    var recurrenceRule = await _recurrenceRuleRepository.GetByIdAsync(linkedTask.RecurrenceId.Value);
+                    if (recurrenceRule != null)
+                    {
+                        // Null out the FK first to avoid constraint violation
+                        linkedTask.RecurrenceId = null;
+                        await _taskItemRepository.UpdateAsync(linkedTask);
+                        await _taskItemRepository.SaveChangesAsync();
+
+                        await _recurrenceRuleRepository.DeleteAsync(recurrenceRule);
+                        await _recurrenceRuleRepository.SaveChangesAsync();
+                    }
+                }
+
+                await _taskItemRepository.DeleteAsync(linkedTask);
+                await _taskItemRepository.SaveChangesAsync();
+            }
+
+            await _expenseRepository.DeleteAsync(expense);
+            await _expenseRepository.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     #region Get Methods
@@ -197,7 +236,7 @@ public class ExpenseService : IExpenseService
     private async Task CreateLinkedTaskAsync(Expense expense, Guid createdByUserHouseholdId)
     {
         var category = await _taskItemCategoryRepository.GetAll()
-       .FirstOrDefaultAsync(c => c.TaskItemCategoryName == "Bills & Payments");
+          .FirstOrDefaultAsync(c => c.TaskItemCategoryName == "Bills & Payments");
 
         if (category == null)
         {
@@ -215,11 +254,25 @@ public class ExpenseService : IExpenseService
 
         var dueDate = GetNextDueDateFromDueDay(expense.DueDay);
 
+        var recurrenceRule = new RecurrenceRule
+        {
+            RecurrenceRuleId = Guid.NewGuid(),
+            RecurrenceFrequency = RecurrenceFrequency.Monthly,
+            RecurrenceDays = null, // Monthly recurrence uses IntervalDays/DueDay, not DaysOfWeek
+            IntervalDays = null,
+            StartDateTime = dueDate,
+            EndDateTime = null,
+            LastGeneratedDateTime = DateTime.UtcNow
+        };
+
+        await _recurrenceRuleRepository.AddAsync(recurrenceRule);
+        await _recurrenceRuleRepository.SaveChangesAsync();
+
         var taskItem = new TaskItem
         {
             TaskItemId = Guid.NewGuid(),
             TaskItemName = $"Pay {expense.ExpenseName}",
-            Description = $"Amount due: {expense.AmountDue:C}",
+            Description = $"Amount due: {expense.AmountDue:C} — due on day {expense.DueDay} of each month.",
             Status = TaskItemStatus.Pending,
             Priority = TaskItemPriority.Medium,
             DueDate = dueDate,
@@ -228,6 +281,7 @@ public class ExpenseService : IExpenseService
             CreatedByUserHouseholdId = createdByUserHouseholdId,
             AssignedToUserHouseholdId = createdByUserHouseholdId,
             TaskItemCategoryId = category.TaskItemCategoryId,
+            RecurrenceId = recurrenceRule.RecurrenceRuleId,
             ExpenseId = expense.ExpenseId,
             IsArchived = false
         };

@@ -9,23 +9,47 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Register confirmation</PageTitle>
+<PageTitle>Register Confirmation</PageTitle>
 
-<h1>Register confirmation</h1>
+<div class="register-confirmation-container">
+    <div class="register-confirmation-card">
 
-<StatusMessage Message="@statusMessage" />
+        <div class="register-confirmation-icon-wrap">
+            <span class="material-icons register-confirmation-icon">mark_email_unread</span>
+        </div>
 
-@if (emailConfirmationLink is not null)
-{
-    <p>
-        This app does not currently have a real email sender registered, see <a href="https://aka.ms/aspaccountconf">these docs</a> for how to configure a real email sender.
-        Normally this would be emailed: <a href="@emailConfirmationLink">Click here to confirm your account</a>
-    </p>
-}
-else
-{
-    <p role="alert">Please check your email to confirm your account.</p>
-}
+        <h1 class="register-confirmation-title">Check your email</h1>
+
+        <StatusMessage Message="@statusMessage" />
+
+        @if (emailConfirmationLink is not null)
+        {
+            <div class="register-confirmation-body">
+                <p class="register-confirmation-text">
+                    A real email sender hasn't been configured yet.
+                </p>
+                <a href="@emailConfirmationLink" class="register-confirmation-link-btn">
+                    <span class="material-icons">verified</span>
+                    Confirm your account
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="register-confirmation-body">
+                <p class="register-confirmation-text">
+                    We've sent a confirmation link to <strong>@Email</strong>.
+                    Please check your inbox and click the link to activate your account.
+                </p>
+                <div class="register-confirmation-hint">
+                    <span class="material-icons">info</span>
+                    <span>Didn't receive an email? Check your spam folder or contact support.</span>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
 
 @code {
     private string? emailConfirmationLink;

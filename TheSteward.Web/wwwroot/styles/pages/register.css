@@ -209,3 +209,31 @@
         font-size: 1.75rem;
     }
 }
+
+
+/* Password Requirements */
+.password-requirements {
+    list-style: none;
+    padding: 0.6rem 0.75rem;
+    margin: 0.4rem 0 0 0;
+    background: var(--blue-1);
+    border: 1px solid var(--blue-2);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.password-requirement {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--blue-7);
+}
+
+    .password-requirement .material-icons {
+        font-size: 0.95rem;
+        color: var(--blue-5);
+        flex-shrink: 0;
+    }

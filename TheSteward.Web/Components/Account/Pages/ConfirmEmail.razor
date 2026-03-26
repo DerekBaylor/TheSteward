@@ -9,13 +9,76 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Confirm email</PageTitle>
+<PageTitle>Confirm Email</PageTitle>
 
-<h1>Confirm email</h1>
-<StatusMessage Message="@statusMessage" />
+<div class="confirm-email-container">
+    <div class="confirm-email-card">
+
+        <div class="confirm-email-icon-wrap @(isSuccess ? "success" : isError ? "error" : "loading")">
+            @if (isLoading)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Medium" Color="Color.Primary" />
+            }
+            else if (isSuccess)
+            {
+                <span class="material-icons confirm-email-icon">verified</span>
+            }
+            else
+            {
+                <span class="material-icons confirm-email-icon">error_outline</span>
+            }
+        </div>
+
+        <h1 class="confirm-email-title">
+            @if (isLoading)
+            {
+                <span>Confirming your email...</span>
+            }
+            else if (isSuccess)
+            {
+                <span>Email confirmed!</span>
+            }
+            else
+            {
+                <span>Confirmation failed</span>
+            }
+        </h1>
+
+        @if (!isLoading)
+        {
+            <p class="confirm-email-message @(isSuccess ? "success" : "error")">
+                @statusMessage
+            </p>
+
+            @if (isSuccess)
+            {
+                <a href="/Account/Login" class="confirm-email-cta-btn">
+                    <span class="material-icons">login</span>
+                    Continue to Login
+                </a>
+            }
+            else
+            {
+                <div class="confirm-email-hint">
+                    <span class="material-icons">info</span>
+                    <span>Your confirmation link may have expired. Try registering again or contact support.</span>
+                </div>
+
+                <a href="/Account/Register" class="confirm-email-secondary-btn">
+                    <span class="material-icons">arrow_back</span>
+                    Back to Register
+                </a>
+            }
+        }
+
+    </div>
+</div>
 
 @code {
     private string? statusMessage;
+    private bool isLoading = true;
+    private bool isSuccess = false;
+    private bool isError = false;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -31,19 +94,33 @@
         if (UserId is null || Code is null)
         {
             RedirectManager.RedirectTo("");
+            return;
         }
 
         var user = await UserManager.FindByIdAsync(UserId);
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = $"Error loading user with ID {UserId}";
+            statusMessage = "We couldn't find an account associated with this confirmation link.";
+            isError = true;
         }
         else
         {
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
             var result = await UserManager.ConfirmEmailAsync(user, code);
-            statusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+
+            if (result.Succeeded)
+            {
+                statusMessage = "Your email has been confirmed. You can now log in to your account.";
+                isSuccess = true;
+            }
+            else
+            {
+                statusMessage = "We were unable to confirm your email. The link may have expired or already been used.";
+                isError = true;
+            }
         }
+
+        isLoading = false;
     }
 }

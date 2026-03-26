@@ -1,0 +1,176 @@
+﻿/* confirmEmail.css */
+
+.confirm-email-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-1);
+    padding: 2rem;
+    font-family: var(--primary-font);
+}
+
+.confirm-email-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.10);
+    padding: 2.5rem 2rem;
+    max-width: 460px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Icon */
+.confirm-email-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .confirm-email-icon-wrap.success {
+        background: var(--green-1);
+        border: 3px solid var(--green-3);
+    }
+
+    .confirm-email-icon-wrap.error {
+        background: var(--red-1);
+        border: 3px solid var(--red-3);
+    }
+
+    .confirm-email-icon-wrap.loading {
+        background: var(--blue-1);
+        border: 3px solid var(--blue-2);
+    }
+
+.confirm-email-icon {
+    font-size: 2.25rem;
+}
+
+.confirm-email-icon-wrap.success .confirm-email-icon {
+    color: var(--base-green);
+}
+
+.confirm-email-icon-wrap.error .confirm-email-icon {
+    color: var(--red-6);
+}
+
+/* Title */
+.confirm-email-title {
+    font-family: var(--label-font);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gray-9);
+    margin: 0;
+    text-align: center;
+}
+
+/* Message */
+.confirm-email-message {
+    font-size: 0.95rem;
+    text-align: center;
+    margin: 0;
+    line-height: 1.6;
+}
+
+    .confirm-email-message.success {
+        color: var(--green-7);
+    }
+
+    .confirm-email-message.error {
+        color: var(--red-6);
+    }
+
+/* CTA button */
+.confirm-email-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--base-green);
+    color: white;
+    border-radius: var(--border-radius);
+    padding: 0.65rem 1.5rem;
+    font-family: var(--label-font);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+    .confirm-email-cta-btn:hover {
+        background: var(--green-8);
+        transform: translateY(-1px);
+    }
+
+    .confirm-email-cta-btn .material-icons {
+        font-size: 1.1rem;
+    }
+
+/* Hint box */
+.confirm-email-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    background: var(--red-1);
+    border: 1px solid var(--red-2);
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: var(--red-7);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+    .confirm-email-hint .material-icons {
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 0.05rem;
+    }
+
+/* Secondary button */
+.confirm-email-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--gray-6);
+    font-family: var(--label-font);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--border-radius);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+    .confirm-email-secondary-btn:hover {
+        background: var(--gray-1);
+        color: var(--gray-9);
+    }
+
+    .confirm-email-secondary-btn .material-icons {
+        font-size: 1rem;
+    }
+
+/* Responsive */
+@media (max-width: 480px) {
+    .confirm-email-container {
+        padding: 1rem;
+        align-items: flex-start;
+        padding-top: 3rem;
+    }
+
+    .confirm-email-card {
+        padding: 2rem 1.25rem;
+    }
+
+    .confirm-email-title {
+        font-size: 1.3rem;
+    }
+}

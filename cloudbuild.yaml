@@ -46,3 +46,7 @@ steps:
 images:
   - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:$COMMIT_SHA'
   - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:latest'
+ 
+# Logging
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET

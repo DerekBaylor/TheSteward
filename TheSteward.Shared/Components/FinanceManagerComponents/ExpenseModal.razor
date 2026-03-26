@@ -87,6 +87,12 @@
         {
             if (formData.IsEditMode)
             {
+                if (!formData.BudgetCategoryId.HasValue || formData.BudgetCategoryId == Guid.Empty)
+                {
+                    Snackbar.Add("Please select a budget category before saving.", Severity.Warning);
+                    return;
+                }
+
                 var updateDto = new UpdateExpenseDto
                 {
                     ExpenseId = formData.ExpenseId!.Value,
@@ -94,7 +100,8 @@
                     DueDay = formData.DueDay,
                     AmountDue = formData.AmountDue,
                     DisplayOrder = formData.DisplayOrder,
-                    BudgetCategoryId = formData.BudgetCategoryId!.Value,
+                    BudgetId = formData.BudgetId,
+                    BudgetCategoryId = formData.BudgetCategoryId.Value,
                     BudgetSubCategoryId = formData.BudgetSubCategoryId,
                     CreditId = formData.CreditId,
                     InvestmentId = formData.InvestmentId
@@ -106,6 +113,12 @@
             }
             else
             {
+                if (!formData.BudgetCategoryId.HasValue || formData.BudgetCategoryId == Guid.Empty)
+                {
+                    Snackbar.Add("Please select a budget category before saving.", Severity.Warning);
+                    return;
+                }
+
                 var createDto = new CreateExpenseDto
                 {
                     ExpenseName = formData.ExpenseName,
@@ -113,7 +126,7 @@
                     AmountDue = formData.AmountDue,
                     DisplayOrder = formData.DisplayOrder,
                     BudgetId = formData.BudgetId,
-                    BudgetCategoryId = formData.BudgetCategoryId!.Value,
+                    BudgetCategoryId = formData.BudgetCategoryId.Value,
                     BudgetSubCategoryId = formData.BudgetSubCategoryId,
                     CreatedByUserHouseholdId = formData.CreatedByUserHouseholdId
                 };

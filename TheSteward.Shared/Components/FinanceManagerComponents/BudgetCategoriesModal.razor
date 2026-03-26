@@ -1,0 +1,540 @@
+﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@using TheSteward.Core.Dtos.FinanceManagerDtos
+@using TheSteward.Core.IServices.FinanceManagerIServices
+@using TheSteward.Shared.Dtos.BudgetDtos
+
+@inject IBudgetCategoryService BudgetCategoryService
+@inject IBudgetSubCategoryService BudgetSubCategoryService
+@inject ISnackbar Snackbar
+
+<MudDialog id="budgetCategoriesModal" Class="bc-modal">
+    <TitleContent>
+        <div class="bc-modal-title">
+            <span class="material-icons bc-modal-icon">category</span>
+            Budget Categories
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        @if (isLoading)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-3" />
+        }
+        else
+        {
+            <div class="bc-modal-body">
+
+                @foreach (var category in localCategories.OrderBy(c => c.DisplayOrder))
+                {
+                    var catId = category.BudgetCategoryId!.Value;
+                    var isExpanded = !collapsedCategories.Contains(catId);
+                    var subList = localSubCategories
+                        .Where(s => s.BudgetCategoryId == catId)
+                        .OrderBy(s => s.DisplayOrder)
+                        .ToList();
+
+                    <section class="bc-category-section">
+
+                        <!-- ── Category Header Row ── -->
+                        <div class="bc-category-header @(isExpanded ? "" : "bc-category-header--collapsed")">
+
+                            <!-- Left: chevron + name (clickable to toggle) -->
+                            <div class="bc-category-header-left"
+                                 @onclick="() => ToggleCategory(catId)">
+                                <span class="material-icons bc-category-chevron">
+                                    @(isExpanded ? "expand_more" : "chevron_right")
+                                </span>
+
+                                @if (category.IsEditing)
+                                {
+                                    <MudTextField @bind-Value="category.BudgetCategoryName"
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  Class="bc-inline-field"
+                                                  MaxLength="200"
+                                                  Placeholder="Category name"
+                                                  @onclick:stopPropagation="true" />
+                                }
+                                else
+                                {
+                                    <span class="bc-category-name">@category.BudgetCategoryName</span>
+                                    <span class="bc-category-count">
+                                        @subList.Count sub@(subList.Count == 1 ? "" : "s")
+                                    </span>
+                                }
+                            </div>
+
+                            <!-- Right: action buttons -->
+                            <div class="bc-category-actions" @onclick:stopPropagation="true">
+                                @if (category.IsEditing)
+                                {
+                                    <button class="bc-action-btn bc-action-btn--save"
+                                            title="Save"
+                                            @onclick="() => SaveCategory(category)">
+                                        <span class="material-icons">check</span>
+                                    </button>
+                                    <button class="bc-action-btn bc-action-btn--cancel"
+                                            title="Cancel"
+                                            @onclick="() => CancelCategory(category)">
+                                        <span class="material-icons">close</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="bc-action-btn bc-action-btn--edit"
+                                            title="Edit category"
+                                            @onclick="() => BeginEditCategory(category)">
+                                        <span class="material-icons">edit</span>
+                                    </button>
+                                    <button class="bc-action-btn bc-action-btn--delete"
+                                            title="Delete category"
+                                            @onclick="() => DeleteCategory(category)">
+                                        <span class="material-icons">delete</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- ── Subcategory Body (collapsible) ── -->
+                        @if (isExpanded)
+                        {
+                            <div class="bc-subcategory-body">
+
+                                @if (!subList.Any() && addingSubForCategoryId != catId)
+                                {
+                                    <p class="bc-sub-empty">No subcategories yet.</p>
+                                }
+
+                                @foreach (var sub in subList)
+                                {
+                                    <div class="bc-subcategory-row">
+                                        <span class="material-icons bc-sub-indent-icon">
+                                            subdirectory_arrow_right
+                                        </span>
+
+                                        @if (sub.IsEditing)
+                                        {
+                                            <MudTextField @bind-Value="sub.BudgetSubCategoryName"
+                                                          Variant="Variant.Outlined"
+                                                          Margin="Margin.Dense"
+                                                          Class="bc-inline-field"
+                                                          MaxLength="200"
+                                                          Placeholder="Subcategory name" />
+
+                                            <div class="bc-row-actions">
+                                                <button class="bc-action-btn bc-action-btn--save"
+                                                        title="Save"
+                                                        @onclick="() => SaveSubCategory(sub)">
+                                                    <span class="material-icons">check</span>
+                                                </button>
+                                                <button class="bc-action-btn bc-action-btn--cancel"
+                                                        title="Cancel"
+                                                        @onclick="() => CancelSubCategory(sub)">
+                                                    <span class="material-icons">close</span>
+                                                </button>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="bc-subcategory-name">
+                                                @sub.BudgetSubCategoryName
+                                            </span>
+
+                                            <div class="bc-row-actions">
+                                                <button class="bc-action-btn bc-action-btn--edit"
+                                                        title="Edit subcategory"
+                                                        @onclick="() => BeginEditSubCategory(sub)">
+                                                    <span class="material-icons">edit</span>
+                                                </button>
+                                                <button class="bc-action-btn bc-action-btn--delete"
+                                                        title="Delete subcategory"
+                                                        @onclick="() => DeleteSubCategory(sub)">
+                                                    <span class="material-icons">delete</span>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                <!-- ── Inline new-subcategory input ── -->
+                                @if (addingSubForCategoryId == catId)
+                                {
+                                    <div class="bc-subcategory-row bc-subcategory-row--new">
+                                        <span class="material-icons bc-sub-indent-icon">
+                                            subdirectory_arrow_right
+                                        </span>
+                                        <MudTextField @bind-Value="newSubCategoryName"
+                                                      Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense"
+                                                      Class="bc-inline-field"
+                                                      MaxLength="200"
+                                                      Placeholder="New subcategory name" />
+                                        <div class="bc-row-actions">
+                                            <button class="bc-action-btn bc-action-btn--save"
+                                                    title="Add"
+                                                    @onclick="() => ConfirmAddSubCategory(category)">
+                                                <span class="material-icons">check</span>
+                                            </button>
+                                            <button class="bc-action-btn bc-action-btn--cancel"
+                                                    title="Cancel"
+                                                    @onclick="CancelAddSubCategory">
+                                                <span class="material-icons">close</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- ── Add Subcategory button ── -->
+                                @if (addingSubForCategoryId != catId)
+                                {
+                                    <button class="bc-add-btn bc-add-btn--sub"
+                                            @onclick="() => BeginAddSubCategory(category)">
+                                        <span class="material-icons" style="font-size:15px;">
+                                            add_circle_outline
+                                        </span>
+                                        Add Subcategory
+                                    </button>
+                                }
+
+                            </div>
+                        }
+
+                    </section>
+                }
+
+                <!-- ── Inline new-category input ── -->
+                @if (isAddingCategory)
+                {
+                    <section class="bc-category-section bc-category-section--new">
+                        <div class="bc-category-header">
+                            <div class="bc-category-header-left">
+                                <span class="material-icons bc-category-chevron" style="opacity:0.3;">
+                                    expand_more
+                                </span>
+                                <MudTextField @bind-Value="newCategoryName"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="bc-inline-field"
+                                              MaxLength="200"
+                                              Placeholder="New category name" />
+                            </div>
+                            <div class="bc-category-actions">
+                                <button class="bc-action-btn bc-action-btn--save"
+                                        title="Add"
+                                        @onclick="ConfirmAddCategory">
+                                    <span class="material-icons">check</span>
+                                </button>
+                                <button class="bc-action-btn bc-action-btn--cancel"
+                                        title="Cancel"
+                                        @onclick="CancelAddCategory">
+                                    <span class="material-icons">close</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                }
+
+                <!-- ── Add Category button ── -->
+                @if (!isAddingCategory)
+                {
+                    <button class="bc-add-btn bc-add-btn--category"
+                            @onclick="BeginAddCategory">
+                        <span class="material-icons" style="font-size:16px;">
+                            add_circle_outline
+                        </span>
+                        Add Category
+                    </button>
+                }
+
+            </div>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton class="ts-card-tab-btn bc-modal-btn-close"
+                   OnClick="Close">
+            Done
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public List<BudgetCategoryDto> BudgetCategories { get; set; } = new();
+
+    [Parameter, EditorRequired]
+    public Guid BudgetId { get; set; }
+
+    private List<BudgetCategoryFormDto> localCategories = new();
+    private List<BudgetSubCategoryFormDto> localSubCategories = new();
+
+    private readonly HashSet<Guid> collapsedCategories = new();
+
+    private bool isAddingCategory = false;
+    private string newCategoryName = string.Empty;
+
+    private Guid? addingSubForCategoryId = null;
+    private string newSubCategoryName = string.Empty;
+
+    private bool isLoading = false;
+
+    private string _editSnapshot = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        BuildLocalLists();
+    }
+
+    private void BuildLocalLists()
+    {
+        localCategories = BudgetCategories
+            .OrderBy(c => c.DisplayOrder)
+            .Select(c => new BudgetCategoryFormDto
+            {
+                BudgetCategoryId = c.BudgetCategoryId,
+                BudgetCategoryName = c.BudgetCategoryName,
+                DisplayOrder = c.DisplayOrder,
+                BudgetId = c.BudgetId
+            }).ToList();
+
+        localSubCategories = BudgetCategories
+            .SelectMany(c => c.BudgetSubCategories.Select(s => new BudgetSubCategoryFormDto
+            {
+                BudgetSubCategoryId = s.BudgetSubCategoryId,
+                BudgetSubCategoryName = s.BudgetSubCategoryName,
+                DisplayOrder = s.DisplayOrder,
+                BudgetId = s.BudgetId,
+                BudgetCategoryId = s.BudgetCategoryId
+            }))
+            .ToList();
+    }
+
+#region Category
+
+    private void ToggleCategory(Guid categoryId)
+    {
+        if (!collapsedCategories.Add(categoryId))
+            collapsedCategories.Remove(categoryId);
+    }
+
+    private void BeginAddCategory()
+    {
+        newCategoryName = string.Empty;
+        isAddingCategory = true;
+    }
+
+    private void CancelAddCategory()
+    {
+        isAddingCategory = false;
+        newCategoryName = string.Empty;
+    }
+
+    private async Task ConfirmAddCategory()
+    {
+        if (string.IsNullOrWhiteSpace(newCategoryName))
+        {
+            Snackbar.Add("Category name cannot be empty.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var created = await BudgetCategoryService.AddAsync(new CreateBudgetCategoryDto
+            {
+                BudgetCategoryName = newCategoryName.Trim(),
+                BudgetId = BudgetId,
+                DisplayOrder = localCategories.Count
+            });
+
+            localCategories.Add(new BudgetCategoryFormDto
+            {
+                BudgetCategoryId = created.BudgetCategoryId,
+                BudgetCategoryName = created.BudgetCategoryName,
+                DisplayOrder = created.DisplayOrder,
+                BudgetId = created.BudgetId
+            });
+
+            isAddingCategory = false;
+            newCategoryName = string.Empty;
+            Snackbar.Add("Category added.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error adding category: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void BeginEditCategory(BudgetCategoryFormDto category)
+    {
+        collapsedCategories.Remove(category.BudgetCategoryId!.Value);
+        _editSnapshot = category.BudgetCategoryName;
+        category.IsEditing = true;
+    }
+
+    private void CancelCategory(BudgetCategoryFormDto category)
+    {
+        category.BudgetCategoryName = _editSnapshot;
+        category.IsEditing = false;
+    }
+
+    private async Task SaveCategory(BudgetCategoryFormDto category)
+    {
+        if (string.IsNullOrWhiteSpace(category.BudgetCategoryName))
+        {
+            Snackbar.Add("Category name cannot be empty.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            await BudgetCategoryService.UpdateAsync(new UpdateBudgetCategoryDto
+            {
+                BudgetCategoryId = category.BudgetCategoryId!.Value,
+                BudgetCategoryName = category.BudgetCategoryName.Trim(),
+                DisplayOrder = category.DisplayOrder,
+                BudgetId = category.BudgetId
+            });
+
+            category.IsEditing = false;
+            Snackbar.Add("Category updated.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating category: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteCategory(BudgetCategoryFormDto category)
+    {
+        try
+        {
+            await BudgetCategoryService.DeleteAsync(category.BudgetCategoryId!.Value);
+            localCategories.Remove(category);
+            localSubCategories.RemoveAll(s => s.BudgetCategoryId == category.BudgetCategoryId);
+            Snackbar.Add("Category deleted.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting category: {ex.Message}", Severity.Error);
+        }
+    }
+#endregion Category
+#region Subcategory
+
+    private void BeginAddSubCategory(BudgetCategoryFormDto category)
+    {
+        collapsedCategories.Remove(category.BudgetCategoryId!.Value);
+        addingSubForCategoryId = category.BudgetCategoryId;
+        newSubCategoryName = string.Empty;
+    }
+
+    private void CancelAddSubCategory()
+    {
+        addingSubForCategoryId = null;
+        newSubCategoryName = string.Empty;
+    }
+
+    private async Task ConfirmAddSubCategory(BudgetCategoryFormDto category)
+    {
+        if (string.IsNullOrWhiteSpace(newSubCategoryName))
+        {
+            Snackbar.Add("Subcategory name cannot be empty.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var existingCount = localSubCategories
+                .Count(s => s.BudgetCategoryId == category.BudgetCategoryId);
+
+            var created = await BudgetSubCategoryService.AddAsync(new CreateBudgetSubCategoryDto
+            {
+                BudgetSubCategoryName = newSubCategoryName.Trim(),
+                BudgetId = BudgetId,
+                BudgetCategoryId = category.BudgetCategoryId!.Value,
+                DisplayOrder = existingCount
+            });
+
+            localSubCategories.Add(new BudgetSubCategoryFormDto
+            {
+                BudgetSubCategoryId = created.BudgetSubCategoryId,
+                BudgetSubCategoryName = created.BudgetSubCategoryName,
+                DisplayOrder = created.DisplayOrder,
+                BudgetId = created.BudgetId,
+                BudgetCategoryId = created.BudgetCategoryId
+            });
+
+            addingSubForCategoryId = null;
+            newSubCategoryName = string.Empty;
+            Snackbar.Add("Subcategory added.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error adding subcategory: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void BeginEditSubCategory(BudgetSubCategoryFormDto sub)
+    {
+        _editSnapshot = sub.BudgetSubCategoryName;
+        sub.IsEditing = true;
+    }
+
+    private void CancelSubCategory(BudgetSubCategoryFormDto sub)
+    {
+        sub.BudgetSubCategoryName = _editSnapshot;
+        sub.IsEditing = false;
+    }
+
+    private async Task SaveSubCategory(BudgetSubCategoryFormDto sub)
+    {
+        if (string.IsNullOrWhiteSpace(sub.BudgetSubCategoryName))
+        {
+            Snackbar.Add("Subcategory name cannot be empty.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            await BudgetSubCategoryService.UpdateAsync(new UpdateBudgetSubCategoryDto
+            {
+                BudgetSubCategoryId = sub.BudgetSubCategoryId!.Value,
+                BudgetSubCategoryName = sub.BudgetSubCategoryName.Trim(),
+                DisplayOrder = sub.DisplayOrder,
+                BudgetId = sub.BudgetId,
+                BudgetCategoryId = sub.BudgetCategoryId
+            });
+
+            sub.IsEditing = false;
+            Snackbar.Add("Subcategory updated.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating subcategory: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteSubCategory(BudgetSubCategoryFormDto sub)
+    {
+        try
+        {
+            await BudgetSubCategoryService.DeleteAsync(sub.BudgetSubCategoryId!.Value);
+            localSubCategories.Remove(sub);
+            Snackbar.Add("Subcategory deleted.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting subcategory: {ex.Message}", Severity.Error);
+        }
+    }
+
+#endregion Subcategory
+
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+}
+
+

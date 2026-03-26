@@ -48,6 +48,7 @@
 @import url('styles/components/budgetStyles/expenseCard.css');
 @import url('styles/components/budgetStyles/expenseModal.css');
 @import url('styles/components/budgetStyles/budgetModal.css');
+@import url('styles/components/budgetStyles/budgetCategoriesModal.css');
 
 
 :root {

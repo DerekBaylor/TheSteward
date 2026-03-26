@@ -1,0 +1,48 @@
+steps:
+  # Step 1 — Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:$COMMIT_SHA'
+      - '-t'
+      - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:latest'
+      - '.'
+
+  # Step 2 — Push the versioned image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:$COMMIT_SHA'
+
+  # Step 3 — Push the latest tag
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:latest'
+
+  # Step 4 — Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'thesteward'
+      - '--image'
+      - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:$COMMIT_SHA'
+      - '--region'
+      - 'us-east1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--add-cloudsql-instances'
+      - 'project-31bf22ca-87b5-4999-b56:us-east1:thesteward-db'
+      - '--set-secrets'
+      - 'ConnectionStrings__DefaultConnection=thesteward-connection-string:latest'
+      - '--min-instances'
+      - '1'
+
+# Store images in Artifact Registry
+images:
+  - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:$COMMIT_SHA'
+  - 'us-east1-docker.pkg.dev/project-31bf22ca-87b5-4999-b56/thesteward-repo/thesteward:latest'

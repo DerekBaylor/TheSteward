@@ -17,24 +17,24 @@
 
 /* ---- Tab Buttons ---- */
 #addIncomeBtn.ts-card-tab-btn {
-    background-color: var(--green-6);
-    border-color: var(--green-6);
-    color: var(--off-white);
-}
-
-#showIncomeDetails.ts-card-tab-btn {
     background-color: var(--green-7);
     border-color: var(--green-7);
     color: var(--off-white);
 }
 
-button#addIncomeBtn:hover:not([disabled]) {
+#showIncomeDetails.ts-card-tab-btn {
     background-color: var(--green-8);
+    border-color: var(--green-8);
+    color: var(--off-white);
+}
+
+button#addIncomeBtn:hover:not([disabled]) {
+    background-color: var(--green-9);
     color: var(--off-white);
 }
 
 button#showIncomeDetails:hover:not([disabled]) {
-    background-color: var(--green-8);
+    background-color: var(--green-9);
     color: var(--off-white);
 }
 

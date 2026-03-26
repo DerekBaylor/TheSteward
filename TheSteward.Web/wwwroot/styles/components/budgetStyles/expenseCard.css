@@ -15,6 +15,17 @@ button#addExpenseBtn:hover:not([disabled]) {
     color: var(--off-white);
 }
 
+#openBudgetCategoriesBtn.ts-card-tab-btn {
+    background-color: var(--purple-2);
+    border-color: var(--purple-4);
+    color: var(--purple-7);
+}
+
+button#openBudgetCategoriesBtn:hover:not([disabled]) {
+    background-color: var(--purple-3);
+    color: var(--purple-8);
+}
+
 /* ---- Card border accent ---- */
 #expenseCard .ts-card-content {
     border-color: var(--base-purple);

@@ -7,6 +7,13 @@
     <MudCardActions class="ts-tabbed-card-btn-container">
         @if (!IsReadOnly)
         {
+            <MudButton id="openBudgetCategoriesBtn"
+                       class="ts-card-tab-btn"
+                       StartIcon="@Icons.Material.Filled.Category"
+                       OnClick="HandleOpenBudgetCategories">
+                Budget Categories
+            </MudButton>
+
             <MudButton id="addExpenseBtn"
                        class="ts-card-tab-btn"
                        StartIcon="@Icons.Material.Filled.Add"
@@ -173,6 +180,12 @@
 
     [Parameter]
     public EventCallback<ExpenseDto> OnDeleteExpense { get; set; }
+
+    [Parameter]
+    public EventCallback OnOpenBudgetCategories { get; set; }
+
+    private async Task HandleOpenBudgetCategories() =>
+        await OnOpenBudgetCategories.InvokeAsync();
 
     private readonly HashSet<Guid> collapsedCategories = new();
 

@@ -1,0 +1,307 @@
+﻿/* ── Modal Title ── */
+.bc-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--label-font);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gray-9);
+}
+
+.bc-modal-icon {
+    font-size: 1.3rem;
+    color: var(--base-purple);
+}
+
+/* ── Scrollable body ── */
+.bc-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 380px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+/* ═══════════════════════════════════════
+   Category Section  (mirrors ExpenseCard)
+   ═══════════════════════════════════════ */
+
+.bc-category-section {
+    margin-bottom: 0.25rem;
+}
+
+.bc-category-section--new {
+    opacity: 0.85;
+}
+
+/* ── Category header bar ── */
+.bc-category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0.5rem 0.4rem;
+    background: var(--purple-1);
+    border-left: 3px solid var(--base-purple);
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+}
+
+    .bc-category-header:hover {
+        background-color: var(--purple-2);
+    }
+
+.bc-category-header--collapsed {
+    border-radius: var(--border-radius);
+    border-left-color: var(--purple-4);
+}
+
+/* Left cluster: chevron + name + count */
+.bc-category-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.bc-category-chevron {
+    font-size: 1.1rem;
+    color: var(--purple-6);
+    flex-shrink: 0;
+}
+
+.bc-category-name {
+    font-family: var(--label-font);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--purple-7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bc-category-count {
+    font-size: 0.68rem;
+    color: var(--gray-5);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+/* Right cluster: edit / delete buttons */
+.bc-category-actions {
+    display: flex;
+    gap: 0.15rem;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.bc-category-header:hover .bc-category-actions {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════
+   Subcategory Body
+   ═══════════════════════════════════════ */
+
+.bc-subcategory-body {
+    padding: 0.3rem 0.5rem 0.4rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    border-left: 3px solid var(--purple-2);
+    margin-left: 0.6rem;
+    border-radius: 0 0 var(--border-radius) 0;
+}
+
+.bc-sub-empty {
+    font-size: 0.78rem;
+    color: var(--gray-4);
+    margin: 0.2rem 0 0.3rem 1.4rem;
+    font-style: italic;
+}
+
+/* ── Subcategory row ── */
+.bc-subcategory-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.3rem;
+    border-radius: 4px;
+    transition: background-color 0.12s ease;
+}
+
+    .bc-subcategory-row:hover {
+        background-color: var(--purple-1);
+    }
+
+.bc-subcategory-row--new {
+    background-color: var(--purple-1);
+}
+
+.bc-sub-indent-icon {
+    font-size: 0.95rem;
+    color: var(--purple-4);
+    flex-shrink: 0;
+}
+
+.bc-subcategory-name {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--gray-7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Row-level action buttons (revealed on hover) */
+.bc-row-actions {
+    display: flex;
+    gap: 0.15rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.bc-subcategory-row:hover .bc-row-actions {
+    opacity: 1;
+}
+
+/* Keep visible while editing */
+.bc-subcategory-row--new .bc-row-actions {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════
+   Shared Action Buttons
+   ═══════════════════════════════════════ */
+
+.bc-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    padding: 0.2rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+    .bc-action-btn .material-icons {
+        font-size: 15px;
+    }
+
+.bc-action-btn--edit {
+    color: var(--gray-5);
+}
+
+    .bc-action-btn--edit:hover {
+        background-color: var(--purple-2);
+        color: var(--base-purple);
+    }
+
+.bc-action-btn--delete {
+    color: var(--gray-5);
+}
+
+    .bc-action-btn--delete:hover {
+        background-color: var(--red-1);
+        color: var(--red-6);
+    }
+
+.bc-action-btn--save {
+    color: var(--gray-5);
+}
+
+    .bc-action-btn--save:hover {
+        background-color: var(--green-1);
+        color: var(--green-7);
+    }
+
+.bc-action-btn--cancel {
+    color: var(--gray-5);
+}
+
+    .bc-action-btn--cancel:hover {
+        background-color: var(--gray-2);
+        color: var(--gray-8);
+    }
+
+/* ═══════════════════════════════════════
+   Add buttons  (Category + Subcategory)
+   ═══════════════════════════════════════ */
+
+/* Shared base */
+.bc-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-family: var(--label-font);
+    font-weight: 600;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+/* Full-width "Add Category" — dashed border, sits at the bottom of the list */
+.bc-add-btn--category {
+    border: 1px dashed var(--purple-4);
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+    color: var(--purple-6);
+    width: 100%;
+    margin-top: 0.15rem;
+}
+
+    .bc-add-btn--category:hover {
+        background-color: var(--purple-1);
+        border-color: var(--base-purple);
+        color: var(--purple-7);
+    }
+
+/* Compact "Add Subcategory" — sits inside the subcategory body */
+.bc-add-btn--sub {
+    border: 1px dashed var(--purple-3);
+    padding: 0.2rem 0.5rem;
+    font-size: 0.74rem;
+    color: var(--purple-5);
+    margin-top: 0.1rem;
+    align-self: flex-start;
+    margin-left: 1.3rem;
+}
+
+    .bc-add-btn--sub:hover {
+        background-color: var(--purple-1);
+        border-color: var(--purple-5);
+        color: var(--purple-7);
+    }
+
+/* ── Inline text field ── */
+.bc-inline-field {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ═══════════════════════════════════════
+   Done button
+   ═══════════════════════════════════════ */
+
+.bc-modal-btn-close {
+    background-color: var(--purple-6) !important;
+    border-color: var(--purple-6) !important;
+    color: var(--off-white) !important;
+}
+
+    .bc-modal-btn-close:hover:not([disabled]) {
+        background-color: var(--purple-8) !important;
+    }

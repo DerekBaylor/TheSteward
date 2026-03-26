@@ -17,6 +17,8 @@
 @inject IInvestmentService InvestmentService
 @inject ICreditService CreditService
 @inject IExpenseService ExpenseService
+@inject IBudgetCategoryService BudgetCategoryService
+@inject IBudgetSubCategoryService BudgetSubCategoryService
 @inject IUserHouseholdService UserHouseholdService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -145,8 +147,10 @@ else
             <ExpenseCard Expenses="currentBudget.Expenses"
                          IsReadOnly="!HouseholdState.HasFinanceWritePermission"
                          OnAddExpense="OpenAddExpenseModal"
-                         OnEditExpense="OpenEditExpenseModal" 
-                         OnDeleteExpense="(expense) => HandleDeleteExpense(expense.ExpenseId)"/>
+                         OnEditExpense="OpenEditExpenseModal"
+                         OnDeleteExpense="(expense) => HandleDeleteExpense(expense.ExpenseId)"
+                         OnOpenBudgetCategories="OpenBudgetCategoriesModal" />
+
                 </div>
 
         </div>
@@ -825,6 +829,38 @@ else
             Snackbar.Add($"Error deleting expense: {ex.Message}", Severity.Error);
         }
     }
+
+    private async Task OpenBudgetCategoriesModal()
+    {
+        if (currentBudget == null) return;
+
+        var parameters = new DialogParameters
+    {
+        { "BudgetCategories", BudgetCategories ?? new() },
+        { "BudgetId", currentBudget.BudgetId }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<BudgetCategoriesModal>(
+            "Budget Categories",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await RefreshBudgetAsync();
+        }
+    }
+
+
     #endregion Expense
  
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;

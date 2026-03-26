@@ -3,6 +3,8 @@
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 @using TheSteward.Shared.Dtos.BudgetDtos
 
+@inject ISnackbar Snackbar
+
 <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
 
@@ -134,8 +136,15 @@
 
     public async Task SubmitAsync()
     {
-        if (editContext.Validate())
-            await OnValidSubmit.InvokeAsync(FormData);
+        if (!editContext.Validate()) return;
+
+        if (!FormData.BudgetCategoryId.HasValue || FormData.BudgetCategoryId == Guid.Empty)
+        {
+            Snackbar.Add("Please select a budget category.", Severity.Warning);
+            return;
+        }
+
+        await OnValidSubmit.InvokeAsync(FormData);
     }
 
     private async Task HandleValidSubmit()

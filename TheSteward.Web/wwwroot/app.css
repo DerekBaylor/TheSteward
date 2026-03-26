@@ -1,26 +1,26 @@
 /*-------*/
 /* Pages */
 /*-------*/
-@import url('./styles/pages/login.css');
+/*@import url('./styles/pages/login.css');
 @import url('./styles/pages/register.css');
 @import url('./styles/pages/home.css');
 @import url('./styles/pages/household.css');
 @import url('./styles/pages/budget.css');
 @import url('./styles/pages/styles.css');
-@import url("./styles/pages/tasks.css");
+@import url("./styles/pages/tasks.css");*/
 
 /*------------*/
 /* Components */
 /*------------*/
-@import url("./styles/components/tsCard.css");
+/*@import url("./styles/components/tsCard.css");
 @import url("./styles/components/tsModal.css");
 @import url("./styles/components//tsSelect.css");
 @import url("./styles/components/sidebarNav.css");
 @import url("./styles/components/landingPage.css");
 @import url("./styles/components/dashboard.css");
-@import url("./styles/components/dashboardCalendar.css");
+@import url("./styles/components/dashboardCalendar.css");*/
 /* household */
-@import url("./styles/components/householdStyles/householdCard.css");
+/*@import url("./styles/components/householdStyles/householdCard.css");
 @import url("./styles/components/householdStyles/userHouseholdCard.css");
 @import url("./styles/components/householdStyles/userHouseholdFormModal.css");
 @import url("./styles/components/householdStyles/userProfileCard.css");
@@ -28,9 +28,9 @@
 @import url("./styles/components/householdStyles/pendingInvitationCard.css");
 @import url("./styles/components//householdStyles/userProfileModal.css");
 @import url("./styles/components/householdStyles/manageUserHouseholdModal.css");
-@import url("./styles/components//householdStyles/householdFormModal.css");
+@import url("./styles/components//householdStyles/householdFormModal.css");*/
 /* budget */
-@import url("./styles/components//budgetStyles//budgetToolbar.css");
+/*@import url("./styles/components//budgetStyles//budgetToolbar.css");
 @import url("./styles/components/budgetStyles/incomeCard.css");
 @import url("./styles/components/budgetStyles/incomeModal.css");
 @import url("./styles/components/budgetStyles/incomeDetailsModal.css");
@@ -42,8 +42,60 @@
 @import url("./styles/components/budgetStyles/creditDetailsModal.css");
 @import url("./styles/components/budgetStyles/expenseCard.css");
 @import url("./styles/components/budgetStyles/expenseModal.css");
-@import url("./styles/components/budgetStyles/budgetModal.css");
+@import url("./styles/components/budgetStyles/budgetModal.css");*/
 /* tasks */
+
+
+/*-------*/
+/* Pages */
+/*-------*/
+@import url('styles/pages/login.css');
+@import url('styles/pages/register.css');
+@import url('styles/pages/home.css');
+@import url('styles/pages/household.css');
+@import url('styles/pages/budget.css');
+@import url('styles/pages/styles.css');
+@import url('styles/pages/tasks.css');
+
+/*------------*/
+/* Components */
+/*------------*/
+@import url('styles/components/tsCard.css');
+@import url('styles/components/tsModal.css');
+@import url('styles/components/tsSelect.css');
+@import url('styles/components/sidebarNav.css');
+@import url('styles/components/landingPage.css');
+@import url('styles/components/dashboard.css');
+@import url('styles/components/dashboardCalendar.css');
+
+/* household */
+@import url('styles/components/householdStyles/householdCard.css');
+@import url('styles/components/householdStyles/userHouseholdCard.css');
+@import url('styles/components/householdStyles/userHouseholdFormModal.css');
+@import url('styles/components/householdStyles/userProfileCard.css');
+@import url('styles/components/householdStyles/inviteMemberModal.css');
+@import url('styles/components/householdStyles/pendingInvitationCard.css');
+@import url('styles/components/householdStyles/userProfileModal.css');
+@import url('styles/components/householdStyles/manageUserHouseholdModal.css');
+@import url('styles/components/householdStyles/householdFormModal.css');
+
+/* budget */
+@import url('styles/components/budgetStyles/budgetToolbar.css');
+@import url('styles/components/budgetStyles/incomeCard.css');
+@import url('styles/components/budgetStyles/incomeModal.css');
+@import url('styles/components/budgetStyles/incomeDetailsModal.css');
+@import url('styles/components/budgetStyles/investmentCard.css');
+@import url('styles/components/budgetStyles/investmentModal.css');
+@import url('styles/components/budgetStyles/investmentDetailsModal.css');
+@import url('styles/components/budgetStyles/creditCard.css');
+@import url('styles/components/budgetStyles/creditForm.css');
+@import url('styles/components/budgetStyles/creditDetailsModal.css');
+@import url('styles/components/budgetStyles/expenseCard.css');
+@import url('styles/components/budgetStyles/expenseModal.css');
+@import url('styles/components/budgetStyles/budgetModal.css');
+
+
+
 
 
 :root {

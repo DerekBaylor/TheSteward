@@ -114,11 +114,14 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 #region Connection Strings
 builder.Services.AddDbContext<TheStewardContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+
+    options.UseNpgsql(connectionString);
+
 });
 #endregion Connection Strings
-
-
 
 
 var app = builder.Build();

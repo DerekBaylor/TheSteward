@@ -33,9 +33,6 @@ public class TaskManagerProfiles : Profile
 
         // TaskItem
         CreateMap<TaskItem, TaskItemDto>()
-                .ForMember(dest => dest.TaskItemCategory, opt => opt.MapFrom(src => src.TaskItemCategory))
-                .ForMember(dest => dest.RecurrenceRule, opt => opt.MapFrom(src => src.RecurrenceRule))
-                .ForMember(dest => dest.RelatedExpense, opt => opt.MapFrom(src => src.RelatedExpense))
                 .ReverseMap()
                 .ForMember(dest => dest.CreatedByUserHousehold, opt => opt.Ignore())
                 .ForMember(dest => dest.AssignedToUserHousehold, opt => opt.Ignore())

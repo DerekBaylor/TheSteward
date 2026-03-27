@@ -1,4 +1,8 @@
-﻿.tm-container {
+﻿/* ========================= */
+/* Container                 */
+/* ========================= */
+
+.tm-container {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -6,110 +10,10 @@
     animation: fadeIn 0.4s ease-out;
 }
 
- /*Header*/ 
-.tm-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-}
+/* ========================= */
+/* Body                      */
+/* ========================= */
 
-.tm-title {
-    font-family: var(--label-font);
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--gray-9);
-    margin: 0 0 0.25rem 0;
-}
-
-.tm-subtitle {
-    font-size: 1rem;
-    color: var(--gray-6);
-    margin: 0;
-}
-
-.tm-add-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.9rem;
-}
-
-    .tm-add-btn .material-symbols-outlined {
-        font-size: 1.1rem;
-    }
-
- /*Stat Cards*/ 
-.tm-stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.tm-stat-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    padding: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: box-shadow 0.2s ease;
-}
-
-    .tm-stat-card:hover {
-        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
-    }
-
-.tm-stat-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-    .tm-stat-icon .material-symbols-outlined {
-        font-size: 1.4rem;
-        color: white;
-    }
-
-.tm-stat-icon--pending {
-    background: linear-gradient(135deg, var(--blue-5), var(--blue-7));
-}
-
-.tm-stat-icon--inprogress {
-    background: linear-gradient(135deg, var(--orange-5), var(--orange-7));
-}
-
-.tm-stat-icon--completed {
-    background: linear-gradient(135deg, var(--green-5), var(--green-7));
-}
-
-.tm-stat-icon--urgent {
-    background: linear-gradient(135deg, var(--red-4), var(--red-7));
-}
-
-.tm-stat-label {
-    font-family: var(--label-font);
-    font-size: 0.75rem;
-    color: var(--gray-5);
-    margin: 0;
-}
-
-.tm-stat-value {
-    font-family: var(--label-font);
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--gray-9);
-    margin: 0;
-    line-height: 1;
-}
-
- /*Body*/ 
 .tm-body {
     background: white;
     border-radius: 12px;
@@ -117,25 +21,44 @@
     overflow: hidden;
 }
 
- /*Toolbar*/ 
-.tm-toolbar {
+/* ========================= */
+/* Filter Strip              */
+/* ========================= */
+
+.tm-filter-strip {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 2px solid var(--gray-2);
+    justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.75rem;
+    margin-bottom: 1.25rem;
 }
 
 .tm-filter-group {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.375rem;
     flex-wrap: wrap;
 }
 
-.tm-filter-btn {
+.tm-top-filter-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.tm-bottom-filter-row {
+    display: flex;
+    flex-direction: row;
+}
+
+/* ========================= */
+/* Stat Chips                */
+/* ========================= */
+
+.tm-stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
     font-family: var(--label-font);
     font-size: 0.8rem;
     font-weight: 600;
@@ -146,18 +69,99 @@
     color: var(--gray-6);
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
-    .tm-filter-btn:hover {
-        border-color: var(--gray-4);
-        color: var(--gray-8);
+    .tm-stat-chip .material-symbols-outlined {
+        font-size: 1rem;
     }
 
-    .tm-filter-btn.active {
-        background: var(--gray-9);
-        border-color: var(--gray-9);
+    .tm-stat-chip:hover {
+        border-color: var(--purple-5);
+        color: var(--purple-6);
+    }
+
+    .tm-stat-chip.active {
+        background: var(--purple-6);
+        border-color: var(--purple-6);
         color: white;
     }
+
+/* Pending */
+.tm-stat-chip--pending:hover {
+    border-color: var(--yellow-5);
+    color: var(--yellow-7);
+}
+
+.tm-stat-chip--pending.active {
+    background: var(--yellow-5);
+    border-color: var(--yellow-5);
+    color: white;
+}
+
+/* In Progress */
+.tm-stat-chip--inprogress:hover {
+    border-color: var(--base-green);
+    color: var(--base-green);
+}
+
+.tm-stat-chip--inprogress.active {
+    background: var(--base-green);
+    border-color: var(--base-green);
+    color: white;
+}
+
+/* Completed */
+.tm-stat-chip--completed:hover {
+    border-color: var(--blue-6);
+    color: var(--blue-6);
+}
+
+.tm-stat-chip--completed.active {
+    background: var(--blue-6);
+    border-color: var(--blue-6);
+    color: white;
+}
+
+/* Urgent */
+.tm-stat-chip--urgent:hover {
+    border-color: var(--red-6);
+    color: var(--red-6);
+}
+
+.tm-stat-chip--urgent.active {
+    background: var(--red-6);
+    border-color: var(--red-6);
+    color: white;
+}
+
+/* ========================= */
+/* Chip Count Badge          */
+/* ========================= */
+
+.tm-chip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: var(--gray-2);
+    color: var(--gray-7);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tm-stat-chip.active .tm-chip-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+/* ========================= */
+/* Priority Chips            */
+/* ========================= */
 
 .tm-priority-chip {
     font-family: var(--label-font);
@@ -181,11 +185,19 @@
     border-color: var(--blue-2);
 }
 
+    .tm-priority-chip--low.active {
+        background: var(--blue-2);
+    }
+
 .tm-priority-chip--medium {
     background: var(--yellow-1);
     color: var(--yellow-7);
     border-color: var(--yellow-2);
 }
+
+    .tm-priority-chip--medium.active {
+        background: var(--yellow-2);
+    }
 
 .tm-priority-chip--high {
     background: var(--orange-1);
@@ -193,33 +205,24 @@
     border-color: var(--orange-2);
 }
 
+    .tm-priority-chip--high.active {
+        background: var(--orange-2);
+    }
+
 .tm-priority-chip--urgent {
     background: var(--red-1);
     color: var(--red-7);
     border-color: var(--red-2);
 }
 
-.tm-priority-chip--low.active {
-    background: var(--blue-2);
-    opacity: 1;
-}
+    .tm-priority-chip--urgent.active {
+        background: var(--red-2);
+    }
 
-.tm-priority-chip--medium.active {
-    background: var(--yellow-2);
-    opacity: 1;
-}
+/* ========================= */
+/* Task List                 */
+/* ========================= */
 
-.tm-priority-chip--high.active {
-    background: var(--orange-2);
-    opacity: 1;
-}
-
-.tm-priority-chip--urgent.active {
-    background: var(--red-2);
-    opacity: 1;
-}
-
- /*Task List*/ 
 .tm-task-list {
     display: flex;
     flex-direction: column;
@@ -251,6 +254,10 @@
     min-width: 0;
 }
 
+/* ========================= */
+/* Priority Indicator        */
+/* ========================= */
+
 .tm-priority-indicator {
     width: 4px;
     height: 48px;
@@ -273,6 +280,10 @@
 .tm-priority-indicator--urgent {
     background: var(--red-5);
 }
+
+/* ========================= */
+/* Task Info                 */
+/* ========================= */
 
 .tm-task-info {
     display: flex;
@@ -327,7 +338,10 @@
         font-weight: 600;
     }
 
- /*Right side*/ 
+/* ========================= */
+/* Task Card Right           */
+/* ========================= */
+
 .tm-task-card-right {
     display: flex;
     align-items: center;
@@ -351,7 +365,10 @@
         font-size: 1rem;
     }
 
- /*Status Badge*/ 
+/* ========================= */
+/* Status Badge              */
+/* ========================= */
+
 .tm-status-badge {
     font-family: var(--label-font);
     font-size: 0.7rem;
@@ -381,7 +398,10 @@
     color: var(--gray-6);
 }
 
- /*Empty State*/ 
+/* ========================= */
+/* Empty State               */
+/* ========================= */
+
 .tm-empty-state {
     display: flex;
     flex-direction: column;
@@ -411,12 +431,9 @@
     margin: 0;
 }
 
- /*Responsive*/ 
-@media (max-width: 1024px) {
-    .tm-stats-row {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+/* ========================= */
+/* Responsive                */
+/* ========================= */
 
 @media (max-width: 768px) {
     .tm-container {
@@ -428,19 +445,6 @@
         gap: 1rem;
     }
 
-    .tm-add-btn {
-        align-self: flex-start;
-    }
-
-    .tm-stats-row {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .tm-toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
     .tm-task-card {
         flex-direction: column;
         align-items: flex-start;
@@ -450,16 +454,31 @@
         width: 100%;
         justify-content: space-between;
     }
+
+    .tm-filter-strip {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tm-stat-chip {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.625rem;
+    }
 }
 
 @media (max-width: 480px) {
-    .tm-stats-row {
-        grid-template-columns: 1fr 1fr;
-    }
-
     .tm-task-meta {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.25rem;
+    }
+
+    .tm-filter-group {
+        width: 100%;
+    }
+
+    .tm-stat-chip {
+        flex: 1;
+        justify-content: center;
     }
 }

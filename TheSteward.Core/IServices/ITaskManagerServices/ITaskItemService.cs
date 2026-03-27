@@ -1,5 +1,6 @@
 ﻿// ITaskItemService.cs
 using TheSteward.Core.Dtos.TaskManagerDtos;
+using TheSteward.Core.Models.TaskManagerModels;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
 namespace TheSteward.Core.IServices.TaskManagerIServices;

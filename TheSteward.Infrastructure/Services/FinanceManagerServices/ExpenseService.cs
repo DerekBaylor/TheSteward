@@ -4,6 +4,7 @@ using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
+using TheSteward.Core.IServices.TaskManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
 using TheSteward.Core.Models.TaskManagerModels;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
@@ -18,7 +19,7 @@ public class ExpenseService : IExpenseService
     private readonly IRecurrenceRuleRepository _recurrenceRuleRepository;
     private readonly IMapper _mapper;
 
-    public ExpenseService(IExpenseRepository expenseRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository,  IMapper mapper)
+    public ExpenseService(IExpenseRepository expenseRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository, IMapper mapper)
     {
         _expenseRepository = expenseRepository;
         _taskItemRepository = taskItemRepository;
@@ -74,7 +75,7 @@ public class ExpenseService : IExpenseService
         var expense = await _expenseRepository.GetByIdAsync(expenseDto.ExpenseId);
         if (expense == null)
             throw new KeyNotFoundException($"Expense with ID {expenseDto.ExpenseId} not found.");
-        
+
         expense.ExpenseName = expenseDto.ExpenseName;
         expense.DueDay = expenseDto.DueDay;
         expense.AmountDue = expenseDto.AmountDue;
@@ -86,6 +87,8 @@ public class ExpenseService : IExpenseService
 
         await _expenseRepository.UpdateAsync(expense);
         await _expenseRepository.SaveChangesAsync();
+
+        await SyncLinkedTaskAsync(expense);
 
         return expenseDto;
     }
@@ -312,6 +315,26 @@ public class ExpenseService : IExpenseService
 
         return candidateDate;
     }
+
+    private async Task SyncLinkedTaskAsync(Expense expense)
+    {
+        var linkedTask = await _taskItemRepository.GetAll()
+            .FirstOrDefaultAsync(t => t.ExpenseId == expense.ExpenseId);
+
+        if (linkedTask == null)
+            return;
+
+        linkedTask.TaskItemName = $"Pay {expense.ExpenseName}";
+        linkedTask.Description =
+            $"Amount due: {expense.AmountDue:C} — due on day {expense.DueDay} of each month.";
+        linkedTask.DueDate = GetNextDueDateFromDueDay(expense.DueDay);
+        linkedTask.UpdatedDate = DateTime.UtcNow;
+
+        await _taskItemRepository.UpdateAsync(linkedTask);
+        await _taskItemRepository.SaveChangesAsync();
+    }
+
+
 
     #endregion Private Helper Methods
 }

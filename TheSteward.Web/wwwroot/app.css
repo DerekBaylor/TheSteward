@@ -50,6 +50,8 @@
 @import url('styles/components/budgetStyles/budgetModal.css');
 @import url('styles/components/budgetStyles/budgetCategoriesModal.css');
 
+/* tasks */
+@import url('styles/components/taskStyles/taskManagerToolbar.css');
 
 :root {
     /* ----- */

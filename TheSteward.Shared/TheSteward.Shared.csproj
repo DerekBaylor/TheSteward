@@ -32,4 +32,8 @@
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Dtos\TaskDtos\" />
+	</ItemGroup>
+
 </Project>

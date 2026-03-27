@@ -23,6 +23,7 @@ using TheSteward.Infrastructure.Repositories.TaskManagerRepositories;
 using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Infrastructure.Services.TaskManagerServices;
 using TheSteward.Core.IServices.TaskManagerIServices;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -158,5 +159,10 @@ app.MapPost("/account/logout", async (
     await signInManager.SignOutAsync();
     return Results.Redirect("/");
 }).RequireAuthorization();
+
+
+var culture = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 app.Run();

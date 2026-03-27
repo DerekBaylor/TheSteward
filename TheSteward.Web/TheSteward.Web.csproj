@@ -74,4 +74,8 @@
 		</PackageReference>
 		<PackageReference Include="AutoMapper" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\styles\components\taskStyyles\" />
+	</ItemGroup>
 </Project>

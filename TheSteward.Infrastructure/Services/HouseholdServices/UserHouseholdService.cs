@@ -1,11 +1,11 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.IRepositories.HouseholdIRepositories;
 using TheSteward.Core.IServices.HouseholdIServices;
 using TheSteward.Core.Models;
 using TheSteward.Core.Models.HouseholdModels;
+using TheSteward.Core.MappingExtensions;
 
 namespace TheSteward.Infrastructure.Services.HouseholdServices;
 
@@ -14,14 +14,12 @@ public class UserHouseholdService : IUserHouseholdService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IInvitationRepository _invitationRepository;
     private readonly IUserHouseholdRepository _userHouseholdRepository;
-    private readonly IMapper _mapper;
 
-    public UserHouseholdService(IUserHouseholdRepository userHouseholdRepository, UserManager<ApplicationUser> userManager, IInvitationRepository invitationRepository, IMapper mapper)
+    public UserHouseholdService(IUserHouseholdRepository userHouseholdRepository, UserManager<ApplicationUser> userManager, IInvitationRepository invitationRepository)
     {
         _userHouseholdRepository = userHouseholdRepository;
         _userManager = userManager;
         _invitationRepository = invitationRepository;
-        _mapper = mapper;
     }
 
     public async Task AddAsync(CreateUserHouseholdDto newUserHousehold, string ownerId)
@@ -29,9 +27,8 @@ public class UserHouseholdService : IUserHouseholdService
         if (newUserHousehold == null)
             throw new ArgumentNullException(nameof(newUserHousehold));
 
-        var owner = await _userManager.FindByIdAsync(ownerId);
-        if (owner == null)
-            throw new KeyNotFoundException($"User with ID {ownerId} not found.");
+        var owner = await _userManager.FindByIdAsync(ownerId)
+            ?? throw new KeyNotFoundException($"User with ID {ownerId} not found.");
 
         await CreateUserHouseholdAsync(
             newUserHousehold.HouseholdId,
@@ -62,12 +59,10 @@ public class UserHouseholdService : IUserHouseholdService
         if (updatedUserHousehold.UserHouseholdId == null)
             throw new ArgumentNullException(nameof(updatedUserHousehold.UserHouseholdId));
 
-        var currentUserHousehold = await GetByIdAsync(updatedUserHousehold.UserHouseholdId.Value);
+        var currentUserHousehold = await _userHouseholdRepository.GetByIdAsync(updatedUserHousehold.UserHouseholdId.Value)
+            ?? throw new KeyNotFoundException($"UserHousehold with ID {updatedUserHousehold.UserHouseholdId} not found.");
 
-        if (currentUserHousehold == null)
-            throw new KeyNotFoundException($"UserHousehold with ID {updatedUserHousehold.UserHouseholdId} not found.");
-
-        _mapper.Map(updatedUserHousehold, currentUserHousehold);
+        currentUserHousehold.ApplyUpdate(updatedUserHousehold);
 
         await _userHouseholdRepository.UpdateAsync(currentUserHousehold);
         await _userHouseholdRepository.SaveChangesAsync();
@@ -125,24 +120,18 @@ public class UserHouseholdService : IUserHouseholdService
     #region Get UserHousehold Methods
     public async Task<UserHousehold> GetByIdAsync(Guid id)
     {
-        var userHousehold = await _userHouseholdRepository.GetByIdAsync(id);
-
-        if (userHousehold == null)
-        {
-            throw new KeyNotFoundException($"Household with ID {id} not found.");
-        }
-
-        return userHousehold;
+        return await _userHouseholdRepository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException($"UserHousehold with ID {id} not found.");
     }
 
     public async Task<List<UserHouseholdDto>> GetAllUserHouseholdsForUserAsync(string userId)
     {
-        var userHousehold = await _userHouseholdRepository.GetAll()
+        var userHouseholds = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
             .Where(uh => uh.Household.IsHouseholdActive && uh.UserId == userId && uh.IsActive)
             .ToListAsync();
 
-        return _mapper.Map<List<UserHouseholdDto>>(userHousehold);
+        return userHouseholds.ToDtoList();
     }
 
     public async Task<List<HouseholdDto>> GetAllHouseholdsForUserAsync(string userId)
@@ -150,19 +139,18 @@ public class UserHouseholdService : IUserHouseholdService
         var households = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
             .Where(uh => uh.UserId == userId &&
-                   uh.Household.IsHouseholdActive &&
-                   uh.IsActive)
+                         uh.Household.IsHouseholdActive &&
+                         uh.IsActive)
             .Select(uh => uh.Household)
             .ToListAsync();
 
-        return _mapper.Map<List<HouseholdDto>>(households);
+        return households.ToDtoList();
     }
 
     public async Task<UserHouseholdDto?> GetDefaultUserHouseholdForUserAsync(string userId)
     {
         var userHousehold = await _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
-            .ThenInclude(h => h.UserHouseholds)
             .Where(uh =>
                 uh.UserId == userId &&
                 uh.IsDefaultUserHousehold &&
@@ -170,15 +158,14 @@ public class UserHouseholdService : IUserHouseholdService
                 uh.Household.IsHouseholdActive)
             .FirstOrDefaultAsync();
 
-        return _mapper.Map<UserHouseholdDto>(userHousehold);
+        return userHousehold?.ToDto();
     }
 
     public async Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId, bool activeOnly = true)
     {
         var query = _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
-                .ThenInclude(h => h.UserHouseholds)
-                    .ThenInclude(uh => uh.User)
+            .Include(uh => uh.User)
             .Where(uh => uh.UserId == userId && uh.HouseholdId == householdId);
 
         if (activeOnly)
@@ -186,7 +173,7 @@ public class UserHouseholdService : IUserHouseholdService
 
         var userHousehold = await query.FirstOrDefaultAsync();
 
-        return _mapper.Map<UserHouseholdDto>(userHousehold);
+        return userHousehold?.ToDto();
     }
     #endregion Get UserHousehold Methods
 
@@ -214,17 +201,14 @@ public class UserHouseholdService : IUserHouseholdService
             throw new InvalidOperationException("This user already has a pending invitation to this household.");
 
         var household = await _userHouseholdRepository.GetAll()
-            .Include(h => h.Household)
-            .Where(h => h.HouseholdId == inviteDto.HouseholdId)
-            .Select(h => h.Household)
-            .FirstOrDefaultAsync();
+            .Include(uh => uh.Household)
+            .Where(uh => uh.HouseholdId == inviteDto.HouseholdId)
+            .Select(uh => uh.Household)
+            .FirstOrDefaultAsync()
+            ?? throw new KeyNotFoundException("Household not found.");
 
-        if (household == null)
-            throw new KeyNotFoundException("Household not found.");
-
-        var invitingUser = await _userManager.FindByIdAsync(invitingUserId);
-        if (invitingUser == null)
-            throw new KeyNotFoundException("Inviting user not found.");
+        var invitingUser = await _userManager.FindByIdAsync(invitingUserId)
+            ?? throw new KeyNotFoundException("Inviting user not found.");
 
         var invitation = new HouseholdInvitation
         {
@@ -235,14 +219,14 @@ public class UserHouseholdService : IUserHouseholdService
             InvitedByUserId = invitingUserId,
             InvitedByUser = invitingUser,
             InvitedDate = DateTime.UtcNow,
-            ExpirationDate = DateTime.UtcNow.AddDays(7), // 7 day expiration
+            ExpirationDate = DateTime.UtcNow.AddDays(7),
             IsAccepted = false
         };
 
         await _invitationRepository.AddAsync(invitation);
         await _invitationRepository.SaveChangesAsync();
 
-        var invitationDto = _mapper.Map<HouseholdInvitationDto>(invitation);
+        var invitationDto = invitation.ToDto();
         return invitationDto;
     }
 
@@ -314,7 +298,7 @@ public class UserHouseholdService : IUserHouseholdService
             .OrderByDescending(i => i.InvitedDate)
             .ToListAsync();
 
-        return _mapper.Map<List<HouseholdInvitationDto>>(invitations);
+        return invitations.ToDtoList();
     }
 
     public async Task CancelInvitationAsync(Guid invitationId, string userId)

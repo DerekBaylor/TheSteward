@@ -12,7 +12,7 @@ public class UpdateHouseholdDto
 
     public bool IsDefaultHousehold { get; set; } = false;
 
-    public bool IsActive { get; set; }
+    public bool IsHouseholdActive { get; set; }
 
     public bool HasTaskManagerAccess { get; set; }
 

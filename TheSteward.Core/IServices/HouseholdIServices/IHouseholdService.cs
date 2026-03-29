@@ -18,9 +18,9 @@ public interface IHouseholdService
     /// <summary>
     /// Deletes a household from the database.
     /// </summary>
-    /// <param name="householdDto">The household data transfer object representing the household to delete.</param>
+    /// <param name="id">The unique identifier of the household.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task DeleteAsync(HouseholdDto householdDto);
+    Task DeleteAsync(Guid householdId);
 
   /// <summary>
     /// Updates an existing household's editable properties in the database.

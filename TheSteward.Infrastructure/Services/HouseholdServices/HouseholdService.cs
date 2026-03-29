@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
 using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.IRepositories.HouseholdIRepositories;
 using TheSteward.Core.IServices.HouseholdIServices;
 using TheSteward.Core.Models;
-using TheSteward.Core.Models.HouseholdModels;
+using TheSteward.Core.MappingExtensions;
 
 namespace TheSteward.Infrastructure.Services.HouseholdServices;
 
@@ -14,25 +12,23 @@ public class HouseholdService : IHouseholdService
     private readonly IHouseholdRepository _householdRepository;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUserHouseholdService _userHouseholdService;
-    private readonly IMapper _mapper;
 
-    public HouseholdService(IHouseholdRepository householdRepository, UserManager<ApplicationUser> userManager, IUserHouseholdService userHouseholdService, IMapper mapper)
+    public HouseholdService(IHouseholdRepository householdRepository, UserManager<ApplicationUser> userManager, IUserHouseholdService userHouseholdService)
     {
         _householdRepository = householdRepository;
         _userManager = userManager;
         _userHouseholdService = userHouseholdService;
-        _mapper = mapper;
     }
     public async Task AddAsync(CreateHouseholdDto newHousehold, string ownerId)
     {
         if (newHousehold == null)
             throw new ArgumentNullException(nameof(newHousehold));
 
-        var owner = await _userManager.FindByIdAsync(ownerId);
-        if (owner == null)
-            throw new KeyNotFoundException($"User with ID {ownerId} not found.");
+        var owner = await _userManager.FindByIdAsync(ownerId)
+            ?? throw new KeyNotFoundException($"User with ID {ownerId} not found.");
 
-        var household = _mapper.Map<Household>(newHousehold);
+        var household = newHousehold.ToEntity(ownerId, owner);
+
         household.HouseholdId = Guid.NewGuid();
         household.OwnerId = ownerId;
         household.IsHouseholdActive = true;
@@ -63,9 +59,10 @@ public class HouseholdService : IHouseholdService
         await _userHouseholdService.AddAsync(createUserHouseholdDto, ownerId);
     }
 
-    public async Task DeleteAsync(HouseholdDto householdDto)
-    { 
-        var household = _mapper.Map<Household>(householdDto);
+    public async Task DeleteAsync(Guid householdId)
+    {
+        var household = await _householdRepository.GetByIdAsync(householdId)
+            ?? throw new KeyNotFoundException($"Household with ID {householdId} not found.");
 
         await _householdRepository.DeleteAsync(household);
         await _householdRepository.SaveChangesAsync();
@@ -73,10 +70,10 @@ public class HouseholdService : IHouseholdService
 
     public async Task UpdateAsync(UpdateHouseholdDto updatedHousehold)
     {
-        var currentHousehold = await _householdRepository.GetByIdAsync(updatedHousehold.HouseholdId);
+        var currentHousehold = await _householdRepository.GetByIdAsync(updatedHousehold.HouseholdId)
+            ?? throw new KeyNotFoundException($"Household with ID {updatedHousehold.HouseholdId} not found.");
 
-        if (currentHousehold == null)
-            throw new KeyNotFoundException($"Household with ID {updatedHousehold.HouseholdId} not found.");
+        currentHousehold.ApplyUpdate(updatedHousehold);
 
         currentHousehold.HasFileManagerAccess = updatedHousehold.HasFileManagerAccess;
         currentHousehold.HasFinanceManagerAccess = updatedHousehold.HasFinanceManagerAccess;
@@ -95,15 +92,9 @@ public class HouseholdService : IHouseholdService
 
     public async Task<HouseholdDto> GetByIdAsync(Guid id)
     {
-        var household = await _householdRepository.GetByIdAsync(id);
+        var household = await _householdRepository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException($"Household with ID {id} not found.");
 
-        if (household == null)
-        {
-            throw new KeyNotFoundException($"Household with ID {id} not found.");
-        }
-
-        var householdDto = _mapper.Map<HouseholdDto>(household);
-
-        return householdDto;
+        return household.ToDto();
     }
 }

@@ -4,7 +4,7 @@ namespace TheSteward.Core.IServices.HouseholdIServices;
 
 public interface IHouseholdService
 {
-  /// <summary>
+    /// <summary>
     /// Adds a new household to the database and creates an owner relationship for the specified user.
     /// The owner is automatically added as a member with full permissions across all household modules.
     /// </summary>
@@ -12,8 +12,8 @@ public interface IHouseholdService
     /// <param name="ownerId">The unique identifier of the user who will own the household.</param>
     /// <exception cref="ArgumentNullException">Thrown when newHousehold is null.</exception>
     /// <exception cref="KeyNotFoundException">Thrown when the user with the specified ownerId does not exist.</exception>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task AddAsync(CreateHouseholdDto newHousehold, string ownerId);
+    /// The task result contains the created household as <see cref="HouseholdDto"/>.
+    Task<HouseholdDto> AddAsync(CreateHouseholdDto newHousehold, string ownerId);
 
     /// <summary>
     /// Deletes a household from the database.
@@ -22,21 +22,21 @@ public interface IHouseholdService
     /// <returns>A task representing the asynchronous operation.</returns>
     Task DeleteAsync(Guid householdId);
 
-  /// <summary>
+    /// <summary>
     /// Updates an existing household's editable properties in the database.
     /// Protected properties (IsHouseholdActive, OwnerId, Owner, Members) are preserved and cannot be modified through this method.
     /// </summary>
     /// <param name="updatedHouseholdDto">The household data transfer object containing the updated values.</param>
     /// <exception cref="ArgumentNullException">Thrown when updatedHouseholdDto.HouseholdId is null.</exception>
     /// <exception cref="KeyNotFoundException">Thrown when no household with the specified ID exists.</exception>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task UpdateAsync(UpdateHouseholdDto updatedHouseholdDto);
+    /// The task result contains the created household as <see cref="HouseholdDto"/>.
+    Task<HouseholdDto> UpdateAsync(UpdateHouseholdDto updatedHouseholdDto);
 
     /// <summary>
     /// Retrieves a household by its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the household.</param>
     /// <exception cref="KeyNotFoundException">Thrown when no household with the specified ID exists.</exception>
-    /// <returns>A task representing the asynchronous operation, containing the household data transfer object.</returns>
+    /// <returns>A task representing the asynchronous operation, containing the household as <see cref="HouseholdDto"/>.</returns>
     Task<HouseholdDto> GetByIdAsync(Guid id);
 }

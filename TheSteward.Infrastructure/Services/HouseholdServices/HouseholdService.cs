@@ -19,7 +19,8 @@ public class HouseholdService : IHouseholdService
         _userManager = userManager;
         _userHouseholdService = userHouseholdService;
     }
-    public async Task AddAsync(CreateHouseholdDto newHousehold, string ownerId)
+
+    public async Task<HouseholdDto> AddAsync(CreateHouseholdDto newHousehold, string ownerId)
     {
         if (newHousehold == null)
             throw new ArgumentNullException(nameof(newHousehold));
@@ -28,15 +29,13 @@ public class HouseholdService : IHouseholdService
             ?? throw new KeyNotFoundException($"User with ID {ownerId} not found.");
 
         var household = newHousehold.ToEntity(ownerId, owner);
-
         household.HouseholdId = Guid.NewGuid();
-        household.OwnerId = ownerId;
         household.IsHouseholdActive = true;
 
         await _householdRepository.AddAsync(household);
         await _householdRepository.SaveChangesAsync();
 
-       var createUserHouseholdDto = new CreateUserHouseholdDto
+        var createUserHouseholdDto = new CreateUserHouseholdDto
         {
             IsDefaultUserHousehold = newHousehold.IsDefaultHousehold,
             IsHouseholdOwner = true,
@@ -54,9 +53,11 @@ public class HouseholdService : IHouseholdService
             User = owner,
             HouseholdId = household.HouseholdId,
             Household = household
-       };
+        };
 
         await _userHouseholdService.AddAsync(createUserHouseholdDto, ownerId);
+
+        return household.ToDto();
     }
 
     public async Task DeleteAsync(Guid householdId)
@@ -68,27 +69,19 @@ public class HouseholdService : IHouseholdService
         await _householdRepository.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(UpdateHouseholdDto updatedHousehold)
+    public async Task<HouseholdDto> UpdateAsync(UpdateHouseholdDto updatedHousehold)
     {
         var currentHousehold = await _householdRepository.GetByIdAsync(updatedHousehold.HouseholdId)
             ?? throw new KeyNotFoundException($"Household with ID {updatedHousehold.HouseholdId} not found.");
 
         currentHousehold.ApplyUpdate(updatedHousehold);
 
-        currentHousehold.HasFileManagerAccess = updatedHousehold.HasFileManagerAccess;
-        currentHousehold.HasFinanceManagerAccess = updatedHousehold.HasFinanceManagerAccess;
-        currentHousehold.HasKitchenManagerAccess = updatedHousehold.HasKitchenManagerAccess;
-        currentHousehold.HasTaskManagerAccess = updatedHousehold.HasTaskManagerAccess;
-        currentHousehold.HouseholdName = updatedHousehold.HouseholdName;
-        currentHousehold.HouseholdId = currentHousehold.HouseholdId;
-        currentHousehold.IsHouseholdActive = currentHousehold.IsHouseholdActive;
-        currentHousehold.OwnerId = currentHousehold.OwnerId;
-        currentHousehold.Owner = currentHousehold.Owner;
-        currentHousehold.UserHouseholds = currentHousehold.UserHouseholds;
-
         await _householdRepository.UpdateAsync(currentHousehold);
         await _householdRepository.SaveChangesAsync();
+
+        return currentHousehold.ToDto();
     }
+
 
     public async Task<HouseholdDto> GetByIdAsync(Guid id)
     {

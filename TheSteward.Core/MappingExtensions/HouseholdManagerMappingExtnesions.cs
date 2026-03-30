@@ -44,12 +44,12 @@ public static class HouseholdManagerMappingExtensions
     public static Household ToEntity(this CreateHouseholdDto src, string ownerId, ApplicationUser owner)
     {
         var entity = GenericMapper.Map<CreateHouseholdDto, Household>(src);
-        entity.HouseholdId = Guid.NewGuid();
-        entity.IsHouseholdActive = true;
         entity.OwnerId = ownerId;
         entity.Owner = owner;
+
         return entity;
     }
+
 
     /// <summary>
     /// Updates the properties of the specified Household entity with values from the

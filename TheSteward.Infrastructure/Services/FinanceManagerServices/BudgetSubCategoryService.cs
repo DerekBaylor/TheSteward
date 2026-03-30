@@ -1,9 +1,8 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
-using TheSteward.Core.IRepositories;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
+using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
@@ -11,35 +10,27 @@ namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 public class BudgetSubCategoryService : IBudgetSubCategoryService
 {
     private readonly IBudgetSubCategoryRepository _budgetSubCategoryRepository;
-    private readonly IMapper _mapper;
 
-
-    public BudgetSubCategoryService(IBudgetSubCategoryRepository budgetSubCategoryRepository, IMapper mapper)
+    public BudgetSubCategoryService(IBudgetSubCategoryRepository budgetSubCategoryRepository)
     {
         _budgetSubCategoryRepository = budgetSubCategoryRepository;
-        _mapper = mapper;
     }
-    
+
     public async Task<BudgetSubCategoryDto> AddAsync(CreateBudgetSubCategoryDto subCategoryDto)
     {
         if (subCategoryDto == null)
             throw new ArgumentNullException(nameof(subCategoryDto));
 
-        var subCategory = new BudgetSubCategory
-        {
-            BudgetSubCategoryId = Guid.NewGuid(),
-            BudgetSubCategoryName = subCategoryDto.BudgetSubCategoryName,
-            BudgetId = subCategoryDto.BudgetId,
-            BudgetCategoryId = subCategoryDto.BudgetCategoryId,
-            DisplayOrder = subCategoryDto.DisplayOrder
-        };
+        var subCategoryId = Guid.NewGuid();
+        var subCategory = subCategoryDto.ToEntity(subCategoryId);
 
         await _budgetSubCategoryRepository.AddAsync(subCategory);
+        await _budgetSubCategoryRepository.SaveChangesAsync();
 
-        return _mapper.Map<BudgetSubCategoryDto>(subCategory);
+        return subCategory.ToDto();
     }
-    
-    public async Task<UpdateBudgetSubCategoryDto> UpdateAsync(UpdateBudgetSubCategoryDto subCategoryDto)
+
+    public async Task<BudgetSubCategoryDto> UpdateAsync(UpdateBudgetSubCategoryDto subCategoryDto)
     {
         if (subCategoryDto == null)
             throw new ArgumentNullException(nameof(subCategoryDto));
@@ -48,29 +39,29 @@ public class BudgetSubCategoryService : IBudgetSubCategoryService
         if (subCategory == null)
             throw new KeyNotFoundException($"Budget subcategory with ID {subCategoryDto.BudgetSubCategoryId} not found.");
 
-        subCategory.BudgetSubCategoryName = subCategoryDto.BudgetSubCategoryName;
-        subCategory.BudgetCategoryId = subCategoryDto.BudgetCategoryId;
-        subCategory.DisplayOrder = subCategoryDto.DisplayOrder;
+        subCategory.ApplyUpdate(subCategoryDto);
 
         await _budgetSubCategoryRepository.UpdateAsync(subCategory);
+        await _budgetSubCategoryRepository.SaveChangesAsync();
 
-        return subCategoryDto;
+        return subCategory.ToDto();
     }
-    
+
     public async Task DeleteAsync(Guid subCategoryId)
     {
         if (subCategoryId == Guid.Empty)
             throw new ArgumentException("Budget subcategory ID cannot be empty.", nameof(subCategoryId));
 
         var subCategory = await _budgetSubCategoryRepository.GetByIdAsync(subCategoryId);
-
         if (subCategory == null)
             throw new KeyNotFoundException($"Budget subcategory with ID {subCategoryId} not found.");
 
         await _budgetSubCategoryRepository.DeleteAsync(subCategory);
+        await _budgetSubCategoryRepository.SaveChangesAsync();
     }
 
     #region Get Methods
+
     public async Task<BudgetSubCategoryDto?> GetAsync(Guid subCategoryId)
     {
         if (subCategoryId == Guid.Empty)
@@ -78,9 +69,8 @@ public class BudgetSubCategoryService : IBudgetSubCategoryService
 
         var subCategory = await _budgetSubCategoryRepository.GetByIdAsync(subCategoryId);
 
-        return subCategory == null ? null : _mapper.Map<BudgetSubCategoryDto>(subCategory);;
+        return subCategory?.ToDto();
     }
-
 
     public async Task<List<BudgetSubCategoryDto>> GetAllByCategoryIdAsync(Guid categoryId)
     {
@@ -92,9 +82,8 @@ public class BudgetSubCategoryService : IBudgetSubCategoryService
             .OrderBy(sc => sc.DisplayOrder)
             .ToListAsync();
 
-        return subCategories.Select(i => _mapper.Map<BudgetSubCategoryDto>(i)).ToList();
+        return subCategories.ToDtoList();
     }
-
 
     public async Task<List<BudgetSubCategoryDto>> GetAllByBudgetIdAsync(Guid budgetId)
     {
@@ -106,10 +95,11 @@ public class BudgetSubCategoryService : IBudgetSubCategoryService
             .OrderBy(sc => sc.DisplayOrder)
             .ToListAsync();
 
-        return subCategories.Select(i => _mapper.Map<BudgetSubCategoryDto>(i)).ToList();
+        return subCategories.ToDtoList();
     }
 
-    public async Task<BudgetSubCategoryDto> GetByIdOrCreateSubCategoryAsync(Guid budgetId, Guid budgetCategoryId, string subCategoryName)
+    public async Task<BudgetSubCategoryDto> GetByIdOrCreateSubCategoryAsync(
+        Guid budgetId, Guid budgetCategoryId, string subCategoryName)
     {
         if (budgetId == Guid.Empty)
             throw new ArgumentException("Budget ID cannot be empty.", nameof(budgetId));
@@ -126,7 +116,7 @@ public class BudgetSubCategoryService : IBudgetSubCategoryService
                                     && sc.BudgetSubCategoryName == subCategoryName);
 
         if (existing != null)
-            return _mapper.Map<BudgetSubCategoryDto>(existing);
+            return existing.ToDto();
 
         var displayOrder = await _budgetSubCategoryRepository.GetAll()
             .CountAsync(sc => sc.BudgetCategoryId == budgetCategoryId);
@@ -141,10 +131,12 @@ public class BudgetSubCategoryService : IBudgetSubCategoryService
         };
 
         await _budgetSubCategoryRepository.AddAsync(newSubCategory);
+        await _budgetSubCategoryRepository.SaveChangesAsync();
 
-        return _mapper.Map<BudgetSubCategoryDto>(newSubCategory);
-
+        return newSubCategory.ToDto();
     }
 
     #endregion Get Methods
 }
+
+

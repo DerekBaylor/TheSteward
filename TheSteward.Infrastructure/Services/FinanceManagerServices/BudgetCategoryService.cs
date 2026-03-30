@@ -1,8 +1,8 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
+using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
@@ -10,34 +10,27 @@ namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 public class BudgetCategoryService : IBudgetCategoryService
 {
     private readonly IBudgetCategoryRepository _budgetCategoryRepository;
-    private readonly IMapper _mapper;
-    
-    public BudgetCategoryService(IBudgetCategoryRepository budgetCategoryRepository, IMapper mapper)
+
+    public BudgetCategoryService(IBudgetCategoryRepository budgetCategoryRepository)
     {
         _budgetCategoryRepository = budgetCategoryRepository;
-        _mapper = mapper;
     }
-
 
     public async Task<BudgetCategoryDto> AddAsync(CreateBudgetCategoryDto categoryDto)
     {
         if (categoryDto == null)
             throw new ArgumentNullException(nameof(categoryDto));
 
-        var category = new BudgetCategory
-        {
-            BudgetCategoryId = Guid.NewGuid(),
-            BudgetCategoryName = categoryDto.BudgetCategoryName,
-            BudgetId = categoryDto.BudgetId,
-            DisplayOrder = categoryDto.DisplayOrder
-        };
+        var categoryId = Guid.NewGuid();
+        var category = categoryDto.ToEntity(categoryId);
 
         await _budgetCategoryRepository.AddAsync(category);
+        await _budgetCategoryRepository.SaveChangesAsync();
 
-        return MapToDto(category);
+        return category.ToDto();
     }
 
-    public async Task<UpdateBudgetCategoryDto> UpdateAsync(UpdateBudgetCategoryDto categoryDto)
+    public async Task<BudgetCategoryDto> UpdateAsync(UpdateBudgetCategoryDto categoryDto)
     {
         if (categoryDto == null)
             throw new ArgumentNullException(nameof(categoryDto));
@@ -46,12 +39,12 @@ public class BudgetCategoryService : IBudgetCategoryService
         if (category == null)
             throw new KeyNotFoundException($"Budget category with ID {categoryDto.BudgetCategoryId} not found.");
 
-        category.BudgetCategoryName = categoryDto.BudgetCategoryName;
-        category.DisplayOrder = categoryDto.DisplayOrder;
+        category.ApplyUpdate(categoryDto);
 
         await _budgetCategoryRepository.UpdateAsync(category);
+        await _budgetCategoryRepository.SaveChangesAsync();
 
-        return categoryDto;
+        return category.ToDto();
     }
 
     public async Task DeleteAsync(Guid categoryId)
@@ -64,9 +57,11 @@ public class BudgetCategoryService : IBudgetCategoryService
             throw new KeyNotFoundException($"Budget category with ID {categoryId} not found.");
 
         await _budgetCategoryRepository.DeleteAsync(category);
+        await _budgetCategoryRepository.SaveChangesAsync();
     }
 
     #region Get Methods
+
     public async Task<BudgetCategoryDto?> GetAsync(Guid categoryId)
     {
         if (categoryId == Guid.Empty)
@@ -76,7 +71,7 @@ public class BudgetCategoryService : IBudgetCategoryService
             .Include(c => c.BudgetSubCategories)
             .FirstOrDefaultAsync(c => c.BudgetCategoryId == categoryId);
 
-        return category == null ? null : MapToDto(category);
+        return category?.ToDto();
     }
 
     public async Task<List<BudgetCategoryDto>> GetAllByBudgetIdAsync(Guid budgetId)
@@ -90,9 +85,9 @@ public class BudgetCategoryService : IBudgetCategoryService
             .OrderBy(c => c.DisplayOrder)
             .ToListAsync();
 
-        return categories.Select(MapToDto).ToList();
+        return categories.ToDtoList();
     }
-    
+
     public async Task<BudgetCategoryDto> GetByIdOrCreateAsync(Guid budgetId, string categoryName)
     {
         if (budgetId == Guid.Empty)
@@ -106,7 +101,7 @@ public class BudgetCategoryService : IBudgetCategoryService
                                    && c.BudgetCategoryName == categoryName);
 
         if (existing != null)
-            return MapToDto(existing);
+            return existing.ToDto();
 
         var displayOrder = await _budgetCategoryRepository.GetAll()
             .CountAsync(c => c.BudgetId == budgetId);
@@ -120,22 +115,12 @@ public class BudgetCategoryService : IBudgetCategoryService
         };
 
         await _budgetCategoryRepository.AddAsync(newCategory);
+        await _budgetCategoryRepository.SaveChangesAsync();
 
-        return MapToDto(newCategory);
+        return newCategory.ToDto();
     }
+
     #endregion Get Methods
-
-    #region Private Helper Methods
-
-    /// <summary>
-    /// Maps a BudgetCategory entity to a BudgetCategoryDto without subcategories.
-    /// </summary>
-    /// <param name="category">The budget category entity to map.</param>
-    /// <returns>The mapped BudgetCategoryDto.</returns>
-    private BudgetCategoryDto MapToDto(BudgetCategory category)
-    {
-        return _mapper.Map<BudgetCategoryDto>(category);
-    }
-
-    #endregion
 }
+
+

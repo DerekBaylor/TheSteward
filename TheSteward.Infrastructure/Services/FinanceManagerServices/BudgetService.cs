@@ -1,14 +1,11 @@
-//01/20/26
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.Dtos.HouseholdDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
+using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.FinanceManagerModels;
-using TheSteward.Core.Utils.FinanceManagerUtils;
 using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants;
-
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
@@ -21,7 +18,6 @@ public class BudgetService : IBudgetService
     private readonly IExpenseRepository _expenseRepository;
     private readonly IIncomeRepository _incomeRepository;
     private readonly IInvestmentRepository _investmentRepository;
-    private readonly IMapper _mapper;
 
     public BudgetService(
         IBudgetRepository budgetRepository,
@@ -30,8 +26,7 @@ public class BudgetService : IBudgetService
         ICreditRepository creditRepository,
         IExpenseRepository expenseRepository,
         IIncomeRepository incomeRepository,
-        IInvestmentRepository investmentRepository,
-        IMapper mapper)
+        IInvestmentRepository investmentRepository)
     {
         _budgetRepository = budgetRepository;
         _categoryRepository = categoryRepository;
@@ -39,37 +34,26 @@ public class BudgetService : IBudgetService
         _expenseRepository = expenseRepository;
         _creditRepository = creditRepository;
         _incomeRepository = incomeRepository;
-        _investmentRepository =  investmentRepository;
-        _mapper = mapper;
+        _investmentRepository = investmentRepository;
     }
 
     #region Create Methods
+
     public async Task<BudgetDto> AddAsync(CreateBudgetDto budgetDto)
     {
         if (budgetDto == null)
             throw new ArgumentNullException(nameof(budgetDto));
 
-        // If this is set as default, unset any existing default budgets for this household
         if (budgetDto.IsDefaultBudget)
-        {
             await UnsetDefaultBudgetsForHouseholdAsync(budgetDto.HouseholdId);
-        }
 
-        var budget = new Budget
-        {
-            BudgetId = Guid.NewGuid(),
-            BudgetName = budgetDto.BudgetName,
-            OwnerId = budgetDto.OwnerId,
-            HouseholdId = budgetDto.HouseholdId,
-            IsDefaultBudget = budgetDto.IsDefaultBudget,
-            IsPublic = budgetDto.IsPublic,
-            CreatedDate = DateTime.UtcNow
-        };
+        var budgetId = Guid.NewGuid();
+        var budget = budgetDto.ToEntity(budgetId, DateTime.UtcNow);
 
         await _budgetRepository.AddAsync(budget);
         await _budgetRepository.SaveChangesAsync();
 
-        return _mapper.Map<BudgetDto>(budget);
+        return budget.ToDto();
     }
 
     public async Task<BudgetDto> AddStarterBudget(UserHouseholdDto userHouseholdDto)
@@ -113,6 +97,7 @@ public class BudgetService : IBudgetService
     }
 
     #endregion Create Methods
+
     public async Task DeleteAsync(Guid budgetId)
     {
         if (budgetId == Guid.Empty)
@@ -135,24 +120,19 @@ public class BudgetService : IBudgetService
         if (budget == null)
             throw new KeyNotFoundException($"Budget with ID {budgetDto.BudgetId} not found.");
 
-        // If changing to default, unset other default budgets
         if (budgetDto.IsDefaultBudget && !budget.IsDefaultBudget)
-        {
             await UnsetDefaultBudgetsForHouseholdAsync(budget.HouseholdId);
-        }
 
-        budget.BudgetName = budgetDto.BudgetName;
-        budget.IsDefaultBudget = budgetDto.IsDefaultBudget;
-        budget.IsPublic = budgetDto.IsPublic;
-        budget.ModifiedDate = DateTime.UtcNow;
+        budget.ApplyUpdate(budgetDto, DateTime.UtcNow);
 
         await _budgetRepository.UpdateAsync(budget);
         await _budgetRepository.SaveChangesAsync();
 
-        return _mapper.Map<BudgetDto>(budget);
+        return budget.ToDto();
     }
 
     #region Get Methods
+
     public async Task<BudgetDto> GetByIdAsync(Guid budgetId)
     {
         if (budgetId == Guid.Empty)
@@ -160,7 +140,7 @@ public class BudgetService : IBudgetService
 
         var budget = await _budgetRepository.GetAll()
             .Include(b => b.BudgetCategories)
-            .ThenInclude(c => c.BudgetSubCategories)
+                .ThenInclude(c => c.BudgetSubCategories)
             .Include(b => b.Incomes)
             .Include(b => b.Expenses)
             .Include(b => b.Credits)
@@ -171,7 +151,7 @@ public class BudgetService : IBudgetService
         if (budget == null)
             throw new KeyNotFoundException($"Budget with ID {budgetId} not found.");
 
-        return _mapper.Map<BudgetDto>(budget);
+        return budget.ToDto();
     }
 
     public async Task<List<BudgetDto>> GetBudgetsByUserHouseholdIdAsync(Guid userHouseholdId)
@@ -185,7 +165,7 @@ public class BudgetService : IBudgetService
             .ThenByDescending(b => b.CreatedDate)
             .ToListAsync();
 
-        return _mapper.Map<List<BudgetDto>>(budgets);
+        return budgets.ToDtoList();
     }
 
     public async Task<List<BudgetDto>> GetByHouseholdAsync(Guid householdId)
@@ -199,7 +179,7 @@ public class BudgetService : IBudgetService
             .ThenByDescending(b => b.CreatedDate)
             .ToListAsync();
 
-        return _mapper.Map<List<BudgetDto>>(budgets);
+        return budgets.ToDtoList();
     }
 
     public async Task<List<BudgetDto>> GetBudgetsForUserHouseholdAsync(UserHouseholdDto userHouseholdDto)
@@ -209,7 +189,7 @@ public class BudgetService : IBudgetService
 
         var budgets = await _budgetRepository.GetAll()
             .Where(b => b.HouseholdId == userHouseholdDto.HouseholdId
-                        && (b.OwnerId == userHouseholdDto.UserId || b.IsPublic))
+                     && (b.OwnerId == userHouseholdDto.UserId || b.IsPublic))
             .Include(b => b.BudgetCategories)
                 .ThenInclude(c => c.BudgetSubCategories)
             .Include(b => b.Incomes)
@@ -222,7 +202,7 @@ public class BudgetService : IBudgetService
             .ThenByDescending(b => b.CreatedDate)
             .ToListAsync();
 
-        return _mapper.Map<List<BudgetDto>>(budgets);
+        return budgets.ToDtoList();
     }
 
     #endregion Get Methods
@@ -251,23 +231,25 @@ public class BudgetService : IBudgetService
 
     /// <summary>
     /// Creates standard budget categories and subcategories.
+    /// All entity initializers here are intentionally explicit — this is hardcoded
+    /// seed data, not DTO mapping.
     /// </summary>
     private async Task CreateStandardCategoriesAsync(Guid budgetId)
     {
         var categories = new[]
         {
-        ("Housing",         new[] { "House/Apt" }),
-        ("Utilities",       Array.Empty<string>()),
-        ("Transportation",  new[] { "Car One" }),
-        ("Living Expenses", new[] { "Food", "Personal Care" }),
-        ("Entertainment",   new[] { "Streaming Services", "Hobbies" }),
-        ("Pets",            Array.Empty<string>()),
-        ("Health",          Array.Empty<string>()),
-        ("Savings",         new[] { "Emergency Fund", "Retirement", "Investments" }),
-        ("Debts",           new[] { "Credit Cards", "Student Loans" }),
-        ("Child",           Array.Empty<string>()),
-        ("Other",           Array.Empty<string>()),
-    };
+            ("Housing",         new[] { "House/Apt" }),
+            ("Utilities",       Array.Empty<string>()),
+            ("Transportation",  new[] { "Car One" }),
+            ("Living Expenses", new[] { "Food", "Personal Care" }),
+            ("Entertainment",   new[] { "Streaming Services", "Hobbies" }),
+            ("Pets",            Array.Empty<string>()),
+            ("Health",          Array.Empty<string>()),
+            ("Savings",         new[] { "Emergency Fund", "Retirement", "Investments" }),
+            ("Debts",           new[] { "Credit Cards", "Student Loans" }),
+            ("Child",           Array.Empty<string>()),
+            ("Other",           Array.Empty<string>()),
+        };
 
         for (int i = 0; i < categories.Length; i++)
         {
@@ -404,7 +386,7 @@ public class BudgetService : IBudgetService
     }
 
     /// <summary>
-    /// Creates a sample credit card entry and links to its sample expense.
+    /// Creates a sample credit card entry and links it to its sample expense.
     /// </summary>
     private async Task CreateSampleCreditAsync(Guid budgetId)
     {
@@ -438,7 +420,7 @@ public class BudgetService : IBudgetService
     }
 
     /// <summary>
-    /// Creates a sample investment entry and links to its sample expense.
+    /// Creates a sample investment entry and links it to its sample expense.
     /// </summary>
     private async Task CreateSampleInvestmentAsync(Guid budgetId)
     {
@@ -470,3 +452,5 @@ public class BudgetService : IBudgetService
 
     #endregion Private Methods for Starter Budget Creation
 }
+
+

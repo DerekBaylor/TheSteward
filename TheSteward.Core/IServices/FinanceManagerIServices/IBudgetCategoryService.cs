@@ -32,7 +32,7 @@ public interface IBudgetCategoryService
     /// <remarks>
     /// Updates the category name and display order. Does not affect associated subcategories.
     /// </remarks>
-    Task<UpdateBudgetCategoryDto> UpdateAsync(UpdateBudgetCategoryDto categoryDto);
+    Task<BudgetCategoryDto> UpdateAsync(UpdateBudgetCategoryDto categoryDto);
 
     /// <summary>
     /// Asynchronously deletes a budget category by its identifier.

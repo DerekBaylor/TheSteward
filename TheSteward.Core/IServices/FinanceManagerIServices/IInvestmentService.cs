@@ -63,7 +63,7 @@ public interface IInvestmentService
     /// var updated = await investmentService.UpdateAsync(updateDto);
     /// </code>
     /// </example>
-    Task<UpdateInvestmentDto> UpdateAsync(UpdateInvestmentDto investmentDto);
+    Task<InvestmentDto> UpdateAsync(UpdateInvestmentDto investmentDto);
     
     /// <summary>
     /// Asynchronously deletes an investment entry by its identifier.

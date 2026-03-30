@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +11,6 @@ using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.IServices.HouseholdIServices;
 using TheSteward.Core.IServices.TaskManagerIServices;
 using TheSteward.Core.Models;
-using TheSteward.Core.Profiles;
 using TheSteward.Infrastructure.Data;
 using TheSteward.Infrastructure.Repositories;
 using TheSteward.Infrastructure.Repositories.FinanceManagerRepositories;
@@ -79,14 +77,6 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 #endregion Services & Repositories
-
-#region Automapper Profiles
-builder.Services.AddAutoMapper(config =>
-{
-    config.AddProfile<HouseholdProfiles>();
-    config.AddProfile<FinanceManagerProfiles>();
-});
-#endregion  Automapper Profiles
 
 #region Auth
 builder.Services.AddAuthentication(options =>

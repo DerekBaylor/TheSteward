@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.TaskManagerDtos;
 using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices.TaskManagerIServices;
+using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.TaskManagerModels;
 
 namespace TheSteward.Infrastructure.Services.TaskManagerServices;
@@ -10,12 +10,10 @@ namespace TheSteward.Infrastructure.Services.TaskManagerServices;
 public class RecurrenceRuleService : IRecurrenceRuleService
 {
     private readonly IBaseRepository<RecurrenceRule> _recurrenceRuleRepository;
-    private readonly IMapper _mapper;
 
-    public RecurrenceRuleService(IBaseRepository<RecurrenceRule> recurrenceRuleRepository, IMapper mapper)
+    public RecurrenceRuleService(IBaseRepository<RecurrenceRule> recurrenceRuleRepository)
     {
         _recurrenceRuleRepository = recurrenceRuleRepository;
-        _mapper = mapper;
     }
 
     public async Task<RecurrenceRuleDto> AddAsync(CreateRecurrenceRuleDto recurrenceRuleDto)
@@ -23,23 +21,18 @@ public class RecurrenceRuleService : IRecurrenceRuleService
         if (recurrenceRuleDto == null)
             throw new ArgumentNullException(nameof(recurrenceRuleDto));
 
-        var recurrenceRule = new RecurrenceRule
-        {
-            RecurrenceRuleId = Guid.NewGuid(),
-            RecurrenceFrequency = recurrenceRuleDto.RecurrenceFrequency,
-            RecurrenceDays = recurrenceRuleDto.RecurrenceDays,
-            IntervalDays = recurrenceRuleDto.IntervalDays,
-            StartDateTime = DateTime.SpecifyKind(recurrenceRuleDto.StartDateTime, DateTimeKind.Utc),
-            EndDateTime = recurrenceRuleDto.EndDateTime.HasValue
-                            ? DateTime.SpecifyKind(recurrenceRuleDto.EndDateTime.Value, DateTimeKind.Utc)
-                            : null,
-            LastGeneratedDateTime = DateTime.UtcNow
-        };
+        var recurrenceRule = recurrenceRuleDto.ToEntity();
+        recurrenceRule.RecurrenceRuleId = Guid.NewGuid();
+        recurrenceRule.LastGeneratedDateTime = DateTime.UtcNow;
+        recurrenceRule.StartDateTime = DateTime.SpecifyKind(recurrenceRuleDto.StartDateTime, DateTimeKind.Utc);
+        recurrenceRule.EndDateTime = recurrenceRuleDto.EndDateTime.HasValue
+            ? DateTime.SpecifyKind(recurrenceRuleDto.EndDateTime.Value, DateTimeKind.Utc)
+            : null;
 
         await _recurrenceRuleRepository.AddAsync(recurrenceRule);
         await _recurrenceRuleRepository.SaveChangesAsync();
 
-        return _mapper.Map<RecurrenceRuleDto>(recurrenceRule);
+        return recurrenceRule.ToDto();
     }
 
     public async Task<UpdateRecurrenceRuleDto> UpdateAsync(UpdateRecurrenceRuleDto recurrenceRuleDto)
@@ -51,9 +44,7 @@ public class RecurrenceRuleService : IRecurrenceRuleService
         if (recurrenceRule == null)
             throw new KeyNotFoundException($"RecurrenceRule with ID {recurrenceRuleDto.RecurrenceRuleId} not found.");
 
-        recurrenceRule.RecurrenceFrequency = recurrenceRuleDto.RecurrenceFrequency;
-        recurrenceRule.RecurrenceDays = recurrenceRuleDto.RecurrenceDays;
-        recurrenceRule.IntervalDays = recurrenceRuleDto.IntervalDays;
+        recurrenceRule.ApplyUpdate(recurrenceRuleDto);
         recurrenceRule.EndDateTime = recurrenceRuleDto.EndDateTime.HasValue
             ? DateTime.SpecifyKind(recurrenceRuleDto.EndDateTime.Value, DateTimeKind.Utc)
             : null;
@@ -78,6 +69,7 @@ public class RecurrenceRuleService : IRecurrenceRuleService
     }
 
     #region Get Methods
+
     public async Task<RecurrenceRuleDto?> GetAsync(Guid recurrenceRuleId)
     {
         if (recurrenceRuleId == Guid.Empty)
@@ -85,7 +77,7 @@ public class RecurrenceRuleService : IRecurrenceRuleService
 
         var recurrenceRule = await _recurrenceRuleRepository.GetByIdAsync(recurrenceRuleId);
 
-        return recurrenceRule == null ? null : _mapper.Map<RecurrenceRuleDto>(recurrenceRule);
+        return recurrenceRule?.ToDto();
     }
 
     public async Task<RecurrenceRuleDto?> GetWithTaskItemsAsync(Guid recurrenceRuleId)
@@ -97,7 +89,7 @@ public class RecurrenceRuleService : IRecurrenceRuleService
             .Include(r => r.TaskItems)
             .FirstOrDefaultAsync(r => r.RecurrenceRuleId == recurrenceRuleId);
 
-        return recurrenceRule == null ? null : _mapper.Map<RecurrenceRuleDto>(recurrenceRule);
+        return recurrenceRule?.ToDto();
     }
 
     public async Task<List<RecurrenceRuleDto>> GetAllByTaskItemIdAsync(Guid taskItemId)
@@ -109,7 +101,9 @@ public class RecurrenceRuleService : IRecurrenceRuleService
             .Where(r => r.TaskItems != null && r.TaskItems.Any(t => t.TaskItemId == taskItemId))
             .ToListAsync();
 
-        return _mapper.Map<List<RecurrenceRuleDto>>(recurrenceRules);
+        return recurrenceRules.ToDtoList();
     }
+
     #endregion Get Methods
 }
+

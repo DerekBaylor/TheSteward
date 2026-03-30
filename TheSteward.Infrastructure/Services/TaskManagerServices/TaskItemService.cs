@@ -1,11 +1,9 @@
-﻿// TaskItemService.cs
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.TaskManagerDtos;
-using TheSteward.Core.IRepositories;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Core.IServices.TaskManagerIServices;
+using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.TaskManagerModels;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
@@ -15,13 +13,11 @@ public class TaskItemService : ITaskItemService
 {
     private readonly ITaskItemRepository _taskItemRepository;
     private readonly IExpenseRepository _expenseRepository;
-    private readonly IMapper _mapper;
 
-    public TaskItemService(ITaskItemRepository taskItemRepository, IExpenseRepository expenseRepository, IMapper mapper)
+    public TaskItemService(ITaskItemRepository taskItemRepository, IExpenseRepository expenseRepository)
     {
         _taskItemRepository = taskItemRepository;
         _expenseRepository = expenseRepository;
-        _mapper = mapper;
     }
 
     public async Task<TaskItemDto> AddAsync(CreateTaskItemDto taskItemDto)
@@ -29,33 +25,23 @@ public class TaskItemService : ITaskItemService
         if (taskItemDto == null)
             throw new ArgumentNullException(nameof(taskItemDto));
 
-        var taskItem = new TaskItem
-        {
-            TaskItemId = Guid.NewGuid(),
-            TaskItemName = taskItemDto.TaskItemName,
-            Description = taskItemDto.Description,
-            Status = taskItemDto.Status,
-            Priority = taskItemDto.Priority,
-            DueDate = taskItemDto.DueDate.HasValue
-                ? DateTime.SpecifyKind(taskItemDto.DueDate.Value, DateTimeKind.Utc)
-                : null,
-            CreatedDate = DateTime.UtcNow,
-            UpdatedDate = DateTime.UtcNow,
-            CreatedByUserHouseholdId = taskItemDto.CreatedByUserHouseholdId,
-            AssignedToUserHouseholdId = taskItemDto.AssignedToUserHouseholdId,
-            TaskItemCategoryId = taskItemDto.TaskItemCategoryId,
-            RecurrenceId = taskItemDto.RecurrenceId,
-            ExpenseId = taskItemDto.ExpenseId,
-            IsArchived = false
-        };
+        var taskItem = taskItemDto.ToEntity();
+        taskItem.TaskItemId = Guid.NewGuid();
+        taskItem.IsArchived = false;
+        taskItem.CreatedDate = DateTime.UtcNow;
+        taskItem.UpdatedDate = DateTime.UtcNow;
+        taskItem.DueDate = taskItemDto.DueDate.HasValue
+            ? DateTime.SpecifyKind(taskItemDto.DueDate.Value, DateTimeKind.Utc)
+            : null;
 
         await _taskItemRepository.AddAsync(taskItem);
         await _taskItemRepository.SaveChangesAsync();
 
-        return _mapper.Map<TaskItemDto>(taskItem);
+        return await GetMappedWithIncludesAsync(taskItem.TaskItemId);
     }
 
     #region Update Methods
+
     public async Task<UpdateTaskItemDto> UpdateAsync(UpdateTaskItemDto taskItemDto)
     {
         if (taskItemDto == null)
@@ -65,20 +51,13 @@ public class TaskItemService : ITaskItemService
         if (taskItem == null)
             throw new KeyNotFoundException($"TaskItem with ID {taskItemDto.TaskItemId} not found.");
 
-        taskItem.TaskItemName = taskItemDto.TaskItemName;
-        taskItem.Description = taskItemDto.Description;
-        taskItem.Status = taskItemDto.Status;
-        taskItem.Priority = taskItemDto.Priority;
+        taskItem.ApplyUpdate(taskItemDto);
         taskItem.DueDate = taskItemDto.DueDate.HasValue
             ? DateTime.SpecifyKind(taskItemDto.DueDate.Value, DateTimeKind.Utc)
             : null;
         taskItem.CompletedDate = taskItemDto.CompletedDate.HasValue
             ? DateTime.SpecifyKind(taskItemDto.CompletedDate.Value, DateTimeKind.Utc)
             : null;
-        taskItem.AssignedToUserHouseholdId = taskItemDto.AssignedToUserHouseholdId;
-        taskItem.TaskItemCategoryId = taskItemDto.TaskItemCategoryId;
-        taskItem.RecurrenceId = taskItemDto.RecurrenceId;
-        taskItem.ExpenseId = taskItemDto.ExpenseId;
         taskItem.UpdatedDate = DateTime.UtcNow;
 
         await _taskItemRepository.UpdateAsync(taskItem);
@@ -108,7 +87,7 @@ public class TaskItemService : ITaskItemService
         await _taskItemRepository.UpdateAsync(taskItem);
         await _taskItemRepository.SaveChangesAsync();
 
-        return _mapper.Map<TaskItemDto>(taskItem);
+        return await GetMappedWithIncludesAsync(taskItem.TaskItemId);
     }
 
     public async Task ArchiveAsync(Guid taskItemId)
@@ -127,7 +106,7 @@ public class TaskItemService : ITaskItemService
         await _taskItemRepository.SaveChangesAsync();
     }
 
-#endregion Update Methods
+    #endregion Update Methods
 
     public async Task DeleteAsync(Guid taskItemId)
     {
@@ -149,9 +128,10 @@ public class TaskItemService : ITaskItemService
         if (taskItemId == Guid.Empty)
             throw new ArgumentException("TaskItem ID cannot be empty.", nameof(taskItemId));
 
-        var taskItem = await _taskItemRepository.GetByIdAsync(taskItemId);
+        var exists = await _taskItemRepository.GetByIdAsync(taskItemId);
+        if (exists == null) return null;
 
-        return taskItem == null ? null : _mapper.Map<TaskItemDto>(taskItem);
+        return await GetMappedWithIncludesAsync(taskItemId);
     }
 
     public async Task<TaskItemDto?> GetWithRelatedDataAsync(Guid taskItemId)
@@ -165,7 +145,7 @@ public class TaskItemService : ITaskItemService
             .Include(t => t.RelatedExpense)
             .FirstOrDefaultAsync(t => t.TaskItemId == taskItemId);
 
-        return taskItem == null ? null : _mapper.Map<TaskItemDto>(taskItem);
+        return taskItem?.ToDto();
     }
 
     public async Task<List<TaskItemDto>> GetAllByAssignedUserHouseholdIdAsync(Guid userHouseholdId)
@@ -180,7 +160,7 @@ public class TaskItemService : ITaskItemService
             .OrderBy(t => t.DueDate)
             .ToListAsync();
 
-        return _mapper.Map<List<TaskItemDto>>(taskItems);
+        return taskItems.ToDtoList();
     }
 
     public async Task<List<TaskItemDto>> GetAllByCategoryIdAsync(Guid taskItemCategoryId)
@@ -190,10 +170,12 @@ public class TaskItemService : ITaskItemService
 
         var taskItems = await _taskItemRepository.GetAll()
             .Where(t => t.TaskItemCategoryId == taskItemCategoryId && !t.IsArchived)
+            .Include(t => t.TaskItemCategory)
+            .Include(t => t.RelatedExpense)
             .OrderBy(t => t.DueDate)
             .ToListAsync();
 
-        return _mapper.Map<List<TaskItemDto>>(taskItems);
+        return taskItems.ToDtoList();
     }
 
     public async Task<List<TaskItemDto>> GetAllByStatusAsync(Guid userHouseholdId, TaskItemStatus status)
@@ -205,10 +187,12 @@ public class TaskItemService : ITaskItemService
             .Where(t => t.AssignedToUserHouseholdId == userHouseholdId
                      && t.Status == status
                      && !t.IsArchived)
+            .Include(t => t.TaskItemCategory)
+            .Include(t => t.RelatedExpense)
             .OrderBy(t => t.DueDate)
             .ToListAsync();
 
-        return _mapper.Map<List<TaskItemDto>>(taskItems);
+        return taskItems.ToDtoList();
     }
 
     public async Task<List<TaskItemDto>> GetAllByCreatedByUserHouseholdIdAsync(Guid createdByUserHouseholdId)
@@ -218,15 +202,27 @@ public class TaskItemService : ITaskItemService
 
         var taskItems = await _taskItemRepository.GetAll()
             .Where(t => t.CreatedByUserHouseholdId == createdByUserHouseholdId && !t.IsArchived)
+            .Include(t => t.TaskItemCategory)
+            .Include(t => t.RelatedExpense)
             .OrderBy(t => t.DueDate)
             .ToListAsync();
 
-        return _mapper.Map<List<TaskItemDto>>(taskItems);
+        return taskItems.ToDtoList();
     }
 
     #endregion Get Methods
 
     #region Utility Helpers
+
+    private async Task<TaskItemDto> GetMappedWithIncludesAsync(Guid taskItemId)
+    {
+        var taskItem = await _taskItemRepository.GetAll()
+            .Include(t => t.TaskItemCategory)
+            .Include(t => t.RelatedExpense)
+            .FirstOrDefaultAsync(t => t.TaskItemId == taskItemId);
+
+        return taskItem!.ToDto();
+    }
 
     private async Task SyncLinkedExpenseAsync(TaskItem taskItem)
     {
@@ -252,3 +248,5 @@ public class TaskItemService : ITaskItemService
 
     #endregion Utility Helpers
 }
+
+

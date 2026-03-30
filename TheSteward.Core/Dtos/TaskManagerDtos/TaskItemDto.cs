@@ -25,10 +25,6 @@ public class TaskItemDto
     
     public bool IsArchived { get; set; }
 
-    public string? LinkedExpenseName { get; set; }
-    
-    public decimal? LinkedExpenseAmount { get; set; }
-
     #region Navigation Properties
     
     public Guid CreatedByUserHouseholdId { get; set; }
@@ -41,11 +37,15 @@ public class TaskItemDto
     
     public string? TaskItemCategoryName { get; set; }
     
-    public string? TaskItemCategoryColor { get; set; }
+    public string? TaskItemCategoryColorHex { get; set; }
     
-    public string? TaskItemCategoryIcon { get; set; }
+    public string? TaskItemCategoryIconName { get; set; }
     
     public Guid? ExpenseId { get; set; }
+
+    public string? RelatedExpenseName { get; set; }
+    
+    public decimal? RelatedExpenseAmountDue { get; set; }
 
     #endregion Navigation Properties
 }

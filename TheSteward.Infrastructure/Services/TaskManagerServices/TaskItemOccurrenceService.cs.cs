@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.TaskManagerDtos;
 using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices.TaskManagerIServices;
+using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.TaskManagerModels;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
@@ -12,16 +12,13 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
 {
     private readonly IBaseRepository<TaskItemOccurrence> _taskItemOccurrenceRepository;
     private readonly IBaseRepository<TaskItem> _taskItemRepository;
-    private readonly IMapper _mapper;
 
     public TaskItemOccurrenceService(
         IBaseRepository<TaskItemOccurrence> taskItemOccurrenceRepository,
-        IBaseRepository<TaskItem> taskItemRepository,
-        IMapper mapper)
+        IBaseRepository<TaskItem> taskItemRepository)
     {
         _taskItemOccurrenceRepository = taskItemOccurrenceRepository;
         _taskItemRepository = taskItemRepository;
-        _mapper = mapper;
     }
 
     public async Task<TaskItemOccurrenceDto> AddAsync(CreateTaskItemOccurrenceDto taskItemOccurrenceDto)
@@ -33,18 +30,14 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
         if (taskItem == null)
             throw new KeyNotFoundException($"TaskItem with ID {taskItemOccurrenceDto.TaskItemId} not found.");
 
-        var taskItemOccurrence = new TaskItemOccurrence
-        {
-            TaskItemOccurrenceId = Guid.NewGuid(),
-            TaskItemId = taskItemOccurrenceDto.TaskItemId,
-            ScheduledDateTime = DateTime.SpecifyKind(taskItemOccurrenceDto.ScheduledDateTime, DateTimeKind.Utc),
-            Status = taskItemOccurrenceDto.Status
-        };
+        var taskItemOccurrence = taskItemOccurrenceDto.ToEntity();
+        taskItemOccurrence.TaskItemOccurrenceId = Guid.NewGuid();
+        taskItemOccurrence.ScheduledDateTime = DateTime.SpecifyKind(taskItemOccurrenceDto.ScheduledDateTime, DateTimeKind.Utc);
 
         await _taskItemOccurrenceRepository.AddAsync(taskItemOccurrence);
         await _taskItemOccurrenceRepository.SaveChangesAsync();
 
-        return _mapper.Map<TaskItemOccurrenceDto>(taskItemOccurrence);
+        return taskItemOccurrence.ToDto();
     }
 
     public async Task<UpdateTaskItemOccurrenceDto> UpdateAsync(UpdateTaskItemOccurrenceDto taskItemOccurrenceDto)
@@ -56,11 +49,10 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
         if (taskItemOccurrence == null)
             throw new KeyNotFoundException($"TaskItemOccurrence with ID {taskItemOccurrenceDto.TaskItemOccurrenceId} not found.");
 
-        taskItemOccurrence.Status = taskItemOccurrenceDto.Status;
+        taskItemOccurrence.ApplyUpdate(taskItemOccurrenceDto);
         taskItemOccurrence.CompletedDate = taskItemOccurrenceDto.CompletedDate.HasValue
             ? DateTime.SpecifyKind(taskItemOccurrenceDto.CompletedDate.Value, DateTimeKind.Utc)
             : null;
-        taskItemOccurrence.CompletedByUserHouseholdId = taskItemOccurrenceDto.CompletedByUserHouseholdId;
 
         await _taskItemOccurrenceRepository.UpdateAsync(taskItemOccurrence);
         await _taskItemOccurrenceRepository.SaveChangesAsync();
@@ -87,7 +79,7 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
         await _taskItemOccurrenceRepository.UpdateAsync(taskItemOccurrence);
         await _taskItemOccurrenceRepository.SaveChangesAsync();
 
-        return _mapper.Map<TaskItemOccurrenceDto>(taskItemOccurrence);
+        return taskItemOccurrence.ToDto();
     }
 
     public async Task<TaskItemOccurrenceDto> SkipAsync(Guid taskItemOccurrenceId)
@@ -104,7 +96,7 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
         await _taskItemOccurrenceRepository.UpdateAsync(taskItemOccurrence);
         await _taskItemOccurrenceRepository.SaveChangesAsync();
 
-        return _mapper.Map<TaskItemOccurrenceDto>(taskItemOccurrence);
+        return taskItemOccurrence.ToDto();
     }
 
     public async Task DeleteAsync(Guid taskItemOccurrenceId)
@@ -121,6 +113,7 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
     }
 
     #region Get Methods
+
     public async Task<TaskItemOccurrenceDto?> GetAsync(Guid taskItemOccurrenceId)
     {
         if (taskItemOccurrenceId == Guid.Empty)
@@ -128,7 +121,7 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
 
         var taskItemOccurrence = await _taskItemOccurrenceRepository.GetByIdAsync(taskItemOccurrenceId);
 
-        return taskItemOccurrence == null ? null : _mapper.Map<TaskItemOccurrenceDto>(taskItemOccurrence);
+        return taskItemOccurrence?.ToDto();
     }
 
     public async Task<TaskItemOccurrenceDto?> GetWithTaskItemAsync(Guid taskItemOccurrenceId)
@@ -138,9 +131,12 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
 
         var taskItemOccurrence = await _taskItemOccurrenceRepository.GetAll()
             .Include(o => o.TaskItem)
+                .ThenInclude(t => t!.TaskItemCategory)
+            .Include(o => o.TaskItem)
+                .ThenInclude(t => t!.RelatedExpense)
             .FirstOrDefaultAsync(o => o.TaskItemOccurrenceId == taskItemOccurrenceId);
 
-        return taskItemOccurrence == null ? null : _mapper.Map<TaskItemOccurrenceDto>(taskItemOccurrence);
+        return taskItemOccurrence?.ToDto();
     }
 
     public async Task<List<TaskItemOccurrenceDto>> GetAllByTaskItemIdAsync(Guid taskItemId)
@@ -153,7 +149,7 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
             .OrderBy(o => o.ScheduledDateTime)
             .ToListAsync();
 
-        return _mapper.Map<List<TaskItemOccurrenceDto>>(occurrences);
+        return occurrences.ToDtoList();
     }
 
     public async Task<List<TaskItemOccurrenceDto>> GetAllByTaskItemIdAndStatusAsync(Guid taskItemId, TaskItemStatus status)
@@ -166,7 +162,7 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
             .OrderBy(o => o.ScheduledDateTime)
             .ToListAsync();
 
-        return _mapper.Map<List<TaskItemOccurrenceDto>>(occurrences);
+        return occurrences.ToDtoList();
     }
 
     public async Task<List<TaskItemOccurrenceDto>> GetAllByUserHouseholdIdAndDateRangeAsync(
@@ -185,13 +181,18 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
 
         var occurrences = await _taskItemOccurrenceRepository.GetAll()
             .Include(o => o.TaskItem)
+                .ThenInclude(t => t!.TaskItemCategory)
+            .Include(o => o.TaskItem)
+                .ThenInclude(t => t!.RelatedExpense)
             .Where(o => o.TaskItem!.AssignedToUserHouseholdId == userHouseholdId
                      && o.ScheduledDateTime >= utcStart
                      && o.ScheduledDateTime <= utcEnd)
             .OrderBy(o => o.ScheduledDateTime)
             .ToListAsync();
 
-        return _mapper.Map<List<TaskItemOccurrenceDto>>(occurrences);
+        return occurrences.ToDtoList();
     }
+
     #endregion Get Methods
 }
+

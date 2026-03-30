@@ -1,5 +1,205 @@
-﻿<h3>TaskItemModal</h3>
+﻿@using TheSteward.Core.Dtos.TaskManagerDtos
+@using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Shared.Dtos.TaskDtos
+@using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
+
+@inject ITaskItemService TaskItemService
+@inject ITaskItemCategoryService TaskItemCategoryService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@(FormData.IsEditMode ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)"
+                     Class="mr-2" Style="vertical-align: middle;" />
+            @(FormData.IsEditMode ? "Edit Task" : "Add Task")
+        </MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="isValid">
+
+            @* ── Task Name ── *@
+            <MudTextField T="string"
+                          Label="Task Name"
+                          @bind-Value="FormData.TaskItemName"
+                          Required="true"
+                          RequiredError="Task name is required."
+                          MaxLength="100"
+                          Immediate="true"
+                          Class="mb-3" />
+
+            @* ── Description ── *@
+            <MudTextField T="string"
+                          Label="Description"
+                          @bind-Value="FormData.Description"
+                          Lines="3"
+                          MaxLength="500"
+                          Class="mb-3" />
+
+            @* ── Category ── *@
+            <MudSelect T="Guid"
+                       Label="Category"
+                       @bind-Value="FormData.TaskItemCategoryId"
+                       Required="true"
+                       RequiredError="Please select a category."
+                       Class="mb-3">
+                @foreach (var category in availableCategories)
+                {
+                    <MudSelectItem T="Guid" Value="category.TaskItemCategoryId">
+                        @category.TaskItemCategoryName
+                    </MudSelectItem>
+                }
+            </MudSelect>
+
+            @* ── Priority & Status ── *@
+            <div class="d-flex gap-3 mb-3">
+                <MudSelect T="TaskItemPriority"
+                           Label="Priority"
+                           @bind-Value="FormData.Priority"
+                           Class="flex-1">
+                    @foreach (var priority in Enum.GetValues<TaskItemPriority>())
+                    {
+                        <MudSelectItem T="TaskItemPriority" Value="priority">@priority</MudSelectItem>
+                    }
+                </MudSelect>
+
+                @if (FormData.IsEditMode)
+                {
+                    <MudSelect T="TaskItemStatus"
+                               Label="Status"
+                               @bind-Value="FormData.Status"
+                               Class="flex-1">
+                        @foreach (var status in Enum.GetValues<TaskItemStatus>())
+                        {
+                            <MudSelectItem T="TaskItemStatus" Value="status">@status</MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+            </div>
+
+            @* ── Due Date ── *@
+            <MudDatePicker Label="Due Date"
+                           @bind-Date="FormData.DueDate"
+                           Clearable="true"
+                           Class="mb-3" />
+
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        @* Delete button — edit mode only *@
+        @if (FormData.IsEditMode)
+        {
+            <MudButton Color="Color.Error"
+                       Variant="Variant.Text"
+                       OnClick="HandleDelete"
+                       Disabled="isSaving"
+                       Class="mr-auto">
+                Delete
+            </MudButton>
+        }
+
+        <MudButton OnClick="Cancel" Disabled="isSaving">Cancel</MudButton>
+
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   OnClick="HandleSubmit"
+                   Disabled="isSaving || !isValid">
+            @if (isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            @(FormData.IsEditMode ? "Save Changes" : "Add Task")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 
+    [Parameter] public TaskItemFormDto FormData { get; set; } = new();
+
+    private MudForm form = default!;
+    private bool isValid;
+    private bool isSaving;
+    private List<TaskItemCategoryDto> availableCategories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableCategories = await TaskItemCategoryService.GetAllAsync();
+
+        // Default to first category if none selected
+        if (FormData.TaskItemCategoryId == Guid.Empty && availableCategories.Any())
+            FormData.TaskItemCategoryId = availableCategories.First().TaskItemCategoryId;
+    }
+
+    private async Task HandleSubmit()
+    {
+        await form.Validate();
+        if (!isValid) return;
+
+        isSaving = true;
+
+        try
+        {
+            if (FormData.IsEditMode)
+            {
+                var updateDto = new UpdateTaskItemDto
+                {
+                    TaskItemId = FormData.TaskItemId.GetValueOrDefault(),
+                    TaskItemName = FormData.TaskItemName,
+                    Description = FormData.Description,
+                    Status = FormData.Status,
+                    Priority = FormData.Priority,
+                    DueDate = FormData.DueDate,
+                    AssignedToUserHouseholdId = FormData.AssignedToUserHouseholdId,
+                    TaskItemCategoryId = FormData.TaskItemCategoryId,
+                    RecurrenceId = FormData.RecurrenceId,
+                    ExpenseId = FormData.ExpenseId
+                };
+
+                await TaskItemService.UpdateAsync(updateDto);
+                Snackbar.Add("Task updated.", Severity.Success);
+            }
+            else
+            {
+                var createDto = new CreateTaskItemDto
+                {
+                    TaskItemName = FormData.TaskItemName,
+                    Description = FormData.Description,
+                    Status = FormData.Status,
+                    Priority = FormData.Priority,
+                    DueDate = FormData.DueDate,
+                    CreatedByUserHouseholdId = FormData.CreatedByUserHouseholdId,
+                    AssignedToUserHouseholdId = FormData.AssignedToUserHouseholdId,
+                    TaskItemCategoryId = FormData.TaskItemCategoryId,
+                    RecurrenceId = FormData.RecurrenceId,
+                    ExpenseId = FormData.ExpenseId
+                };
+
+                await TaskItemService.AddAsync(createDto);
+                Snackbar.Add("Task added!", Severity.Success);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void HandleDelete()
+    {
+        MudDialog.Close(DialogResult.Ok($"delete:{FormData.TaskItemId}"));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
 }
+

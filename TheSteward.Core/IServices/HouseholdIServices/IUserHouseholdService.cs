@@ -14,7 +14,7 @@ public interface IUserHouseholdService
     /// <exception cref="ArgumentNullException">Thrown when newUserHousehold is null.</exception>
     /// <exception cref="KeyNotFoundException">Thrown when the owner user is not found.</exception>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task AddAsync(CreateUserHouseholdDto newUserHousehold, string ownerId);
+    Task<UserHouseholdDto> AddAsync(CreateUserHouseholdDto newUserHousehold, string ownerId);
 
     /// <summary>
     /// Deletes a user-household relationship, permanently removing the user from the household.
@@ -37,7 +37,7 @@ public interface IUserHouseholdService
     /// <exception cref="ArgumentNullException">Thrown when UserHouseholdId is null.</exception>
     /// <exception cref="KeyNotFoundException">Thrown when the user-household relationship is not found.</exception>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task UpdateAsync(UpdateUserHouseholdDto updatedUserHousehold);
+    Task<UserHouseholdDto> UpdateAsync(UpdateUserHouseholdDto updatedUserHousehold);
 
     /// <summary>
     /// Sets the default budget for a user household.
@@ -50,7 +50,7 @@ public interface IUserHouseholdService
     /// <exception cref="KeyNotFoundException">
     /// Thrown when no user household matching <paramref name="userHouseholdId"/> is found.
     /// </exception>
-    Task SetDefaultBudgetAsync(Guid userHouseholdId, Guid budgetId);
+    Task<UserHouseholdDto> SetDefaultBudgetAsync(Guid userHouseholdId, Guid budgetId);
 
     /// <summary>
     /// Deactivates a user-household relationship, revoking the user's access to the household
@@ -66,7 +66,7 @@ public interface IUserHouseholdService
     /// Thrown when no user household matching <paramref name="userHouseholdId"/> is found.
     /// </exception>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task DeactivateUserAsync(Guid userHouseholdId);
+    Task<UserHouseholdDto> DeactivateUserAsync(Guid userHouseholdId);
 
     /// <summary>
     /// Reactivates a previously deactivated user-household relationship, restoring the user's
@@ -76,7 +76,7 @@ public interface IUserHouseholdService
     /// <exception cref="ArgumentException">Thrown when <paramref name="userHouseholdId"/> is empty.</exception>
     /// <exception cref="KeyNotFoundException">Thrown when no user household matching <paramref name="userHouseholdId"/> is found.</exception>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task ReactivateUserAsync(Guid userHouseholdId);
+    Task<UserHouseholdDto> ReactivateUserAsync(Guid userHouseholdId);
     #endregion Update Methods
 
     #region Get Methods
@@ -151,7 +151,7 @@ public interface IUserHouseholdService
     /// <exception cref="UnauthorizedAccessException">Thrown when the invitation does not belong to the user.</exception>
     /// <exception cref="InvalidOperationException">Thrown when the invitation is expired or already accepted.</exception>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task AcceptInvitationAsync(Guid invitationId, string userId, bool setAsDefault);
+    Task<UserHouseholdDto> AcceptInvitationAsync(Guid invitationId, string userId, bool setAsDefault);
 
     /// <summary>
     /// Gets all pending invitations for a user by email.

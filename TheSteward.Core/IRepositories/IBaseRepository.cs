@@ -116,4 +116,11 @@ public interface IBaseRepository<T> where T : class
     /// </code>
     /// </remarks>
     Task<IDbContextTransaction> BeginTransactionAsync();
+
+    /// <summary>
+    /// Clears all tracked changes, resetting the change tracker to its initial state.
+    /// </summary>
+    /// <remarks>Call this method to discard any pending changes that have been tracked. After calling this
+    /// method, the change tracker will not report any changes until new modifications are made.</remarks>
+    void ClearChangeTracker();
 }

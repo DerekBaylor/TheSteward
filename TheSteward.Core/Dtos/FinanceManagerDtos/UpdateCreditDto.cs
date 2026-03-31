@@ -55,5 +55,7 @@ public class UpdateCreditDto
     /// </summary>
     public string? BudgetSubCategoryName { get; set; }
 
+    public Guid UserHouseholdId { get; set; }
+
     #endregion Navigation Properties
 }

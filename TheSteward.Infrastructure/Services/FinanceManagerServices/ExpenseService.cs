@@ -50,6 +50,7 @@ public class ExpenseService : IExpenseService
         catch
         {
             await transaction.RollbackAsync();
+            _expenseRepository.ClearChangeTracker();
             throw;
         }
     }

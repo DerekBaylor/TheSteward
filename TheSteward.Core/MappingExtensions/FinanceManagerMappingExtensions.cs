@@ -1,4 +1,5 @@
-﻿using TheSteward.Core.Dtos.FinanceManagerDtos;
+﻿using System.Diagnostics.CodeAnalysis;
+using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.Models.FinanceManagerModels;
 
 namespace TheSteward.Core.MappingExtensions;
@@ -8,12 +9,46 @@ public static class FinanceManagerMappingExtensions
     #region Budget
 
     /// <summary>
-    /// Converts a Budget entity to its corresponding BudgetDto representation.
+    /// Explicit override required — GenericMapper cannot resolve nested collection ToDto() calls.
+    /// All navigation collections must be eagerly loaded before calling this method.
     /// </summary>
-    /// <param name="src">The Budget instance to convert. Cannot be null.</param>
-    /// <returns>A BudgetDto object containing the mapped values from the specified Budget instance.</returns>
     public static BudgetDto ToDto(this Budget src)
-        => GenericMapper.Map<Budget, BudgetDto>(src);
+    {
+        var dto = new BudgetDto
+        {
+            BudgetId = src.BudgetId,
+            BudgetName = src.BudgetName,
+            HouseholdId = src.HouseholdId,
+            OwnerId = src.OwnerId,
+            IsDefaultBudget = src.IsDefaultBudget,
+            IsPublic = src.IsPublic,
+            CreatedDate = src.CreatedDate,
+            ModifiedDate = src.ModifiedDate,
+
+            // Collections — each delegates to its own ToDto() override
+            BudgetCategories = src.BudgetCategories is not null
+                ? src.BudgetCategories.ToDtoList(includeSubCategories: true)
+                : new(),
+
+            Incomes = src.Incomes is not null
+                ? src.Incomes.ToDtoList()
+                : new(),
+
+            Investments = src.Investments is not null
+                ? src.Investments.ToDtoList()   // flattens LinkedExpense via Investment.ToDto()
+                : new(),
+
+            Credits = src.Credits is not null
+                ? src.Credits.ToDtoList()
+                : new(),
+
+            Expenses = src.Expenses is not null
+                ? src.Expenses.ToDtoList()      // flattens BudgetCategory, BudgetSubCategory, LinkedCredit, LinkedInvestment
+                : new(),
+        };
+
+        return dto;
+    }
 
     /// <summary>
     /// Converts a sequence of Budget entities to a list of BudgetDto objects.
@@ -22,7 +57,8 @@ public static class FinanceManagerMappingExtensions
     /// <returns>A list of BudgetDto objects representing the converted Budget entities. Returns an empty list if the source
     /// sequence is empty.</returns>
     public static List<BudgetDto> ToDtoList(this IEnumerable<Budget> src)
-        => GenericMapper.MapList<Budget, BudgetDto>(src);
+        => src.Select(b => b.ToDto()).ToList();
+
 
     /// <summary>
     /// Creates a new Budget entity from the specified CreateBudgetDto instance.
@@ -217,11 +253,28 @@ public static class FinanceManagerMappingExtensions
     /// <param name="src">The data transfer object containing updated values to apply. Cannot be null.</param>
     public static void ApplyUpdate(this Credit entity, UpdateCreditDto src)
     {
-        GenericMapper.MapProperties(src, entity);
-        // ExpenseId is nullable on the DTO — only overwrite when the caller supplies one
-        if (src.ExpenseId.HasValue)
+        entity.CreditName = src.CreditName;
+        entity.CreditType = src.CreditType;
+        entity.CurrentValue = src.CurrentValue;
+        entity.InterestRate = src.InterestRate;
+        entity.PaymentAmount = src.PaymentAmount;
+        entity.PaymentFrequency = src.PaymentFrequency;
+        entity.PaymentDay = src.PaymentDay;
+        entity.EstMonthlyInterest = src.EstMonthlyInterest;
+        entity.EstYearlyInterest = src.EstYearlyInterest;
+        entity.DisplayOrder = src.DisplayOrder;
+
+        // Only update BudgetId if a valid one is provided
+        if (src.BudgetId != Guid.Empty)
+            entity.BudgetId = src.BudgetId;
+
+        // Only update ExpenseId if a valid one is explicitly provided
+        if (src.ExpenseId.HasValue && src.ExpenseId.Value != Guid.Empty)
             entity.ExpenseId = src.ExpenseId.Value;
     }
+
+
+
 
     #endregion Credit
 
@@ -229,20 +282,26 @@ public static class FinanceManagerMappingExtensions
 
     /// <summary>
     /// Navigation properties are flattened from loaded navigations.
-    /// Explicit override required — generic map cannot resolve nested ToDto() calls.
+    /// LinkedInvestmentDto and LinkedCreditDto are intentionally NOT recursively 
+    /// mapped to prevent circular reference loops. Use the FK IDs for lookups instead.
     /// </summary>
     public static ExpenseDto ToDto(this Expense src)
     {
         var dto = GenericMapper.Map<Expense, ExpenseDto>(src);
+
         dto.BudgetCategory = src.BudgetCategory?.ToDto()
             ?? new BudgetCategoryDto { BudgetCategoryName = string.Empty };
+
         dto.BudgetSubCategory = src.BudgetSubCategory?.ToDto()
             ?? new BudgetSubCategoryDto { BudgetSubCategoryName = string.Empty };
-        dto.LinkedCreditDto = src.LinkedCredit?.ToDto();
-        dto.LinkedInvestmentDto = src.LinkedInvestment?.ToDto();
+
+        // These caused the circular reference — set to null, use FK IDs instead
+        dto.LinkedCreditDto = null;
+        dto.LinkedInvestmentDto = null;
 
         return dto;
     }
+
 
     /// <summary>
     /// Converts a sequence of Expense entities to a list of ExpenseDto objects.
@@ -280,18 +339,34 @@ public static class FinanceManagerMappingExtensions
     /// via the mapped foreign keys.</remarks>
     /// <param name="entity">The Expense entity to update. Cannot be null.</param>
     /// <param name="src">The data transfer object containing updated values to apply. Cannot be null.</param>
+    //public static void ApplyUpdate(this Expense entity, UpdateExpenseDto src)
+    //    => GenericMapper.MapProperties(src, entity);
+
     public static void ApplyUpdate(this Expense entity, UpdateExpenseDto src)
-        => GenericMapper.MapProperties(src, entity);
+    {
+        entity.ExpenseName = src.ExpenseName;
+        entity.AmountDue = src.AmountDue;
+        entity.DueDay = src.DueDay;
+        entity.DisplayOrder = src.DisplayOrder;
+        entity.BudgetCategoryId = src.BudgetCategoryId;
+        entity.BudgetSubCategoryId = src.BudgetSubCategoryId;
+        entity.CreditId = src.CreditId;
+        entity.InvestmentId = src.InvestmentId;
+
+        if (src.BudgetId != Guid.Empty)
+            entity.BudgetId = src.BudgetId;
+    }
+
 
     #endregion
 
-    #region Income
+        #region Income
 
-    /// <summary>
-    /// Converts an Income entity to its corresponding IncomeDto representation.
-    /// </summary>
-    /// <param name="src">The Income instance to convert. Cannot be null.</param>
-    /// <returns>An IncomeDto object containing the mapped values from the specified Income instance.</returns>
+        /// <summary>
+        /// Converts an Income entity to its corresponding IncomeDto representation.
+        /// </summary>
+        /// <param name="src">The Income instance to convert. Cannot be null.</param>
+        /// <returns>An IncomeDto object containing the mapped values from the specified Income instance.</returns>
     public static IncomeDto ToDto(this Income src)
         => GenericMapper.Map<Income, IncomeDto>(src);
 
@@ -320,16 +395,17 @@ public static class FinanceManagerMappingExtensions
     #region Investment
 
     /// <summary>
-    /// LinkedExpense navigation is flattened — explicit override required.
-    /// Budget navigation is intentionally omitted — EF owns it.
+    /// LinkedExpense is intentionally NOT mapped here to prevent circular reference:
+    /// Expense → LinkedInvestment → LinkedExpense → LinkedInvestment → ...
+    /// The ExpenseId FK on InvestmentDto is sufficient for lookups.
     /// </summary>
     public static InvestmentDto ToDto(this Investment src)
     {
         var dto = GenericMapper.Map<Investment, InvestmentDto>(src);
-        dto.LinkedExpenseDto = src.LinkedExpense?.ToDto();
-
+        dto.LinkedExpenseDto = null;
         return dto;
     }
+
 
     /// <summary>
     /// Converts a sequence of Investment entities to a list of InvestmentDto objects.
@@ -354,7 +430,7 @@ public static class FinanceManagerMappingExtensions
     public static Investment ToEntity(this CreateInvestmentDto src, Guid investmentId)
     {
         var entity = GenericMapper.Map<CreateInvestmentDto, Investment>(src);
-        entity.InvestmentId = investmentId;  // Budget and LinkedExpense intentionally omitted — EF resolves via FK
+        entity.InvestmentId = investmentId;
 
         return entity;
     }
@@ -367,8 +443,24 @@ public static class FinanceManagerMappingExtensions
     /// resolves them via the mapped foreign keys.</remarks>
     /// <param name="entity">The Investment entity to update. Cannot be null.</param>
     /// <param name="src">The data transfer object containing updated values to apply. Cannot be null.</param>
-    public static void ApplyUpdate(this Investment entity, UpdateInvestmentDto src)
-        => GenericMapper.MapProperties(src, entity);
+    //public static void ApplyUpdate(this Investment entity, UpdateInvestmentDto src)
+    //    => GenericMapper.MapProperties(src, entity);
+
+    public static void ApplyUpdate(this Investment investment, UpdateInvestmentDto dto)
+    {
+        investment.InvestmentName = dto.InvestmentName;
+        investment.CurrentValue = dto.CurrentValue;
+        investment.InterestRate = dto.InterestRate;
+        investment.ContributionAmount = dto.ContributionAmount;
+        investment.ContributionFrequency = dto.ContributionFrequency;
+        investment.EstYearlyGrowth = dto.EstYearlyGrowth;
+        investment.DisplayOrder = dto.DisplayOrder;
+        investment.ExpenseId = dto.ExpenseId;
+
+        if (dto.BudgetId != Guid.Empty)
+            investment.BudgetId = dto.BudgetId;
+
+    }
 
     #endregion Investment
 }

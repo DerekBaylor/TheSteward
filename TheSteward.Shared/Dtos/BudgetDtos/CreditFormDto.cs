@@ -78,4 +78,6 @@ public class CreditFormDto
     public Guid BudgetId { get; set; }
 
     public bool IsEditMode => CreditId.HasValue && CreditId != Guid.Empty;
+
+    public Guid CreatedById { get; set; }
 }

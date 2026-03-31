@@ -173,20 +173,26 @@ else
     private List<BudgetDto> availableBudgets = new();
     private Action? _stateChangeHandler;
     private List<BudgetCategoryDto>? BudgetCategories = new();
+    private Guid? householdId;
+    private UserHouseholdDto? userhouseholdDto = new();
 
     protected override async Task OnInitializedAsync()
     {
         _stateChangeHandler = () => InvokeAsync(StateHasChanged);
         HouseholdState.OnChange += _stateChangeHandler;
 
+        householdId = HouseholdState.CurrentHousehold?.HouseholdId;
+        userhouseholdDto = HouseholdState.CurrentUserHousehold;
+
         await LoadBudgetAsync();
     }
 
-    private async void OnHouseholdChanged(UserHouseholdDto _)
+    private async void OnHouseholdChanged(UserHouseholdDto newUserHouseholdDto)
     {
         currentBudget = null;
         hasBudget = false;
         errorMessage = null;
+        userhouseholdDto = newUserHouseholdDto;
         await LoadBudgetAsync();
         StateHasChanged();
     }
@@ -194,10 +200,7 @@ else
     #region Budget
     private async Task LoadBudgetAsync()
     {
-        var householdId = HouseholdState.CurrentHousehold?.HouseholdId;
-        var userHousehold = HouseholdState.CurrentUserHousehold;
-
-        if (householdId == null || userHousehold == null || !HouseholdState.HasFinanceReadPermission)
+        if (householdId == null || userhouseholdDto == null || !HouseholdState.HasFinanceReadPermission)
         {
             isLoading = false;
             return;
@@ -207,9 +210,9 @@ else
         {
             isLoading = true;
 
-            availableBudgets = await BudgetService.GetBudgetsForUserHouseholdAsync(userHousehold);
+            availableBudgets = await BudgetService.GetBudgetsForUserHouseholdAsync(userhouseholdDto);
 
-            currentBudget = availableBudgets.FirstOrDefault(b => b.BudgetId == userHousehold.DefaultBudgetId)
+            currentBudget = availableBudgets.FirstOrDefault(b => b.BudgetId == userhouseholdDto.DefaultBudgetId)
                          ?? availableBudgets.FirstOrDefault(b => b.IsDefaultBudget)
                          ?? availableBudgets.FirstOrDefault();
 
@@ -634,7 +637,8 @@ else
         {
             BudgetId = currentBudget!.BudgetId,
             DisplayOrder = currentBudget.Credits.Count,
-            BudgetCategoryName = "Debt & Credit"
+            BudgetCategoryName = "Debt & Credit",
+            CreatedById = userhouseholdDto.UserHouseholdId
         };
 
         await OpenCreditModal(formData);
@@ -685,6 +689,7 @@ else
             BudgetCategoryName = linkedExpense?.BudgetCategory?.BudgetCategoryName ?? "Debt & Credit",
             BudgetSubCategoryId = linkedExpense?.BudgetSubCategoryId,
             BudgetSubCategoryName = linkedExpense?.BudgetSubCategory?.BudgetSubCategoryName,
+            CreatedById = userhouseholdDto.UserHouseholdId
         };
 
         await OpenCreditModal(formData);

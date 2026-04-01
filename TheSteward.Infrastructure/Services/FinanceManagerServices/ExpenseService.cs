@@ -14,13 +14,15 @@ namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 public class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
+    private readonly ICreditRepository _creditRepository;
     private readonly ITaskItemRepository _taskItemRepository;
     private readonly ITaskItemCategoryRepository _taskItemCategoryRepository;
     private readonly IRecurrenceRuleRepository _recurrenceRuleRepository;
 
-    public ExpenseService(IExpenseRepository expenseRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository)
+    public ExpenseService(IExpenseRepository expenseRepository, ICreditRepository creditRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository)
     {
         _expenseRepository = expenseRepository;
+        _creditRepository = creditRepository;
         _taskItemRepository = taskItemRepository;
         _taskItemCategoryRepository = taskItemCategoryRepository;
         _recurrenceRuleRepository = recurrenceRuleRepository;
@@ -70,6 +72,7 @@ public class ExpenseService : IExpenseService
         await _expenseRepository.UpdateAsync(expense);
         await _expenseRepository.SaveChangesAsync();
 
+        await SyncLinkedCreditAsync(expense);
         await SyncLinkedTaskAsync(expense);
 
         return expense.ToDto();
@@ -309,6 +312,33 @@ public class ExpenseService : IExpenseService
 
         return candidateDate;
     }
+
+    /// <summary>
+    /// If this expense is linked to a credit, syncs the credit's payment fields
+    /// to match the updated expense. Only syncs fields the user can change on
+    /// the expense side: name, amount, and due day.
+    /// Skips sync when the update originated from CreditService to avoid a loop.
+    /// </summary>
+    private async Task SyncLinkedCreditAsync(Expense expense)
+    {
+        // Only sync if this expense has a linked credit
+        if (expense.CreditId == null || expense.CreditId == Guid.Empty)
+            return;
+
+        var credit = await _creditRepository.GetByIdAsync(expense.CreditId.Value);
+        if (credit == null)
+            return;
+
+        // Only update the fields that mirror the expense
+        credit.CreditName = expense.ExpenseName;
+        credit.PaymentAmount = expense.AmountDue;
+        credit.PaymentDay = expense.DueDay;
+
+        await _creditRepository.UpdateAsync(credit);
+        await _creditRepository.SaveChangesAsync();
+    }
+
+
 
     /// <summary>
     /// Synchronizes the linked task item with the specified expense, updating its details to reflect the current

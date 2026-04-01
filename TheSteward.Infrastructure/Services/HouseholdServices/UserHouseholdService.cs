@@ -176,10 +176,13 @@ public class UserHouseholdService : IUserHouseholdService
         return userHousehold?.ToDto();
     }
 
-    public async Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId, bool activeOnly = true)
+    public async Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(
+        Guid householdId, string userId, bool activeOnly = true)
     {
         var query = _userHouseholdRepository.GetAll()
             .Include(uh => uh.Household)
+                .ThenInclude(h => h.UserHouseholds)
+                    .ThenInclude(uh => uh.User)
             .Include(uh => uh.User)
             .Where(uh => uh.UserId == userId && uh.HouseholdId == householdId);
 
@@ -190,6 +193,7 @@ public class UserHouseholdService : IUserHouseholdService
 
         return userHousehold?.ToDto();
     }
+
     #endregion Get UserHousehold Methods
 
     #region Invitation Methods

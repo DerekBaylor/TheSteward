@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace TheSteward.Core.Dtos.HouseholdDtos;
 
@@ -12,7 +13,7 @@ public class UpdateHouseholdDto
 
     public bool IsDefaultHousehold { get; set; } = false;
 
-    public bool IsHouseholdActive { get; set; }
+    public bool IsHouseholdActive { get; set; } = true;
 
     public bool HasTaskManagerAccess { get; set; }
 

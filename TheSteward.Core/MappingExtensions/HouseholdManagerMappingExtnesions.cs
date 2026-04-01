@@ -25,9 +25,9 @@ public static class HouseholdManagerMappingExtensions
         HasFileManagerAccess = src.HasFileManagerAccess,
         OwnerId = src.OwnerId,
         Owner = src.Owner,
-        UserHouseholdDtos = src.UserHouseholds
-                                     .Select(uh => uh.ToDto(includeHousehold: false))
-                                     .ToList()
+        UserHouseholdDtos = src.UserHouseholds?
+                             .Select(uh => uh.ToDto(includeHousehold: false))
+                             .ToList() ?? new List<UserHouseholdDto>()
     };
 
     /// <summary>

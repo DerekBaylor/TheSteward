@@ -15,14 +15,16 @@ public class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly ICreditRepository _creditRepository;
+    private readonly IInvestmentRepository _investmentRepository;
     private readonly ITaskItemRepository _taskItemRepository;
     private readonly ITaskItemCategoryRepository _taskItemCategoryRepository;
     private readonly IRecurrenceRuleRepository _recurrenceRuleRepository;
 
-    public ExpenseService(IExpenseRepository expenseRepository, ICreditRepository creditRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository)
+    public ExpenseService(IExpenseRepository expenseRepository, ICreditRepository creditRepository,IInvestmentRepository investmentRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository)
     {
         _expenseRepository = expenseRepository;
         _creditRepository = creditRepository;
+        _investmentRepository = investmentRepository;
         _taskItemRepository = taskItemRepository;
         _taskItemCategoryRepository = taskItemCategoryRepository;
         _recurrenceRuleRepository = recurrenceRuleRepository;
@@ -63,20 +65,34 @@ public class ExpenseService : IExpenseService
         if (expenseDto == null)
             throw new ArgumentNullException(nameof(expenseDto));
 
-        var expense = await _expenseRepository.GetByIdAsync(expenseDto.ExpenseId);
-        if (expense == null)
-            throw new KeyNotFoundException($"Expense with ID {expenseDto.ExpenseId} not found.");
+        await using var transaction = await _expenseRepository.BeginTransactionAsync();
 
-        expense.ApplyUpdate(expenseDto);
+        try
+        {
+            var expense = await _expenseRepository.GetByIdAsync(expenseDto.ExpenseId);
+            if (expense == null)
+                throw new KeyNotFoundException($"Expense with ID {expenseDto.ExpenseId} not found.");
 
-        await _expenseRepository.UpdateAsync(expense);
-        await _expenseRepository.SaveChangesAsync();
+            expense.ApplyUpdate(expenseDto);
 
-        await SyncLinkedCreditAsync(expense);
-        await SyncLinkedTaskAsync(expense);
+            await _expenseRepository.UpdateAsync(expense);
+            await _expenseRepository.SaveChangesAsync();
 
-        return expense.ToDto();
+            await SyncLinkedCreditAsync(expense);
+            await SyncLinkedTaskAsync(expense);
+
+            await transaction.CommitAsync();
+
+            return expense.ToDto();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            _expenseRepository.ClearChangeTracker();
+            throw;
+        }
     }
+
 
 
     public async Task DeleteAsync(Guid expenseId)
@@ -337,6 +353,28 @@ public class ExpenseService : IExpenseService
         await _creditRepository.UpdateAsync(credit);
         await _creditRepository.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Syncs the linked investment with the updated expense.
+    /// Only syncs fields that mirror the expense: name and contribution amount.
+    /// Bypasses InvestmentService directly to prevent sync loops.
+    /// </summary>
+    private async Task SyncLinkedInvestmentAsync(Expense expense)
+    {
+        if (expense.InvestmentId == null || expense.InvestmentId == Guid.Empty)
+            return;
+
+        var investment = await _investmentRepository.GetByIdAsync(expense.InvestmentId.Value);
+        if (investment == null)
+            return;
+
+        investment.InvestmentName = expense.ExpenseName;
+        investment.ContributionAmount = expense.AmountDue;
+
+        await _investmentRepository.UpdateAsync(investment);
+        await _investmentRepository.SaveChangesAsync();
+    }
+
 
 
 

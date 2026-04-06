@@ -84,13 +84,6 @@ else
                                 </button>
                             }
 
-                            <button class="tm-stat-chip tm-stat-chip--urgent @(activePriorityFilter == TaskItemPriority.Urgent ? "active" : "")"
-                                    @onclick="OnUrgentChipClicked">
-                                <span class="material-symbols-outlined">priority_high</span>
-                                Urgent
-                                <span class="tm-chip-count">@tasks.Count(t => t.Priority == TaskItemPriority.Urgent)</span>
-                            </button>
-
                             @foreach (var priority in Enum.GetValues<TaskItemPriority>())
                             {
                                 <button class="tm-priority-chip tm-priority-chip--@priority.ToString().ToLower() @(activePriorityFilter == priority ? "active" : "")"

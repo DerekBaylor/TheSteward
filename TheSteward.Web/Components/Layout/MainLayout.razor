@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using TheSteward.Shared.Themes
+
+@inherits LayoutComponentBase
 @implements IDisposable
 @inject INavigationService NavigationService
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -6,7 +8,7 @@
 @inject HouseholdState HouseholdState
 @inject NavigationManager NavigationManager
 
-<MudThemeProvider />
+<MudThemeProvider Theme="StewardTheme.Theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />

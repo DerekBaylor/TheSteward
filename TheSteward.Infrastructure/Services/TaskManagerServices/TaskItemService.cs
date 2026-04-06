@@ -47,26 +47,40 @@ public class TaskItemService : ITaskItemService
         if (taskItemDto == null)
             throw new ArgumentNullException(nameof(taskItemDto));
 
-        var taskItem = await _taskItemRepository.GetByIdAsync(taskItemDto.TaskItemId);
-        if (taskItem == null)
-            throw new KeyNotFoundException($"TaskItem with ID {taskItemDto.TaskItemId} not found.");
+        await using var transaction = await _taskItemRepository.BeginTransactionAsync();
 
-        taskItem.ApplyUpdate(taskItemDto);
-        taskItem.DueDate = taskItemDto.DueDate.HasValue
-            ? DateTime.SpecifyKind(taskItemDto.DueDate.Value, DateTimeKind.Utc)
-            : null;
-        taskItem.CompletedDate = taskItemDto.CompletedDate.HasValue
-            ? DateTime.SpecifyKind(taskItemDto.CompletedDate.Value, DateTimeKind.Utc)
-            : null;
-        taskItem.UpdatedDate = DateTime.UtcNow;
+        try
+        {
+            var taskItem = await _taskItemRepository.GetByIdAsync(taskItemDto.TaskItemId);
+            if (taskItem == null)
+                throw new KeyNotFoundException($"TaskItem with ID {taskItemDto.TaskItemId} not found.");
 
-        await _taskItemRepository.UpdateAsync(taskItem);
-        await _taskItemRepository.SaveChangesAsync();
+            taskItem.ApplyUpdate(taskItemDto);
+            taskItem.DueDate = taskItemDto.DueDate.HasValue
+                ? DateTime.SpecifyKind(taskItemDto.DueDate.Value, DateTimeKind.Utc)
+                : null;
+            taskItem.CompletedDate = taskItemDto.CompletedDate.HasValue
+                ? DateTime.SpecifyKind(taskItemDto.CompletedDate.Value, DateTimeKind.Utc)
+                : null;
+            taskItem.UpdatedDate = DateTime.UtcNow;
 
-        await SyncLinkedExpenseAsync(taskItem);
+            await _taskItemRepository.UpdateAsync(taskItem);
+            await _taskItemRepository.SaveChangesAsync();
 
-        return taskItemDto;
+            await SyncLinkedExpenseAsync(taskItem);
+
+            await transaction.CommitAsync();
+
+            return taskItemDto;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            _taskItemRepository.ClearChangeTracker();
+            throw;
+        }
     }
+
 
     public async Task<TaskItemDto> CompleteAsync(Guid taskItemId, Guid completedByUserHouseholdId)
     {

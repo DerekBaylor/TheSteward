@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 using System.Globalization;
 using TheSteward.Core.IRepositories;
@@ -21,6 +22,7 @@ using TheSteward.Infrastructure.Services.HouseholdServices;
 using TheSteward.Infrastructure.Services.TaskManagerServices;
 using TheSteward.Shared.Interfaces;
 using TheSteward.Shared.Services;
+using TheSteward.Shared.Themes;
 using TheSteward.Web.Components;
 using TheSteward.Web.Components.Account;
 
@@ -31,7 +33,17 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRazorPages();
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+    config.SnackbarConfiguration.PreventDuplicates = false;
+    config.SnackbarConfiguration.VisibleStateDuration = 4000;
+    config.SnackbarConfiguration.HideTransitionDuration = 300;
+    config.SnackbarConfiguration.ShowTransitionDuration = 300;
+});
+
+
+
 
 #region Services & Repositories
 builder.Services.AddScoped<INavigationService, NavigationService>();

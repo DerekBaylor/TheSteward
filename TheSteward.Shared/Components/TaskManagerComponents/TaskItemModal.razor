@@ -1,6 +1,5 @@
 ﻿@using TheSteward.Core.Dtos.TaskManagerDtos
 @using TheSteward.Core.IServices.TaskManagerIServices
-@using TheSteward.Core.IServices.TaskManagerIServices
 @using TheSteward.Shared.Dtos.TaskDtos
 @using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
 
@@ -8,114 +7,119 @@
 @inject ITaskItemCategoryService TaskItemCategoryService
 @inject ISnackbar Snackbar
 
-<MudDialog>
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            <MudIcon Icon="@(FormData.IsEditMode ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)"
-                     Class="mr-2" Style="vertical-align: middle;" />
-            @(FormData.IsEditMode ? "Edit Task" : "Add Task")
-        </MudText>
-    </TitleContent>
-
+<MudDialog id="taskModal" Class="ts-modal task-modal">
     <DialogContent>
-        <MudForm @ref="form" @bind-IsValid="isValid">
+        <div class="dialog-layout">
 
-            @* ── Task Name ── *@
-            <MudTextField T="string"
-                          Label="Task Name"
-                          @bind-Value="FormData.TaskItemName"
-                          Required="true"
-                          RequiredError="Task name is required."
-                          MaxLength="100"
-                          Immediate="true"
-                          Class="mb-3" />
+            @* ── Left Column: Vertical Title ── *@
+            <MudStack class="dialog-sidebar">
+                <div class="dialog-sidebar-content">
+                    <MudIcon Icon="@(FormData.IsEditMode ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)" />
+                    <MudText Typo="Typo.h6">
+                        Task
+                    </MudText>
+                </div>
+            </MudStack>
 
-            @* ── Description ── *@
-            <MudTextField T="string"
-                          Label="Description"
-                          @bind-Value="FormData.Description"
-                          Lines="3"
-                          MaxLength="500"
-                          Class="mb-3" />
+            @* ── Right Column: Form ── *@
+            <MudStack Class="modal-right-stack">
 
-            @* ── Category ── *@
-            <MudSelect T="Guid"
-                       Label="Category"
-                       @bind-Value="FormData.TaskItemCategoryId"
-                       Required="true"
-                       RequiredError="Please select a category."
-                       Class="mb-3">
-                @foreach (var category in availableCategories)
-                {
-                    <MudSelectItem T="Guid" Value="category.TaskItemCategoryId">
-                        @category.TaskItemCategoryName
-                    </MudSelectItem>
-                }
-            </MudSelect>
+            <MudStack Class="dialog-form">
+                <MudForm @ref="form" @bind-IsValid="isValid">
 
-            @* ── Priority & Status ── *@
-            <div class="d-flex gap-3 mb-3">
-                <MudSelect T="TaskItemPriority"
-                           Label="Priority"
-                           @bind-Value="FormData.Priority"
-                           Class="flex-1">
-                    @foreach (var priority in Enum.GetValues<TaskItemPriority>())
-                    {
-                        <MudSelectItem T="TaskItemPriority" Value="priority">@priority</MudSelectItem>
-                    }
-                </MudSelect>
+                    <MudTextField T="string"
+                                  Label="Task Name"
+                                  @bind-Value="FormData.TaskItemName"
+                                  Required="true"
+                                  RequiredError="Task name is required."
+                                  MaxLength="100"
+                                  Immediate="true"
+                                  Class="mb-3" />
 
-                @if (FormData.IsEditMode)
-                {
-                    <MudSelect T="TaskItemStatus"
-                               Label="Status"
-                               @bind-Value="FormData.Status"
-                               Class="flex-1">
-                        @foreach (var status in Enum.GetValues<TaskItemStatus>())
+                    <MudTextField T="string"
+                                  Label="Description"
+                                  @bind-Value="FormData.Description"
+                                  Lines="3"
+                                  MaxLength="500"
+                                  Class="mb-3" />
+
+                    <MudSelect T="Guid"
+                               Label="Category"
+                               @bind-Value="FormData.TaskItemCategoryId"
+                               Required="true"
+                               RequiredError="Please select a category."
+                               Class="mb-3">
+                        @foreach (var category in availableCategories)
                         {
-                            <MudSelectItem T="TaskItemStatus" Value="status">@status</MudSelectItem>
+                            <MudSelectItem T="Guid" Value="category.TaskItemCategoryId">
+                                @category.TaskItemCategoryName
+                            </MudSelectItem>
                         }
                     </MudSelect>
-                }
-            </div>
 
-            @* ── Due Date ── *@
-            <MudDatePicker Label="Due Date"
-                           @bind-Date="FormData.DueDate"
-                           Clearable="true"
-                           Class="mb-3" />
+                    <div class="d-flex gap-3 mb-3">
+                        <MudSelect T="TaskItemPriority"
+                                   Label="Priority"
+                                   @bind-Value="FormData.Priority"
+                                   Class="flex-1">
+                            @foreach (var priority in Enum.GetValues<TaskItemPriority>())
+                            {
+                                <MudSelectItem T="TaskItemPriority" Value="priority">@priority</MudSelectItem>
+                            }
+                        </MudSelect>
 
-        </MudForm>
-    </DialogContent>
+                        @if (FormData.IsEditMode)
+                        {
+                            <MudSelect T="TaskItemStatus"
+                                       Label="Status"
+                                       @bind-Value="FormData.Status"
+                                       Class="flex-1">
+                                @foreach (var status in Enum.GetValues<TaskItemStatus>())
+                                {
+                                    <MudSelectItem T="TaskItemStatus" Value="status">@status</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                    </div>
 
-    <DialogActions>
-        @* Delete button — edit mode only *@
-        @if (FormData.IsEditMode)
-        {
-            <MudButton Color="Color.Error"
-                       Variant="Variant.Text"
-                       OnClick="HandleDelete"
-                       Disabled="isSaving"
-                       Class="mr-auto">
-                Delete
-            </MudButton>
-        }
+                    <MudDatePicker Label="Due Date"
+                                   @bind-Date="FormData.DueDate"
+                                   Clearable="true"
+                                   Class="mb-3" />
 
-        <MudButton OnClick="Cancel" Disabled="isSaving">Cancel</MudButton>
+                </MudForm>
+            </MudStack>
 
-        <MudButton Color="Color.Primary"
-                   Variant="Variant.Filled"
-                   OnClick="HandleSubmit"
-                   Disabled="isSaving || !isValid">
-            @if (isSaving)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-            }
-            @(FormData.IsEditMode ? "Save Changes" : "Add Task")
-        </MudButton>
-    </DialogActions>
+
+                <DialogActions>
+                    @if (FormData.IsEditMode)
+                    {
+                        <MudButton Color="Color.Error"
+                                   Variant="Variant.Text"
+                                   OnClick="HandleDelete"
+                                   Disabled="isSaving"
+                                   Class="mr-auto">
+                            Delete
+                        </MudButton>
+                    }
+
+                    <MudButton OnClick="Cancel" Disabled="isSaving">Cancel</MudButton>
+
+                    <MudButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               OnClick="HandleSubmit"
+                               Disabled="isSaving || !isValid">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        }
+                        @(FormData.IsEditMode ? "Save Changes" : "Add Task")
+                    </MudButton>
+                </DialogActions>
+            </MudStack>
+        </div>
+        </DialogContent>
 </MudDialog>
-
 @code {
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 

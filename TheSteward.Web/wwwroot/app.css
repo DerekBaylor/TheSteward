@@ -52,6 +52,7 @@
 
 /* tasks */
 @import url('styles/components/taskStyles/taskManagerToolbar.css');
+@import url('styles/components/taskStyles/taskItemModal.css');
 
 :root {
     /* ----- */
@@ -303,3 +304,27 @@ h1, h2, h3, h4, h5, h6 {
 .gray-10 {
     background-color: var(--gray-10);
 }
+
+
+/* Blue-tinted MudBlazor elevation overrides */
+.mud-elevation-1 {
+    box-shadow: 0 2px 4px rgba(21, 53, 214, 0.10) !important;
+}
+
+.mud-elevation-2 {
+    box-shadow: 0 4px 8px rgba(21, 53, 214, 0.12) !important;
+}
+
+.mud-elevation-3 {
+    box-shadow: 0 6px 12px rgba(21, 53, 214, 0.14) !important;
+}
+
+.mud-elevation-4 {
+    box-shadow: 0 8px 16px rgba(21, 53, 214, 0.16) !important;
+}
+
+.mud-elevation-5 {
+    box-shadow: 0 10px 20px rgba(21, 53, 214, 0.18) !important;
+}
+
+

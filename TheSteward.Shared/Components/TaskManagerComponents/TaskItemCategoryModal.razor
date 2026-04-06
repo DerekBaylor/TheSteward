@@ -1,0 +1,189 @@
+﻿@using TheSteward.Core.Dtos.TaskManagerDtos
+@using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Shared.Dtos.TaskManagerDtos
+@using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
+
+@inject ITaskItemCategoryService TaskItemCategoryService
+@inject ISnackbar Snackbar
+
+@namespace TheSteward.Shared.Components.TaskManagerComponents
+
+<MudDialog id="taskCategoryModal" Class="ts-modal task-modal">
+    <DialogContent>
+        <div class="dialog-layout">
+
+            @* ── Left Column: Vertical Title ── *@
+            <MudStack Class="dialog-sidebar">
+                <div class="dialog-sidebar-content">
+                    <MudIcon Icon="@(FormData.IsEditMode ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)" />
+                    <MudText Typo="Typo.h6">
+                        CATEGORY
+                    </MudText>
+                </div>
+            </MudStack>
+
+            @* ── Right Column: Form ── *@
+            <MudStack Class="modal-right-stack">
+
+                <MudStack Class="dialog-form">
+                    <MudForm @ref="form" @bind-IsValid="isValid">
+
+                        <MudTextField T="string"
+                                      Label="Category Name"
+                                      @bind-Value="FormData.TaskItemCategoryName"
+                                      Required="true"
+                                      RequiredError="Category name is required."
+                                      MaxLength="100"
+                                      Immediate="true"
+                                      Class="mb-3" />
+
+                        @* ── Icon Picker ── *@
+                        <MudText Typo="Typo.body2" Class="mb-2">Category Icon</MudText>
+                        <div class="category-icon-grid mb-3">
+                            @foreach (var option in CategoryIconOptions)
+                            {
+                                var isSelected = FormData.IconName == option.IconName;
+                                <MudTooltip Text="@option.Label" Placement="Placement.Top">
+                                    <div class="category-icon-option @(isSelected ? "selected" : "")"
+                                         @onclick="() => FormData.IconName = option.IconName">
+                                        <span class="material-symbols-outlined">@option.IconName</span>
+                                    </div>
+                                </MudTooltip>
+                            }
+                        </div>
+
+                        @* ── Color Picker ── *@
+                        <MudText Typo="Typo.body2" Class="mb-1">Category Color</MudText>
+                        <div class="d-flex align-center gap-3 mb-3">
+                            <input type="color"
+                                   value="@FormData.ColorHex"
+                                   @oninput="OnColorInput"
+                                   style="width: 48px; height: 48px; border: none;
+                            border-radius: 8px; cursor: pointer;
+                            padding: 2px; background: none;" />
+
+                            <MudTextField T="string"
+                                          @bind-Value="FormData.ColorHex"
+                                          Placeholder="#6366f1"
+                                          MaxLength="7"
+                                          Immediate="true"
+                                          Style="max-width: 140px;" />
+
+                            @* Live preview: icon + color together *@
+                            @if (!string.IsNullOrEmpty(FormData.IconName))
+                            {
+                                <div class="category-icon-preview"
+                                     style="background-color: @FormData.ColorHex;">
+                                    <span class="material-symbols-outlined">@FormData.IconName</span>
+                                </div>
+                            }
+                        </div>
+
+                    </MudForm>
+                </MudStack>
+
+                <div class="dialog-actions">
+                    @if (FormData.IsEditMode)
+                    {
+                        <MudButton Color="Color.Error"
+                                   Variant="Variant.Text"
+                                   OnClick="HandleDelete"
+                                   Disabled="isSaving"
+                                   Class="mr-auto">
+                            Delete
+                        </MudButton>
+                    }
+
+                    <MudButton OnClick="Cancel" Disabled="isSaving">Cancel</MudButton>
+
+                    <MudButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               OnClick="HandleSubmit"
+                               Disabled="isSaving || !isValid">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small"
+                                                 Indeterminate="true"
+                                                 Class="mr-2" />
+                        }
+                        @(FormData.IsEditMode ? "Save Changes" : "Add Category")
+                    </MudButton>
+                </div>
+
+            </MudStack>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public TaskItemCategoryFormDto FormData { get; set; } = new();
+
+    private MudForm form = default!;
+    private bool isValid;
+    private bool isSaving;
+
+    private void OnColorInput(ChangeEventArgs e)
+    {
+        FormData.ColorHex = e.Value?.ToString() ?? FormData.ColorHex;
+    }
+
+    private async Task HandleSubmit()
+    {
+        await form.Validate();
+        if (!isValid) return;
+
+        isSaving = true;
+
+        try
+        {
+            if (FormData.IsEditMode)
+            {
+                var updateDto = new UpdateTaskItemCategoryDto
+                {
+                    TaskItemCategoryId = FormData.TaskItemCategoryId,
+                    TaskItemCategoryName = FormData.TaskItemCategoryName.Trim(),
+                    IconName = FormData.IconName?.Trim(),
+                    ColorHex = FormData.ColorHex.Trim()
+                };
+
+                await TaskItemCategoryService.UpdateAsync(updateDto);
+                Snackbar.Add("Category updated.", Severity.Success);
+            }
+            else
+            {
+                var createDto = new CreateTaskItemCategoryDto
+                {
+                    TaskItemCategoryName = FormData.TaskItemCategoryName.Trim(),
+                    IconName = FormData.IconName?.Trim(),
+                    ColorHex = FormData.ColorHex.Trim()
+                };
+
+                await TaskItemCategoryService.AddAsync(createDto);
+                Snackbar.Add("Category added!", Severity.Success);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void HandleDelete()
+    {
+        MudDialog.Close(DialogResult.Ok($"delete:{FormData.TaskItemCategoryId}"));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
+
+

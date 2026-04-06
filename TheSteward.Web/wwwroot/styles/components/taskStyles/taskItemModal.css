@@ -3,7 +3,7 @@
 
 }
 
- .mud-dialog #taskModal.mud-dialog-content {
+ .mud-dialog .mud-dialog-content {
         padding: 0 !important;
     }
 
@@ -16,7 +16,6 @@
 
 .dialog-layout {
     display: flex;
-    min-height: 450px;
 }
 
 .dialog-sidebar {
@@ -55,4 +54,10 @@
 
 .dialog-form {
     width: 100%;
+}
+
+.dialog-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
 }

@@ -41,6 +41,25 @@ else if (householdItems.Count > 0)
             }
         </div>
 
+        <MudSpacer />
+
+        @* Toolbar Action Buttons *@
+        @if (HouseholdState.HasTaskManagerWritePermission)
+        {
+            <div class="toolbar-action-group">
+                <button class="budget-action-btn budget-action-btn--add"
+                        @onclick="OnAddCategoryClicked">
+                    <span class="material-symbols-outlined">create_new_folder</span>
+                    Add Category
+                </button>
+                <button class="budget-action-btn budget-action-btn--add"
+                        @onclick="OnAddTaskClicked">
+                    <span class="material-symbols-outlined">add</span>
+                    Add Task
+                </button>
+            </div>
+        }
+
     </MudToolBar>
 }
 else
@@ -51,8 +70,14 @@ else
 }
 
 @code {
-    [Parameter] 
+    [Parameter]
     public EventCallback<UserHouseholdDto> OnHouseholdChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnAddTask { get; set; }
+
+    [Parameter]
+    public EventCallback OnAddCategory { get; set; }
 
     private List<SelectItem<Guid?>> householdItems = new();
     private Guid? selectedHouseholdId;
@@ -85,6 +110,18 @@ else
 
         HouseholdState.SetUserHousehold(selected);
         await OnHouseholdChanged.InvokeAsync(selected);
+    }
+
+    private async Task OnAddTaskClicked()
+    {
+        if (OnAddTask.HasDelegate)
+            await OnAddTask.InvokeAsync();
+    }
+
+    private async Task OnAddCategoryClicked()
+    {
+        if (OnAddCategory.HasDelegate)
+            await OnAddCategory.InvokeAsync();
     }
 
     public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;

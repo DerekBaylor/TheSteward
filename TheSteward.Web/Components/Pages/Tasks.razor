@@ -8,11 +8,13 @@
 @using TheSteward.Shared.Components.TaskManagerComponents
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Shared.Dtos.TaskDtos
+@using TheSteward.Shared.Dtos.TaskManagerDtos
 @using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HouseholdState HouseholdState
 @inject ITaskItemService TaskItemService
+@inject ITaskItemCategoryService TaskItemCategoryService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -21,7 +23,9 @@
 
 <PageTitle>Task Manager</PageTitle>
 
-<TaskManagerToolBar OnHouseholdChanged="OnHouseholdChanged" />
+<TaskManagerToolBar OnHouseholdChanged="OnHouseholdChanged"
+                    OnAddTask="OpenAddTaskModal"
+                    OnAddCategory="OpenAddCategoryModal" />
 
 @if (HouseholdState.CurrentUserHousehold == null)
 {
@@ -51,17 +55,6 @@ else
 
                 @* Status Chips *@
                 <div class="tm-filter-group">
-
-                    <div class="tm-top-filter-row">
-                        @if (HouseholdState.HasTaskManagerWritePermission)
-                        {
-                            <button class="budget-action-btn budget-action-btn--add"
-                                    @onclick="OpenAddTaskModal">
-                                <span class="material-symbols-outlined">add</span>
-                                Add Task
-                            </button>
-                        }
-                    </div>
 
                     <div class="tm-bottom-filter-row">
 
@@ -295,6 +288,7 @@ else
 
     #endregion Filters
 
+    #region Task Item
     private async Task OpenAddTaskModal()
     {
         var userHousehold = HouseholdState.CurrentUserHousehold!;
@@ -396,4 +390,46 @@ else
             Snackbar.Add($"Error deleting task: {ex.Message}", Severity.Error);
         }
     }
+    #endregion TaskItem
+
+    #region Task Item Category
+    private async Task OpenAddCategoryModal()
+    {
+        var formData = new TaskItemCategoryFormDto
+        {
+            IsEditMode = false
+        };
+
+        await OpenCategoryModal(formData);
+    }
+
+    private async Task OpenCategoryModal(TaskItemCategoryFormDto formData)
+    {
+        var parameters = new DialogParameters
+    {
+        { "FormData", formData }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.ExtraSmall,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<TaskItemCategoryModal>(
+            formData.IsEditMode ? "Edit Category" : "Add Category",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled) return;
+
+        // Refresh tasks so any category name changes reflect in the list
+        await RefreshTasksAsync();
+    }
+
+
+    #endregion Task Item Category
 }

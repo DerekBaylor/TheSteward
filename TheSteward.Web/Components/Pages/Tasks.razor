@@ -5,6 +5,7 @@
 @using System.Security.Claims
 @using TheSteward.Core.Dtos.TaskManagerDtos
 @using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Core.Utils.TaskManagerUtils
 @using TheSteward.Shared.Components.TaskManagerComponents
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Shared.Dtos.TaskDtos
@@ -25,7 +26,9 @@
 
 <TaskManagerToolBar OnHouseholdChanged="OnHouseholdChanged"
                     OnAddTask="OpenAddTaskModal"
-                    OnAddCategory="OpenAddCategoryModal" />
+                    OnAddCategory="OpenAddCategoryModal"
+                    OnAddStandardTasks="OpenStandardTasksModal" />
+
 
 @if (HouseholdState.CurrentUserHousehold == null)
 {
@@ -55,44 +58,36 @@ else
 
                 @* Status Chips *@
                 <div class="tm-filter-group">
+                        <button class="tm-stat-chip @(activeStatusFilter == null && activePriorityFilter == null ? "active" : "")"
+                                @onclick="ClearFilters">
+                            <span class="material-symbols-outlined">list</span>
+                            All
+                            <span class="tm-chip-count">@tasks.Count</span>
+                        </button>
 
-                    <div class="tm-bottom-filter-row">
-
-                        <div class="tm-bottom-filter-row">
-
-                            <button class="tm-stat-chip @(activeStatusFilter == null && activePriorityFilter == null ? "active" : "")"
-                                    @onclick="ClearFilters">
-                                <span class="material-symbols-outlined">list</span>
-                                All
-                                <span class="tm-chip-count">@tasks.Count</span>
+                        @foreach (var status in Enum.GetValues<TaskItemStatus>())
+                        {
+                            <button class="tm-stat-chip tm-stat-chip--@status.ToString().ToLower() @(activeStatusFilter == status ? "active" : "")"
+                                    @onclick="() => SetStatusFilter(status)">
+                                <span class="material-symbols-outlined">@GetStatusIcon(status)</span>
+                                @status
+                                <span class="tm-chip-count">@tasks.Count(t => t.Status == status)</span>
                             </button>
+                        }
 
-                            @foreach (var status in Enum.GetValues<TaskItemStatus>())
-                            {
-                                <button class="tm-stat-chip tm-stat-chip--@status.ToString().ToLower() @(activeStatusFilter == status ? "active" : "")"
-                                        @onclick="() => SetStatusFilter(status)">
-                                    <span class="material-symbols-outlined">@GetStatusIcon(status)</span>
-                                    @status
-                                    <span class="tm-chip-count">@tasks.Count(t => t.Status == status)</span>
-                                </button>
-                            }
-
-                            @foreach (var priority in Enum.GetValues<TaskItemPriority>())
-                            {
-                                <button class="tm-priority-chip tm-priority-chip--@priority.ToString().ToLower() @(activePriorityFilter == priority ? "active" : "")"
-                                        @onclick="() => SetPriorityFilter(priority)">
-                                    <span class="material-symbols-outlined">flag</span>
-                                    @priority
-                                </button>
-                            }
-
-                        </div>
-                    </div>
+                        @foreach (var priority in Enum.GetValues<TaskItemPriority>())
+                        {
+                            <button class="tm-priority-chip tm-priority-chip--@priority.ToString().ToLower() @(activePriorityFilter == priority ? "active" : "")"
+                                    @onclick="() => SetPriorityFilter(priority)">
+                                <span class="material-symbols-outlined">flag</span>
+                                @priority
+                            </button>
+                        }
                 </div>
             </div>
 
 
-
+            <MudDivider />
 
             @* ── Task List ── *@
             <div class="tm-task-list">
@@ -429,7 +424,69 @@ else
         // Refresh tasks so any category name changes reflect in the list
         await RefreshTasksAsync();
     }
-
-
     #endregion Task Item Category
+
+    #region Staandard Tasks
+    private async Task OpenStandardTasksModal()
+    {
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+        if (userHousehold == null) return;
+
+        // Build the selectable list — exclude tasks the user already has
+        var existingNames = tasks
+            .Select(t => t.TaskItemName.Trim().ToLowerInvariant())
+            .ToHashSet();
+
+        var selectableTasks = TaskManagerConstants.StandardTasks
+            .Where(t => !existingNames.Contains(t.TaskName.Trim().ToLowerInvariant()))
+            .Select(t => new StandardTaskSelectionDto
+            {
+                TaskName = t.TaskName,
+                CategoryName = t.CategoryName,
+                IsSelected = true   // all selected by default
+            })
+            .ToList();
+
+        var parameters = new DialogParameters
+    {
+        { "SelectableTasks", selectableTasks }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<StandardTaskModal>(
+            "Add Standard Tasks",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled) return;
+
+        if (result.Data is List<StandardTaskDefinition> selectedTasks && selectedTasks.Any())
+        {
+            try
+            {
+                await TaskItemService.AddStandardTasksAsync(
+                    userHousehold.UserHouseholdId,
+                    selectedTasks,
+                    tasks);
+
+                Snackbar.Add($"{selectedTasks.Count} task{(selectedTasks.Count > 1 ? "s" : "")} added!", Severity.Success);
+                await RefreshTasksAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error adding standard tasks: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    #endregion Standard Tasks
+
 }

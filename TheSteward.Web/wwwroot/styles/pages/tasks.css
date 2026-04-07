@@ -26,29 +26,19 @@
 /* ========================= */
 
 .tm-filter-strip {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: row;
+    padding: .5rem;
 }
 
 .tm-filter-group {
-    display: flex;
     align-items: center;
-    gap: 0.375rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
     flex-wrap: wrap;
-}
-
-.tm-top-filter-row {
-    display: flex;
-    flex-direction: row;
-}
-
-.tm-bottom-filter-row {
-    display: flex;
-    flex-direction: row;
+    width: 100%;
 }
 
 /* ========================= */
@@ -481,4 +471,37 @@
         flex: 1;
         justify-content: center;
     }
+}
+
+
+
+/* ========================= */
+/* Std Tasks                 */
+/* ========================= */
+
+.std-task-group {
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 8px;
+    padding: 0.75rem;
+}
+
+.std-task-group-header {
+    margin-bottom: 0.5rem;
+}
+
+.std-task-category-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+}
+
+.std-task-category-icon {
+    font-size: 1.1rem;
+    color: var(--mud-palette-primary);
+}
+
+.std-task-checkbox {
+    display: block;
+    margin-left: 0.5rem;
 }

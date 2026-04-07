@@ -1,12 +1,14 @@
 ﻿// ITaskItemService.cs
 using TheSteward.Core.Dtos.TaskManagerDtos;
 using TheSteward.Core.Models.TaskManagerModels;
+using TheSteward.Core.Utils.TaskManagerUtils;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
 namespace TheSteward.Core.IServices.TaskManagerIServices;
 
 public interface ITaskItemService
 {
+    #region Create Methods
     /// <summary>
     /// Asynchronously creates a new task item.
     /// </summary>
@@ -29,6 +31,9 @@ public interface ITaskItemService
     /// </code>
     /// </example>
     Task<TaskItemDto> AddAsync(CreateTaskItemDto taskItemDto);
+
+    Task AddStandardTasksAsync(Guid userHouseholdId, IEnumerable<StandardTaskDefinition> selectedTasks, IEnumerable<TaskItemDto> existingTasks);
+    #endregion Create
 
     /// <summary>
     /// Asynchronously updates an existing task item.

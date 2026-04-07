@@ -37,7 +37,7 @@ else if (householdItems.Count > 0)
                           @bind-Value="selectedHouseholdId"
                           OnChange="OnHouseholdChangedAsync"
                           Placeholder="Choose household"
-                          Variant="purple" />
+                          Variant="blue" />
             }
         </div>
 
@@ -47,16 +47,23 @@ else if (householdItems.Count > 0)
         @if (HouseholdState.HasTaskManagerWritePermission)
         {
             <div class="toolbar-action-group">
-                <button class="budget-action-btn budget-action-btn--add"
-                        @onclick="OnAddCategoryClicked">
-                    <span class="material-symbols-outlined">create_new_folder</span>
-                    Add Category
-                </button>
-                <button class="budget-action-btn budget-action-btn--add"
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="toolbar-btn"
                         @onclick="OnAddTaskClicked">
                     <span class="material-symbols-outlined">add</span>
                     Add Task
-                </button>
+                </MudButton>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="toolbar-btn"
+                        @onclick="OnAddCategoryClicked">
+                    <span class="material-symbols-outlined">create_new_folder</span>
+                    Add Category
+                </MudButton>
+
+                <MudTooltip Text="Add Standard Tasks">
+                    <MudIconButton Icon="@Icons.Material.Filled.PlaylistAdd"
+                                   Color="Color.Secondary"
+                                   OnClick="OnAddStandardTasks" />
+                </MudTooltip>
+
             </div>
         }
 
@@ -78,6 +85,9 @@ else
 
     [Parameter]
     public EventCallback OnAddCategory { get; set; }
+
+    [Parameter] 
+    public EventCallback OnAddStandardTasks { get; set; }
 
     private List<SelectItem<Guid?>> householdItems = new();
     private Guid? selectedHouseholdId;

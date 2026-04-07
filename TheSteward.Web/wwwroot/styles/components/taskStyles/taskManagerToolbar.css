@@ -9,10 +9,19 @@
     gap: 1.5rem;
     margin: 1.5rem 1rem;
     padding: 1rem 1.5rem;
+    width: 90%;
+    justify-self: center;
+    align-self: center;
 }
 
 .toolbar-select-group{
     display: flex;
     flex-direction: row;
     gap: 1rem;
+}
+
+.tm-toolbar-bar .toolbar-action-group {
+    display: flex;
+    flex-direction: row;
+    gap: .5rem;
 }

@@ -19,7 +19,7 @@
 <PageTitle>Log in</PageTitle>
 
 <div class="login-container">
-    <div id="loginCard" class="ts-card">
+    <MudCard id="loginCard" Class="ts-card" Outlined="true">
         <div class="ts-card-header">
             <h1>Welcome Back</h1>
             <p>Sign in to continue to The Steward</p>
@@ -70,9 +70,9 @@
                 <a href="Account/ForgotPassword" class="link-secondary">Forgot password?</a>
             </div>
 
-            <button type="submit" class="btn-primary">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" FullWidth="true" ButtonType="ButtonType.Submit">
                 Sign In
-            </button>
+            </MudButton>
 
             <div class="form-footer">
                 <p>
@@ -83,7 +83,7 @@
             </div>
         </EditForm>
 
-    </div>
+    </MudCard>
 </div>
 
 @code {

@@ -53,6 +53,7 @@
 /* tasks */
 @import url('styles/components/taskStyles/taskManagerToolbar.css');
 @import url('styles/components/taskStyles/taskItemModal.css');
+@import url('styles/components/taskStyles/taskItemCategory.css');
 
 :root {
     /* ----- */
@@ -140,6 +141,8 @@
     --blue-9: hsl(from var(--base-blue) h s 15%);
     --blue-10: hsl(from var(--base-blue) h s 5%);
     --dark-blue: var(--blue-8);
+    --blue-shadow: hsl(from var(--base-blue) h s 15% / 25%);
+    --blue-shadow-5: 0 2px 8px var(--blue-shadow), 0 5px 20px var(--blue-shadow);
     /*     Purple     */
     --base-purple: var(--purple-6);
     --purple-1: hsl(from var(--base-purple) h s 95%);
@@ -312,29 +315,6 @@ h1, h2, h3, h4, h5, h6 {
 .gray-10 {
     background-color: var(--gray-10);
 }
-
-
-/* Blue-tinted MudBlazor elevation overrides */
-.mud-elevation-1 {
-    box-shadow: 0 2px 4px rgba(21, 53, 214, 0.10) !important;
-}
-
-.mud-elevation-2 {
-    box-shadow: 0 4px 8px rgba(21, 53, 214, 0.12) !important;
-}
-
-.mud-elevation-3 {
-    box-shadow: 0 6px 12px rgba(21, 53, 214, 0.14) !important;
-}
-
-.mud-elevation-4 {
-    box-shadow: 0 8px 16px rgba(21, 53, 214, 0.16) !important;
-}
-
-.mud-elevation-5 {
-    box-shadow: 0 10px 20px rgba(21, 53, 214, 0.18) !important;
-}
-
 
 /* Icon picker grid */
 .category-icon-grid {

@@ -390,30 +390,26 @@ else
     #region Task Item Category
     private async Task OpenAddCategoryModal()
     {
-        var formData = new TaskItemCategoryFormDto
-        {
-            IsEditMode = false
-        };
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+        if (userHousehold == null) return;
 
-        await OpenCategoryModal(formData);
-    }
+        // Load all categories to pass into the modal
+        var categories = await TaskItemCategoryService.GetAllAsync();
 
-    private async Task OpenCategoryModal(TaskItemCategoryFormDto formData)
-    {
         var parameters = new DialogParameters
     {
-        { "FormData", formData }
+        { "TaskItemCategories", categories }
     };
 
         var options = new DialogOptions
         {
             CloseOnEscapeKey = true,
-            MaxWidth = MaxWidth.ExtraSmall,
+            MaxWidth = MaxWidth.Small,
             FullWidth = true
         };
 
         var dialog = await DialogService.ShowAsync<TaskItemCategoryModal>(
-            formData.IsEditMode ? "Edit Category" : "Add Category",
+            "Task Categories",
             parameters,
             options);
 
@@ -421,7 +417,7 @@ else
 
         if (result is null || result.Canceled) return;
 
-        // Refresh tasks so any category name changes reflect in the list
+        // Refresh so any category changes reflect in the task list
         await RefreshTasksAsync();
     }
     #endregion Task Item Category

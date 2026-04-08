@@ -311,7 +311,7 @@ else
             Priority = task.Priority,
             DueDate = task.DueDate,
             CreatedByUserHouseholdId = task.CreatedByUserHouseholdId,
-            AssignedToUserHouseholdId = task.AssignedToUserHouseholdId,
+            AssignedToUserHouseholdId = task.AssignedToUserHouseholdId ?? Guid.Empty,
             TaskItemCategoryId = task.TaskItemCategoryId,
             RecurrenceId = task.RecurrenceId,
             ExpenseId = task.ExpenseId,

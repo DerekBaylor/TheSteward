@@ -44,4 +44,6 @@ public class InvestmentFormDto
     public Guid BudgetId { get; set; }
 
     public bool IsEditMode => InvestmentId.HasValue && InvestmentId != Guid.Empty;
+
+    public Guid HouseholdId { get; set; }
 }

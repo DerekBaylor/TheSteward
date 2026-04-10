@@ -18,6 +18,7 @@ public class UpdateTaskItemDto
     
     public DateTime? CompletedDate { get; set; }
 
+    public bool IsPrivate { get; set; }
 
     #region Navigation Properties
 
@@ -28,6 +29,6 @@ public class UpdateTaskItemDto
     public Guid? RecurrenceId { get; set; }
     
     public Guid? ExpenseId { get; set; }
-    #endregion Navigation Properties
 
+    #endregion Navigation Properties
 }

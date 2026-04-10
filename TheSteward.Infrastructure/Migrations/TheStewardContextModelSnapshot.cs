@@ -395,6 +395,9 @@ namespace TheSteward.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("InvestmentId")
                         .HasColumnType("uuid");
 
@@ -701,7 +704,13 @@ namespace TheSteward.Infrastructure.Migrations
                     b.Property<Guid?>("ExpenseId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrivate")
                         .HasColumnType("boolean");
 
                     b.Property<int>("Priority")
@@ -730,6 +739,8 @@ namespace TheSteward.Infrastructure.Migrations
                     b.HasIndex("CreatedByUserHouseholdId");
 
                     b.HasIndex("ExpenseId");
+
+                    b.HasIndex("HouseholdId");
 
                     b.HasIndex("RecurrenceId");
 
@@ -1023,6 +1034,12 @@ namespace TheSteward.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("ExpenseId");
 
+                    b.HasOne("TheSteward.Core.Models.HouseholdModels.Household", "Household")
+                        .WithMany()
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TheSteward.Core.Models.TaskManagerModels.RecurrenceRule", "RecurrenceRule")
                         .WithMany("TaskItems")
                         .HasForeignKey("RecurrenceId");
@@ -1036,6 +1053,8 @@ namespace TheSteward.Infrastructure.Migrations
                     b.Navigation("AssignedToUserHousehold");
 
                     b.Navigation("CreatedByUserHousehold");
+
+                    b.Navigation("Household");
 
                     b.Navigation("RecurrenceRule");
 

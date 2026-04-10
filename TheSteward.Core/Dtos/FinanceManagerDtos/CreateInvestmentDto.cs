@@ -43,6 +43,8 @@ public class CreateInvestmentDto
     public Guid BudgetId { get; set; }
 
     public Guid? ExpenseId { get; set; }
-    
+
+    public Guid HouseholdId { get; set; }
+
     #endregion Navigational Properties
 }

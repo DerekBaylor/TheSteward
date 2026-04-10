@@ -22,6 +22,7 @@ public class ExpenseFormDto
     public int DisplayOrder { get; set; }
 
     #region Scalar Properties
+    public Guid HouseholdId { get; set; }
 
     [Required(ErrorMessage = "Budget is required.")]
     public Guid BudgetId { get; set; }

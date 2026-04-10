@@ -5,9 +5,9 @@ using TheSteward.Core.IRepositories.HouseholdIRepositories;
 using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Core.IServices.TaskManagerIServices;
 using TheSteward.Core.MappingExtensions;
+using TheSteward.Core.Models.HouseholdModels;
 using TheSteward.Core.Models.TaskManagerModels;
 using TheSteward.Core.Utils.TaskManagerUtils;
-using TheSteward.Infrastructure.Repositories.HouseholdRepositories;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
 namespace TheSteward.Infrastructure.Services.TaskManagerServices;
@@ -73,6 +73,7 @@ public class TaskItemService : ITaskItemService
             }
 
             var taskItem = taskItemDto.ToEntity();
+
             taskItem.TaskItemId = Guid.NewGuid();
             taskItem.IsArchived = false;
             taskItem.CreatedDate = DateTime.UtcNow;
@@ -80,6 +81,9 @@ public class TaskItemService : ITaskItemService
             taskItem.DueDate = taskItemDto.DueDate.HasValue
                 ? DateTime.SpecifyKind(taskItemDto.DueDate.Value, DateTimeKind.Utc)
                 : null;
+
+            // Tasks linked to an expense are always private on creation.
+            taskItem.IsPrivate = taskItemDto.ExpenseId.HasValue || taskItemDto.IsPrivate;
 
             if (recurrenceRule != null)
                 taskItem.RecurrenceId = recurrenceRule.RecurrenceRuleId;
@@ -121,13 +125,16 @@ public class TaskItemService : ITaskItemService
         }
     }
 
-    public async Task AddStandardTasksAsync(
-        Guid userHouseholdId,
-        IEnumerable<StandardTaskDefinition> selectedTasks,
-        IEnumerable<TaskItemDto> existingTasks)
+    public async Task AddStandardTasksAsync(Guid userHouseholdId, IEnumerable<StandardTaskDefinition> selectedTasks, IEnumerable<TaskItemDto> existingTasks)
     {
         if (userHouseholdId == Guid.Empty)
             throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(userHouseholdId));
+
+        // Resolve HouseholdId once up front so all created tasks are linked correctly.
+        var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId)
+            ?? throw new KeyNotFoundException($"UserHousehold with ID {userHouseholdId} not found.");
+
+        var householdId = userHousehold.HouseholdId;
 
         var existingNames = existingTasks
             .Select(t => t.TaskItemName.Trim().ToLowerInvariant())
@@ -135,21 +142,17 @@ public class TaskItemService : ITaskItemService
 
         var allCategories = await _taskItemCategoryRepository.GetAll().ToListAsync();
 
-        // ── 1. Create selected standard tasks ──────────────────────────────────
         foreach (var task in selectedTasks)
         {
             if (existingNames.Contains(task.TaskName.Trim().ToLowerInvariant()))
                 continue;
 
             var category = await ResolveOrCreateCategoryAsync(allCategories, task.CategoryName);
-
-            await CreateStandardTaskItemAsync(userHouseholdId, task, category);
+            await CreateStandardTaskItemAsync(userHouseholdId, householdId, task, category);
         }
 
-        // ── 2. Create bill tasks for any expenses that don't have one yet ──────
-        await CreateMissingExpenseTasksAsync(userHouseholdId, existingNames, allCategories);
+        await CreateMissingExpenseTasksAsync(userHouseholdId, householdId, existingNames, allCategories);
     }
-
 
     #endregion Create Methods
 
@@ -232,7 +235,6 @@ public class TaskItemService : ITaskItemService
         }
     }
 
-
     public async Task ArchiveAsync(Guid taskItemId)
     {
         if (taskItemId == Guid.Empty)
@@ -274,7 +276,6 @@ public class TaskItemService : ITaskItemService
         await _taskItemRepository.DeleteAsync(taskItem);
         await _taskItemRepository.SaveChangesAsync();
     }
-
 
     #region Get Methods
 
@@ -364,6 +365,29 @@ public class TaskItemService : ITaskItemService
 
         return taskItems.ToDtoList();
     }
+
+    public async Task<List<TaskItemDto>> GetAllByHouseholdIdAsync(Guid householdId, Guid requestingUserHouseholdId)
+    {
+        if (householdId == Guid.Empty)
+            throw new ArgumentException("Household ID cannot be empty.", nameof(householdId));
+
+        if (requestingUserHouseholdId == Guid.Empty)
+            throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(requestingUserHouseholdId));
+
+        var taskItems = await _taskItemRepository.GetAll()
+            .Where(t => t.HouseholdId == householdId
+                     && !t.IsArchived
+                     && (!t.IsPrivate
+                         || t.CreatedByUserHouseholdId == requestingUserHouseholdId
+                         || t.AssignedToUserHouseholdId == requestingUserHouseholdId))
+            .Include(t => t.TaskItemCategory)
+            .Include(t => t.RelatedExpense)
+            .OrderBy(t => t.DueDate)
+            .ToListAsync();
+
+        return taskItems.ToDtoList();
+    }
+
 
     #endregion Get Methods
 
@@ -609,13 +633,9 @@ public class TaskItemService : ITaskItemService
     /// Creates a standard task item, including its recurrence rule and first
     /// occurrence if the task definition carries a recurrence.
     /// </summary>
-    private async Task CreateStandardTaskItemAsync(
-        Guid userHouseholdId,
-        StandardTaskDefinition task,
-        TaskItemCategory category)
+    private async Task CreateStandardTaskItemAsync(Guid userHouseholdId, Guid householdId, StandardTaskDefinition task, TaskItemCategory category)
     {
         var now = DateTime.UtcNow;
-
         RecurrenceRule? recurrenceRule = null;
 
         if (task.Recurrence != null)
@@ -641,6 +661,8 @@ public class TaskItemService : ITaskItemService
             TaskItemName = task.TaskName,
             Status = TaskItemStatus.Pending,
             Priority = TaskItemPriority.Medium,
+            HouseholdId = householdId,           // ← new
+            IsPrivate = false,                    // ← standard tasks are public
             CreatedByUserHouseholdId = userHouseholdId,
             AssignedToUserHouseholdId = userHouseholdId,
             TaskItemCategoryId = category.TaskItemCategoryId,
@@ -672,30 +694,22 @@ public class TaskItemService : ITaskItemService
             await _taskItemRepository.UpdateAsync(taskItem);
             await _taskItemRepository.SaveChangesAsync();
         }
+
     }
 
     /// <summary>
     /// Checks the household's expenses and creates a "Pay X" bill task for
     /// any expense that doesn't already have one.
     /// </summary>
-    private async Task CreateMissingExpenseTasksAsync(
-        Guid userHouseholdId,
-        HashSet<string> existingTaskNames,
-        List<TaskItemCategory> allCategories)
+    private async Task CreateMissingExpenseTasksAsync(Guid userHouseholdId, Guid householdId, HashSet<string> existingTaskNames, List<TaskItemCategory> allCategories)
     {
-        // Resolve the HouseholdId from the UserHouseholdId.
-        var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId);
-        if (userHousehold == null)
-            return;
-
         var expenses = await _expenseRepository.GetAll()
-            .Where(e => e.Budget.HouseholdId == userHousehold.HouseholdId)
-            .ToListAsync();
+         .Where(e => e.Budget.HouseholdId == householdId)
+         .ToListAsync();
 
         if (expenses.Count == 0)
             return;
 
-        // Pull all expense IDs that already have a linked task so we don't double-create.
         var expenseIdsWithTasks = await _taskItemRepository.GetAll()
             .Where(t => t.ExpenseId != null)
             .Select(t => t.ExpenseId!.Value)
@@ -705,11 +719,9 @@ public class TaskItemService : ITaskItemService
 
         foreach (var expense in expenses)
         {
-            // Skip if a linked task already exists for this expense.
             if (expenseIdsWithTasks.Contains(expense.ExpenseId))
                 continue;
 
-            // Skip if a task with the same "Pay X" name already exists.
             var expectedName = $"Pay {expense.ExpenseName}".Trim().ToLowerInvariant();
             if (existingTaskNames.Contains(expectedName))
                 continue;
@@ -738,6 +750,8 @@ public class TaskItemService : ITaskItemService
                 Status = TaskItemStatus.Pending,
                 Priority = TaskItemPriority.Medium,
                 DueDate = dueDate,
+                HouseholdId = householdId,           // ← new
+                IsPrivate = true,                     // ← expense tasks are always private
                 CreatedByUserHouseholdId = userHouseholdId,
                 AssignedToUserHouseholdId = userHouseholdId,
                 TaskItemCategoryId = billsCategory.TaskItemCategoryId,
@@ -762,6 +776,9 @@ public class TaskItemService : ITaskItemService
             await _occurrenceRepository.AddAsync(firstOccurrence);
             await _occurrenceRepository.SaveChangesAsync();
         }
+
+
+
     }
 
 

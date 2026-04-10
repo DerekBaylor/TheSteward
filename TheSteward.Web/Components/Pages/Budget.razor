@@ -524,7 +524,8 @@ else
     {
         var formData = new InvestmentFormDto
         {
-            BudgetId = currentBudget!.BudgetId
+            BudgetId = currentBudget!.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
         };
 
         await OpenInvestmentModal(formData);
@@ -565,6 +566,7 @@ else
             EstYearlyGrowth = investment.EstYearlyGrowth,
             DisplayOrder = investment.DisplayOrder,
             BudgetId = investment.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             ExpenseId = investment.ExpenseId
         };
 
@@ -632,6 +634,7 @@ else
         {
             BudgetId = currentBudget!.BudgetId,
             DisplayOrder = currentBudget.Credits.Count,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             BudgetCategoryName = "Debt & Credit",
             CreatedById = userhouseholdDto.UserHouseholdId
         };
@@ -679,6 +682,7 @@ else
             EstYearlyInterest = credit.EstYearlyInterest,
             DisplayOrder = credit.DisplayOrder,
             BudgetId = credit.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             ExpenseId = credit.ExpenseId,
             BudgetCategoryId = linkedExpense?.BudgetCategoryId,
             BudgetCategoryName = linkedExpense?.BudgetCategory?.BudgetCategoryName ?? "Debt & Credit",
@@ -750,6 +754,7 @@ else
         var formData = new ExpenseFormDto
         {
             BudgetId = currentBudget!.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             CreatedByUserHouseholdId = HouseholdState.CurrentUserHousehold!.UserHouseholdId,
             DisplayOrder = currentBudget.Expenses.Count + 1
         };
@@ -767,6 +772,7 @@ else
             AmountDue = expense.AmountDue,
             DisplayOrder = expense.DisplayOrder,
             BudgetId = expense.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             CreatedByUserHouseholdId = HouseholdState.CurrentUserHousehold!.UserHouseholdId,
             BudgetCategoryId = expense.BudgetCategoryId,
             BudgetCategoryName = expense.BudgetCategory?.BudgetCategoryName ?? string.Empty,

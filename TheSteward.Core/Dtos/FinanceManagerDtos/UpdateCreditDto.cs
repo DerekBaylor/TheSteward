@@ -35,6 +35,8 @@ public class UpdateCreditDto
     [Required]
     public Guid BudgetId { get; set; }
 
+    public Guid HouseholdId { get; set; }
+
     public Guid? ExpenseId { get; set; }
 
     /// <summary>

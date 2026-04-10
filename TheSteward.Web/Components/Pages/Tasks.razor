@@ -308,7 +308,8 @@ else
             AssignedToUserHouseholdId = userHousehold.UserHouseholdId,
             Status = TaskItemStatus.Pending,
             Priority = TaskItemPriority.Medium,
-            IsEditMode = false
+            IsEditMode = false,
+            HouseholdId = HouseholdState.CurrentUserHousehold!.HouseholdId
         };
 
         await OpenTaskModal(formData);
@@ -329,7 +330,8 @@ else
             TaskItemCategoryId = task.TaskItemCategoryId,
             RecurrenceId = task.RecurrenceId,
             ExpenseId = task.ExpenseId,
-            IsEditMode = true
+            IsEditMode = true,
+            HouseholdId = HouseholdState.CurrentUserHousehold!.HouseholdId
         };
 
         await OpenTaskModal(formData);

@@ -296,6 +296,8 @@ public class ExpenseService : IExpenseService
             DueDate = dueDate,
             CreatedDate = DateTime.UtcNow,
             UpdatedDate = DateTime.UtcNow,
+            HouseholdId = expense.HouseholdId,
+            IsPrivate = true,
             CreatedByUserHouseholdId = createdByUserHouseholdId,
             AssignedToUserHouseholdId = createdByUserHouseholdId,
             TaskItemCategoryId = category.TaskItemCategoryId,
@@ -303,6 +305,7 @@ public class ExpenseService : IExpenseService
             ExpenseId = expense.ExpenseId,
             IsArchived = false
         };
+
 
         await _taskItemRepository.AddAsync(taskItem);
         await _taskItemRepository.SaveChangesAsync();

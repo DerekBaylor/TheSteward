@@ -131,6 +131,7 @@ public class CreateUserHouseholdDtoBuilder
             HasFileManagerReadPermission = _hasFileManagerReadPermission,
             UserId = _userId,
             User = _user,
+            UserName = _user.UserName,
             HouseholdId = _householdId,
             Household = _household
         };

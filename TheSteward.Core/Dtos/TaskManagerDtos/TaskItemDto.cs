@@ -24,13 +24,17 @@ public class TaskItemDto
     public DateTime UpdatedDate { get; set; }
     
     public bool IsArchived { get; set; }
+    
+    public bool IsPrivate { get; set; }
 
     #region Navigation Properties
+
+    public Guid HouseholdId { get; set; }
     
     public Guid CreatedByUserHouseholdId { get; set; }
     
     public Guid? AssignedToUserHouseholdId { get; set; }
-        
+    
     public Guid? RecurrenceId { get; set; }
     
     public Guid TaskItemCategoryId { get; set; }
@@ -42,7 +46,7 @@ public class TaskItemDto
     public string? TaskItemCategoryIconName { get; set; }
     
     public Guid? ExpenseId { get; set; }
-
+    
     public string? RelatedExpenseName { get; set; }
     
     public decimal? RelatedExpenseAmountDue { get; set; }

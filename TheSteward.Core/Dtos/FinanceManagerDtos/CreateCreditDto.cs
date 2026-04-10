@@ -54,5 +54,7 @@ public class CreateCreditDto
 
     public Guid CreatedByUserHouseholdId { get; set; }
 
+    public Guid HouseholdId { get; set; }
+
     #endregion  Scaler Properties
 }

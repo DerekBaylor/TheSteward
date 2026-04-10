@@ -36,6 +36,7 @@ public class Expense
 
     [Required]
     public Guid BudgetCategoryId { get; set; }
+    
     public BudgetCategory? BudgetCategory { get; set; }
     
     public Guid? BudgetSubCategoryId { get; set; }
@@ -44,10 +45,14 @@ public class Expense
     public BudgetSubCategory? BudgetSubCategory { get; set; }
 
     public Guid? CreditId { get; set; }
+    
     public Credit? LinkedCredit { get; set; }
 
     public Guid? InvestmentId { get; set; }
+    
     public Investment? LinkedInvestment { get; set; }
+
+    public Guid HouseholdId { get; set; }
 
     #endregion Navigation Properties
 }

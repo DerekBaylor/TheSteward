@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace TheSteward.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class budgetInit : Migration
+    public partial class InitAfterTaskItems : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,6 +49,37 @@ namespace TheSteward.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RecurrenceRules",
+                columns: table => new
+                {
+                    RecurrenceRuleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RecurrenceFrequency = table.Column<int>(type: "integer", nullable: false),
+                    RecurrenceDays = table.Column<int>(type: "integer", nullable: true),
+                    IntervalDays = table.Column<int>(type: "integer", nullable: true),
+                    StartDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EndDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastGeneratedDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecurrenceRules", x => x.RecurrenceRuleId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TaskItemsCategories",
+                columns: table => new
+                {
+                    TaskItemCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TaskItemCategoryName = table.Column<string>(type: "text", nullable: false),
+                    IconName = table.Column<string>(type: "text", nullable: true),
+                    ColorHex = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaskItemsCategories", x => x.TaskItemCategoryId);
                 });
 
             migrationBuilder.CreateTable(
@@ -236,42 +267,6 @@ namespace TheSteward.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserHouseholds",
-                columns: table => new
-                {
-                    UserHouseholdId = table.Column<Guid>(type: "uuid", nullable: false),
-                    IsDefaultUserHousehold = table.Column<bool>(type: "boolean", nullable: false),
-                    IsHouseholdOwner = table.Column<bool>(type: "boolean", nullable: false),
-                    HasAdminPermissions = table.Column<bool>(type: "boolean", nullable: false),
-                    HasFinanceManagerWritePermission = table.Column<bool>(type: "boolean", nullable: false),
-                    HasFinanceManagerReadPermission = table.Column<bool>(type: "boolean", nullable: false),
-                    HasKitchenManagerWritePermission = table.Column<bool>(type: "boolean", nullable: false),
-                    HasKitchenManagerReadPermission = table.Column<bool>(type: "boolean", nullable: false),
-                    HasTaskManagerWritePermission = table.Column<bool>(type: "boolean", nullable: false),
-                    HasTaskManagerReadPermission = table.Column<bool>(type: "boolean", nullable: false),
-                    HasFileManagerWritePermission = table.Column<bool>(type: "boolean", nullable: false),
-                    HasFileManagerReadPermission = table.Column<bool>(type: "boolean", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    HouseholdId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserHouseholds", x => x.UserHouseholdId);
-                    table.ForeignKey(
-                        name: "FK_UserHouseholds_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserHouseholds_Households_HouseholdId",
-                        column: x => x.HouseholdId,
-                        principalTable: "Households",
-                        principalColumn: "HouseholdId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "BudgetCategories",
                 columns: table => new
                 {
@@ -298,6 +293,7 @@ namespace TheSteward.Infrastructure.Migrations
                     IncomeId = table.Column<Guid>(type: "uuid", nullable: false),
                     IncomeName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     IncomeFrequency = table.Column<int>(type: "integer", nullable: false),
+                    FilingStatus = table.Column<int>(type: "integer", nullable: false),
                     PayCheckGross = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     YearlyGrossSalary = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     EstFederalIncomeTax = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
@@ -314,6 +310,51 @@ namespace TheSteward.Infrastructure.Migrations
                         column: x => x.BudgetId,
                         principalTable: "Budgets",
                         principalColumn: "BudgetId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserHouseholds",
+                columns: table => new
+                {
+                    UserHouseholdId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    IsDefaultUserHousehold = table.Column<bool>(type: "boolean", nullable: false),
+                    IsHouseholdOwner = table.Column<bool>(type: "boolean", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    HasAdminPermissions = table.Column<bool>(type: "boolean", nullable: false),
+                    HasFinanceManagerReadPermission = table.Column<bool>(type: "boolean", nullable: false),
+                    HasFinanceManagerWritePermission = table.Column<bool>(type: "boolean", nullable: false),
+                    HasKitchenManagerReadPermission = table.Column<bool>(type: "boolean", nullable: false),
+                    HasKitchenManagerWritePermission = table.Column<bool>(type: "boolean", nullable: false),
+                    HasTaskManagerReadPermission = table.Column<bool>(type: "boolean", nullable: false),
+                    HasTaskManagerCompletePermission = table.Column<bool>(type: "boolean", nullable: false),
+                    HasTaskManagerWritePermission = table.Column<bool>(type: "boolean", nullable: false),
+                    HasFileManagerReadPermission = table.Column<bool>(type: "boolean", nullable: false),
+                    HasFileManagerWritePermission = table.Column<bool>(type: "boolean", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    HouseholdId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DefaultBudgetId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserHouseholds", x => x.UserHouseholdId);
+                    table.ForeignKey(
+                        name: "FK_UserHouseholds_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserHouseholds_Budgets_DefaultBudgetId",
+                        column: x => x.DefaultBudgetId,
+                        principalTable: "Budgets",
+                        principalColumn: "BudgetId");
+                    table.ForeignKey(
+                        name: "FK_UserHouseholds_Households_HouseholdId",
+                        column: x => x.HouseholdId,
+                        principalTable: "Households",
+                        principalColumn: "HouseholdId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -355,8 +396,10 @@ namespace TheSteward.Infrastructure.Migrations
                     DisplayOrder = table.Column<int>(type: "integer", nullable: false),
                     BudgetId = table.Column<Guid>(type: "uuid", nullable: false),
                     BudgetCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Credit = table.Column<Guid>(type: "uuid", nullable: true),
-                    InvestmentId = table.Column<Guid>(type: "uuid", nullable: true)
+                    BudgetSubCategoryId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreditId = table.Column<Guid>(type: "uuid", nullable: true),
+                    InvestmentId = table.Column<Guid>(type: "uuid", nullable: true),
+                    HouseholdId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -367,6 +410,11 @@ namespace TheSteward.Infrastructure.Migrations
                         principalTable: "BudgetCategories",
                         principalColumn: "BudgetCategoryId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Expenses_BudgetSubCategories_BudgetSubCategoryId",
+                        column: x => x.BudgetSubCategoryId,
+                        principalTable: "BudgetSubCategories",
+                        principalColumn: "BudgetSubCategoryId");
                     table.ForeignKey(
                         name: "FK_Expenses_Budgets_BudgetId",
                         column: x => x.BudgetId,
@@ -418,12 +466,12 @@ namespace TheSteward.Infrastructure.Migrations
                     InvestmentName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     CurrentValue = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     InterestRate = table.Column<decimal>(type: "numeric(5,4)", nullable: false),
-                    ContributionAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    ContributionAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     ContributionFrequency = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     EstYearlyGrowth = table.Column<decimal>(type: "numeric", nullable: false),
                     DisplayOrder = table.Column<int>(type: "integer", nullable: false),
                     BudgetId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ExpenseId = table.Column<Guid>(type: "uuid", nullable: false)
+                    ExpenseId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -438,7 +486,88 @@ namespace TheSteward.Infrastructure.Migrations
                         name: "FK_Investments_Expenses_ExpenseId",
                         column: x => x.ExpenseId,
                         principalTable: "Expenses",
-                        principalColumn: "ExpenseId",
+                        principalColumn: "ExpenseId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TaskItems",
+                columns: table => new
+                {
+                    TaskItemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TaskItemName = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Priority = table.Column<int>(type: "integer", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsArchived = table.Column<bool>(type: "boolean", nullable: false),
+                    IsPrivate = table.Column<bool>(type: "boolean", nullable: false),
+                    HouseholdId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedByUserHouseholdId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssignedToUserHouseholdId = table.Column<Guid>(type: "uuid", nullable: true),
+                    RecurrenceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TaskItemCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExpenseId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaskItems", x => x.TaskItemId);
+                    table.ForeignKey(
+                        name: "FK_TaskItems_Expenses_ExpenseId",
+                        column: x => x.ExpenseId,
+                        principalTable: "Expenses",
+                        principalColumn: "ExpenseId");
+                    table.ForeignKey(
+                        name: "FK_TaskItems_Households_HouseholdId",
+                        column: x => x.HouseholdId,
+                        principalTable: "Households",
+                        principalColumn: "HouseholdId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TaskItems_RecurrenceRules_RecurrenceId",
+                        column: x => x.RecurrenceId,
+                        principalTable: "RecurrenceRules",
+                        principalColumn: "RecurrenceRuleId");
+                    table.ForeignKey(
+                        name: "FK_TaskItems_TaskItemsCategories_TaskItemCategoryId",
+                        column: x => x.TaskItemCategoryId,
+                        principalTable: "TaskItemsCategories",
+                        principalColumn: "TaskItemCategoryId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TaskItems_UserHouseholds_AssignedToUserHouseholdId",
+                        column: x => x.AssignedToUserHouseholdId,
+                        principalTable: "UserHouseholds",
+                        principalColumn: "UserHouseholdId");
+                    table.ForeignKey(
+                        name: "FK_TaskItems_UserHouseholds_CreatedByUserHouseholdId",
+                        column: x => x.CreatedByUserHouseholdId,
+                        principalTable: "UserHouseholds",
+                        principalColumn: "UserHouseholdId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TaskItemOccurrences",
+                columns: table => new
+                {
+                    TaskItemOccurrenceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ScheduledDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CompletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CompletedByUserHouseholdId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TaskItemId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaskItemOccurrences", x => x.TaskItemOccurrenceId);
+                    table.ForeignKey(
+                        name: "FK_TaskItemOccurrences_TaskItems_TaskItemId",
+                        column: x => x.TaskItemId,
+                        principalTable: "TaskItems",
+                        principalColumn: "TaskItemId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -521,6 +650,11 @@ namespace TheSteward.Infrastructure.Migrations
                 column: "BudgetId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Expenses_BudgetSubCategoryId",
+                table: "Expenses",
+                column: "BudgetSubCategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_HouseholdInvitations_HouseholdId",
                 table: "HouseholdInvitations",
                 column: "HouseholdId");
@@ -552,6 +686,46 @@ namespace TheSteward.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_TaskItemOccurrences_TaskItemId",
+                table: "TaskItemOccurrences",
+                column: "TaskItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskItems_AssignedToUserHouseholdId",
+                table: "TaskItems",
+                column: "AssignedToUserHouseholdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskItems_CreatedByUserHouseholdId",
+                table: "TaskItems",
+                column: "CreatedByUserHouseholdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskItems_ExpenseId",
+                table: "TaskItems",
+                column: "ExpenseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskItems_HouseholdId",
+                table: "TaskItems",
+                column: "HouseholdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskItems_RecurrenceId",
+                table: "TaskItems",
+                column: "RecurrenceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskItems_TaskItemCategoryId",
+                table: "TaskItems",
+                column: "TaskItemCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserHouseholds_DefaultBudgetId",
+                table: "UserHouseholds",
+                column: "DefaultBudgetId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserHouseholds_HouseholdId",
                 table: "UserHouseholds",
                 column: "HouseholdId");
@@ -581,9 +755,6 @@ namespace TheSteward.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "BudgetSubCategories");
-
-            migrationBuilder.DropTable(
                 name: "Credits");
 
             migrationBuilder.DropTable(
@@ -596,13 +767,28 @@ namespace TheSteward.Infrastructure.Migrations
                 name: "Investments");
 
             migrationBuilder.DropTable(
-                name: "UserHouseholds");
+                name: "TaskItemOccurrences");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "TaskItems");
+
+            migrationBuilder.DropTable(
                 name: "Expenses");
+
+            migrationBuilder.DropTable(
+                name: "RecurrenceRules");
+
+            migrationBuilder.DropTable(
+                name: "TaskItemsCategories");
+
+            migrationBuilder.DropTable(
+                name: "UserHouseholds");
+
+            migrationBuilder.DropTable(
+                name: "BudgetSubCategories");
 
             migrationBuilder.DropTable(
                 name: "BudgetCategories");

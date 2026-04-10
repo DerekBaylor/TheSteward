@@ -12,8 +12,8 @@ using TheSteward.Infrastructure.Data;
 namespace TheSteward.Infrastructure.Migrations
 {
     [DbContext(typeof(TheStewardContext))]
-    [Migration("20260311162906_UpdateInvestmentEntity")]
-    partial class UpdateInvestmentEntity
+    [Migration("20260410204501_InitAfterTaskItems")]
+    partial class InitAfterTaskItems
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -398,6 +398,9 @@ namespace TheSteward.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("InvestmentId")
                         .HasColumnType("uuid");
 
@@ -607,6 +610,9 @@ namespace TheSteward.Infrastructure.Migrations
                     b.Property<bool>("HasKitchenManagerWritePermission")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("HasTaskManagerCompletePermission")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("HasTaskManagerReadPermission")
                         .HasColumnType("boolean");
 
@@ -615,6 +621,9 @@ namespace TheSteward.Infrastructure.Migrations
 
                     b.Property<Guid>("HouseholdId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDefaultUserHousehold")
                         .HasColumnType("boolean");
@@ -626,6 +635,11 @@ namespace TheSteward.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.HasKey("UserHouseholdId");
 
                     b.HasIndex("DefaultBudgetId");
@@ -635,6 +649,157 @@ namespace TheSteward.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserHouseholds");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.RecurrenceRule", b =>
+                {
+                    b.Property<Guid>("RecurrenceRuleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("EndDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("IntervalDays")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("LastGeneratedDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("RecurrenceDays")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RecurrenceFrequency")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("RecurrenceRuleId");
+
+                    b.ToTable("RecurrenceRules");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.TaskItem", b =>
+                {
+                    b.Property<Guid>("TaskItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedToUserHouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserHouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ExpenseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("RecurrenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TaskItemCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TaskItemName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("TaskItemId");
+
+                    b.HasIndex("AssignedToUserHouseholdId");
+
+                    b.HasIndex("CreatedByUserHouseholdId");
+
+                    b.HasIndex("ExpenseId");
+
+                    b.HasIndex("HouseholdId");
+
+                    b.HasIndex("RecurrenceId");
+
+                    b.HasIndex("TaskItemCategoryId");
+
+                    b.ToTable("TaskItems");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.TaskItemCategory", b =>
+                {
+                    b.Property<Guid>("TaskItemCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ColorHex")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("IconName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TaskItemCategoryName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("TaskItemCategoryId");
+
+                    b.ToTable("TaskItemsCategories");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.TaskItemOccurrence", b =>
+                {
+                    b.Property<Guid>("TaskItemOccurrenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CompletedByUserHouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ScheduledDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TaskItemId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("TaskItemOccurrenceId");
+
+                    b.HasIndex("TaskItemId");
+
+                    b.ToTable("TaskItemOccurrences");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -856,6 +1021,62 @@ namespace TheSteward.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.TaskItem", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.HouseholdModels.UserHousehold", "AssignedToUserHousehold")
+                        .WithMany()
+                        .HasForeignKey("AssignedToUserHouseholdId");
+
+                    b.HasOne("TheSteward.Core.Models.HouseholdModels.UserHousehold", "CreatedByUserHousehold")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserHouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.FinanceManagerModels.Expense", "RelatedExpense")
+                        .WithMany()
+                        .HasForeignKey("ExpenseId");
+
+                    b.HasOne("TheSteward.Core.Models.HouseholdModels.Household", "Household")
+                        .WithMany()
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.TaskManagerModels.RecurrenceRule", "RecurrenceRule")
+                        .WithMany("TaskItems")
+                        .HasForeignKey("RecurrenceId");
+
+                    b.HasOne("TheSteward.Core.Models.TaskManagerModels.TaskItemCategory", "TaskItemCategory")
+                        .WithMany("TaskItems")
+                        .HasForeignKey("TaskItemCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssignedToUserHousehold");
+
+                    b.Navigation("CreatedByUserHousehold");
+
+                    b.Navigation("Household");
+
+                    b.Navigation("RecurrenceRule");
+
+                    b.Navigation("RelatedExpense");
+
+                    b.Navigation("TaskItemCategory");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.TaskItemOccurrence", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.TaskManagerModels.TaskItem", "TaskItem")
+                        .WithMany()
+                        .HasForeignKey("TaskItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaskItem");
+                });
+
             modelBuilder.Entity("TheSteward.Core.Models.FinanceManagerModels.Budget", b =>
                 {
                     b.Navigation("BudgetCategories");
@@ -884,6 +1105,16 @@ namespace TheSteward.Infrastructure.Migrations
             modelBuilder.Entity("TheSteward.Core.Models.HouseholdModels.Household", b =>
                 {
                     b.Navigation("UserHouseholds");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.RecurrenceRule", b =>
+                {
+                    b.Navigation("TaskItems");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.TaskItemCategory", b =>
+                {
+                    b.Navigation("TaskItems");
                 });
 #pragma warning restore 612, 618
         }

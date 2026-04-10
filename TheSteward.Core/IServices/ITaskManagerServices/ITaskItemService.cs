@@ -1,6 +1,4 @@
-﻿// ITaskItemService.cs
-using TheSteward.Core.Dtos.TaskManagerDtos;
-using TheSteward.Core.Models.TaskManagerModels;
+﻿using TheSteward.Core.Dtos.TaskManagerDtos;
 using TheSteward.Core.Utils.TaskManagerUtils;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
@@ -162,5 +160,15 @@ public interface ITaskItemService
     /// </returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="createdByUserHouseholdId"/> is empty.</exception>
     Task<List<TaskItemDto>> GetAllByCreatedByUserHouseholdIdAsync(Guid createdByUserHouseholdId);
+
+    /// <summary>
+    /// Retrieves all tasks for a household that are visible to the requesting UserHousehold.
+    /// Public tasks are visible to all members. Private tasks are only visible to the
+    /// UserHousehold that created them or the UserHousehold they are assigned to.
+    /// </summary>
+    /// <param name="householdId">The household to retrieve tasks for.</param>
+    /// <param name="requestingUserHouseholdId">The UserHousehold making the request.</param>
+    /// <returns>A list of visible, non-archived <see cref="TaskItemDto"/> records.</returns>
+    Task<List<TaskItemDto>> GetAllByHouseholdIdAsync(Guid householdId, Guid requestingUserHouseholdId);
     #endregion Get Methods
 }

@@ -5,16 +5,27 @@ namespace TheSteward.Shared.Dtos.TaskDtos;
 public class TaskItemFormDto
 {
     public Guid? TaskItemId { get; set; }
+    
     public string TaskItemName { get; set; } = string.Empty;
+    
     public string? Description { get; set; }
+    
     public TaskItemStatus Status { get; set; } = TaskItemStatus.Pending;
+    
     public TaskItemPriority Priority { get; set; } = TaskItemPriority.Medium;
+    
     public DateTime? DueDate { get; set; }
+    
     public Guid CreatedByUserHouseholdId { get; set; }
+    
     public Guid AssignedToUserHouseholdId { get; set; }
+    
     public Guid TaskItemCategoryId { get; set; }
+    
     public Guid? RecurrenceId { get; set; }
+    
     public Guid? ExpenseId { get; set; }
+    
     public bool IsEditMode { get; set; }
 
     /// <summary>True when the user wants this task to repeat.</summary>
@@ -32,5 +43,6 @@ public class TaskItemFormDto
 
     public DateTime? RecurrenceEndDate { get; set; }
 
+    public Guid HouseholdId { get; set; }
 }
 

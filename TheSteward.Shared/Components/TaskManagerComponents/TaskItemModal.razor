@@ -300,7 +300,6 @@
             }
             else
             {
-                // Build the optional recurrence DTO only when opted in
                 CreateRecurrenceRuleDto? recurrenceDto = null;
 
                 if (FormData.IsRecurring)
@@ -324,6 +323,7 @@
                     Status = FormData.Status,
                     Priority = FormData.Priority,
                     DueDate = FormData.IsRecurring ? null : FormData.DueDate,
+                    HouseholdId = FormData.HouseholdId,
                     CreatedByUserHouseholdId = FormData.CreatedByUserHouseholdId,
                     AssignedToUserHouseholdId = FormData.AssignedToUserHouseholdId,
                     TaskItemCategoryId = FormData.TaskItemCategoryId,

@@ -20,6 +20,7 @@ namespace TheSteward.Tests.Services;
 public class UserHouseholdServiceTests
 {
     private Mock<IUserHouseholdRepository>? _mockUserHouseholdRepository;
+    private Mock<IHouseholdRepository>? _mockHouseholdRepository;
     private Mock<IInvitationRepository>? _mockInvitationRepository;
     private Mock<UserManager<ApplicationUser>>? _mockUserManager;
     private Mock<IMapper>? _mockMapper;
@@ -29,18 +30,15 @@ public class UserHouseholdServiceTests
     public void Setup()
     {
         _mockUserHouseholdRepository = new Mock<IUserHouseholdRepository>();
+        _mockHouseholdRepository = new Mock<IHouseholdRepository>();
         _mockInvitationRepository = new Mock<IInvitationRepository>();
-        _mockMapper = new Mock<IMapper>();
+
 
         var userStore = new Mock<IUserStore<ApplicationUser>>();
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
             userStore.Object, null, null, null, null, null, null, null, null);
 
-        _service = new UserHouseholdService(
-            _mockUserHouseholdRepository.Object,
-            _mockUserManager.Object,
-            _mockInvitationRepository.Object,
-            _mockMapper.Object);
+        _service = new UserHouseholdService(_mockUserHouseholdRepository.Object, _mockHouseholdRepository.Object, _mockUserManager.Object, _mockInvitationRepository.Object);
     }
 
     #region AddAsync Tests
@@ -160,7 +158,7 @@ public class UserHouseholdServiceTests
             .ReturnsAsync(1);
 
         // Act
-        await _service!.DeleteAsync(userHousehold);
+        await _service!.DeleteAsync(userHousehold.HouseholdId);
 
         // Assert
         _mockUserHouseholdRepository.Verify(r => r.DeleteAsync(userHousehold), Times.Once);

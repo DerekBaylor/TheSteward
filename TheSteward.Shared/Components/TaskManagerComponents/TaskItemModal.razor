@@ -1,6 +1,7 @@
 ﻿@* TaskItemModal.razor *@
 @using TheSteward.Core.Dtos.TaskManagerDtos
 @using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Shared.Dtos.TaskDtos
 @using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
 
@@ -25,6 +26,7 @@
                 <MudStack Class="dialog-form">
                     <MudForm @ref="form" @bind-IsValid="isValid">
 
+                        @* Task Name *@
                         <MudTextField T="string"
                                       Label="Task Name"
                                       @bind-Value="FormData.TaskItemName"
@@ -33,7 +35,7 @@
                                       MaxLength="100"
                                       Immediate="true"
                                       Class="mb-3" />
-
+                        @* Description *@
                         <MudTextField T="string"
                                       Label="Description"
                                       @bind-Value="FormData.Description"
@@ -41,6 +43,23 @@
                                       MaxLength="500"
                                       Class="mb-3" />
 
+                        @* Assignee *@
+                        @if (HouseholdMembers.Any())
+                        {
+                            <MudSelect T="Guid"
+                                       Label="Assign To"
+                                       @bind-Value="FormData.AssignedToUserHouseholdId"
+                                       Class="mb-3">
+                                @foreach (var member in HouseholdMembers)
+                                {
+                                    <MudSelectItem T="Guid" Value="member.UserHouseholdId">
+                                        @member.DisplayName
+                                    </MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+
+                        @* Category *@
                         <MudSelect T="Guid"
                                    Label="Category"
                                    @bind-Value="FormData.TaskItemCategoryId"
@@ -55,6 +74,7 @@
                             }
                         </MudSelect>
 
+                        @* Priority *@
                         <div class="d-flex gap-3 mb-3">
                             <MudSelect T="TaskItemPriority"
                                        Label="Priority"
@@ -66,6 +86,7 @@
                                 }
                             </MudSelect>
 
+                            @* Status *@
                             @if (FormData.IsEditMode)
                             {
                                 <MudSelect T="TaskItemStatus"
@@ -89,7 +110,7 @@
                                            Class="mb-3" />
                         }
 
-                        @* ── Recurrence Toggle ── *@
+                        @* Recurrence Toggle *@
                         @if (!FormData.IsEditMode || FormData.RecurrenceId == null)
                         {
                             <MudSwitch T="bool"
@@ -99,7 +120,7 @@
                                        Class="mb-2" />
                         }
 
-                        @* ── Recurrence Section ── *@
+                        @* Recurrence Section *@
                         @if (FormData.IsRecurring)
                         {
                             <MudPaper Elevation="0" Class="pa-3 mb-3 mud-background-gray rounded">
@@ -192,8 +213,14 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
-    [Parameter] public TaskItemFormDto FormData { get; set; } = new();
+    [CascadingParameter] 
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+    
+    [Parameter] 
+    public TaskItemFormDto FormData { get; set; } = new();
+
+    [Parameter]
+    public List<HouseholdMemberDto> HouseholdMembers { get; set; } = new();
 
     private MudForm form = default!;
     private bool isValid;

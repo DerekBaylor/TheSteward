@@ -124,6 +124,18 @@ public interface IUserHouseholdService
     /// </param>
     /// <returns>A task representing the asynchronous operation, containing the user-household DTO or null if not found.</returns>
     Task<UserHouseholdDto?> GetUserHouseholdByHouseholdIdAndUserIdAsync(Guid householdId, string userId, bool activeOnly = true);
+
+    /// <summary>
+    /// Retrieves all active <see cref="UserHouseholdDto"/> records associated with a given household.
+    /// </summary>
+    /// <param name="householdId">The unique identifier of the household to retrieve members for.</param>
+    /// <returns>
+    /// A list of <see cref="UserHouseholdDto"/> representing all active members of the specified household.
+    /// </returns>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when no active household is found matching the provided <paramref name="householdId"/>.
+    /// </exception>
+    Task<List<UserHouseholdDto>> GetAllUserHouseholdsForHouseholdAsync(Guid householdId);
     #endregion Get Methods
 
     #region Invitation Methods

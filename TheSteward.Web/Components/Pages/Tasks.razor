@@ -16,6 +16,8 @@
 @inject HouseholdState HouseholdState
 @inject ITaskItemService TaskItemService
 @inject ITaskItemCategoryService TaskItemCategoryService
+@inject IUserHouseholdService UserHouseholdService
+@inject IHouseholdService HouseholdService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
@@ -175,6 +177,7 @@ else
     private TaskItemStatus? activeStatusFilter;
     private TaskItemPriority? activePriorityFilter;
     private List<TaskItemDto> tasks = new();
+    private List<HouseholdMemberDto> householdMembers = new();
     private Action? _stateChangeHandler;
 
     private IEnumerable<TaskItemDto> FilteredTasks => tasks
@@ -204,8 +207,19 @@ else
         try
         {
             isLoading = true;
+
             tasks = await TaskItemService.GetAllByAssignedUserHouseholdIdAsync(
                 userHousehold.UserHouseholdId);
+
+            var allMembers = await UserHouseholdService.GetAllUserHouseholdsForHouseholdAsync(userHousehold.HouseholdId);
+
+            householdMembers = allMembers
+                .Select(m => new HouseholdMemberDto
+                {
+                    UserHouseholdId = m.UserHouseholdId,
+                    DisplayName = m.UserName
+                })
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -325,7 +339,8 @@ else
     {
         var parameters = new DialogParameters
         {
-            { "FormData", formData }
+            { "FormData", formData },
+            { "HouseholdMembers", householdMembers }
         };
 
         var options = new DialogOptions

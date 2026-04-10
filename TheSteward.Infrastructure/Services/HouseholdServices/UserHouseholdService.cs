@@ -12,12 +12,14 @@ namespace TheSteward.Infrastructure.Services.HouseholdServices;
 public class UserHouseholdService : IUserHouseholdService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IHouseholdRepository _householdRepository;
     private readonly IInvitationRepository _invitationRepository;
     private readonly IUserHouseholdRepository _userHouseholdRepository;
 
-    public UserHouseholdService(IUserHouseholdRepository userHouseholdRepository, UserManager<ApplicationUser> userManager, IInvitationRepository invitationRepository)
+    public UserHouseholdService(IUserHouseholdRepository userHouseholdRepository, IHouseholdRepository householdRepository, UserManager<ApplicationUser> userManager, IInvitationRepository invitationRepository)
     {
         _userHouseholdRepository = userHouseholdRepository;
+        _householdRepository = householdRepository;
         _userManager = userManager;
         _invitationRepository = invitationRepository;
     }
@@ -192,6 +194,18 @@ public class UserHouseholdService : IUserHouseholdService
         var userHousehold = await query.FirstOrDefaultAsync();
 
         return userHousehold?.ToDto();
+    }
+
+    public async Task<List<UserHouseholdDto>> GetAllUserHouseholdsForHouseholdAsync(Guid householdId)
+    {
+        var household = await _householdRepository.GetAll()
+            .Include(h => h.UserHouseholds)
+            .FirstOrDefaultAsync(h => h.HouseholdId == householdId && h.IsHouseholdActive)
+            ?? throw new KeyNotFoundException($"Household with ID {householdId} not found.");
+
+        return household.UserHouseholds
+            .Where(uh => uh.IsActive)
+            .ToDtoList();
     }
 
     #endregion Get UserHousehold Methods

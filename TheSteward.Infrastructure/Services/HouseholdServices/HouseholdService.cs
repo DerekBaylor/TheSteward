@@ -82,7 +82,6 @@ public class HouseholdService : IHouseholdService
         return currentHousehold.ToDto();
     }
 
-
     public async Task<HouseholdDto> GetByIdAsync(Guid id)
     {
         var household = await _householdRepository.GetByIdAsync(id)

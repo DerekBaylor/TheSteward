@@ -37,6 +37,7 @@
 
         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register" class="registration-form">
             <DataAnnotationsValidator />
+            <ValidationSummary class="form-error" />
 
             <div class="form-group">
                 <label for="Input.Email" class="form-label">Email Address</label>
@@ -61,16 +62,16 @@
             </div>
 
             <div class="form-group">
-                <label for="Input.Password" class="form-label">Password</label>
+                <label for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
                 <InputText type="password"
-                           @bind-Value="Input.Password"
-                           id="Input.Password"
+                           @bind-Value="Input.ConfirmPassword"
+                           id="Input.ConfirmPassword"
                            class="form-input"
                            autocomplete="new-password"
-                           placeholder="Create a password" />
+                           placeholder="Confirm your password" />
 
                 <ul class="password-requirements">
-                     <li class="password-requirement">
+                    <li class="password-requirement">
                         <span class="material-icons">check_circle</span>
                         At least 6 characters long
                     </li>
@@ -92,8 +93,9 @@
                     </li>
                 </ul>
 
-                <ValidationMessage For="() => Input.Password" class="form-error" />
+                <ValidationMessage For="() => Input.ConfirmPassword" class="form-error" />
             </div>
+
 
             <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" FullWidth="true" ButtonType="ButtonType.Submit">
                 Create Account

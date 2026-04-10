@@ -12,7 +12,7 @@
 <PageTitle>Confirm Email</PageTitle>
 
 <div class="confirm-email-container">
-    <div class="confirm-email-card">
+    <MudCard Class="confirm-email-card">
 
         <div class="confirm-email-icon-wrap @(isSuccess ? "success" : isError ? "error" : "loading")">
             @if (isLoading)
@@ -71,7 +71,7 @@
             }
         }
 
-    </div>
+    </MudCard>
 </div>
 
 @code {

@@ -8,6 +8,7 @@ using TheSteward.Core.Models.FinanceManagerModels;
 using TheSteward.Core.Models.TaskManagerModels;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 using TheSteward.Core.MappingExtensions;
+using TheSteward.Core.Utils.TaskManagerUtils;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
@@ -269,7 +270,7 @@ public class ExpenseService : IExpenseService
             await _taskItemCategoryRepository.SaveChangesAsync();
         }
 
-        var dueDate = GetNextDueDateFromDueDay(expense.DueDay);
+        var dueDate = RecurrenceUtility.GetNextDueDateFromDueDay(expense.DueDay);
 
         var recurrenceRule = new RecurrenceRule
         {
@@ -305,28 +306,6 @@ public class ExpenseService : IExpenseService
 
         await _taskItemRepository.AddAsync(taskItem);
         await _taskItemRepository.SaveChangesAsync();
-    }
-
-    /// <summary>
-    /// Calculates the next occurrence of the given due day in the current or next month.
-    /// Handles DueDay 31 as the last day of the month.
-    /// </summary>
-    private static DateTime GetNextDueDateFromDueDay(int dueDay)
-    {
-        var now = DateTime.UtcNow;
-        var daysInCurrentMonth = DateTime.DaysInMonth(now.Year, now.Month);
-        var resolvedDay = dueDay > daysInCurrentMonth ? daysInCurrentMonth : dueDay;
-        var candidateDate = new DateTime(now.Year, now.Month, resolvedDay, 0, 0, 0, DateTimeKind.Utc);
-
-        if (candidateDate <= now)
-        {
-            var nextMonth = now.AddMonths(1);
-            var daysInNextMonth = DateTime.DaysInMonth(nextMonth.Year, nextMonth.Month);
-            resolvedDay = dueDay > daysInNextMonth ? daysInNextMonth : dueDay;
-            candidateDate = new DateTime(nextMonth.Year, nextMonth.Month, resolvedDay, 0, 0, 0, DateTimeKind.Utc);
-        }
-
-        return candidateDate;
     }
 
     /// <summary>
@@ -397,7 +376,7 @@ public class ExpenseService : IExpenseService
         linkedTask.TaskItemName = $"Pay {expense.ExpenseName}";
         linkedTask.Description =
             $"Amount due: {expense.AmountDue:C} — due on day {expense.DueDay} of each month.";
-        linkedTask.DueDate = GetNextDueDateFromDueDay(expense.DueDay);
+        linkedTask.DueDate = RecurrenceUtility.GetNextDueDateFromDueDay(expense.DueDay);
         linkedTask.UpdatedDate = DateTime.UtcNow;
 
         await _taskItemRepository.UpdateAsync(linkedTask);

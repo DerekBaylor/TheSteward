@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.TaskManagerDtos;
-using TheSteward.Core.IRepositories;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
+using TheSteward.Core.IRepositories.HouseholdIRepositories;
 using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Core.IServices.TaskManagerIServices;
 using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.TaskManagerModels;
 using TheSteward.Core.Utils.TaskManagerUtils;
-using TheSteward.Infrastructure.Repositories.TaskManagerRepositories;
+using TheSteward.Infrastructure.Repositories.HouseholdRepositories;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
 namespace TheSteward.Infrastructure.Services.TaskManagerServices;
@@ -17,21 +17,24 @@ public class TaskItemService : ITaskItemService
     private readonly ITaskItemRepository _taskItemRepository;
     private readonly ITaskItemCategoryRepository _taskItemCategoryRepository;
     private readonly IExpenseRepository _expenseRepository;
-    private readonly IBaseRepository<RecurrenceRule> _recurrenceRuleRepository;
-    private readonly IBaseRepository<TaskItemOccurrence> _occurrenceRepository;
+    private readonly IRecurrenceRuleRepository _recurrenceRuleRepository;
+    private readonly ITaskItemOccurenceRepository _occurrenceRepository;
+    private readonly IUserHouseholdRepository _userHouseholdRepository;
 
     public TaskItemService(
         ITaskItemRepository taskItemRepository,
         ITaskItemCategoryRepository taskItemCategoryRepository,
         IExpenseRepository expenseRepository,
-        IBaseRepository<RecurrenceRule> recurrenceRuleRepository,
-        IBaseRepository<TaskItemOccurrence> occurrenceRepository)
+        IRecurrenceRuleRepository recurrenceRuleRepository,
+        ITaskItemOccurenceRepository occurrenceRepository,
+        IUserHouseholdRepository userHouseholdRepository)
     {
         _taskItemRepository = taskItemRepository;
         _taskItemCategoryRepository = taskItemCategoryRepository;
         _expenseRepository = expenseRepository;
         _recurrenceRuleRepository = recurrenceRuleRepository;
         _occurrenceRepository = occurrenceRepository;
+        _userHouseholdRepository = userHouseholdRepository;
     }
 
     #region Create Methods
@@ -118,11 +121,11 @@ public class TaskItemService : ITaskItemService
         }
     }
 
-    public async Task AddStandardTasksAsync(Guid userHouseholdId, IEnumerable<StandardTaskDefinition> selectedTasks, IEnumerable<TaskItemDto> existingTasks)
+    public async Task AddStandardTasksAsync(
+        Guid userHouseholdId,
+        IEnumerable<StandardTaskDefinition> selectedTasks,
+        IEnumerable<TaskItemDto> existingTasks)
     {
-        // Standard tasks are intentionally created without recurrence rules —
-        // users can edit them afterward to add a schedule if desired.
-
         if (userHouseholdId == Guid.Empty)
             throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(userHouseholdId));
 
@@ -132,49 +135,21 @@ public class TaskItemService : ITaskItemService
 
         var allCategories = await _taskItemCategoryRepository.GetAll().ToListAsync();
 
+        // ── 1. Create selected standard tasks ──────────────────────────────────
         foreach (var task in selectedTasks)
         {
             if (existingNames.Contains(task.TaskName.Trim().ToLowerInvariant()))
                 continue;
 
-            var category = allCategories
-                .FirstOrDefault(c =>
-                    c.TaskItemCategoryName.Trim().ToLowerInvariant() ==
-                    task.CategoryName.Trim().ToLowerInvariant());
+            var category = await ResolveOrCreateCategoryAsync(allCategories, task.CategoryName);
 
-            if (category == null)
-            {
-                category = new TaskItemCategory
-                {
-                    TaskItemCategoryId = Guid.NewGuid(),
-                    TaskItemCategoryName = task.CategoryName,
-                    ColorHex = GetDefaultColorForCategory(task.CategoryName),
-                    IconName = GetDefaultIconForCategory(task.CategoryName)
-                };
-
-                await _taskItemCategoryRepository.AddAsync(category);
-                await _taskItemCategoryRepository.SaveChangesAsync();
-                allCategories.Add(category);
-            }
-
-            var taskItem = new TaskItem
-            {
-                TaskItemId = Guid.NewGuid(),
-                TaskItemName = task.TaskName,
-                Status = TaskItemStatus.Pending,
-                Priority = TaskItemPriority.Medium,
-                CreatedByUserHouseholdId = userHouseholdId,
-                AssignedToUserHouseholdId = userHouseholdId,
-                TaskItemCategoryId = category.TaskItemCategoryId,
-                IsArchived = false,
-                CreatedDate = DateTime.UtcNow,
-                UpdatedDate = DateTime.UtcNow
-            };
-
-            await _taskItemRepository.AddAsync(taskItem);
-            await _taskItemRepository.SaveChangesAsync();
+            await CreateStandardTaskItemAsync(userHouseholdId, task, category);
         }
+
+        // ── 2. Create bill tasks for any expenses that don't have one yet ──────
+        await CreateMissingExpenseTasksAsync(userHouseholdId, existingNames, allCategories);
     }
+
 
     #endregion Create Methods
 
@@ -599,6 +574,196 @@ public class TaskItemService : ITaskItemService
         taskItem.CompletedDate = DateTime.UtcNow;
         taskItem.UpdatedDate = DateTime.UtcNow;
     }
+
+    /// <summary>
+    /// Finds an existing category by name or creates and persists a new one.
+    /// </summary>
+    private async Task<TaskItemCategory> ResolveOrCreateCategoryAsync(
+        List<TaskItemCategory> allCategories,
+        string categoryName)
+    {
+        var category = allCategories
+            .FirstOrDefault(c =>
+                c.TaskItemCategoryName.Trim().ToLowerInvariant() ==
+                categoryName.Trim().ToLowerInvariant());
+
+        if (category != null)
+            return category;
+
+        category = new TaskItemCategory
+        {
+            TaskItemCategoryId = Guid.NewGuid(),
+            TaskItemCategoryName = categoryName,
+            ColorHex = GetDefaultColorForCategory(categoryName),
+            IconName = GetDefaultIconForCategory(categoryName)
+        };
+
+        await _taskItemCategoryRepository.AddAsync(category);
+        await _taskItemCategoryRepository.SaveChangesAsync();
+        allCategories.Add(category);
+
+        return category;
+    }
+
+    /// <summary>
+    /// Creates a standard task item, including its recurrence rule and first
+    /// occurrence if the task definition carries a recurrence.
+    /// </summary>
+    private async Task CreateStandardTaskItemAsync(
+        Guid userHouseholdId,
+        StandardTaskDefinition task,
+        TaskItemCategory category)
+    {
+        var now = DateTime.UtcNow;
+
+        RecurrenceRule? recurrenceRule = null;
+
+        if (task.Recurrence != null)
+        {
+            recurrenceRule = new RecurrenceRule
+            {
+                RecurrenceRuleId = Guid.NewGuid(),
+                RecurrenceFrequency = task.Recurrence.Frequency,
+                RecurrenceDays = task.Recurrence.RecurrenceDays,
+                IntervalDays = task.Recurrence.IntervalDays,
+                StartDateTime = now,
+                EndDateTime = null,
+                LastGeneratedDateTime = now
+            };
+
+            await _recurrenceRuleRepository.AddAsync(recurrenceRule);
+            await _recurrenceRuleRepository.SaveChangesAsync();
+        }
+
+        var taskItem = new TaskItem
+        {
+            TaskItemId = Guid.NewGuid(),
+            TaskItemName = task.TaskName,
+            Status = TaskItemStatus.Pending,
+            Priority = TaskItemPriority.Medium,
+            CreatedByUserHouseholdId = userHouseholdId,
+            AssignedToUserHouseholdId = userHouseholdId,
+            TaskItemCategoryId = category.TaskItemCategoryId,
+            RecurrenceId = recurrenceRule?.RecurrenceRuleId,
+            IsArchived = false,
+            CreatedDate = now,
+            UpdatedDate = now
+        };
+
+        await _taskItemRepository.AddAsync(taskItem);
+        await _taskItemRepository.SaveChangesAsync();
+
+        if (recurrenceRule != null)
+        {
+            var firstOccurrenceDate = ComputeNextOccurrence(recurrenceRule, recurrenceRule.StartDateTime);
+
+            var firstOccurrence = new TaskItemOccurrence
+            {
+                TaskItemOccurrenceId = Guid.NewGuid(),
+                TaskItemId = taskItem.TaskItemId,
+                ScheduledDateTime = firstOccurrenceDate,
+                Status = TaskItemStatus.Pending
+            };
+
+            await _occurrenceRepository.AddAsync(firstOccurrence);
+            await _occurrenceRepository.SaveChangesAsync();
+
+            taskItem.DueDate = firstOccurrenceDate;
+            await _taskItemRepository.UpdateAsync(taskItem);
+            await _taskItemRepository.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Checks the household's expenses and creates a "Pay X" bill task for
+    /// any expense that doesn't already have one.
+    /// </summary>
+    private async Task CreateMissingExpenseTasksAsync(
+        Guid userHouseholdId,
+        HashSet<string> existingTaskNames,
+        List<TaskItemCategory> allCategories)
+    {
+        // Resolve the HouseholdId from the UserHouseholdId.
+        var userHousehold = await _userHouseholdRepository.GetByIdAsync(userHouseholdId);
+        if (userHousehold == null)
+            return;
+
+        var expenses = await _expenseRepository.GetAll()
+            .Where(e => e.Budget.HouseholdId == userHousehold.HouseholdId)
+            .ToListAsync();
+
+        if (expenses.Count == 0)
+            return;
+
+        // Pull all expense IDs that already have a linked task so we don't double-create.
+        var expenseIdsWithTasks = await _taskItemRepository.GetAll()
+            .Where(t => t.ExpenseId != null)
+            .Select(t => t.ExpenseId!.Value)
+            .ToHashSetAsync();
+
+        var billsCategory = await ResolveOrCreateCategoryAsync(allCategories, "Bills");
+
+        foreach (var expense in expenses)
+        {
+            // Skip if a linked task already exists for this expense.
+            if (expenseIdsWithTasks.Contains(expense.ExpenseId))
+                continue;
+
+            // Skip if a task with the same "Pay X" name already exists.
+            var expectedName = $"Pay {expense.ExpenseName}".Trim().ToLowerInvariant();
+            if (existingTaskNames.Contains(expectedName))
+                continue;
+
+            var dueDate = RecurrenceUtility.GetNextDueDateFromDueDay(expense.DueDay);
+
+            var recurrenceRule = new RecurrenceRule
+            {
+                RecurrenceRuleId = Guid.NewGuid(),
+                RecurrenceFrequency = RecurrenceFrequency.Monthly,
+                RecurrenceDays = null,
+                IntervalDays = null,
+                StartDateTime = dueDate,
+                EndDateTime = null,
+                LastGeneratedDateTime = DateTime.UtcNow
+            };
+
+            await _recurrenceRuleRepository.AddAsync(recurrenceRule);
+            await _recurrenceRuleRepository.SaveChangesAsync();
+
+            var taskItem = new TaskItem
+            {
+                TaskItemId = Guid.NewGuid(),
+                TaskItemName = $"Pay {expense.ExpenseName}",
+                Description = $"Amount due: {expense.AmountDue:C} — due on day {expense.DueDay} of each month.",
+                Status = TaskItemStatus.Pending,
+                Priority = TaskItemPriority.Medium,
+                DueDate = dueDate,
+                CreatedByUserHouseholdId = userHouseholdId,
+                AssignedToUserHouseholdId = userHouseholdId,
+                TaskItemCategoryId = billsCategory.TaskItemCategoryId,
+                RecurrenceId = recurrenceRule.RecurrenceRuleId,
+                ExpenseId = expense.ExpenseId,
+                IsArchived = false,
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = DateTime.UtcNow
+            };
+
+            await _taskItemRepository.AddAsync(taskItem);
+            await _taskItemRepository.SaveChangesAsync();
+
+            var firstOccurrence = new TaskItemOccurrence
+            {
+                TaskItemOccurrenceId = Guid.NewGuid(),
+                TaskItemId = taskItem.TaskItemId,
+                ScheduledDateTime = dueDate,
+                Status = TaskItemStatus.Pending
+            };
+
+            await _occurrenceRepository.AddAsync(firstOccurrence);
+            await _occurrenceRepository.SaveChangesAsync();
+        }
+    }
+
 
     #endregion Utility Helpers
 }

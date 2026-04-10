@@ -224,7 +224,6 @@
         if (FormData.TaskItemCategoryId == Guid.Empty && availableCategories.Any())
             FormData.TaskItemCategoryId = availableCategories.First().TaskItemCategoryId;
 
-        // If editing a task that already has a recurrence, reflect that in the toggle
         if (FormData.RecurrenceId.HasValue)
             FormData.IsRecurring = true;
     }
@@ -303,7 +302,6 @@
                     TaskItemCategoryId = FormData.TaskItemCategoryId,
                     RecurrenceId = FormData.RecurrenceId,
                     ExpenseId = FormData.ExpenseId,
-                    // Pass the recurrence definition — service will persist it
                     RecurrenceRule = recurrenceDto
                 };
 

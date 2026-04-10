@@ -1,7 +1,19 @@
-﻿namespace TheSteward.Core.Utils.TaskManagerUtils;
+﻿using TheSteward.Core.Models.TaskManagerModels;
+using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
+
+namespace TheSteward.Core.Utils.TaskManagerUtils;
+
+public record StandardTaskRecurrenceDefinition(
+    RecurrenceFrequency Frequency,
+    DaysOfWeek? RecurrenceDays = null,
+    int? IntervalDays = null);
+
+public record StandardTaskDefinition(
+    string TaskName,
+    string CategoryName,
+    StandardTaskRecurrenceDefinition? Recurrence = null);
 
 public record TaskCategoryIconOption(string Label, string IconName);
-public record StandardTaskDefinition(string TaskName, string CategoryName);
 
 public static class TaskManagerConstants
 {
@@ -88,67 +100,216 @@ public static class TaskManagerConstants
 
     public static readonly IReadOnlyList<StandardTaskDefinition> StandardTasks = new List<StandardTaskDefinition>
 {
-    // Daily Chores
-    new("Sweeping hard floors",                                         "Daily Chores"),
-    new("Wiping down kitchen counters and stovetop",                    "Daily Chores"),
-    new("Cleaning the sink and faucets",                                "Daily Chores"),
-    new("Tidying and decluttering common areas",                        "Daily Chores"),
-    new("Washing dishes / running the dishwasher",                      "Daily Chores"),
+    // ── Daily ──────────────────────────────────────────────────────────────
+    new("Sweeping hard floors",
+        "Cleaning",
+        new(RecurrenceFrequency.Daily)),
 
-    // Weekly Chores
-    new("Vacuuming floors and carpets",                                 "Weekly Chores"),
-    new("Mopping hard floors",                                          "Weekly Chores"),
-    new("Cleaning the sink and faucets (weekly)",                       "Weekly Chores"),
-    new("Taking out the trash and recycling",                           "Weekly Chores"),
-    new("Doing laundry (washing, drying, folding, and putting away)",   "Weekly Chores"),
-    new("Changing bed linens",                                          "Weekly Chores"),
-    new("Cleaning toilets, sinks, and showers/tubs",                    "Weekly Chores"),
-    new("Wiping down mirrors and glass surfaces",                        "Weekly Chores"),
-    new("Dusting furniture and surfaces",                               "Weekly Chores"),
-    new("Cut Grass",                                                    "Weekly Chores"),
+    new("Wiping down kitchen counters and stovetop",
+        "Cleaning",
+        new(RecurrenceFrequency.Daily)),
 
-    // Monthly Chores
-    new("Cleaning the inside of the microwave and oven",                "Monthly Chores"),
-    new("Wiping down kitchen appliances",                               "Monthly Chores"),
-    new("Cleaning inside the refrigerator",                             "Monthly Chores"),
-    new("Washing windows (interior)",                                   "Monthly Chores"),
-    new("Dusting ceiling fans and light fixtures",                      "Monthly Chores"),
-    new("Scrubbing grout in bathrooms",                                 "Monthly Chores"),
-    new("Cleaning out the pantry and checking expiration dates",        "Monthly Chores"),
-    new("Washing throw pillows and blankets",                           "Monthly Chores"),
-    new("Cleaning baseboards and door frames",                          "Monthly Chores"),
-    new("Vacuuming upholstered furniture",                              "Monthly Chores"),
-    new("Checking and replacing air filters (if needed)",               "Monthly Chores"),
+    new("Cleaning the sink and faucets",
+        "Cleaning",
+        new(RecurrenceFrequency.Daily)),
 
-    // Quarterly Chores
-    new("Deep cleaning the oven",                                       "Quarterly Chores"),
-    new("Cleaning behind and underneath large appliances",              "Quarterly Chores"),
-    new("Washing windows (exterior)",                                   "Quarterly Chores"),
-    new("Rotating and flipping mattresses",                             "Quarterly Chores"),
-    new("Cleaning out closets and donating unused items",               "Quarterly Chores"),
-    new("Descaling faucets and showerheads",                            "Quarterly Chores"),
-    new("Cleaning window tracks and door tracks",                       "Quarterly Chores"),
-    new("Flushing and cleaning garbage disposal",                       "Quarterly Chores"),
-    new("Checking smoke and carbon monoxide detector batteries",        "Quarterly Chores"),
-    new("Washing curtains and drapes",                                  "Quarterly Chores"),
-    new("Cleaning the washing machine and dishwasher drums",            "Quarterly Chores"),
+    new("Tidying and decluttering common areas",
+        "Cleaning",
+        new(RecurrenceFrequency.Daily)),
 
-    // Bi-Annual Chores
-    new("Vehicle oil change",                                           "Bi-Annual Chores"),
+    new("Washing dishes / running the dishwasher",
+        "Cleaning",
+        new(RecurrenceFrequency.Daily)),
 
-    // Annual Chores
-    new("Deep cleaning carpets (steam cleaning)",                       "Annual Chores"),
-    new("Cleaning gutters and downspouts",                              "Annual Chores"),
-    new("Inspecting and cleaning the chimney/fireplace",                "Annual Chores"),
-    new("Servicing the HVAC system",                                    "Annual Chores"),
-    new("Cleaning the dryer vent duct",                                 "Annual Chores"),
-    new("Washing and storing seasonal items",                           "Annual Chores"),
-    new("Inspecting the roof for damage",                               "Annual Chores"),
-    new("Deep cleaning the garage / basement",                          "Annual Chores"),
-    new("Checking caulking around tubs, showers, and windows",         "Annual Chores"),
-    new("Flushing the water heater",                                    "Annual Chores"),
-    new("Cleaning and organizing the attic or basement",               "Annual Chores"),
-    new("File Taxes",                                                   "Annual Chores"),
+    // ── Weekly ─────────────────────────────────────────────────────────────
+    new("Vacuuming floors and carpets",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Mopping hard floors",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Cleaning the sink and faucets (weekly)",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Taking out the trash and recycling",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Doing laundry (washing, drying, folding, and putting away)",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Changing bed linens",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Cleaning toilets, sinks, and showers/tubs",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Wiping down mirrors and glass surfaces",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Dusting furniture and surfaces",
+        "Cleaning",
+        new(RecurrenceFrequency.Weekly)),
+
+    new("Cut Grass",
+        "Yard",
+        new(RecurrenceFrequency.Weekly)),
+
+    // ── Monthly ────────────────────────────────────────────────────────────
+    new("Cleaning the inside of the microwave and oven",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Wiping down kitchen appliances",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Cleaning inside the refrigerator",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Washing windows (interior)",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Dusting ceiling fans and light fixtures",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Scrubbing grout in bathrooms",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Cleaning out the pantry and checking expiration dates",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Washing throw pillows and blankets",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Cleaning baseboards and door frames",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Vacuuming upholstered furniture",
+        "Cleaning",
+        new(RecurrenceFrequency.Monthly)),
+
+    new("Checking and replacing air filters (if needed)",
+        "Repairs",
+        new(RecurrenceFrequency.Monthly)),
+
+    // ── Quarterly (every 90 days via Custom) ───────────────────────────────
+    new("Deep cleaning the oven",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Cleaning behind and underneath large appliances",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Washing windows (exterior)",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Rotating and flipping mattresses",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Cleaning out closets and donating unused items",
+        "General",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Descaling faucets and showerheads",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Cleaning window tracks and door tracks",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Checking smoke and carbon monoxide detector batteries",
+        "Repairs",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Washing curtains and drapes",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    new("Cleaning the washing machine and dishwasher drums",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 90)),
+
+    // ── Bi-Annual (every 180 days via Custom) ──────────────────────────────
+    new("Vehicle oil change",
+        "Errands",
+        new(RecurrenceFrequency.Custom, IntervalDays: 180)),
+
+    new("Tire Rotation",
+        "Errands",
+        new(RecurrenceFrequency.Custom, IntervalDays: 180)),
+
+    new("Dental Cleaning",
+        "Medical",
+        new(RecurrenceFrequency.Custom, IntervalDays: 180)),
+
+    // ── Annual (every 365 days via Custom) ─────────────────────────────────
+    new("Deep cleaning carpets (steam cleaning)",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Inspecting and cleaning the chimney/fireplace",
+        "Repairs",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Servicing the HVAC system",
+        "Repairs",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Cleaning the dryer vent duct",
+        "Repairs",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Washing and storing seasonal items",
+        "Cleaning",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Inspecting the roof for damage",
+        "Repairs",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Deep cleaning the garage / basement",
+        "General",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Checking caulking around tubs, showers, and windows",
+        "Repairs",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Flushing the water heater",
+        "Repairs",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Cleaning and organizing the attic or basement",
+        "General",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("File Taxes",
+        "Finance",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
+
+    new("Yearly Medical Checkup",
+        "Medical",
+        new(RecurrenceFrequency.Custom, IntervalDays: 365)),
 };
+
 
 }

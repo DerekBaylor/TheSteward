@@ -1,0 +1,63 @@
+﻿.ts-modal.task-modal {
+    border: none;
+
+}
+
+ .mud-dialog .mud-dialog-content {
+        padding: 0 !important;
+    }
+
+
+.mud-dialog-title {
+    display: none;
+}
+
+
+
+.dialog-layout {
+    display: flex;
+}
+
+.dialog-sidebar {
+    width: 52px;
+    flex-shrink: 0;
+    background-color: var(--base-blue);
+    border-radius: 4px 0 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border-radius: 0 1.5rem 0 0;
+}
+
+.dialog-sidebar-content {
+    align-items: center;
+    color: white;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    margin-top: .5rem;
+    padding: 0;
+    text-orientation: upright;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+}
+
+    .dialog-sidebar-content .mud-icon-root,
+    .dialog-sidebar-content .mud-typography {
+        color: white;
+    }
+
+.modal-right-stack {
+    margin: 1rem;
+    width: 100%;
+}
+
+.dialog-form {
+    width: 100%;
+}
+
+.dialog-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}

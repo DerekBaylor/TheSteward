@@ -34,11 +34,7 @@ public class HouseholdServiceTests
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
             userStore.Object, null, null, null, null, null, null, null, null);
 
-        _service = new HouseholdService(
-            _mockHouseholdRepository.Object,
-            _mockUserManager.Object,
-            _mockUserHouseholdService.Object,
-            _mockMapper.Object);
+        _service = new HouseholdService(_mockHouseholdRepository.Object, _mockUserManager.Object, _mockUserHouseholdService.Object);
     }
 
     #region AddAsync Tests
@@ -77,7 +73,7 @@ public class HouseholdServiceTests
 
         _mockUserHouseholdService!
             .Setup(s => s.AddAsync(It.IsAny<CreateUserHouseholdDto>(), ownerId))
-            .Returns(Task.CompletedTask);
+            .Returns((Task<UserHouseholdDto>)Task.CompletedTask);
 
         // Act
         await _service!.AddAsync(createDto, ownerId);
@@ -184,7 +180,7 @@ public class HouseholdServiceTests
             .ReturnsAsync(1);
 
         // Act
-        await _service!.DeleteAsync(householdDto);
+        await _service!.DeleteAsync(householdDto.HouseholdId);
 
         // Assert
         _mockHouseholdRepository.Verify(r => r.DeleteAsync(household), Times.Once);

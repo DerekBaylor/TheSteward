@@ -66,7 +66,7 @@ public interface ICreditService
     /// Thrown when no credit exists with <see cref="UpdateCreditDto.CreditId"/>, or when a
     /// linked expense ID is recorded on the credit but that expense cannot be found.
     /// </exception>
-    Task<UpdateCreditDto> UpdateAsync(UpdateCreditDto creditDto);
+    Task<CreditDto> UpdateAsync(UpdateCreditDto creditDto);
 
     /// <summary>
     /// Asynchronously deletes a credit entry by its identifier.

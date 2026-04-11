@@ -105,7 +105,9 @@
                     ExpenseId = formData.ExpenseId,
                     BudgetCategoryName = formData.BudgetCategoryName,
                     BudgetCategoryId = formData.BudgetCategoryId,
-                    BudgetSubCategoryId = formData.BudgetSubCategoryId
+                    BudgetSubCategoryId = formData.BudgetSubCategoryId,
+                    HouseholdId = FormData.HouseholdId,
+                    UserHouseholdId = formData.CreatedById
                 };
 
                 var updated = await CreditService.UpdateAsync(updateDto);
@@ -127,10 +129,12 @@
                     PaymentDay = formData.PaymentDay,
                     DisplayOrder = formData.DisplayOrder,
                     BudgetId = formData.BudgetId,
+                    HouseholdId = FormData.HouseholdId,
                     BudgetCategoryId = formData.BudgetCategoryId,
                     BudgetCategoryName = formData.BudgetCategoryName,
                     BudgetSubCategoryId = formData.BudgetSubCategoryId,
-                    BudgetSubCategoryName = formData.BudgetSubCategoryName
+                    BudgetSubCategoryName = formData.BudgetSubCategoryName,
+                    CreatedByUserHouseholdId = formData.CreatedById
                 };
 
                 var created = await CreditService.AddAsync(createDto);

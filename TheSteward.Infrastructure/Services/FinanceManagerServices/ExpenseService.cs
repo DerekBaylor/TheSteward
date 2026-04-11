@@ -1,30 +1,34 @@
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
+using TheSteward.Core.IServices.TaskManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
 using TheSteward.Core.Models.TaskManagerModels;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
+using TheSteward.Core.MappingExtensions;
+using TheSteward.Core.Utils.TaskManagerUtils;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
 public class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
+    private readonly ICreditRepository _creditRepository;
+    private readonly IInvestmentRepository _investmentRepository;
     private readonly ITaskItemRepository _taskItemRepository;
     private readonly ITaskItemCategoryRepository _taskItemCategoryRepository;
     private readonly IRecurrenceRuleRepository _recurrenceRuleRepository;
-    private readonly IMapper _mapper;
 
-    public ExpenseService(IExpenseRepository expenseRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository,  IMapper mapper)
+    public ExpenseService(IExpenseRepository expenseRepository, ICreditRepository creditRepository,IInvestmentRepository investmentRepository, ITaskItemRepository taskItemRepository, ITaskItemCategoryRepository taskItemCategoryRepository, IRecurrenceRuleRepository recurrenceRuleRepository)
     {
         _expenseRepository = expenseRepository;
+        _creditRepository = creditRepository;
+        _investmentRepository = investmentRepository;
         _taskItemRepository = taskItemRepository;
         _taskItemCategoryRepository = taskItemCategoryRepository;
         _recurrenceRuleRepository = recurrenceRuleRepository;
-        _mapper = mapper;
     }
 
     public async Task<ExpenseDto> AddAsync(CreateExpenseDto expenseDto)
@@ -36,19 +40,8 @@ public class ExpenseService : IExpenseService
 
         try
         {
-            var expense = new Expense
-            {
-                ExpenseId = Guid.NewGuid(),
-                ExpenseName = expenseDto.ExpenseName,
-                DueDay = expenseDto.DueDay,
-                AmountDue = expenseDto.AmountDue,
-                DisplayOrder = expenseDto.DisplayOrder,
-                BudgetId = expenseDto.BudgetId,
-                BudgetCategoryId = expenseDto.BudgetCategoryId,
-                BudgetSubCategoryId = expenseDto.BudgetSubCategoryId,
-                CreditId = expenseDto.CreditId,
-                InvestmentId = expenseDto.InvestmentId,
-            };
+            var expenseId = Guid.NewGuid();
+            var expense = expenseDto.ToEntity(expenseId);
 
             await _expenseRepository.AddAsync(expense);
             await _expenseRepository.SaveChangesAsync();
@@ -57,38 +50,51 @@ public class ExpenseService : IExpenseService
 
             await transaction.CommitAsync();
 
-            return _mapper.Map<ExpenseDto>(expense);
+            return expense.ToDto();
         }
         catch
         {
             await transaction.RollbackAsync();
+            _expenseRepository.ClearChangeTracker();
             throw;
         }
     }
 
-    public async Task<UpdateExpenseDto> UpdateAsync(UpdateExpenseDto expenseDto)
+
+    public async Task<ExpenseDto> UpdateAsync(UpdateExpenseDto expenseDto)
     {
         if (expenseDto == null)
             throw new ArgumentNullException(nameof(expenseDto));
 
-        var expense = await _expenseRepository.GetByIdAsync(expenseDto.ExpenseId);
-        if (expense == null)
-            throw new KeyNotFoundException($"Expense with ID {expenseDto.ExpenseId} not found.");
-        
-        expense.ExpenseName = expenseDto.ExpenseName;
-        expense.DueDay = expenseDto.DueDay;
-        expense.AmountDue = expenseDto.AmountDue;
-        expense.DisplayOrder = expenseDto.DisplayOrder;
-        expense.BudgetCategoryId = expenseDto.BudgetCategoryId;
-        expense.BudgetSubCategoryId = expenseDto.BudgetSubCategoryId;
-        expense.CreditId = expenseDto.CreditId;
-        expense.InvestmentId = expenseDto.InvestmentId;
+        await using var transaction = await _expenseRepository.BeginTransactionAsync();
 
-        await _expenseRepository.UpdateAsync(expense);
-        await _expenseRepository.SaveChangesAsync();
+        try
+        {
+            var expense = await _expenseRepository.GetByIdAsync(expenseDto.ExpenseId);
+            if (expense == null)
+                throw new KeyNotFoundException($"Expense with ID {expenseDto.ExpenseId} not found.");
 
-        return expenseDto;
+            expense.ApplyUpdate(expenseDto);
+
+            await _expenseRepository.UpdateAsync(expense);
+            await _expenseRepository.SaveChangesAsync();
+
+            await SyncLinkedCreditAsync(expense);
+            await SyncLinkedTaskAsync(expense);
+
+            await transaction.CommitAsync();
+
+            return expense.ToDto();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            _expenseRepository.ClearChangeTracker();
+            throw;
+        }
     }
+
+
 
     public async Task DeleteAsync(Guid expenseId)
     {
@@ -108,7 +114,6 @@ public class ExpenseService : IExpenseService
 
             if (linkedTask != null)
             {
-                // Delete the recurrence rule before the task since task holds the FK
                 if (linkedTask.RecurrenceId.HasValue)
                 {
                     var recurrenceRule = await _recurrenceRuleRepository.GetByIdAsync(linkedTask.RecurrenceId.Value);
@@ -140,15 +145,16 @@ public class ExpenseService : IExpenseService
         }
     }
 
+
     #region Get Methods
+
     public async Task<ExpenseDto?> GetAsync(Guid expenseId)
     {
         if (expenseId == Guid.Empty)
             throw new ArgumentException("Expense ID cannot be empty.", nameof(expenseId));
 
         var expense = await _expenseRepository.GetByIdAsync(expenseId);
-
-        return expense == null ? null : _mapper.Map<ExpenseDto>(expense);
+        return expense?.ToDto();
     }
 
     public async Task<ExpenseDto?> GetWithRelatedDataAsync(Guid expenseId)
@@ -158,12 +164,12 @@ public class ExpenseService : IExpenseService
 
         var expense = await _expenseRepository.GetAll()
             .Include(e => e.BudgetCategory)
-            .Include (e => e.BudgetSubCategory)
+            .Include(e => e.BudgetSubCategory)
             .Include(e => e.LinkedCredit)
             .Include(e => e.LinkedInvestment)
             .FirstOrDefaultAsync(e => e.ExpenseId == expenseId);
 
-        return expense == null ? null : _mapper.Map<ExpenseDto>(expense);
+        return expense?.ToDto();
     }
 
     public async Task<List<ExpenseDto>> GetAllByBudgetIdAsync(Guid budgetId)
@@ -174,11 +180,11 @@ public class ExpenseService : IExpenseService
         var expenses = await _expenseRepository.GetAll()
             .Where(e => e.BudgetId == budgetId)
             .Include(e => e.BudgetCategory)
-            .Include (e => e.BudgetSubCategory)
+            .Include(e => e.BudgetSubCategory)
             .OrderBy(e => e.DisplayOrder)
             .ToListAsync();
 
-        return _mapper.Map<List<ExpenseDto>>(expenses);
+        return expenses.ToDtoList();
     }
 
     public async Task<List<ExpenseDto>> GetAllByCategoryIdAsync(Guid categoryId)
@@ -188,11 +194,11 @@ public class ExpenseService : IExpenseService
 
         var expenses = await _expenseRepository.GetAll()
             .Where(e => e.BudgetCategoryId == categoryId)
-            .Include (e => e.BudgetSubCategory)
+            .Include(e => e.BudgetSubCategory)
             .OrderBy(e => e.DisplayOrder)
             .ToListAsync();
 
-        return _mapper.Map<List<ExpenseDto>>(expenses);
+        return expenses.ToDtoList();
     }
 
     public async Task<List<ExpenseDto>> GetAllByBudgetIdWithRelatedDataAsync(Guid budgetId)
@@ -203,13 +209,13 @@ public class ExpenseService : IExpenseService
         var expenses = await _expenseRepository.GetAll()
             .Where(e => e.BudgetId == budgetId)
             .Include(e => e.BudgetCategory)
-            .Include (e => e.BudgetSubCategory)
+            .Include(e => e.BudgetSubCategory)
             .Include(e => e.LinkedCredit)
             .Include(e => e.LinkedInvestment)
             .OrderBy(e => e.DisplayOrder)
             .ToListAsync();
 
-        return _mapper.Map<List<ExpenseDto>>(expenses);
+        return expenses.ToDtoList();
     }
 
     public async Task<ExpenseDto> GetByBudgetIdAndExpenseNameAsync(Guid budgetId, string expenseName)
@@ -227,16 +233,28 @@ public class ExpenseService : IExpenseService
         if (expense == null)
             throw new KeyNotFoundException($"Expense with name '{expenseName}' not found in budget with ID {budgetId}.");
 
-        return _mapper.Map<ExpenseDto>(expense);
+        return expense.ToDto();
     }
+
     #endregion Get Methods
+
 
     #region Private Helper Methods
 
+    /// <summary>
+    /// Creates a new recurring task item linked to the specified expense and associates it with the given user
+    /// household.
+    /// </summary>
+    /// <remarks>The created task item will be set to recur monthly and will be categorized under "Bills &
+    /// Payments". If the category does not exist, it will be created automatically. The task will be assigned to the
+    /// specified user household and linked to the provided expense.</remarks>
+    /// <param name="expense">The expense for which the linked recurring task item will be created. Must not be null.</param>
+    /// <param name="createdByUserHouseholdId">The unique identifier of the user household that will be set as the creator and assignee of the new task item.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task CreateLinkedTaskAsync(Expense expense, Guid createdByUserHouseholdId)
     {
         var category = await _taskItemCategoryRepository.GetAll()
-          .FirstOrDefaultAsync(c => c.TaskItemCategoryName == "Bills & Payments");
+            .FirstOrDefaultAsync(c => c.TaskItemCategoryName == "Bills & Payments");
 
         if (category == null)
         {
@@ -252,13 +270,13 @@ public class ExpenseService : IExpenseService
             await _taskItemCategoryRepository.SaveChangesAsync();
         }
 
-        var dueDate = GetNextDueDateFromDueDay(expense.DueDay);
+        var dueDate = RecurrenceUtility.GetNextDueDateFromDueDay(expense.DueDay);
 
         var recurrenceRule = new RecurrenceRule
         {
             RecurrenceRuleId = Guid.NewGuid(),
             RecurrenceFrequency = RecurrenceFrequency.Monthly,
-            RecurrenceDays = null, // Monthly recurrence uses IntervalDays/DueDay, not DaysOfWeek
+            RecurrenceDays = null,
             IntervalDays = null,
             StartDateTime = dueDate,
             EndDateTime = null,
@@ -278,6 +296,8 @@ public class ExpenseService : IExpenseService
             DueDate = dueDate,
             CreatedDate = DateTime.UtcNow,
             UpdatedDate = DateTime.UtcNow,
+            HouseholdId = expense.HouseholdId,
+            IsPrivate = true,
             CreatedByUserHouseholdId = createdByUserHouseholdId,
             AssignedToUserHouseholdId = createdByUserHouseholdId,
             TaskItemCategoryId = category.TaskItemCategoryId,
@@ -286,32 +306,86 @@ public class ExpenseService : IExpenseService
             IsArchived = false
         };
 
+
         await _taskItemRepository.AddAsync(taskItem);
         await _taskItemRepository.SaveChangesAsync();
     }
 
     /// <summary>
-    /// Calculates the next occurrence of the given due day in the current or next month.
-    /// Handles DueDay 31 as the last day of the month.
+    /// If this expense is linked to a credit, syncs the credit's payment fields
+    /// to match the updated expense. Only syncs fields the user can change on
+    /// the expense side: name, amount, and due day.
+    /// Skips sync when the update originated from CreditService to avoid a loop.
     /// </summary>
-    private static DateTime GetNextDueDateFromDueDay(int dueDay)
+    private async Task SyncLinkedCreditAsync(Expense expense)
     {
-        var now = DateTime.UtcNow;
-        var daysInCurrentMonth = DateTime.DaysInMonth(now.Year, now.Month);
-        var resolvedDay = dueDay > daysInCurrentMonth ? daysInCurrentMonth : dueDay;
-        var candidateDate = new DateTime(now.Year, now.Month, resolvedDay, 0, 0, 0, DateTimeKind.Utc);
+        // Only sync if this expense has a linked credit
+        if (expense.CreditId == null || expense.CreditId == Guid.Empty)
+            return;
 
-        // If due day has already passed this month, roll to next month
-        if (candidateDate <= now)
-        {
-            var nextMonth = now.AddMonths(1);
-            var daysInNextMonth = DateTime.DaysInMonth(nextMonth.Year, nextMonth.Month);
-            resolvedDay = dueDay > daysInNextMonth ? daysInNextMonth : dueDay;
-            candidateDate = new DateTime(nextMonth.Year, nextMonth.Month, resolvedDay, 0, 0, 0, DateTimeKind.Utc);
-        }
+        var credit = await _creditRepository.GetByIdAsync(expense.CreditId.Value);
+        if (credit == null)
+            return;
 
-        return candidateDate;
+        // Only update the fields that mirror the expense
+        credit.CreditName = expense.ExpenseName;
+        credit.PaymentAmount = expense.AmountDue;
+        credit.PaymentDay = expense.DueDay;
+
+        await _creditRepository.UpdateAsync(credit);
+        await _creditRepository.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Syncs the linked investment with the updated expense.
+    /// Only syncs fields that mirror the expense: name and contribution amount.
+    /// Bypasses InvestmentService directly to prevent sync loops.
+    /// </summary>
+    private async Task SyncLinkedInvestmentAsync(Expense expense)
+    {
+        if (expense.InvestmentId == null || expense.InvestmentId == Guid.Empty)
+            return;
+
+        var investment = await _investmentRepository.GetByIdAsync(expense.InvestmentId.Value);
+        if (investment == null)
+            return;
+
+        investment.InvestmentName = expense.ExpenseName;
+        investment.ContributionAmount = expense.AmountDue;
+
+        await _investmentRepository.UpdateAsync(investment);
+        await _investmentRepository.SaveChangesAsync();
+    }
+
+
+
+
+    /// <summary>
+    /// Synchronizes the linked task item with the specified expense, updating its details to reflect the current
+    /// expense information.
+    /// </summary>
+    /// <remarks>If no task item is linked to the specified expense, the method completes without making any
+    /// changes.</remarks>
+    /// <param name="expense">The expense whose associated task item will be updated. Cannot be null.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    private async Task SyncLinkedTaskAsync(Expense expense)
+    {
+        var linkedTask = await _taskItemRepository.GetAll()
+            .FirstOrDefaultAsync(t => t.ExpenseId == expense.ExpenseId);
+
+        if (linkedTask == null)
+            return;
+
+        linkedTask.TaskItemName = $"Pay {expense.ExpenseName}";
+        linkedTask.Description =
+            $"Amount due: {expense.AmountDue:C} — due on day {expense.DueDay} of each month.";
+        linkedTask.DueDate = RecurrenceUtility.GetNextDueDateFromDueDay(expense.DueDay);
+        linkedTask.UpdatedDate = DateTime.UtcNow;
+
+        await _taskItemRepository.UpdateAsync(linkedTask);
+        await _taskItemRepository.SaveChangesAsync();
     }
 
     #endregion Private Helper Methods
+
 }

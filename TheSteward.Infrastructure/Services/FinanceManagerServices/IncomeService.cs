@@ -1,21 +1,17 @@
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.Models.FinanceManagerModels;
-
-namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
+using TheSteward.Core.MappingExtensions;
+using Microsoft.EntityFrameworkCore;
 
 public class IncomeService : IIncomeService
 {
     private readonly IIncomeRepository _incomeRepository;
-    private readonly IMapper _mapper;
 
-    public IncomeService(IIncomeRepository incomeRepository, IMapper mapper)
+    public IncomeService(IIncomeRepository incomeRepository)
     {
         _incomeRepository = incomeRepository;
-        _mapper = mapper;
     }
 
     public async Task<IncomeDto> AddAsync(CreateIncomeDto incomeDto)
@@ -23,25 +19,18 @@ public class IncomeService : IIncomeService
         if (incomeDto == null)
             throw new ArgumentNullException(nameof(incomeDto));
 
-        var income = new Income
-        {
-            IncomeId = Guid.NewGuid(),
-            IncomeName = incomeDto.IncomeName,
-            IncomeFrequency = incomeDto.IncomeFrequency,
-            PayCheckGross = incomeDto.PayCheckGross,
-            BudgetId = incomeDto.BudgetId,
-            DisplayOrder = incomeDto.DisplayOrder
-        };
+        var incomeId = Guid.NewGuid();
+        var income = incomeDto.ToEntity(incomeId);
 
         CalculateIncomeValues(income);
 
         await _incomeRepository.AddAsync(income);
         await _incomeRepository.SaveChangesAsync();
 
-        return _mapper.Map<IncomeDto>(income);
+        return income.ToDto();
     }
 
-    public async Task<UpdateIncomeDto> UpdateAsync(UpdateIncomeDto incomeDto)
+    public async Task<IncomeDto> UpdateAsync(UpdateIncomeDto incomeDto)
     {
         if (incomeDto == null)
             throw new ArgumentNullException(nameof(incomeDto));
@@ -50,17 +39,13 @@ public class IncomeService : IIncomeService
         if (income == null)
             throw new KeyNotFoundException($"Income with ID {incomeDto.IncomeId} not found.");
 
-        income.IncomeName = incomeDto.IncomeName;
-        income.IncomeFrequency = incomeDto.IncomeFrequency;
-        income.PayCheckGross = incomeDto.PayCheckGross;
-        income.DisplayOrder = incomeDto.DisplayOrder;
-
+        income.ApplyUpdate(incomeDto);
         CalculateIncomeValues(income);
 
         await _incomeRepository.UpdateAsync(income);
         await _incomeRepository.SaveChangesAsync();
 
-        return incomeDto;
+        return income.ToDto();
     }
 
     public async Task DeleteAsync(Guid incomeId)
@@ -77,13 +62,14 @@ public class IncomeService : IIncomeService
     }
 
     #region Get Methods
+
     public async Task<IncomeDto?> GetAsync(Guid incomeId)
     {
         if (incomeId == Guid.Empty)
             throw new ArgumentException("Income ID cannot be empty.", nameof(incomeId));
 
         var income = await _incomeRepository.GetByIdAsync(incomeId);
-        return income == null ? null : _mapper.Map<IncomeDto>(income);
+        return income?.ToDto();
     }
 
     public async Task<List<IncomeDto>> GetAllByBudgetIdAsync(Guid budgetId)
@@ -96,8 +82,9 @@ public class IncomeService : IIncomeService
             .OrderBy(i => i.DisplayOrder)
             .ToListAsync();
 
-        return incomes.Select(i => _mapper.Map<IncomeDto>(i)).ToList();
+        return incomes.ToDtoList();
     }
+
     #endregion Get Methods
 
     #region Private Helper Methods
@@ -116,8 +103,8 @@ public class IncomeService : IIncomeService
         income.EstStateIncomeTax = CalculateStateIncomeTax(income.YearlyGrossSalary);
 
         var yearlyNet = income.YearlyGrossSalary
-                                  - income.EstFederalIncomeTax
-                                  - income.EstStateIncomeTax;
+                        - income.EstFederalIncomeTax
+                        - income.EstStateIncomeTax;
         income.MonthlyNetIncome = Math.Round(yearlyNet / 12m, 2);
     }
 
@@ -152,3 +139,5 @@ public class IncomeService : IIncomeService
 
     #endregion
 }
+
+

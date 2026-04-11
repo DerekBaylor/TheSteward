@@ -95,7 +95,8 @@
                     ContributionFrequency = formData.ContributionFrequency,
                     EstYearlyGrowth = formData.EstYearlyGrowth,
                     DisplayOrder = formData.DisplayOrder,
-                    ExpenseId = formData.ExpenseId
+                    ExpenseId = formData.ExpenseId,
+                    HouseholdId = FormData.HouseholdId,
                 };
 
                 var updated = await InvestmentService.UpdateAsync(updateDto);
@@ -114,7 +115,8 @@
                     EstYearlyGrowth = formData.EstYearlyGrowth,
                     DisplayOrder = formData.DisplayOrder,
                     BudgetId = formData.BudgetId,
-                    ExpenseId = formData.ExpenseId
+                    ExpenseId = formData.ExpenseId,
+                    HouseholdId = FormData.HouseholdId,
                 };
 
                 var created = await InvestmentService.AddAsync(createDto);

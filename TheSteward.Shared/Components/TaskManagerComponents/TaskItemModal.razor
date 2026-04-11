@@ -1,0 +1,355 @@
+﻿@* TaskItemModal.razor *@
+@using TheSteward.Core.Dtos.TaskManagerDtos
+@using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Shared.Dtos.HouseholdDtos
+@using TheSteward.Shared.Dtos.TaskDtos
+@using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
+
+@inject ITaskItemService TaskItemService
+@inject ITaskItemCategoryService TaskItemCategoryService
+@inject ISnackbar Snackbar
+
+<MudDialog id="taskModal" Class="ts-modal task-modal">
+    <DialogContent>
+        <div class="dialog-layout">
+
+            @* ── Left Column: Vertical Title ── *@
+            <MudStack class="dialog-sidebar">
+                <div class="dialog-sidebar-content">
+                    <MudIcon Icon="@(FormData.IsEditMode ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)" />
+                    <MudText Typo="Typo.h6">TASK</MudText>
+                </div>
+            </MudStack>
+
+            @* ── Right Column: Form ── *@
+            <MudStack Class="modal-right-stack">
+                <MudStack Class="dialog-form">
+                    <MudForm @ref="form" @bind-IsValid="isValid">
+
+                        @* Task Name *@
+                        <MudTextField T="string"
+                                      Label="Task Name"
+                                      @bind-Value="FormData.TaskItemName"
+                                      Required="true"
+                                      RequiredError="Task name is required."
+                                      MaxLength="100"
+                                      Immediate="true"
+                                      Class="mb-3" />
+                        @* Description *@
+                        <MudTextField T="string"
+                                      Label="Description"
+                                      @bind-Value="FormData.Description"
+                                      Lines="3"
+                                      MaxLength="500"
+                                      Class="mb-3" />
+
+                        @* Assignee *@
+                        @if (HouseholdMembers.Any())
+                        {
+                            <MudSelect T="Guid"
+                                       Label="Assign To"
+                                       @bind-Value="FormData.AssignedToUserHouseholdId"
+                                       Class="mb-3">
+                                @foreach (var member in HouseholdMembers)
+                                {
+                                    <MudSelectItem T="Guid" Value="member.UserHouseholdId">
+                                        @member.DisplayName
+                                    </MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+
+                        @* Category *@
+                        <MudSelect T="Guid"
+                                   Label="Category"
+                                   @bind-Value="FormData.TaskItemCategoryId"
+                                   Required="true"
+                                   RequiredError="Please select a category."
+                                   Class="mb-3">
+                            @foreach (var category in availableCategories)
+                            {
+                                <MudSelectItem T="Guid" Value="category.TaskItemCategoryId">
+                                    @category.TaskItemCategoryName
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+
+                        @* Priority *@
+                        <div class="d-flex gap-3 mb-3">
+                            <MudSelect T="TaskItemPriority"
+                                       Label="Priority"
+                                       @bind-Value="FormData.Priority"
+                                       Class="flex-1">
+                                @foreach (var priority in Enum.GetValues<TaskItemPriority>())
+                                {
+                                    <MudSelectItem T="TaskItemPriority" Value="priority">@priority</MudSelectItem>
+                                }
+                            </MudSelect>
+
+                            @* Status *@
+                            @if (FormData.IsEditMode)
+                            {
+                                <MudSelect T="TaskItemStatus"
+                                           Label="Status"
+                                           @bind-Value="FormData.Status"
+                                           Class="flex-1">
+                                    @foreach (var status in Enum.GetValues<TaskItemStatus>())
+                                    {
+                                        <MudSelectItem T="TaskItemStatus" Value="status">@status</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                        </div>
+
+                        @* Due date is hidden when recurring *@
+                        @if (!FormData.IsRecurring)
+                        {
+                            <MudDatePicker Label="Due Date"
+                                           @bind-Date="FormData.DueDate"
+                                           Clearable="true"
+                                           Class="mb-3" />
+                        }
+
+                        @* Recurrence Toggle *@
+                        @if (!FormData.IsEditMode || FormData.RecurrenceId == null)
+                        {
+                            <MudSwitch T="bool"
+                                       Label="Repeats"
+                                       @bind-Value="FormData.IsRecurring"
+                                       Color="Color.Primary"
+                                       Class="mb-2" />
+                        }
+
+                        @* Recurrence Section *@
+                        @if (FormData.IsRecurring)
+                        {
+                            <MudPaper Elevation="0" Class="pa-3 mb-3 mud-background-gray rounded">
+
+                                <MudSelect T="RecurrenceFrequency"
+                                           Label="Repeats"
+                                           @bind-Value="FormData.RecurrenceFrequency"
+                                           Class="mb-3">
+                                    @foreach (var freq in Enum.GetValues<RecurrenceFrequency>())
+                                    {
+                                        <MudSelectItem T="RecurrenceFrequency" Value="freq">
+                                            @FrequencyLabel(freq)
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+
+                                @* Day-of-week checkboxes — only for Weekly / BiWeekly *@
+                                @if (FormData.RecurrenceFrequency is RecurrenceFrequency.Weekly
+                                                                    or RecurrenceFrequency.BiWeekly)
+                                {
+                                    <MudText Typo="Typo.caption" Class="mb-1">Repeat on</MudText>
+                                    <div class="d-flex flex-wrap gap-1 mb-3">
+                                        @foreach (var day in WeekDayOptions)
+                                        {
+                                            var isChecked = FormData.RecurrenceDays.HasFlag(day);
+                                            <MudChip T="string"
+                                                     Color="@(isChecked ? Color.Primary : Color.Default)"
+                                                     Variant="@(isChecked ? Variant.Filled : Variant.Outlined)"
+                                                     OnClick="@(() => ToggleDay(day))"
+                                                     Size="Size.Small">
+                                                @day.ToString()[..2]
+                                            </MudChip>
+                                        }
+                                    </div>
+                                }
+
+                                @* Custom interval *@
+                                @if (FormData.RecurrenceFrequency == RecurrenceFrequency.Custom)
+                                {
+                                    <MudNumericField T="int?"
+                                                     Label="Every N days"
+                                                     @bind-Value="FormData.IntervalDays"
+                                                     Min="1"
+                                                     Max="365"
+                                                     Class="mb-3" />
+                                }
+
+                                <MudDatePicker Label="Starts on"
+                                               @bind-Date="recurrenceStartDate"
+                                               Class="mb-3" />
+
+                                <MudDatePicker Label="Ends on (optional)"
+                                               @bind-Date="recurrenceEndDate"
+                                               Clearable="true" />
+
+                            </MudPaper>
+                        }
+
+                    </MudForm>
+                </MudStack>
+
+                <div class="dialog-actions">
+                    @if (FormData.IsEditMode)
+                    {
+                        <MudButton Color="Color.Error"
+                                   Variant="Variant.Text"
+                                   OnClick="HandleDelete"
+                                   Disabled="isSaving"
+                                   Class="mr-auto">
+                            Delete
+                        </MudButton>
+                    }
+
+                    <MudButton OnClick="Cancel" Disabled="isSaving">Cancel</MudButton>
+
+                    <MudButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               OnClick="HandleSubmit"
+                               Disabled="isSaving || !isValid">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        }
+                        @(FormData.IsEditMode ? "Save Changes" : "Add Task")
+                    </MudButton>
+                </div>
+            </MudStack>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+    
+    [Parameter] 
+    public TaskItemFormDto FormData { get; set; } = new();
+
+    [Parameter]
+    public List<HouseholdMemberDto> HouseholdMembers { get; set; } = new();
+
+    private MudForm form = default!;
+    private bool isValid;
+    private bool isSaving;
+    private List<TaskItemCategoryDto> availableCategories = new();
+
+    // MudDatePicker needs nullable DateTime? — bridge to FormData
+    private DateTime? recurrenceStartDate
+    {
+        get => FormData.RecurrenceStartDate;
+        set => FormData.RecurrenceStartDate = value ?? DateTime.Today;
+    }
+
+    private DateTime? recurrenceEndDate
+    {
+        get => FormData.RecurrenceEndDate;
+        set => FormData.RecurrenceEndDate = value;
+    }
+
+    // All named DaysOfWeek values except None
+    private static readonly DaysOfWeek[] WeekDayOptions =
+        Enum.GetValues<DaysOfWeek>().Where(d => d != DaysOfWeek.None).ToArray();
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableCategories = await TaskItemCategoryService.GetAllAsync();
+
+        if (FormData.TaskItemCategoryId == Guid.Empty && availableCategories.Any())
+            FormData.TaskItemCategoryId = availableCategories.First().TaskItemCategoryId;
+
+        if (FormData.RecurrenceId.HasValue)
+            FormData.IsRecurring = true;
+    }
+
+    private void ToggleDay(DaysOfWeek day)
+    {
+        FormData.RecurrenceDays ^= day; // flips the flag
+    }
+
+    private static string FrequencyLabel(RecurrenceFrequency freq) => freq switch
+    {
+        RecurrenceFrequency.Daily => "Daily",
+        RecurrenceFrequency.Weekly => "Weekly",
+        RecurrenceFrequency.BiWeekly => "Every 2 weeks",
+        RecurrenceFrequency.Monthly => "Monthly",
+        RecurrenceFrequency.Custom => "Custom interval",
+        _ => freq.ToString()
+    };
+
+    private async Task HandleSubmit()
+    {
+        await form.Validate();
+        if (!isValid) return;
+
+        isSaving = true;
+
+        try
+        {
+            if (FormData.IsEditMode)
+            {
+                var updateDto = new UpdateTaskItemDto
+                {
+                    TaskItemId = FormData.TaskItemId!.Value,
+                    TaskItemName = FormData.TaskItemName,
+                    Description = FormData.Description,
+                    Status = FormData.Status,
+                    Priority = FormData.Priority,
+                    DueDate = FormData.DueDate,
+                    AssignedToUserHouseholdId = FormData.AssignedToUserHouseholdId,
+                    TaskItemCategoryId = FormData.TaskItemCategoryId,
+                    RecurrenceId = FormData.RecurrenceId,
+                    ExpenseId = FormData.ExpenseId
+                };
+
+                await TaskItemService.UpdateAsync(updateDto);
+                Snackbar.Add("Task updated.", Severity.Success);
+            }
+            else
+            {
+                CreateRecurrenceRuleDto? recurrenceDto = null;
+
+                if (FormData.IsRecurring)
+                {
+                    recurrenceDto = new CreateRecurrenceRuleDto
+                    {
+                        RecurrenceFrequency = FormData.RecurrenceFrequency,
+                        RecurrenceDays = FormData.RecurrenceDays == DaysOfWeek.None
+                                                ? null
+                                                : FormData.RecurrenceDays,
+                        IntervalDays = FormData.IntervalDays,
+                        StartDateTime = FormData.RecurrenceStartDate,
+                        EndDateTime = FormData.RecurrenceEndDate
+                    };
+                }
+
+                var createDto = new CreateTaskItemDto
+                {
+                    TaskItemName = FormData.TaskItemName,
+                    Description = FormData.Description,
+                    Status = FormData.Status,
+                    Priority = FormData.Priority,
+                    DueDate = FormData.IsRecurring ? null : FormData.DueDate,
+                    HouseholdId = FormData.HouseholdId,
+                    CreatedByUserHouseholdId = FormData.CreatedByUserHouseholdId,
+                    AssignedToUserHouseholdId = FormData.AssignedToUserHouseholdId,
+                    TaskItemCategoryId = FormData.TaskItemCategoryId,
+                    RecurrenceId = FormData.RecurrenceId,
+                    ExpenseId = FormData.ExpenseId,
+                    RecurrenceRule = recurrenceDto
+                };
+
+                await TaskItemService.AddAsync(createDto);
+                Snackbar.Add("Task added!", Severity.Success);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void HandleDelete() =>
+        MudDialog.Close(DialogResult.Ok($"delete:{FormData.TaskItemId}"));
+
+    private void Cancel() => MudDialog.Cancel();
+}

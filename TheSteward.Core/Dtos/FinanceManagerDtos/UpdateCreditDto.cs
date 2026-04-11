@@ -35,6 +35,8 @@ public class UpdateCreditDto
     [Required]
     public Guid BudgetId { get; set; }
 
+    public Guid HouseholdId { get; set; }
+
     public Guid? ExpenseId { get; set; }
 
     /// <summary>
@@ -54,6 +56,8 @@ public class UpdateCreditDto
     /// Used to get-or-create a subcategory when <see cref="BudgetSubCategoryId"/> is not supplied.
     /// </summary>
     public string? BudgetSubCategoryName { get; set; }
+
+    public Guid UserHouseholdId { get; set; }
 
     #endregion Navigation Properties
 }

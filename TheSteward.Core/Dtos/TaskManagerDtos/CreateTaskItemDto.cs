@@ -14,7 +14,8 @@ public class CreateTaskItemDto
     
     public DateTime? DueDate { get; set; }
 
-    #region Scaler Properties
+    public required Guid HouseholdId { get; set; }
+    
     public required Guid CreatedByUserHouseholdId { get; set; }
     
     public Guid? AssignedToUserHouseholdId { get; set; }
@@ -22,7 +23,10 @@ public class CreateTaskItemDto
     public required Guid TaskItemCategoryId { get; set; }
     
     public Guid? RecurrenceId { get; set; }
-
+    
     public Guid? ExpenseId { get; set; }
-    #endregion Scaler Properties
+
+    public bool IsPrivate { get; set; }
+
+    public CreateRecurrenceRuleDto? RecurrenceRule { get; set; }
 }

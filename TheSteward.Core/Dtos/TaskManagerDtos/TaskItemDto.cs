@@ -7,7 +7,7 @@ public class TaskItemDto
 {
     public Guid TaskItemId { get; set; }
     
-    public required string TaskItemName { get; set; }
+    public string TaskItemName { get; set; }
     
     public string? Description { get; set; }
     
@@ -22,25 +22,34 @@ public class TaskItemDto
     public DateTime CreatedDate { get; set; }
     
     public DateTime UpdatedDate { get; set; }
+    
+    public bool IsArchived { get; set; }
+    
+    public bool IsPrivate { get; set; }
 
-    #region Scaler Properties
+    #region Navigation Properties
+
+    public Guid HouseholdId { get; set; }
+    
     public Guid CreatedByUserHouseholdId { get; set; }
     
     public Guid? AssignedToUserHouseholdId { get; set; }
     
-    public Guid TaskItemCategoryId { get; set; }
-    
     public Guid? RecurrenceId { get; set; }
     
-    public Guid? ExpenseId { get; set; }
-    #endregion Scaler Properties
-
-    #region Navigation Properties
-
-    public TaskItemCategoryDto? TaskItemCategory { get; set; }
+    public Guid TaskItemCategoryId { get; set; }
     
-    public RecurrenceRuleDto? RecurrenceRule { get; set; }
-   
-    public ExpenseDto? RelatedExpense { get; set; }
+    public string? TaskItemCategoryName { get; set; }
+    
+    public string? TaskItemCategoryColorHex { get; set; }
+    
+    public string? TaskItemCategoryIconName { get; set; }
+    
+    public Guid? ExpenseId { get; set; }
+    
+    public string? RelatedExpenseName { get; set; }
+    
+    public decimal? RelatedExpenseAmountDue { get; set; }
+
     #endregion Navigation Properties
 }

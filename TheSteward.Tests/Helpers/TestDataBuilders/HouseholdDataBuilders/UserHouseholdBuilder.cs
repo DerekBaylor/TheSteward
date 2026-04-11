@@ -103,11 +103,13 @@ public class UserHouseholdBuilder
             HasKitchenManagerWritePermission = _hasKitchenManagerWritePermission,
             HasKitchenManagerReadPermission = _hasKitchenManagerReadPermission,
             HasTaskManagerWritePermission = _hasTaskManagerWritePermission,
+            HasTaskManagerCompletePermission = _hasTaskManagerWritePermission,
             HasTaskManagerReadPermission = _hasTaskManagerReadPermission,
             HasFileManagerWritePermission = _hasFileManagerWritePermission,
             HasFileManagerReadPermission = _hasFileManagerReadPermission,
             UserId = _userId,
             User = _user,
+            UserName = _user?.UserName ?? "TestUser",
             HouseholdId = _householdId,
             Household = _household
         };

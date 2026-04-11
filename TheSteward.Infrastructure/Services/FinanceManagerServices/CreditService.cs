@@ -1,10 +1,8 @@
-using AutoMapper;
-using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.FinanceManagerDtos;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
-using TheSteward.Core.Models.FinanceManagerModels;
+using TheSteward.Core.MappingExtensions;
 
 namespace TheSteward.Infrastructure.Services.FinanceManagerServices;
 
@@ -14,15 +12,13 @@ public class CreditService : ICreditService
     private readonly IBudgetCategoryService _budgetCategoryService;
     private readonly IBudgetSubCategoryService _budgetSubCategoryService;
     private readonly IExpenseService _expenseService;
-    private readonly IMapper _mapper;
 
-    public CreditService(ICreditRepository creditRepository, IBudgetCategoryService budgetCategoryService, IBudgetSubCategoryService budgetSubCategoryService, IExpenseService expenseService, IMapper mapper) 
+    public CreditService(ICreditRepository creditRepository, IBudgetCategoryService budgetCategoryService,IBudgetSubCategoryService budgetSubCategoryService, IExpenseService expenseService)
     {
         _creditRepository = creditRepository;
         _budgetCategoryService = budgetCategoryService;
         _budgetSubCategoryService = budgetSubCategoryService;
         _expenseService = expenseService;
-        _mapper = mapper;
     }
 
     public async Task<CreditDto> AddAsync(CreateCreditDto createCreditDto)
@@ -30,7 +26,6 @@ public class CreditService : ICreditService
         if (createCreditDto == null)
             throw new ArgumentNullException(nameof(createCreditDto));
 
-        // --- Resolve category & subcategory ---
         var category = await ResolveCategoryAsync(
             createCreditDto.BudgetId,
             createCreditDto.BudgetCategoryId,
@@ -44,7 +39,6 @@ public class CreditService : ICreditService
 
         var creditId = Guid.NewGuid();
 
-        // --- Create the linked expense ---
         var expenseDto = new CreateExpenseDto
         {
             ExpenseName = createCreditDto.CreditName,
@@ -60,92 +54,102 @@ public class CreditService : ICreditService
 
         var expense = await _expenseService.AddAsync(expenseDto);
 
-        var credit = new Credit
-        {
-            CreditId = creditId,
-            CreditName = createCreditDto.CreditName,
-            CreditType = createCreditDto.CreditType,
-            InterestRate = createCreditDto.InterestRate,
-            CurrentValue = createCreditDto.CurrentValue,
-            EstMonthlyInterest = createCreditDto.EstMonthlyInterest,
-            EstYearlyInterest = createCreditDto.EstYearlyInterest,
-            PaymentFrequency = createCreditDto.PaymentFrequency,
-            PaymentAmount = createCreditDto.PaymentAmount,
-            PaymentDay = createCreditDto.PaymentDay,
-            DisplayOrder = createCreditDto.DisplayOrder,
-            BudgetId = createCreditDto.BudgetId,
-            ExpenseId = expense.ExpenseId,
-        };
+        var credit = createCreditDto.ToEntity(creditId, expense.ExpenseId);
 
         await _creditRepository.AddAsync(credit);
         await _creditRepository.SaveChangesAsync();
 
-        var creditDto = _mapper.Map<CreditDto>(credit);
-        return creditDto;
+        return credit.ToDto();
     }
 
-    public async Task<UpdateCreditDto> UpdateAsync(UpdateCreditDto updateCreditDto)
+    public async Task<CreditDto> UpdateAsync(UpdateCreditDto updateCreditDto)
     {
         if (updateCreditDto == null)
             throw new ArgumentNullException(nameof(updateCreditDto));
 
-        var credit = await _creditRepository.GetByIdAsync(updateCreditDto.CreditId);
-
-        if (credit == null)
-            throw new KeyNotFoundException($"Credit with ID {updateCreditDto.CreditId} not found.");
-
-        var budgetId = updateCreditDto.BudgetId != Guid.Empty ? updateCreditDto.BudgetId : credit.BudgetId;
-
-        if (budgetId == Guid.Empty)
-            throw new ArgumentException($"BudgetId could not be resolved for credit {updateCreditDto.CreditId}.");
-
-        // --- Resolve category & subcategory (mirrors AddAsync) ---
-        var category = await ResolveCategoryAsync(budgetId, updateCreditDto.BudgetCategoryId, updateCreditDto.BudgetCategoryName);
-
-        var subCategory = await ResolveSubCategoryAsync(budgetId, category.BudgetCategoryId, updateCreditDto.BudgetSubCategoryId, updateCreditDto.BudgetSubCategoryName);
-
-        // --- Update the credit ---
-        credit.CreditName = updateCreditDto.CreditName;
-        credit.CreditType = updateCreditDto.CreditType;
-        credit.InterestRate = updateCreditDto.InterestRate;
-        credit.CurrentValue = updateCreditDto.CurrentValue;
-        credit.EstMonthlyInterest = updateCreditDto.EstMonthlyInterest;
-        credit.EstYearlyInterest = updateCreditDto.EstYearlyInterest;
-        credit.PaymentFrequency = updateCreditDto.PaymentFrequency;
-        credit.PaymentAmount = updateCreditDto.PaymentAmount;
-        credit.PaymentDay = updateCreditDto.PaymentDay;
-        credit.DisplayOrder = updateCreditDto.DisplayOrder;
-
-        await _creditRepository.UpdateAsync(credit);
-
-        // --- Sync the linked expense (if one exists) ---
-        if (credit.ExpenseId != Guid.Empty)
+        try
         {
-            var expense = await _expenseService.GetAsync(credit.ExpenseId);
+            var credit = await _creditRepository.GetByIdAsync(updateCreditDto.CreditId);
+            if (credit == null)
+                throw new KeyNotFoundException($"Credit with ID {updateCreditDto.CreditId} not found.");
 
-            if (expense == null)
-                throw new KeyNotFoundException($"Linked expense with ID {credit.ExpenseId} not found for credit {updateCreditDto.CreditId}.");
+            var budgetId = updateCreditDto.BudgetId != Guid.Empty
+                ? updateCreditDto.BudgetId
+                : credit.BudgetId;
 
-            var updateExpenseDto = new UpdateExpenseDto
+            if (budgetId == Guid.Empty)
+                throw new ArgumentException($"BudgetId could not be resolved for credit {updateCreditDto.CreditId}.");
+
+            var category = await ResolveCategoryAsync(
+                budgetId,
+                updateCreditDto.BudgetCategoryId,
+                updateCreditDto.BudgetCategoryName);
+
+            var subCategory = await ResolveSubCategoryAsync(
+                budgetId,
+                category.BudgetCategoryId,
+                updateCreditDto.BudgetSubCategoryId,
+                updateCreditDto.BudgetSubCategoryName);
+
+            credit.ApplyUpdate(updateCreditDto);
+
+            await _creditRepository.UpdateAsync(credit);
+
+            if (credit.ExpenseId != Guid.Empty)
             {
-                ExpenseId = expense.ExpenseId,
-                ExpenseName = updateCreditDto.CreditName,
-                AmountDue = updateCreditDto.PaymentAmount,
-                DueDay = updateCreditDto.PaymentDay,
-                DisplayOrder = updateCreditDto.DisplayOrder,
-                BudgetCategoryId = category.BudgetCategoryId,
-                BudgetSubCategoryId = subCategory?.BudgetSubCategoryId,
-                CreditId = updateCreditDto.CreditId,
-                InvestmentId = expense.InvestmentId,
-            };
+                var expense = await _expenseService.GetAsync(credit.ExpenseId);
+                if (expense == null)
+                    throw new KeyNotFoundException(
+                        $"Linked expense with ID {credit.ExpenseId} not found for credit {updateCreditDto.CreditId}.");
 
-            await _expenseService.UpdateAsync(updateExpenseDto);
+                var updateExpenseDto = new UpdateExpenseDto
+                {
+                    ExpenseId = expense.ExpenseId,
+                    ExpenseName = updateCreditDto.CreditName,
+                    AmountDue = updateCreditDto.PaymentAmount,
+                    DueDay = updateCreditDto.PaymentDay,
+                    DisplayOrder = updateCreditDto.DisplayOrder,
+                    BudgetId = budgetId,
+                    BudgetCategoryId = category.BudgetCategoryId,
+                    BudgetSubCategoryId = subCategory?.BudgetSubCategoryId,
+                    CreditId = updateCreditDto.CreditId,
+                    InvestmentId = expense.InvestmentId,
+                };
+
+                await _expenseService.UpdateAsync(updateExpenseDto);
+            }
+            else
+            {
+                var createExpenseDto = new CreateExpenseDto
+                {
+                    ExpenseName = updateCreditDto.CreditName,
+                    AmountDue = updateCreditDto.PaymentAmount,
+                    DueDay = updateCreditDto.PaymentDay,
+                    DisplayOrder = updateCreditDto.DisplayOrder,
+                    BudgetId = budgetId,
+                    BudgetCategoryId = category.BudgetCategoryId,
+                    BudgetSubCategoryId = subCategory?.BudgetSubCategoryId,
+                    CreditId = updateCreditDto.CreditId,
+                    CreatedByUserHouseholdId = updateCreditDto.UserHouseholdId,
+                };
+
+                var createdExpense = await _expenseService.AddAsync(createExpenseDto);
+
+                credit.ExpenseId = createdExpense.ExpenseId;
+                await _creditRepository.UpdateAsync(credit);
+            }
+
+            await _creditRepository.SaveChangesAsync();
+
+            return credit.ToDto();
         }
-
-        await _creditRepository.SaveChangesAsync();
-
-        return updateCreditDto;
+        catch
+        {
+            _creditRepository.ClearChangeTracker();
+            throw;
+        }
     }
+
 
     public async Task DeleteAsync(Guid creditId)
     {
@@ -165,6 +169,7 @@ public class CreditService : ICreditService
         if (expenseId != Guid.Empty)
             await _expenseService.DeleteAsync(expenseId);
     }
+
     public async Task<CreditDto?> GetAsync(Guid creditId)
     {
         if (creditId == Guid.Empty)
@@ -172,10 +177,11 @@ public class CreditService : ICreditService
 
         var credit = await _creditRepository.GetByIdAsync(creditId);
 
-        return credit == null ? null : _mapper.Map<CreditDto>(credit);
+        return credit?.ToDto();
     }
 
     #region Get Methods
+
     public async Task<CreditDto?> GetWithExpenseAsync(Guid creditId)
     {
         if (creditId == Guid.Empty)
@@ -185,7 +191,7 @@ public class CreditService : ICreditService
             .Include(c => c.LinkedExpense)
             .FirstOrDefaultAsync(c => c.CreditId == creditId);
 
-        return credit == null ? null : _mapper.Map<CreditDto>(credit);
+        return credit?.ToDto();
     }
 
     public async Task<List<CreditDto>> GetAllByBudgetIdAsync(Guid budgetId)
@@ -198,7 +204,7 @@ public class CreditService : ICreditService
             .OrderBy(c => c.DisplayOrder)
             .ToListAsync();
 
-        return _mapper.Map<List<CreditDto>>(credits);
+        return credits.ToDtoList();
     }
 
     public async Task<List<CreditDto>> GetAllByBudgetIdWithExpensesAsync(Guid budgetId)
@@ -212,7 +218,7 @@ public class CreditService : ICreditService
             .OrderBy(c => c.DisplayOrder)
             .ToListAsync();
 
-        return _mapper.Map<List<CreditDto>>(credits);
+        return credits.ToDtoList();
     }
 
     #endregion Get Methods
@@ -223,12 +229,12 @@ public class CreditService : ICreditService
     /// Returns an existing category by ID, or gets/creates one by name.
     /// Always returns a valid category — never null.
     /// </summary>
-    private async Task<BudgetCategoryDto> ResolveCategoryAsync(Guid budgetId, Guid? categoryId, string categoryName)
+    private async Task<BudgetCategoryDto> ResolveCategoryAsync(
+        Guid budgetId, Guid? categoryId, string categoryName)
     {
         if (categoryId.HasValue && categoryId.Value != Guid.Empty)
         {
             var category = await _budgetCategoryService.GetAsync(categoryId.Value);
-
             if (category == null)
                 throw new KeyNotFoundException(
                     $"Budget category with ID {categoryId.Value} not found.");
@@ -240,21 +246,19 @@ public class CreditService : ICreditService
             ? "Debt & Credit"
             : categoryName;
 
-        var budgetCategoryDto = await _budgetCategoryService.GetByIdOrCreateAsync(budgetId, fallbackName);
-        
-        return budgetCategoryDto;
+        return await _budgetCategoryService.GetByIdOrCreateAsync(budgetId, fallbackName);
     }
 
     /// <summary>
     /// Returns an existing subcategory by ID, or gets/creates one by name.
     /// Returns null when no subcategory info is provided at all.
     /// </summary>
-    private async Task<BudgetSubCategoryDto?> ResolveSubCategoryAsync(Guid budgetId, Guid budgetCategoryId, Guid? subCategoryId, string? subCategoryName)
+    private async Task<BudgetSubCategoryDto?> ResolveSubCategoryAsync(
+        Guid budgetId, Guid budgetCategoryId, Guid? subCategoryId, string? subCategoryName)
     {
         if (subCategoryId.HasValue && subCategoryId.Value != Guid.Empty)
         {
             var subCategory = await _budgetSubCategoryService.GetAsync(subCategoryId.Value);
-
             if (subCategory == null)
                 throw new KeyNotFoundException(
                     $"Budget subcategory with ID {subCategoryId.Value} not found.");
@@ -263,14 +267,11 @@ public class CreditService : ICreditService
         }
 
         if (!string.IsNullOrWhiteSpace(subCategoryName))
-        {
             return await _budgetSubCategoryService.GetByIdOrCreateSubCategoryAsync(
-                budgetId,
-                budgetCategoryId,
-                subCategoryName);
-        }
+                budgetId, budgetCategoryId, subCategoryName);
 
         return null;
     }
+
     #endregion Private Methods
 }

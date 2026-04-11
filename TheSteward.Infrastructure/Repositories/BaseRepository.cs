@@ -57,4 +57,9 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         return await _context.Database.BeginTransactionAsync();
     }
+
+    public void ClearChangeTracker()
+    {
+        _context.ChangeTracker.Clear();
+    }
 }

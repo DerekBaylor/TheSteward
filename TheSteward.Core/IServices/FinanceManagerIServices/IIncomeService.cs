@@ -79,7 +79,7 @@ public interface IIncomeService
     /// var updatedIncome = await incomeService.UpdateAsync(updateDto);
     /// </code>
     /// </example>
-    Task<UpdateIncomeDto> UpdateAsync(UpdateIncomeDto incomeDto);
+    Task<IncomeDto> UpdateAsync(UpdateIncomeDto incomeDto);
     
     /// <summary>
     /// Asynchronously retrieves a single income entry by its identifier.

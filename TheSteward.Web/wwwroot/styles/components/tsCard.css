@@ -4,7 +4,6 @@
 .ts-card {
     margin: 1rem;
     font-family: var(--primary-font);
-    border: 3px solid var(--base-green);
     border-radius: var(--border-radius);
 }
 
@@ -16,7 +15,8 @@
 
 .ts-card-header {
     align-items: center;
-    background-color: var(--base-green);
+    background-image: var(--blue-gradient);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
     color: var(--off-white);
     display: flex;
     flex-shrink: 0;

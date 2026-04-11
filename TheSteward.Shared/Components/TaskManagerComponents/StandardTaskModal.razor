@@ -1,0 +1,158 @@
+﻿@using TheSteward.Core.Utils.TaskManagerUtils
+@using TheSteward.Shared.Dtos.TaskManagerDtos
+@using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
+
+@namespace TheSteward.Shared.Components.TaskManagerComponents
+
+<MudDialog>
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <span class="material-symbols-outlined">checklist</span>
+            <span>Add Standard Tasks</span>
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">
+            Select the tasks you'd like to add. Tasks you already have are hidden.
+            Categories will be created automatically if they don't exist yet.
+        </MudText>
+
+        @if (!SelectableTasks.Any())
+        {
+            <MudAlert Severity="Severity.Info">
+                You already have all standard tasks. Nothing new to add.
+            </MudAlert>
+        }
+        else
+        {
+            @* Select All / Deselect All *@
+            <div class="d-flex align-center justify-space-between mb-2">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    @SelectedCount of @SelectableTasks.Count selected
+                </MudText>
+                <div class="d-flex gap-2">
+                    <MudButton Size="Size.Small"
+                               Variant="Variant.Text"
+                               OnClick="SelectAll">
+                        Select All
+                    </MudButton>
+                    <MudButton Size="Size.Small"
+                               Variant="Variant.Text"
+                               OnClick="DeselectAll">
+                        Deselect All
+                    </MudButton>
+                </div>
+            </div>
+
+            @* Group tasks by category *@
+            @foreach (var group in GroupedTasks)
+            {
+                <div class="std-task-group mb-3">
+                    <div class="d-flex align-center justify-space-between std-task-group-header">
+                        <MudText Typo="Typo.subtitle2" Class="std-task-category-label">
+                            <span class="material-symbols-outlined std-task-category-icon">
+                                @GetCategoryIcon(group.Key)
+                            </span>
+                            @group.Key
+                        </MudText>
+                        <MudButton Size="Size.Small"
+                                   Variant="Variant.Text"
+                                   OnClick="() => ToggleGroup(group.Key)">
+                            @(IsGroupFullySelected(group.Key) ? "Deselect Group" : "Select Group")
+                        </MudButton>
+                    </div>
+
+                    @foreach (var task in group.Value)
+                    {
+                        <MudCheckBox T="bool"
+                                     Value="task.IsSelected"
+                                     ValueChanged="(val) => task.IsSelected = val"
+                                     Color="Color.Primary"
+                                     Class="std-task-checkbox">
+                            @task.TaskName
+                        </MudCheckBox>
+                    }
+                </div>
+            }
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="Submit"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Disabled="@(SelectedCount == 0)">
+            Add @(SelectedCount > 0 ? $"{SelectedCount} Task{(SelectedCount > 1 ? "s" : "")}" : "Tasks")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    /// <summary>
+    /// All standard task definitions filtered to exclude ones the user already has.
+    /// </summary>
+    [Parameter]
+    public List<StandardTaskSelectionDto> SelectableTasks { get; set; } = new();
+
+    private Dictionary<string, List<StandardTaskSelectionDto>> GroupedTasks =>
+        SelectableTasks
+            .GroupBy(t => t.CategoryName)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+    private int SelectedCount => SelectableTasks.Count(t => t.IsSelected);
+
+    private void SelectAll()
+    {
+        foreach (var task in SelectableTasks)
+            task.IsSelected = true;
+    }
+
+    private void DeselectAll()
+    {
+        foreach (var task in SelectableTasks)
+            task.IsSelected = false;
+    }
+
+    private void ToggleGroup(string categoryName)
+    {
+        if (!GroupedTasks.TryGetValue(categoryName, out var group)) return;
+
+        var allSelected = group.All(t => t.IsSelected);
+        foreach (var task in group)
+            task.IsSelected = !allSelected;
+    }
+
+    private bool IsGroupFullySelected(string categoryName) =>
+        GroupedTasks.TryGetValue(categoryName, out var group) && group.All(t => t.IsSelected);
+
+    private static string GetCategoryIcon(string categoryName) =>
+        categoryName switch
+        {
+            "Daily Chores" => "wb_sunny",
+            "Weekly Chores" => "date_range",
+            "Monthly Chores" => "calendar_month",
+            "Quarterly Chores" => "event_repeat",
+            "Bi-Annual Chores" => "directions_car",
+            "Annual Chores" => "star",
+            _ => "task_alt"
+        };
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Submit()
+    {
+        var selected = SelectableTasks
+            .Where(t => t.IsSelected)
+            .Select(t => new StandardTaskDefinition(t.TaskName, t.CategoryName))
+            .ToList();
+
+        MudDialog.Close(DialogResult.Ok(selected));
+    }
+}
+
+

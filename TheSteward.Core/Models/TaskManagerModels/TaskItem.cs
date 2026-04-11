@@ -18,16 +18,24 @@ public class TaskItem
     public TaskItemPriority Priority { get; set; }
 
     public DateTime? DueDate { get; set; }
-    
+
     public DateTime? CompletedDate { get; set; }
 
     public DateTime CreatedDate { get; set; }
-    
+
     public DateTime UpdatedDate { get; set; }
-    
+
     public bool IsArchived { get; set; }
 
+    public bool IsPrivate { get; set; }
+
     #region Navigation Properties
+
+    public required Guid HouseholdId { get; set; }
+
+    [ForeignKey("HouseholdId")]
+    public Household? Household { get; set; }
+
     public required Guid CreatedByUserHouseholdId { get; set; }
 
     [ForeignKey("CreatedByUserHouseholdId")]
@@ -39,14 +47,15 @@ public class TaskItem
     public UserHousehold? AssignedToUserHousehold { get; set; }
 
     public Guid? RecurrenceId { get; set; }
-    
+
     [ForeignKey("RecurrenceId")]
     public RecurrenceRule? RecurrenceRule { get; set; }
 
     public Guid TaskItemCategoryId { get; set; }
-    
+
     [ForeignKey("TaskItemCategoryId")]
     public TaskItemCategory? TaskItemCategory { get; set; }
+
     public Guid? ExpenseId { get; set; }
 
     [ForeignKey("ExpenseId")]
@@ -54,3 +63,5 @@ public class TaskItem
 
     #endregion Navigation Properties
 }
+
+

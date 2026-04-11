@@ -5,6 +5,7 @@ namespace TheSteward.Core.Dtos.TaskManagerDtos;
 public class UpdateTaskItemDto
 {
     public Guid TaskItemId { get; set; }
+    
     public required string TaskItemName { get; set; }
     
     public string? Description { get; set; }
@@ -17,13 +18,17 @@ public class UpdateTaskItemDto
     
     public DateTime? CompletedDate { get; set; }
 
-    #region Scaler Properties
+    public bool IsPrivate { get; set; }
+
+    #region Navigation Properties
+
     public Guid? AssignedToUserHouseholdId { get; set; }
     
-    public required Guid TaskItemCategoryId { get; set; }
+    public Guid TaskItemCategoryId { get; set; }
     
     public Guid? RecurrenceId { get; set; }
     
     public Guid? ExpenseId { get; set; }
-    #endregion Scaler Properties
+
+    #endregion Navigation Properties
 }

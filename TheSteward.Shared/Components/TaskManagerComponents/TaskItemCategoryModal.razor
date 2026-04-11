@@ -1,0 +1,394 @@
+﻿@namespace TheSteward.Shared.Components.TaskManagerComponents
+
+@using TheSteward.Core.Dtos.TaskManagerDtos
+@using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Shared.Dtos.TaskManagerDtos
+@using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
+
+@inject ITaskItemCategoryService TaskItemCategoryService
+@inject ISnackbar Snackbar
+
+<MudDialog Class="tc-modal">
+    <TitleContent>
+        <div class="tc-modal-title">
+            <span class="material-symbols-outlined tc-modal-icon">category</span>
+            Task Categories
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        @if (isLoading)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-3" />
+        }
+        else
+        {
+            <div class="tc-modal-body">
+
+                @foreach (var category in localCategories.OrderBy(c => c.TaskItemCategoryName))
+                {
+                    <section class="tc-category-section">
+                        <div class="tc-category-row">
+
+                            @* ── Left: icon swatch + name ── *@
+                            <div class="tc-category-left">
+                                <span class="tc-category-swatch"
+                                      style="background-color: @category.ColorHex;">
+                                    <span class="material-symbols-outlined tc-category-icon">
+                                        @(category.IconName ?? "task_alt")
+                                    </span>
+                                </span>
+
+                                @if (category.IsEditing)
+                                {
+                                    <MudTextField @bind-Value="category.TaskItemCategoryName"
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  Class="tc-inline-field"
+                                                  MaxLength="200"
+                                                  Placeholder="Category name" />
+                                }
+                                else
+                                {
+                                    <span class="tc-category-name">
+                                        @category.TaskItemCategoryName
+                                    </span>
+                                }
+                            </div>
+
+                            @* ── Right: action buttons ── *@
+                            <div class="tc-category-actions">
+                                @if (category.IsEditing)
+                                {
+                                    <button class="tc-action-btn tc-action-btn--save"
+                                            title="Save"
+                                            @onclick="() => SaveCategory(category)">
+                                        <span class="material-symbols-outlined">check</span>
+                                    </button>
+                                    <button class="tc-action-btn tc-action-btn--cancel"
+                                            title="Cancel"
+                                            @onclick="() => CancelEditCategory(category)">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="tc-action-btn tc-action-btn--edit"
+                                            title="Edit category"
+                                            @onclick="() => BeginEditCategory(category)">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </button>
+                                    <button class="tc-action-btn tc-action-btn--delete"
+                                            title="Delete category"
+                                            @onclick="() => DeleteCategory(category)">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        @* ── Expanded edit fields (icon + color) ── *@
+                        @if (category.IsEditing)
+                        {
+                            <div class="tc-edit-extras">
+
+                                @* Color picker row *@
+                                <div class="tc-edit-row">
+                                    <span class="tc-edit-label">Color</span>
+                                    <div class="tc-color-swatches">
+                                        @foreach (var color in PresetColors)
+                                        {
+                                            <button class="tc-color-swatch @(category.ColorHex == color ? "tc-color-swatch--active" : "")"
+                                                    style="background-color: @color;"
+                                                    title="@color"
+                                                    @onclick="() => category.ColorHex = color">
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+
+                                @* Icon picker row *@
+                                <div class="tc-edit-row">
+                                    <span class="tc-edit-label">Icon</span>
+                                    <div class="tc-icon-grid">
+                                        @foreach (var icon in CategoryIconOptions)
+                                        {
+                                            <button class="tc-icon-option @(category.IconName == icon.IconName ? "tc-icon-option--active" : "")"
+                                                    title="@icon.Label"
+                                                    @onclick="() => category.IconName = icon.IconName">
+                                                <span class="material-symbols-outlined">@icon.IconName</span>
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                    </section>
+                }
+
+                @* ── Inline new-category input ── *@
+                @if (isAddingCategory)
+                {
+                    <section class="tc-category-section tc-category-section--new">
+                        <div class="tc-category-row">
+                            <div class="tc-category-left">
+                                <span class="tc-category-swatch"
+                                      style="background-color: @newColorHex;">
+                                    <span class="material-symbols-outlined tc-category-icon">
+                                        @(newIconName ?? "task_alt")
+                                    </span>
+                                </span>
+                                <MudTextField @bind-Value="newCategoryName"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="tc-inline-field"
+                                              MaxLength="200"
+                                              Placeholder="New category name" />
+                            </div>
+                            <div class="tc-category-actions">
+                                <button class="tc-action-btn tc-action-btn--save"
+                                        title="Add"
+                                        @onclick="ConfirmAddCategory">
+                                    <span class="material-symbols-outlined">check</span>
+                                </button>
+                                <button class="tc-action-btn tc-action-btn--cancel"
+                                        title="Cancel"
+                                        @onclick="CancelAddCategory">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        @* New category icon + color pickers *@
+                        <div class="tc-edit-extras">
+                            <div class="tc-edit-row">
+                                <span class="tc-edit-label">Color</span>
+                                <div class="tc-color-swatches">
+                                    @foreach (var color in PresetColors)
+                                    {
+                                        <button class="tc-color-swatch @(newColorHex == color ? "tc-color-swatch--active" : "")"
+                                                style="background-color: @color;"
+                                                title="@color"
+                                                @onclick="() => newColorHex = color">
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="tc-edit-row">
+                                <span class="tc-edit-label">Icon</span>
+                                <div class="tc-icon-grid">
+                                    @foreach (var icon in CategoryIconOptions)
+                                    {
+                                        <button class="tc-icon-option @(newIconName == icon.IconName ? "tc-icon-option--active" : "")"
+                                                title="@icon.Label"
+                                                @onclick="() => newIconName = icon.IconName">
+                                            <span class="material-symbols-outlined">@icon.IconName</span>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                }
+
+                @* ── Add Category button ── *@
+                @if (!isAddingCategory)
+                {
+                    <button class="tc-add-btn" @onclick="BeginAddCategory">
+                        <span class="material-symbols-outlined" style="font-size: 16px;">
+                            add_circle_outline
+                        </span>
+                        Add Category
+                    </button>
+                }
+
+            </div>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Class="ts-card-tab-btn tc-modal-btn-close" OnClick="Close">
+            Done
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>
+    /// Pre-loaded categories passed in from the parent page.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public List<TaskItemCategoryDto> TaskItemCategories { get; set; } = new();
+
+    // ── Local state ──────────────────────────────────────────
+    private List<TaskItemCategoryFormDto> localCategories = new();
+    private bool isLoading = false;
+
+    // ── Add new category state ───────────────────────────────
+    private bool isAddingCategory = false;
+    private string newCategoryName = string.Empty;
+    private string newColorHex = "#607D8B";
+    private string? newIconName = "task_alt";
+
+    // ── Edit snapshot (for cancel) ───────────────────────────
+    private string _nameSnapshot = string.Empty;
+    private string _colorSnapshot = string.Empty;
+    private string? _iconSnapshot = null;
+
+    // ── Constants ────────────────────────────────────────────
+    private static readonly IReadOnlyList<string> PresetColors = new[]
+    {
+        "#4CAF50", "#2196F3", "#FF9800", "#F44336",
+        "#9C27B0", "#00BCD4", "#795548", "#607D8B",
+        "#E91E63", "#3F51B5", "#009688", "#FF5722"
+    };
+
+    protected override void OnInitialized() => BuildLocalList();
+
+    private void BuildLocalList()
+    {
+        localCategories = TaskItemCategories
+            .OrderBy(c => c.TaskItemCategoryName)
+            .Select(c => new TaskItemCategoryFormDto
+            {
+                TaskItemCategoryId = c.TaskItemCategoryId,
+                TaskItemCategoryName = c.TaskItemCategoryName,
+                IconName = c.IconName,
+                ColorHex = c.ColorHex
+            })
+            .ToList();
+    }
+
+    #region Add Category
+
+    private void BeginAddCategory()
+    {
+        newCategoryName = string.Empty;
+        newColorHex = "#607D8B";
+        newIconName = "task_alt";
+        isAddingCategory = true;
+    }
+
+    private void CancelAddCategory()
+    {
+        isAddingCategory = false;
+        newCategoryName = string.Empty;
+    }
+
+    private async Task ConfirmAddCategory()
+    {
+        if (string.IsNullOrWhiteSpace(newCategoryName))
+        {
+            Snackbar.Add("Category name cannot be empty.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            isLoading = true;
+
+            var created = await TaskItemCategoryService.AddAsync(new CreateTaskItemCategoryDto
+            {
+                TaskItemCategoryName = newCategoryName.Trim(),
+                IconName = newIconName,
+                ColorHex = newColorHex
+            });
+
+            localCategories.Add(new TaskItemCategoryFormDto
+            {
+                TaskItemCategoryId = created.TaskItemCategoryId,
+                TaskItemCategoryName = created.TaskItemCategoryName,
+                IconName = created.IconName,
+                ColorHex = created.ColorHex
+            });
+
+            isAddingCategory = false;
+            newCategoryName = string.Empty;
+            Snackbar.Add("Category added.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error adding category: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    #endregion Add Category
+
+    #region Edit Category
+
+    private void BeginEditCategory(TaskItemCategoryFormDto category)
+    {
+        // Snapshot current values so we can restore on cancel
+        _nameSnapshot = category.TaskItemCategoryName;
+        _colorSnapshot = category.ColorHex;
+        _iconSnapshot = category.IconName;
+        category.IsEditing = true;
+    }
+
+    private void CancelEditCategory(TaskItemCategoryFormDto category)
+    {
+        category.TaskItemCategoryName = _nameSnapshot;
+        category.ColorHex = _colorSnapshot;
+        category.IconName = _iconSnapshot;
+        category.IsEditing = false;
+    }
+
+    private async Task SaveCategory(TaskItemCategoryFormDto category)
+    {
+        if (string.IsNullOrWhiteSpace(category.TaskItemCategoryName))
+        {
+            Snackbar.Add("Category name cannot be empty.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            await TaskItemCategoryService.UpdateAsync(new UpdateTaskItemCategoryDto
+            {
+                TaskItemCategoryId = category.TaskItemCategoryId!.Value,
+                TaskItemCategoryName = category.TaskItemCategoryName.Trim(),
+                IconName = category.IconName,
+                ColorHex = category.ColorHex
+            });
+
+            category.IsEditing = false;
+            Snackbar.Add("Category updated.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating category: {ex.Message}", Severity.Error);
+        }
+    }
+
+    #endregion Edit Category
+
+    #region Delete Category
+
+    private async Task DeleteCategory(TaskItemCategoryFormDto category)
+    {
+        try
+        {
+            await TaskItemCategoryService.DeleteAsync(category.TaskItemCategoryId!.Value);
+            localCategories.Remove(category);
+            Snackbar.Add("Category deleted.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting category: {ex.Message}", Severity.Error);
+        }
+    }
+
+    #endregion Delete Category
+
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+}
+
+

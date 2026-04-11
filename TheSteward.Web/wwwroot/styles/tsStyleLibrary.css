@@ -110,6 +110,9 @@
         outline-offset: 2px;
     }
 
+.toolbar-btn span.material-symbols-outlined {
+    margin-right: .5rem;
+}
 
 /* ------------ */
 /* Form Control */

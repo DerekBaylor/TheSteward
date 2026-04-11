@@ -1,28 +1,30 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TheSteward.Core.IRepositories;
-using TheSteward.Core.Models;
-using TheSteward.Core.Profiles;
-using TheSteward.Infrastructure.Data;
-using TheSteward.Infrastructure.Repositories;
-using TheSteward.Shared.Interfaces;
-using TheSteward.Shared.Services;
-using TheSteward.Web.Components;
-using TheSteward.Web.Components.Account;
+using MudBlazor;
 using MudBlazor.Services;
+using System.Globalization;
+using TheSteward.Core.IRepositories;
 using TheSteward.Core.IRepositories.FinanceManagerIRepositories;
 using TheSteward.Core.IRepositories.HouseholdIRepositories;
+using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Core.IServices.FinanceManagerIServices;
 using TheSteward.Core.IServices.HouseholdIServices;
+using TheSteward.Core.IServices.TaskManagerIServices;
+using TheSteward.Core.Models;
+using TheSteward.Infrastructure.Data;
+using TheSteward.Infrastructure.Repositories;
 using TheSteward.Infrastructure.Repositories.FinanceManagerRepositories;
 using TheSteward.Infrastructure.Repositories.HouseholdRepositories;
+using TheSteward.Infrastructure.Repositories.TaskManagerRepositories;
 using TheSteward.Infrastructure.Services.FinanceManagerServices;
 using TheSteward.Infrastructure.Services.HouseholdServices;
-using TheSteward.Infrastructure.Repositories.TaskManagerRepositories;
-using TheSteward.Core.IRepositories.ITaskManagerRepositories;
 using TheSteward.Infrastructure.Services.TaskManagerServices;
-using TheSteward.Core.IServices.TaskManagerIServices;
+using TheSteward.Shared.Interfaces;
+using TheSteward.Shared.Services;
+using TheSteward.Shared.Themes;
+using TheSteward.Web.Components;
+using TheSteward.Web.Components.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +33,17 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRazorPages();
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+    config.SnackbarConfiguration.PreventDuplicates = false;
+    config.SnackbarConfiguration.VisibleStateDuration = 4000;
+    config.SnackbarConfiguration.HideTransitionDuration = 300;
+    config.SnackbarConfiguration.ShowTransitionDuration = 300;
+});
+
+
+
 
 #region Services & Repositories
 builder.Services.AddScoped<INavigationService, NavigationService>();
@@ -77,14 +89,6 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 #endregion Services & Repositories
-
-#region Automapper Profiles
-builder.Services.AddAutoMapper(config =>
-{
-    config.AddProfile<HouseholdProfiles>();
-    config.AddProfile<FinanceManagerProfiles>();
-});
-#endregion  Automapper Profiles
 
 #region Auth
 builder.Services.AddAuthentication(options =>
@@ -158,5 +162,10 @@ app.MapPost("/account/logout", async (
     await signInManager.SignOutAsync();
     return Results.Redirect("/");
 }).RequireAuthorization();
+
+
+var culture = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 app.Run();

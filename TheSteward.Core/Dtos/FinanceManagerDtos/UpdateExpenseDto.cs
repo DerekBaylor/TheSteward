@@ -36,6 +36,8 @@ public class UpdateExpenseDto
 
     public Guid? CreditId { get; set; }
 
+    public Guid HouseholdId { get; set; }
+
     public Guid? InvestmentId { get; set; }
 
     #endregion Navigation Properties 

@@ -3,12 +3,25 @@ using TheSteward.Shared.Dtos.HouseholdDtos;
 
 public class HouseholdState
 {
+    #region Properties
+
     public UserHouseholdDto? CurrentUserHousehold { get; private set; }
     public List<UserHouseholdDto> UserHouseholds { get; private set; } = new();
     public HouseholdDto? CurrentHousehold => CurrentUserHousehold?.Household;
+
+    #endregion Properties
+
+    #region Permissions
+
     public bool HasAdminPermissions => CurrentUserHousehold?.HasAdminPermissions ?? false;
+
     public bool HasFinanceReadPermission => CurrentUserHousehold?.HasFinanceManagerReadPermission ?? false;
     public bool HasFinanceWritePermission => CurrentUserHousehold?.HasFinanceManagerWritePermission ?? false;
+
+    public bool HasTaskManagerReadPermission => CurrentUserHousehold?.HasTaskManagerReadPermission ?? false;
+    public bool HasTaskManagerWritePermission => CurrentUserHousehold?.HasTaskManagerWritePermission ?? false;
+    public bool HasTaskManagerCompletePermission => CurrentUserHousehold?.HasTaskManagerCompletePermission ?? false;
+    #endregion Permissions
 
     public event Action? OnChange;
 
@@ -35,3 +48,5 @@ public class HouseholdState
 
     private void NotifyStateChanged() => OnChange?.Invoke();
 }
+
+

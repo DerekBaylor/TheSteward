@@ -50,12 +50,11 @@ public class CreateCreditDto
     /// </summary>
     public string? BudgetSubCategoryName { get; set; }
 
-    /// <summary>
-    /// Set by the service after the expense is created. Should not be populated by callers.
-    /// </summary>
     public Guid? ExpenseId { get; set; }
 
     public Guid CreatedByUserHouseholdId { get; set; }
+
+    public Guid HouseholdId { get; set; }
 
     #endregion  Scaler Properties
 }

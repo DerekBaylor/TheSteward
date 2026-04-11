@@ -3,233 +3,503 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@using TheSteward.Core.Dtos.TaskManagerDtos
+@using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Core.Utils.TaskManagerUtils
+@using TheSteward.Shared.Components.TaskManagerComponents
+@using TheSteward.Shared.Dtos.HouseholdDtos
+@using TheSteward.Shared.Dtos.TaskDtos
+@using TheSteward.Shared.Dtos.TaskManagerDtos
 @using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HouseholdState HouseholdState
+@inject ITaskItemService TaskItemService
+@inject ITaskItemCategoryService TaskItemCategoryService
+@inject IUserHouseholdService UserHouseholdService
+@inject IHouseholdService HouseholdService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 @attribute [Authorize]
+@implements IDisposable
 
 <PageTitle>Task Manager</PageTitle>
 
-<div class="tm-container">
+<TaskManagerToolBar OnHouseholdChanged="OnHouseholdChanged"
+                    OnAddTask="OpenAddTaskModal"
+                    OnAddCategory="OpenAddCategoryModal"
+                    OnAddStandardTasks="OpenStandardTasksModal" />
 
-    <div class="tm-header">
-        <div class="tm-header-left">
-            <h2 class="tm-title">Task Manager</h2>
-            <p class="tm-subtitle">Manage and track your household tasks</p>
-        </div>
-        <button class="ts-btn ts-submit-btn tm-add-btn" @onclick="OpenAddTaskModal">
-            <span class="material-symbols-outlined">add</span>
-            Add Task
-        </button>
-    </div>
 
-    @* Stat Cards *@
-    <div class="tm-stats-row">
-        <div class="tm-stat-card">
-            <span class="tm-stat-icon tm-stat-icon--pending">
-                <span class="material-symbols-outlined">pending</span>
-            </span>
-            <div class="tm-stat-content">
-                <p class="tm-stat-label">Pending</p>
-                <p class="tm-stat-value">@MockTasks.Count(t => t.Status == TaskItemStatus.Pending)</p>
-            </div>
-        </div>
-        <div class="tm-stat-card">
-            <span class="tm-stat-icon tm-stat-icon--inprogress">
-                <span class="material-symbols-outlined">autorenew</span>
-            </span>
-            <div class="tm-stat-content">
-                <p class="tm-stat-label">In Progress</p>
-                <p class="tm-stat-value">@MockTasks.Count(t => t.Status == TaskItemStatus.InProgress)</p>
-            </div>
-        </div>
-        <div class="tm-stat-card">
-            <span class="tm-stat-icon tm-stat-icon--completed">
-                <span class="material-symbols-outlined">check_circle</span>
-            </span>
-            <div class="tm-stat-content">
-                <p class="tm-stat-label">Completed</p>
-                <p class="tm-stat-value">@MockTasks.Count(t => t.Status == TaskItemStatus.Completed)</p>
-            </div>
-        </div>
-        <div class="tm-stat-card">
-            <span class="tm-stat-icon tm-stat-icon--urgent">
-                <span class="material-symbols-outlined">priority_high</span>
-            </span>
-            <div class="tm-stat-content">
-                <p class="tm-stat-label">Urgent</p>
-                <p class="tm-stat-value">@MockTasks.Count(t => t.Priority == TaskItemPriority.Urgent)</p>
-            </div>
-        </div>
-    </div>
+@if (HouseholdState.CurrentUserHousehold == null)
+{
+    <MudAlert Severity="Severity.Warning" Class="mt-4">
+        You are not part of a household. Please visit the
+        <MudLink Href="/household">Household page</MudLink> to get started.
+    </MudAlert>
+}
+else if (!HouseholdState.HasTaskManagerReadPermission)
+{
+    <MudAlert Severity="Severity.Error" Class="mt-4">
+        You do not have permission to view tasks for this household.
+        Please contact your household admin.
+    </MudAlert>
+}
+else if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+}
+else
+{
+    <div class="tm-container">
+        <div class="tm-body">
 
-    <div class="tm-body">
+            @* ── Filter Strip ── *@
+            <div class="tm-filter-strip">
 
-        @* Filters *@
-        <div class="tm-toolbar">
-            <div class="tm-filter-group">
-                <button class="tm-filter-btn @(activeStatusFilter == null ? "active" : "")"
-                        @onclick="() => SetStatusFilter(null)">
-                    All
-                </button>
-                @foreach (var status in Enum.GetValues<TaskItemStatus>())
-                {
-                    <button class="tm-filter-btn @(activeStatusFilter == status ? "active" : "")"
-                            @onclick="() => SetStatusFilter(status)">
-                        @status
-                    </button>
-                }
-            </div>
-            <div class="tm-filter-group">
-                @foreach (var priority in Enum.GetValues<TaskItemPriority>())
-                {
-                    <button class="tm-priority-chip tm-priority-chip--@priority.ToString().ToLower() @(activePriorityFilter == priority ? "active" : "")"
-                            @onclick="() => SetPriorityFilter(priority)">
-                        @priority
-                    </button>
-                }
-            </div>
-        </div>
+                @* Status Chips *@
+                <div class="tm-filter-group">
+                        <button class="tm-stat-chip @(activeStatusFilter == null && activePriorityFilter == null ? "active" : "")"
+                                @onclick="ClearFilters">
+                            <span class="material-symbols-outlined">list</span>
+                            All
+                            <span class="tm-chip-count">@tasks.Count</span>
+                        </button>
 
-        @* Task List *@
-        <div class="tm-task-list">
-            @if (!FilteredTasks.Any())
-            {
-                <div class="tm-empty-state">
-                    <span class="material-symbols-outlined tm-empty-icon">checklist</span>
-                    <p class="tm-empty-title">No tasks found</p>
-                    <p class="tm-empty-subtitle">Try adjusting your filters or add a new task.</p>
+                        @foreach (var status in Enum.GetValues<TaskItemStatus>())
+                        {
+                            <button class="tm-stat-chip tm-stat-chip--@status.ToString().ToLower() @(activeStatusFilter == status ? "active" : "")"
+                                    @onclick="() => SetStatusFilter(status)">
+                                <span class="material-symbols-outlined">@GetStatusIcon(status)</span>
+                                @status
+                                <span class="tm-chip-count">@tasks.Count(t => t.Status == status)</span>
+                            </button>
+                        }
+
+                        @foreach (var priority in Enum.GetValues<TaskItemPriority>())
+                        {
+                            <button class="tm-priority-chip tm-priority-chip--@priority.ToString().ToLower() @(activePriorityFilter == priority ? "active" : "")"
+                                    @onclick="() => SetPriorityFilter(priority)">
+                                <span class="material-symbols-outlined">flag</span>
+                                @priority
+                            </button>
+                        }
                 </div>
-            }
-            else
-            {
-                @foreach (var task in FilteredTasks)
+            </div>
+
+
+            <MudDivider />
+
+            @* ── Task List ── *@
+            <div class="tm-task-list">
+                @if (!FilteredTasks.Any())
                 {
-                    <div class="tm-task-card">
-                        <div class="tm-task-card-left">
-                            <span class="tm-priority-indicator tm-priority-indicator--@task.Priority.ToString().ToLower()"></span>
-                            <div class="tm-task-info">
-                                <p class="tm-task-name">@task.TaskItemName</p>
-                                @if (!string.IsNullOrEmpty(task.Description))
-                                {
-                                    <p class="tm-task-description">@task.Description</p>
-                                }
-                                <div class="tm-task-meta">
-                                    <span class="tm-task-category">
-                                        <span class="material-symbols-outlined">label</span>
-                                        @task.CategoryName
-                                    </span>
-                                    @if (task.DueDate.HasValue)
+                    <div class="tm-empty-state">
+                        <span class="material-symbols-outlined tm-empty-icon">checklist</span>
+                        <p class="tm-empty-title">No tasks found</p>
+                        <p class="tm-empty-subtitle">Try adjusting your filters or add a new task.</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var task in FilteredTasks)
+                    {
+                        <div class="tm-task-card">
+                            <div class="tm-task-card-left">
+                                <span class="tm-priority-indicator tm-priority-indicator--@task.Priority.ToString().ToLower()"></span>
+                                <div class="tm-task-info">
+                                    <p class="tm-task-name">@task.TaskItemName</p>
+                                    @if (!string.IsNullOrEmpty(task.Description))
                                     {
-                                        <span class="tm-task-due @(task.DueDate < DateTime.UtcNow && task.Status != TaskItemStatus.Completed ? "overdue" : "")">
-                                            <span class="material-symbols-outlined">event</span>
-                                            @task.DueDate.Value.ToString("MMM dd, yyyy")
-                                        </span>
+                                        <p class="tm-task-description">@task.Description</p>
                                     }
+                                    <div class="tm-task-meta">
+                                        <span class="tm-task-category">
+                                            <span class="material-symbols-outlined">label</span>
+                                            @task.TaskItemCategoryName
+                                        </span>
+                                        @if (task.DueDate.HasValue)
+                                        {
+                                            <span class="tm-task-due @(task.DueDate < DateTime.UtcNow && task.Status != TaskItemStatus.Completed ? "overdue" : "")">
+                                                <span class="material-symbols-outlined">event</span>
+                                                @task.DueDate.Value.ToString("MMM dd, yyyy")
+                                            </span>
+                                        }
+                                        @if (task.ExpenseId.HasValue)
+                                        {
+                                            <span class="tm-task-linked-expense">
+                                                <span class="material-symbols-outlined">link</span>
+                                                @task.RelatedExpenseName
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tm-task-card-right">
+                                <span class="tm-status-badge tm-status-badge--@task.Status.ToString().ToLower()">
+                                    @task.Status
+                                </span>
+                                <div class="tm-task-actions">
+                                    <button class="ts-btn ts-edit-btn"
+                                            @onclick="() => OpenEditTaskModal(task)">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </button>
+                                    @if (task.Status != TaskItemStatus.Completed)
+                                    {
+                                        <button class="ts-btn ts-submit-btn"
+                                                @onclick="() => HandleCompleteTask(task)">
+                                            <span class="material-symbols-outlined">check</span>
+                                        </button>
+                                    }
+                                    <button class="ts-btn ts-cancel-btn"
+                                            @onclick="() => HandleDeleteTask(task.TaskItemId)">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <div class="tm-task-card-right">
-                            <span class="tm-status-badge tm-status-badge--@task.Status.ToString().ToLower()">
-                                @task.Status
-                            </span>
-                            <div class="tm-task-actions">
-                                <button class="ts-btn ts-edit-btn" @onclick="() => OpenEditTaskModal(task)">
-                                    <span class="material-symbols-outlined">edit</span>
-                                </button>
-                                @if (task.Status != TaskItemStatus.Completed)
-                                {
-                                    <button class="ts-btn ts-submit-btn" @onclick="() => CompleteTask(task)">
-                                        <span class="material-symbols-outlined">check</span>
-                                    </button>
-                                }
-                                <button class="ts-btn ts-cancel-btn" @onclick="() => DeleteTask(task)">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 }
-            }
+            </div>
         </div>
-    </div>
-</div>
-
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger mt-3" role="alert">
-        @errorMessage
     </div>
 }
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mt-3">@errorMessage</MudAlert>
+}
+
 @code {
+    private bool isLoading = true;
     private string? errorMessage;
-    private string? currentUserId;
     private TaskItemStatus? activeStatusFilter;
     private TaskItemPriority? activePriorityFilter;
+    private List<TaskItemDto> tasks = new();
+    private List<HouseholdMemberDto> householdMembers = new();
+    private Action? _stateChangeHandler;
 
-    // -- Placeholder model until DTOs are wired up --
-    private class MockTaskItem
-    {
-        public Guid TaskItemId { get; set; }
-        public string TaskItemName { get; set; } = "";
-        public string? Description { get; set; }
-        public TaskItemStatus Status { get; set; }
-        public TaskItemPriority Priority { get; set; }
-        public DateTime? DueDate { get; set; }
-        public string CategoryName { get; set; } = "";
-    }
-
-    private List<MockTaskItem> MockTasks = new()
-    {
-        new() { TaskItemId = Guid.NewGuid(), TaskItemName = "Take out trash", Description = "Every Monday and Thursday", Status = TaskItemStatus.Pending, Priority = TaskItemPriority.Low, DueDate = DateTime.UtcNow.AddDays(1), CategoryName = "Yard" },
-        new() { TaskItemId = Guid.NewGuid(), TaskItemName = "Deep clean bathroom", Status = TaskItemStatus.InProgress, Priority = TaskItemPriority.Medium, DueDate = DateTime.UtcNow.AddDays(2), CategoryName = "Kitchen" },
-        new() { TaskItemId = Guid.NewGuid(), TaskItemName = "Replace HVAC filter", Description = "Check the size before buying", Status = TaskItemStatus.Pending, Priority = TaskItemPriority.Urgent, DueDate = DateTime.UtcNow.AddDays(-1), CategoryName = "Maintenance" },
-        new() { TaskItemId = Guid.NewGuid(), TaskItemName = "Grocery shopping", Status = TaskItemStatus.Completed, Priority = TaskItemPriority.High, DueDate = DateTime.UtcNow.AddDays(-2), CategoryName = "Kitchen" },
-        new() { TaskItemId = Guid.NewGuid(), TaskItemName = "Mow the lawn", Status = TaskItemStatus.Pending, Priority = TaskItemPriority.Medium, DueDate = DateTime.UtcNow.AddDays(5), CategoryName = "Yard" },
-    };
-
-    private IEnumerable<MockTaskItem> FilteredTasks => MockTasks
+    private IEnumerable<TaskItemDto> FilteredTasks => tasks
         .Where(t => activeStatusFilter == null || t.Status == activeStatusFilter)
         .Where(t => activePriorityFilter == null || t.Priority == activePriorityFilter)
         .OrderBy(t => t.DueDate);
 
     protected override async Task OnInitializedAsync()
     {
+        _stateChangeHandler = () => InvokeAsync(StateHasChanged);
+        HouseholdState.OnChange += _stateChangeHandler;
+        await LoadTasksAsync();
+    }
+
+    public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
+
+    private async Task LoadTasksAsync()
+    {
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+
+        if (userHousehold == null || !HouseholdState.HasTaskManagerReadPermission)
+        {
+            isLoading = false;
+            return;
+        }
+
         try
         {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-            if (user.Identity?.IsAuthenticated == true)
-                currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            isLoading = true;
+
+            tasks = await TaskItemService.GetAllByAssignedUserHouseholdIdAsync(
+                userHousehold.UserHouseholdId);
+
+            var allMembers = await UserHouseholdService.GetAllUserHouseholdsForHouseholdAsync(userHousehold.HouseholdId);
+
+            householdMembers = allMembers
+                .Select(m => new HouseholdMemberDto
+                {
+                    UserHouseholdId = m.UserHouseholdId,
+                    DisplayName = m.UserName
+                })
+                .ToList();
         }
         catch (Exception ex)
         {
             errorMessage = $"Error loading tasks: {ex.Message}";
         }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
-    private void SetStatusFilter(TaskItemStatus? status)
+    private async Task RefreshTasksAsync()
     {
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+        if (userHousehold == null) return;
+
+        tasks = await TaskItemService.GetAllByAssignedUserHouseholdIdAsync(
+            userHousehold.UserHouseholdId);
+
+        StateHasChanged();
+    }
+
+    #region Household
+
+    private async void OnHouseholdChanged(UserHouseholdDto _)
+    {
+        tasks.Clear();
+        errorMessage = null;
+        await LoadTasksAsync();
+        StateHasChanged();
+    }
+
+    #endregion Household
+
+    #region Filters
+
+    private void ClearFilters()
+    {
+        activeStatusFilter = null;
+        activePriorityFilter = null;
+    }
+
+    private void SetStatusFilter(TaskItemStatus status)
+    {
+        activePriorityFilter = null;
         activeStatusFilter = activeStatusFilter == status ? null : status;
     }
 
-    private void SetPriorityFilter(TaskItemPriority priority)
+    private void SetPriorityFilter(TaskItemPriority? priority)
     {
         activePriorityFilter = activePriorityFilter == priority ? null : priority;
     }
 
-    private void OpenAddTaskModal() { /* wire up modal later */ }
-    private void OpenEditTaskModal(MockTaskItem task) { /* wire up modal later */ }
-
-    private void CompleteTask(MockTaskItem task)
+    private void OnUrgentChipClicked()
     {
-        task.Status = TaskItemStatus.Completed;
+        if (activePriorityFilter == TaskItemPriority.Urgent)
+        {
+            activePriorityFilter = null;
+        }
+        else
+        {
+            activeStatusFilter = null;
+            activePriorityFilter = TaskItemPriority.Urgent;
+        }
     }
 
-    private void DeleteTask(MockTaskItem task)
+    private static string GetStatusIcon(TaskItemStatus status) => status switch
     {
-        MockTasks.Remove(task);
+        TaskItemStatus.Pending => "pending",
+        TaskItemStatus.InProgress => "autorenew",
+        TaskItemStatus.Completed => "check_circle",
+        TaskItemStatus.Skipped => "skip_next",
+        _ => "circle"
+    };
+
+    #endregion Filters
+
+    #region Task Item
+    private async Task OpenAddTaskModal()
+    {
+        var userHousehold = HouseholdState.CurrentUserHousehold!;
+
+        var formData = new TaskItemFormDto
+        {
+            CreatedByUserHouseholdId = userHousehold.UserHouseholdId,
+            AssignedToUserHouseholdId = userHousehold.UserHouseholdId,
+            Status = TaskItemStatus.Pending,
+            Priority = TaskItemPriority.Medium,
+            IsEditMode = false,
+            HouseholdId = HouseholdState.CurrentUserHousehold!.HouseholdId
+        };
+
+        await OpenTaskModal(formData);
     }
+
+    private async Task OpenEditTaskModal(TaskItemDto task)
+    {
+        var formData = new TaskItemFormDto
+        {
+            TaskItemId = task.TaskItemId,
+            TaskItemName = task.TaskItemName,
+            Description = task.Description,
+            Status = task.Status,
+            Priority = task.Priority,
+            DueDate = task.DueDate,
+            CreatedByUserHouseholdId = task.CreatedByUserHouseholdId,
+            AssignedToUserHouseholdId = task.AssignedToUserHouseholdId ?? Guid.Empty,
+            TaskItemCategoryId = task.TaskItemCategoryId,
+            RecurrenceId = task.RecurrenceId,
+            ExpenseId = task.ExpenseId,
+            IsEditMode = true,
+            HouseholdId = HouseholdState.CurrentUserHousehold!.HouseholdId
+        };
+
+        await OpenTaskModal(formData);
+    }
+
+    private async Task OpenTaskModal(TaskItemFormDto formData)
+    {
+        var parameters = new DialogParameters
+        {
+            { "FormData", formData },
+            { "HouseholdMembers", householdMembers }
+        };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<TaskItemModal>(
+            formData.IsEditMode ? "Edit Task" : "Add Task",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result.Canceled) return;
+
+        if (result.Data is string resultData && resultData.StartsWith("delete:"))
+        {
+            var idString = resultData["delete:".Length..];
+            if (Guid.TryParse(idString, out var taskId))
+                await HandleDeleteTask(taskId);
+            return;
+        }
+
+        await RefreshTasksAsync();
+    }
+
+    private async Task HandleCompleteTask(TaskItemDto task)
+    {
+        try
+        {
+            await TaskItemService.CompleteAsync(
+                task.TaskItemId,
+                HouseholdState.CurrentUserHousehold!.UserHouseholdId);
+
+            Snackbar.Add("Task marked as complete!", Severity.Success);
+            await RefreshTasksAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error completing task: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task HandleDeleteTask(Guid taskItemId)
+    {
+        try
+        {
+            await TaskItemService.DeleteAsync(taskItemId);
+            Snackbar.Add("Task deleted.", Severity.Success);
+            await RefreshTasksAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting task: {ex.Message}", Severity.Error);
+        }
+    }
+    #endregion TaskItem
+
+    #region Task Item Category
+    private async Task OpenAddCategoryModal()
+    {
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+        if (userHousehold == null) return;
+
+        // Load all categories to pass into the modal
+        var categories = await TaskItemCategoryService.GetAllAsync();
+
+        var parameters = new DialogParameters
+    {
+        { "TaskItemCategories", categories }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<TaskItemCategoryModal>(
+            "Task Categories",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled) return;
+
+        // Refresh so any category changes reflect in the task list
+        await RefreshTasksAsync();
+    }
+    #endregion Task Item Category
+
+    #region Staandard Tasks
+    private async Task OpenStandardTasksModal()
+    {
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+        if (userHousehold == null) return;
+
+        // Build the selectable list — exclude tasks the user already has
+        var existingNames = tasks
+            .Select(t => t.TaskItemName.Trim().ToLowerInvariant())
+            .ToHashSet();
+
+        var selectableTasks = TaskManagerConstants.StandardTasks
+            .Where(t => !existingNames.Contains(t.TaskName.Trim().ToLowerInvariant()))
+            .Select(t => new StandardTaskSelectionDto
+            {
+                TaskName = t.TaskName,
+                CategoryName = t.CategoryName,
+                IsSelected = true   // all selected by default
+            })
+            .ToList();
+
+        var parameters = new DialogParameters
+    {
+        { "SelectableTasks", selectableTasks }
+    };
+
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<StandardTaskModal>(
+            "Add Standard Tasks",
+            parameters,
+            options);
+
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled) return;
+
+        if (result.Data is List<StandardTaskDefinition> selectedTasks && selectedTasks.Any())
+        {
+            try
+            {
+                await TaskItemService.AddStandardTasksAsync(
+                    userHousehold.UserHouseholdId,
+                    selectedTasks,
+                    tasks);
+
+                Snackbar.Add($"{selectedTasks.Count} task{(selectedTasks.Count > 1 ? "s" : "")} added!", Severity.Success);
+                await RefreshTasksAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error adding standard tasks: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    #endregion Standard Tasks
+
 }

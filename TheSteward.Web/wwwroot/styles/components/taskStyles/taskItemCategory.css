@@ -1,0 +1,206 @@
+﻿/* ── Task Category Modal ── */
+.tc-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.tc-modal-icon {
+    color: var(--mud-palette-primary);
+}
+
+.tc-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* ── Category Row ── */
+.tc-category-section {
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tc-category-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.75rem;
+    gap: 0.75rem;
+}
+
+.tc-category-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.tc-category-swatch {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tc-category-icon {
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.tc-category-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-inline-field {
+    flex: 1;
+}
+
+/* ── Action Buttons ── */
+.tc-category-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.tc-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    transition: background 0.15s;
+}
+
+.tc-action-btn--edit:hover {
+    background: rgba(33, 150, 243, 0.12);
+    color: #2196F3;
+}
+
+.tc-action-btn--save:hover {
+    background: rgba(76, 175, 80, 0.12);
+    color: #4CAF50;
+}
+
+.tc-action-btn--cancel:hover {
+    background: rgba(158,158,158, 0.15);
+}
+
+.tc-action-btn--delete:hover {
+    background: rgba(244, 67, 54, 0.12);
+    color: #F44336;
+}
+
+/* ── Edit Extras (color + icon pickers) ── */
+.tc-edit-extras {
+    padding: 0.5rem 0.75rem 0.75rem;
+    border-top: 1px solid var(--mud-palette-lines-default);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    background: var(--mud-palette-background-grey);
+}
+
+.tc-edit-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.tc-edit-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--mud-palette-text-secondary);
+    min-width: 36px;
+    padding-top: 4px;
+}
+
+/* ── Color Swatches ── */
+.tc-color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tc-color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+}
+
+    .tc-color-swatch:hover {
+        transform: scale(1.15);
+    }
+
+.tc-color-swatch--active {
+    border-color: var(--mud-palette-text-primary);
+    transform: scale(1.15);
+}
+
+/* ── Icon Grid ── */
+.tc-icon-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.tc-icon-option {
+    background: none;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    color: var(--mud-palette-text-secondary);
+}
+
+    .tc-icon-option:hover {
+        background: var(--mud-palette-action-hover);
+        color: var(--mud-palette-text-primary);
+    }
+
+.tc-icon-option--active {
+    border-color: var(--mud-palette-primary);
+    color: var(--mud-palette-primary);
+    background: rgba(var(--mud-palette-primary-rgb), 0.08);
+}
+
+/* ── Add Button ── */
+.tc-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: 1px dashed var(--mud-palette-lines-default);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    color: var(--mud-palette-text-secondary);
+    font-size: 0.875rem;
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+    .tc-add-btn:hover {
+        border-color: var(--mud-palette-primary);
+        color: var(--mud-palette-primary);
+    }

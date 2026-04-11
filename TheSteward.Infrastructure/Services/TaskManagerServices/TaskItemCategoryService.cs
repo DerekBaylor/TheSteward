@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TheSteward.Core.Dtos.TaskManagerDtos;
 using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices.TaskManagerIServices;
+using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.TaskManagerModels;
 
 namespace TheSteward.Infrastructure.Services.TaskManagerServices;
@@ -10,12 +10,10 @@ namespace TheSteward.Infrastructure.Services.TaskManagerServices;
 public class TaskItemCategoryService : ITaskItemCategoryService
 {
     private readonly IBaseRepository<TaskItemCategory> _taskItemCategoryRepository;
-    private readonly IMapper _mapper;
 
-    public TaskItemCategoryService(IBaseRepository<TaskItemCategory> taskItemCategoryRepository, IMapper mapper)
+    public TaskItemCategoryService(IBaseRepository<TaskItemCategory> taskItemCategoryRepository)
     {
         _taskItemCategoryRepository = taskItemCategoryRepository;
-        _mapper = mapper;
     }
 
     public async Task<TaskItemCategoryDto> AddAsync(CreateTaskItemCategoryDto taskItemCategoryDto)
@@ -23,18 +21,13 @@ public class TaskItemCategoryService : ITaskItemCategoryService
         if (taskItemCategoryDto == null)
             throw new ArgumentNullException(nameof(taskItemCategoryDto));
 
-        var taskItemCategory = new TaskItemCategory
-        {
-            TaskItemCategoryId = Guid.NewGuid(),
-            TaskItemCategoryName = taskItemCategoryDto.TaskItemCategoryName,
-            ColorHex = taskItemCategoryDto.ColorHex,
-            IconName = taskItemCategoryDto.IconName
-        };
+        var taskItemCategory = taskItemCategoryDto.ToEntity();
+        taskItemCategory.TaskItemCategoryId = Guid.NewGuid();
 
         await _taskItemCategoryRepository.AddAsync(taskItemCategory);
         await _taskItemCategoryRepository.SaveChangesAsync();
 
-        return _mapper.Map<TaskItemCategoryDto>(taskItemCategory);
+        return taskItemCategory.ToDto();
     }
 
     public async Task<UpdateTaskItemCategoryDto> UpdateAsync(UpdateTaskItemCategoryDto taskItemCategoryDto)
@@ -46,9 +39,7 @@ public class TaskItemCategoryService : ITaskItemCategoryService
         if (taskItemCategory == null)
             throw new KeyNotFoundException($"TaskItemCategory with ID {taskItemCategoryDto.TaskItemCategoryId} not found.");
 
-        taskItemCategory.TaskItemCategoryName = taskItemCategoryDto.TaskItemCategoryName;
-        taskItemCategory.ColorHex = taskItemCategoryDto.ColorHex;
-        taskItemCategory.IconName = taskItemCategoryDto.IconName;
+        taskItemCategory.ApplyUpdate(taskItemCategoryDto);
 
         await _taskItemCategoryRepository.UpdateAsync(taskItemCategory);
         await _taskItemCategoryRepository.SaveChangesAsync();
@@ -70,6 +61,7 @@ public class TaskItemCategoryService : ITaskItemCategoryService
     }
 
     #region Get Methods
+
     public async Task<TaskItemCategoryDto?> GetAsync(Guid taskItemCategoryId)
     {
         if (taskItemCategoryId == Guid.Empty)
@@ -77,7 +69,7 @@ public class TaskItemCategoryService : ITaskItemCategoryService
 
         var taskItemCategory = await _taskItemCategoryRepository.GetByIdAsync(taskItemCategoryId);
 
-        return taskItemCategory == null ? null : _mapper.Map<TaskItemCategoryDto>(taskItemCategory);
+        return taskItemCategory?.ToDto();
     }
 
     public async Task<TaskItemCategoryDto?> GetWithTaskItemsAsync(Guid taskItemCategoryId)
@@ -89,7 +81,7 @@ public class TaskItemCategoryService : ITaskItemCategoryService
             .Include(c => c.TaskItems)
             .FirstOrDefaultAsync(c => c.TaskItemCategoryId == taskItemCategoryId);
 
-        return taskItemCategory == null ? null : _mapper.Map<TaskItemCategoryDto>(taskItemCategory);
+        return taskItemCategory?.ToDto();
     }
 
     public async Task<List<TaskItemCategoryDto>> GetAllAsync()
@@ -98,7 +90,7 @@ public class TaskItemCategoryService : ITaskItemCategoryService
             .OrderBy(c => c.TaskItemCategoryName)
             .ToListAsync();
 
-        return _mapper.Map<List<TaskItemCategoryDto>>(categories);
+        return categories.ToDtoList();
     }
 
     public async Task<TaskItemCategoryDto> GetByNameAsync(string taskItemCategoryName)
@@ -112,7 +104,10 @@ public class TaskItemCategoryService : ITaskItemCategoryService
         if (taskItemCategory == null)
             throw new KeyNotFoundException($"TaskItemCategory with name '{taskItemCategoryName}' not found.");
 
-        return _mapper.Map<TaskItemCategoryDto>(taskItemCategory);
+        return taskItemCategory.ToDto();
     }
+
     #endregion Get Methods
 }
+
+

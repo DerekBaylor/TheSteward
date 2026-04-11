@@ -68,6 +68,7 @@ public class UpdateUserHouseholdDtoBuilder
             HasFileManagerWritePermission = _hasFileManagerWritePermission,
             HasFileManagerReadPermission = _hasFileManagerReadPermission,
             UserId = _userId,
+            UserName = "Test User",
             HouseholdId = _householdId
         };
     }

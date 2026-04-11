@@ -51,5 +51,5 @@ public class CreateIncomeDto
     public int DisplayOrder { get; set; }
 
     public decimal EstFederalIncomeTax { get; set; }
-    public decimal EstStateTax { get; set; }
+    public decimal EstStateIncomeTax { get; set; }
 }

@@ -50,6 +50,10 @@
 @import url('styles/components/budgetStyles/budgetModal.css');
 @import url('styles/components/budgetStyles/budgetCategoriesModal.css');
 
+/* tasks */
+@import url('styles/components/taskStyles/taskManagerToolbar.css');
+@import url('styles/components/taskStyles/taskItemModal.css');
+@import url('styles/components/taskStyles/taskItemCategory.css');
 
 :root {
     /* ----- */
@@ -137,6 +141,8 @@
     --blue-9: hsl(from var(--base-blue) h s 15%);
     --blue-10: hsl(from var(--base-blue) h s 5%);
     --dark-blue: var(--blue-8);
+    --blue-shadow: hsl(from var(--base-blue) h s 15% / 25%);
+    --blue-shadow-5: 0 2px 8px var(--blue-shadow), 0 5px 20px var(--blue-shadow);
     /*     Purple     */
     --base-purple: var(--purple-6);
     --purple-1: hsl(from var(--base-purple) h s 95%);
@@ -162,6 +168,7 @@
     --button-background-hover-green: rgb(0, 85, 143);
     --font-weight-med: 600;
     --green-gradient: linear-gradient( var(--green-8), var(--green-8), var(--green-7), var(--green-6), var(--green-5));
+    --blue-gradient: linear-gradient( var(--blue-8), var(--blue-8), var(--blue-7), var(--blue-6), var(--blue-5));
 }
 
 body {
@@ -203,14 +210,16 @@ body.main-content {
     min-height: 100vh;
 }
 
-.mud-main-content {
+.mud-main-content.main-content {
     padding: 0;
     padding-top: 0 !important;
+    margin-left: 240px !important;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-content {
     flex: 1;
-    margin-left: 200px;
     transition: margin-left 0.3s ease;
 }
 
@@ -227,6 +236,11 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+.mud-drawer.mud-drawer-responsive.mud-drawer-pos-left, .mud-drawer.mud-drawer-persistent.mud-drawer-pos-left {
+    width: 240px !important;
+    background-color: var(--off-white);
+    border-radius: 0 5rem 0 0;
+}
 
 /* ----- */
 /* Fonts */
@@ -301,3 +315,56 @@ h1, h2, h3, h4, h5, h6 {
 .gray-10 {
     background-color: var(--gray-10);
 }
+
+/* Icon picker grid */
+.category-icon-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.category-icon-option {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    background-color: var(--mud-palette-background-grey);
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+    .category-icon-option:hover {
+        border-color: var(--base-blue);
+        background-color: var(--mud-palette-action-hover);
+    }
+
+    .category-icon-option.selected {
+        border-color: var(--base-blue);
+        background-color: color-mix(in srgb, var(--base-blue) 15%, transparent);
+    }
+
+    .category-icon-option .material-symbols-outlined {
+        font-size: 22px;
+        color: var(--mud-palette-text-primary);
+    }
+
+/* Live preview badge */
+.category-icon-preview {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .category-icon-preview .material-symbols-outlined {
+        font-size: 22px;
+        color: white;
+    }
+
+

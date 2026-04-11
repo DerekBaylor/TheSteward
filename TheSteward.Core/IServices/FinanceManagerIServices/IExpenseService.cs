@@ -60,7 +60,7 @@ public interface IExpenseService
     /// var updated = await expenseService.UpdateAsync(updateDto);
     /// </code>
     /// </example>
-    Task<UpdateExpenseDto> UpdateAsync(UpdateExpenseDto expenseDto);
+    Task<ExpenseDto> UpdateAsync(UpdateExpenseDto expenseDto);
         
     /// <summary>
     /// Asynchronously deletes an expense entry by its identifier.

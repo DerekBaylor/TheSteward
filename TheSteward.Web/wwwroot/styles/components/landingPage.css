@@ -80,51 +80,6 @@
     animation: slideDown 0.6s ease-out 0.3s backwards;
 }
 
-.btn-hero-primary {
-    padding: 1rem 2.5rem;
-    background-image: var(--green-gradient);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-    .btn-hero-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px var(--green-8);
-    }
-
-    .btn-hero-primary:active {
-        transform: translateY(-1px);
-    }
-
-.btn-hero-secondary {
-    padding: 1rem 2.5rem;
-    background: white;
-    color: var(--base-green);
-    border: 2px solid var(--base-green);
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-    .btn-hero-secondary:hover {
-        background: var(--green-1);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-hero-secondary:active {
-        transform: translateY(-1px);
-    }
-
 /* Features Grid */
 .features-grid {
     display: grid;
@@ -178,7 +133,7 @@
 .feature-icon {
     width: 56px;
     height: 56px;
-    background-image: var(--green-gradient);
+    background-image: var(--blue-gradient);
     border-radius: 12px;
     display: flex;
     align-items: center;

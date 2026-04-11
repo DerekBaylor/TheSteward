@@ -1,6 +1,4 @@
-﻿/* confirmEmail.css */
-
-.confirm-email-container {
+﻿.confirm-email-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -36,8 +34,8 @@
 }
 
     .confirm-email-icon-wrap.success {
-        background: var(--green-1);
-        border: 3px solid var(--green-3);
+        background: var(--blue-1);
+        border: 3px solid var(--blue-3);
     }
 
     .confirm-email-icon-wrap.error {
@@ -55,7 +53,7 @@
 }
 
 .confirm-email-icon-wrap.success .confirm-email-icon {
-    color: var(--base-green);
+    color: var(--base-blue);
 }
 
 .confirm-email-icon-wrap.error .confirm-email-icon {
@@ -81,7 +79,7 @@
 }
 
     .confirm-email-message.success {
-        color: var(--green-7);
+        color: var(--blue-7);
     }
 
     .confirm-email-message.error {
@@ -93,7 +91,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--base-green);
+    background: var(--base-blue);
     color: white;
     border-radius: var(--border-radius);
     padding: 0.65rem 1.5rem;
@@ -105,7 +103,7 @@
 }
 
     .confirm-email-cta-btn:hover {
-        background: var(--green-8);
+        background: var(--blue-8);
         transform: translateY(-1px);
     }
 

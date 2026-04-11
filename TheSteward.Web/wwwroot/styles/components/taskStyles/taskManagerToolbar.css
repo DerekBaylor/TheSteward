@@ -1,0 +1,27 @@
+﻿.tm-toolbar-bar {
+    align-items: center;
+    animation: slideDown 0.4s ease-out;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    display: flex;
+    font-family: var(--primary-font);
+    gap: 1.5rem;
+    margin: 1.5rem 1rem;
+    padding: 1rem 1.5rem;
+    width: 90%;
+    justify-self: center;
+    align-self: center;
+}
+
+.toolbar-select-group{
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.tm-toolbar-bar .toolbar-action-group {
+    display: flex;
+    flex-direction: row;
+    gap: .5rem;
+}

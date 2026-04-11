@@ -158,11 +158,6 @@ else
 
 }
 
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <MudAlert Severity="Severity.Error" Class="mt-3">@errorMessage</MudAlert>
-}
-
 @code {
     private bool isLoading = true;
     private bool isCreating = false;
@@ -173,20 +168,26 @@ else
     private List<BudgetDto> availableBudgets = new();
     private Action? _stateChangeHandler;
     private List<BudgetCategoryDto>? BudgetCategories = new();
+    private Guid? householdId;
+    private UserHouseholdDto? userhouseholdDto = new();
 
     protected override async Task OnInitializedAsync()
     {
         _stateChangeHandler = () => InvokeAsync(StateHasChanged);
         HouseholdState.OnChange += _stateChangeHandler;
 
+        householdId = HouseholdState.CurrentHousehold?.HouseholdId;
+        userhouseholdDto = HouseholdState.CurrentUserHousehold;
+
         await LoadBudgetAsync();
     }
 
-    private async void OnHouseholdChanged(UserHouseholdDto _)
+    private async void OnHouseholdChanged(UserHouseholdDto newUserHouseholdDto)
     {
         currentBudget = null;
         hasBudget = false;
         errorMessage = null;
+        userhouseholdDto = newUserHouseholdDto;
         await LoadBudgetAsync();
         StateHasChanged();
     }
@@ -194,10 +195,7 @@ else
     #region Budget
     private async Task LoadBudgetAsync()
     {
-        var householdId = HouseholdState.CurrentHousehold?.HouseholdId;
-        var userHousehold = HouseholdState.CurrentUserHousehold;
-
-        if (householdId == null || userHousehold == null || !HouseholdState.HasFinanceReadPermission)
+        if (householdId == null || userhouseholdDto == null || !HouseholdState.HasFinanceReadPermission)
         {
             isLoading = false;
             return;
@@ -207,9 +205,9 @@ else
         {
             isLoading = true;
 
-            availableBudgets = await BudgetService.GetBudgetsForUserHouseholdAsync(userHousehold);
+            availableBudgets = await BudgetService.GetBudgetsForUserHouseholdAsync(userhouseholdDto);
 
-            currentBudget = availableBudgets.FirstOrDefault(b => b.BudgetId == userHousehold.DefaultBudgetId)
+            currentBudget = availableBudgets.FirstOrDefault(b => b.BudgetId == userhouseholdDto.DefaultBudgetId)
                          ?? availableBudgets.FirstOrDefault(b => b.IsDefaultBudget)
                          ?? availableBudgets.FirstOrDefault();
 
@@ -526,7 +524,8 @@ else
     {
         var formData = new InvestmentFormDto
         {
-            BudgetId = currentBudget!.BudgetId
+            BudgetId = currentBudget!.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
         };
 
         await OpenInvestmentModal(formData);
@@ -567,6 +566,7 @@ else
             EstYearlyGrowth = investment.EstYearlyGrowth,
             DisplayOrder = investment.DisplayOrder,
             BudgetId = investment.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             ExpenseId = investment.ExpenseId
         };
 
@@ -634,7 +634,9 @@ else
         {
             BudgetId = currentBudget!.BudgetId,
             DisplayOrder = currentBudget.Credits.Count,
-            BudgetCategoryName = "Debt & Credit"
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
+            BudgetCategoryName = "Debt & Credit",
+            CreatedById = userhouseholdDto.UserHouseholdId
         };
 
         await OpenCreditModal(formData);
@@ -680,11 +682,13 @@ else
             EstYearlyInterest = credit.EstYearlyInterest,
             DisplayOrder = credit.DisplayOrder,
             BudgetId = credit.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             ExpenseId = credit.ExpenseId,
             BudgetCategoryId = linkedExpense?.BudgetCategoryId,
             BudgetCategoryName = linkedExpense?.BudgetCategory?.BudgetCategoryName ?? "Debt & Credit",
             BudgetSubCategoryId = linkedExpense?.BudgetSubCategoryId,
             BudgetSubCategoryName = linkedExpense?.BudgetSubCategory?.BudgetSubCategoryName,
+            CreatedById = userhouseholdDto.UserHouseholdId
         };
 
         await OpenCreditModal(formData);
@@ -750,6 +754,7 @@ else
         var formData = new ExpenseFormDto
         {
             BudgetId = currentBudget!.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             CreatedByUserHouseholdId = HouseholdState.CurrentUserHousehold!.UserHouseholdId,
             DisplayOrder = currentBudget.Expenses.Count + 1
         };
@@ -767,6 +772,7 @@ else
             AmountDue = expense.AmountDue,
             DisplayOrder = expense.DisplayOrder,
             BudgetId = expense.BudgetId,
+            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
             CreatedByUserHouseholdId = HouseholdState.CurrentUserHousehold!.UserHouseholdId,
             BudgetCategoryId = expense.BudgetCategoryId,
             BudgetCategoryName = expense.BudgetCategory?.BudgetCategoryName ?? string.Empty,

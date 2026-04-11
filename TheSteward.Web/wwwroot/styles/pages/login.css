@@ -9,7 +9,7 @@
 
 #loginCard.ts-card {
     background: white;
-    box-shadow: 0 20px 60px var(--green-10);
+    box-shadow: var(--blue-shadow-5);
     width: 100%;
     max-width: 440px;
     animation: slideUp 0.4s ease-out;
@@ -183,14 +183,14 @@
     }
 
 .link-primary {
-    color: var(--base-green);
+    color: var(--base-blue);
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s;
 }
 
     .link-primary:hover {
-        color: var(--green-8);
+        color: var(--blue-8);
         text-decoration: underline;
     }
 

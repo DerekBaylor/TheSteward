@@ -1,5 +1,4 @@
-﻿@* TaskItemModal.razor *@
-@using TheSteward.Core.Dtos.TaskManagerDtos
+﻿@using TheSteward.Core.Dtos.TaskManagerDtos
 @using TheSteward.Core.IServices.TaskManagerIServices
 @using TheSteward.Shared.Dtos.HouseholdDtos
 @using TheSteward.Shared.Dtos.TaskDtos
@@ -11,19 +10,18 @@
 
 <MudDialog id="taskModal" Class="ts-modal task-modal">
     <DialogContent>
-        <div class="dialog-layout">
+        <MudElement Class="modal-layout">
 
-            @* ── Left Column: Vertical Title ── *@
-            <MudStack class="dialog-sidebar">
-                <div class="dialog-sidebar-content">
+            <MudStack class="modal-sidebar">
+                <MudElement Class="modal-sidebar-content">
                     <MudIcon Icon="@(FormData.IsEditMode ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)" />
                     <MudText Typo="Typo.h6">TASK</MudText>
-                </div>
+                </MudElement>
             </MudStack>
 
-            @* ── Right Column: Form ── *@
+            @* Right Column: Form *@
             <MudStack Class="modal-right-stack">
-                <MudStack Class="dialog-form">
+                <MudStack Class="modal-form">
                     <MudForm @ref="form" @bind-IsValid="isValid">
 
                         @* Task Name *@
@@ -182,7 +180,7 @@
                     </MudForm>
                 </MudStack>
 
-                <div class="dialog-actions">
+                <MudElement Class="modal-actions">
                     @if (FormData.IsEditMode)
                     {
                         <MudButton Color="Color.Error"
@@ -194,7 +192,11 @@
                         </MudButton>
                     }
 
-                    <MudButton OnClick="Cancel" Disabled="isSaving">Cancel</MudButton>
+                    <MudButton OnClick="Cancel" 
+                               Disabled="isSaving"
+                               Variant="Variant.Outlined">
+                        Cancel
+                    </MudButton>
 
                     <MudButton Color="Color.Primary"
                                Variant="Variant.Filled"
@@ -206,9 +208,9 @@
                         }
                         @(FormData.IsEditMode ? "Save Changes" : "Add Task")
                     </MudButton>
-                </div>
+                </MudElement>
             </MudStack>
-        </div>
+        </MudElement>
     </DialogContent>
 </MudDialog>
 

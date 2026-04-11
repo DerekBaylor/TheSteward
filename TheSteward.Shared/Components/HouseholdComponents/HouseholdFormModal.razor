@@ -2,57 +2,61 @@
 @using TheSteward.Shared.Dtos.HouseholdDtos
 
 <MudDialog id="householdFormModal" Class="household-form-modal ts-modal">
-    <TitleContent>
-        <div class="modal-header-custom">
-            <MudText Typo="Typo.h5">@(IsEditMode ? "Edit Household" : "Create Household")</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Close"
-                           OnClick="HandleCancel"
-                           Class="modal-close-btn" />
-        </div>
-    </TitleContent>
-
     <DialogContent>
-        <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
-            <DataAnnotationsValidator />
+        <MudElement Class="modal-layout">
 
-            <MudTextField @bind-Value="FormData.HouseholdName"
-                          Label="Household Name"
-                          Variant="Variant.Outlined"
-                          For="@(() => FormData.HouseholdName)"
-                          Margin="Margin.Dense"
-                          Class="mb-4 ts-text-field" />
-            <MudText Typo="Typo.subtitle2" Class="mb-2">Enable Modules:</MudText>
+            <MudStack Class="modal-sidebar">
+                <MudElement Class="modal-sidebar-content">
+                    <MudIcon Icon="@(IsEditMode ? Icons.Material.Filled.Edit : Icons.Material.Filled.Add)" />
+                    <MudText Typo="Typo.h6">HOUSEHOLD</MudText>
+                </MudElement>
+            </MudStack>
 
-            <MudSwitch @bind-Value="FormData.HasTaskManagerAccess"
-                       Label="Enable Task Manager"
-                       Class="mb-2 ts-switch ts-household-switch" />
+            <MudStack Class="modal-right-stack">
+                <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
 
-            <MudSwitch @bind-Value="FormData.HasFinanceManagerAccess"
-                       Label="Enable Finance Manager"
-                       Class="mb-2 ts-switch ts-household-switch" />
+                    <MudTextField @bind-Value="FormData.HouseholdName"
+                                  Label="Household Name"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => FormData.HouseholdName)"
+                                  Margin="Margin.Dense"
+                                  Class="" />
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Enable Modules:</MudText>
 
-            <MudSwitch @bind-Value="FormData.HasKitchenManagerAccess"
-                       Label="Enable Kitchen Manager"
-                       Class="mb-2 ts-switch ts-household-switch" />
+                    <MudSwitch @bind-Value="FormData.HasTaskManagerAccess"
+                               Label="Enable Task Manager"
+                               Color="Color.Primary"/>
 
-            <MudSwitch @bind-Value="FormData.HasFileManagerAccess"
-                       Label="Enable File Manager"
-                       Class="mb-2 ts-switch ts-household-switch" />
-        </EditForm>
+                    <MudSwitch @bind-Value="FormData.HasFinanceManagerAccess"
+                               Label="Enable Finance Manager"
+                               Color="Color.Primary"/>
+
+                    <MudSwitch @bind-Value="FormData.HasKitchenManagerAccess"
+                               Label="Enable Kitchen Manager"
+                               Color="Color.Primary"/>
+
+                    <MudSwitch @bind-Value="FormData.HasFileManagerAccess"
+                               Label="Enable File Manager"
+                               Color="Color.Primary"/>
+                </EditForm>
+
+            <MudElement Class="modal-actions">
+                <MudButton OnClick="HandleCancel"
+                           Variant="Variant.Outlined">
+                    Cancel
+                </MudButton>
+                <MudButton OnClick="HandleSubmit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary">
+                    @(IsEditMode ? "Update" : "Create")
+                </MudButton>
+            </MudElement>
+        </MudStack>
+
+        </MudElement>
     </DialogContent>
 
-    <DialogActions>
-        <MudButton OnClick="HandleCancel"
-                   Variant="Variant.Outlined"
-                   Class="ts-btn ts-cancel-btn">
-            Cancel
-        </MudButton>
-        <MudButton OnClick="HandleSubmit"
-                   Variant="Variant.Filled"
-                   Class="ts-btn household-update-btn">
-            @(IsEditMode ? "Update" : "Create")
-        </MudButton>
-    </DialogActions>
 </MudDialog>
 
 @code {

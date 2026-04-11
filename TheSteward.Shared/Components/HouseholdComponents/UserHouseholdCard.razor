@@ -6,18 +6,21 @@
 
 <MudCard id="userHouseholdCard" class="ts-tabbed-card" Elevation="0">
     <MudCardActions class="ts-tabbed-card-btn-container">
-        <MudButton id="editPermissionsBtn" class="ts-card-tab-btn" @onclick="HandleEdit">Edit Member</MudButton>
-        <MudButton id="closeMemberBtn" class="ts-card-tab-btn" @onclick="HandleCancel">Close</MudButton>
+        <MudButton id="editPermissionsBtn" class="ts-tab-btn ts-tab-btn-one" @onclick="HandleEdit">Edit Member</MudButton>
+        <MudButton id="closeMemberBtn" class="ts-tab-btn ts-tab-btn-two" @onclick="HandleCancel">Close</MudButton>
     </MudCardActions>
 
     <MudCardContent class="ts-card-content">
         <MudCardHeader Class="ts-tabbed-card-header">
-            <h3 class="ts-tabbed-card-title">
-                <span class="material-icons" style="vertical-align: middle; font-size: 24px; margin-right: 8px;">person</span>
+            <h2 class="ts-tabbed-card-title">Member Information</h2>
+        <MudDivider />
+            <h3 class="ts-tabbed-card-subtitle">
+                <span class="material-icons" style="vertical-align: middle; font-size: 24px;">person</span>
                 <span class="ts-label">@UserHouseholdDto.User.UserName</span>
             </h3>
         </MudCardHeader>
 
+        
         <div class="ts-card-body">
             <section class="ts-card-section">
                 <p class="ts-card-row">

@@ -36,6 +36,9 @@ public class UserHouseholdFormDto
 
     [UserPermission("Task Manager - Write", "Tasks")]
     public bool HasTaskManagerWritePermission { get; set; }
+    
+    [UserPermission("Task Manager - Complete", "Tasks")]
+    public bool HasTaskManagerCompletePermission { get; set; }
 
 
     [UserPermission("Task Manager - Read", "Tasks")]

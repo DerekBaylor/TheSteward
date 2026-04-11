@@ -2,58 +2,62 @@
 @using TheSteward.Shared.Dtos
 @using TheSteward.Shared.Dtos.HouseholdDtos
 
-<MudDialog Class="user-profile-modal">
-    <TitleContent>
-        <div class="modal-header-custom">
-            <MudText Typo="Typo.h6">Edit My Profile</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Close"
-                           OnClick="HandleCancel"
-                           Class="modal-close-btn" />
-        </div>
-    </TitleContent>
-
+<MudDialog Class="ts-modal user-profile-modal">
     <DialogContent>
-        <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
-            <DataAnnotationsValidator />
 
-            <MudTextField @bind-Value="FormData.UserName"
-                          Label="Username"
-                          Variant="Variant.Outlined"
-                          For="@(() => FormData.UserName)"
-                          Margin="Margin.Dense"
-                          Class="mb-4" />
+        <MudElement Class="modal-layout">
 
-            <MudTextField @bind-Value="FormData.Email"
-                          Label="Email"
-                          Variant="Variant.Outlined"
-                          For="@(() => FormData.Email)"
-                          Margin="Margin.Dense"
-                          InputType="InputType.Email"
-                          Class="mb-4" />
+            <MudStack Class="modal-sidebar">
+                <MudElement Class="modal-sidebar-content">
+                    <MudIcon Icon="@Icons.Material.Filled.Edit" />
+                    <MudText Typo="Typo.h6">PROFILE</MudText>
+                </MudElement>
+            </MudStack>
 
-            <MudTextField @bind-Value="FormData.PhoneNumber"
-                          Label="Phone Number"
-                          Variant="Variant.Outlined"
-                          For="@(() => FormData.PhoneNumber)"
-                          Margin="Margin.Dense"
-                          InputType="InputType.Telephone"
-                          Placeholder="(555) 555-5555"
-                          Class="mb-4" />
-        </EditForm>
+            <MudStack Class="modal-right-stack">
+                <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+
+                    <MudTextField @bind-Value="FormData.UserName"
+                                  Label="Username"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => FormData.UserName)"
+                                  Margin="Margin.Dense"
+                                  Class="mb-4" />
+
+                    <MudTextField @bind-Value="FormData.Email"
+                                  Label="Email"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => FormData.Email)"
+                                  Margin="Margin.Dense"
+                                  InputType="InputType.Email"
+                                  Class="mb-4" />
+
+                    <MudTextField @bind-Value="FormData.PhoneNumber"
+                                  Label="Phone Number"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => FormData.PhoneNumber)"
+                                  Margin="Margin.Dense"
+                                  InputType="InputType.Telephone"
+                                  Placeholder="(555) 555-5555"
+                                  Class="mb-4" />
+                </EditForm>
+
+                <MudElement Class="modal-actions">
+                    <MudButton OnClick="HandleCancel"
+                               Variant="Variant.Outlined">
+                        Cancel
+                    </MudButton>
+                    <MudButton OnClick="HandleSubmit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary">
+                        Update Profile
+                    </MudButton>
+                </MudElement>
+            </MudStack>
+        </MudElement>
     </DialogContent>
 
-    <DialogActions>
-        <MudButton OnClick="HandleCancel"
-                   Variant="Variant.Outlined"
-                   Class="cancel-btn">
-            Cancel
-        </MudButton>
-        <MudButton OnClick="HandleSubmit"
-                   Variant="Variant.Filled"
-                   Class="submit-btn">
-            Update Profile
-        </MudButton>
-    </DialogActions>
 </MudDialog>
 
 @code {

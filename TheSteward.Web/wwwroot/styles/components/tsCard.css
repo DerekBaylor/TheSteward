@@ -5,6 +5,7 @@
     margin: 1rem;
     font-family: var(--primary-font);
     border-radius: var(--border-radius);
+    box-shadow: var(--blue-shadow-5);
 }
 
 .ts-card-content {
@@ -72,25 +73,55 @@
         flex-grow: 1;
     }
 
+
+
+
+
+
+
+
+
+
+
 /* ------------ */
 /* Tabbbed Card */
 /* ------------ */
 
 .ts-tabbed-card {
-    margin: 1rem;
-    font-family: var(--primary-font);
+    animation: slideUp 0.4s ease-out;
     border: none;
+    border-color: var(--base-blue);
     border-radius: var(--border-radius);
+    font-family: var(--primary-font);
+    margin: 1rem;
+    width: 25rem;
 }
 
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* tab buttons */
+/* ----------  */
     .ts-tabbed-card .ts-tabbed-card-btn-container {
+        background-color: var(--white-background);
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
         padding: 0 .5rem 0 0;
     }
 
-        .ts-tabbed-card-btn-container .ts-card-tab-btn {
+        .ts-tabbed-card-btn-container .ts-tab-btn {
             border-radius: var(--border-radius) var(--border-radius) 0 0;
             border-width: 1px;
             cursor: pointer;
@@ -101,11 +132,53 @@
             color: var(--off-white);
         }
 
-    .ts-tabbed-card .ts-tabbed-card-header {
-        padding: 0;
+/* tab edit btn */
+.ts-tab-btn-one.ts-tab-btn-one {
+    background-color: var(--blue-4);
+    border-color: var(--light-blue);
+    color: var(--off-white);
+}
+
+    .ts-tab-btn-one.ts-tab-btn-one:hover {
+        background-color: var(--blue-8);
     }
 
-        .ts-tabbed-card-header .ts-tabbbed-card-title {
-            font-family: var(--label-font);
-            margin: 0 1rem 0 0;
-        }
+/* tab add btn */
+.ts-tab-btn-two.ts-tab-btn-two {
+    background-color: var(--blue-5);
+    border-color: var(--blue-5);
+    color: var(--off-white);
+}
+
+    .ts-tab-btn-two.ts-tab-btn-two:hover {
+        background-color: var(--blue-8);
+    }
+
+/* Content */
+/* ------- */
+
+#householdCard .ts-card-content {
+    border-color: var(--base-blue);
+    box-shadow: var(--blue-shadow-tabbed);
+}
+
+
+/* tab card header */
+/* --------------- */
+.ts-tabbed-card .ts-tabbed-card-header {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+    .ts-card-content .ts-tabbed-card-header .ts-tabbed-card-title {
+        font-family: var(--label-font);
+        margin: 0 0 0.25rem 0;
+        color: var(--blue-9);
+    }
+
+    .ts-tabbed-card-header .ts-tabbed-card-subtitle {
+        align-self: flex-start;
+        font-family: var(--label-font);
+        margin: 0.25rem 0 0 0;
+    }

@@ -3,13 +3,17 @@
 
 <MudCard id="userProfileCard" class="ts-tabbed-card user-profile-card" Elevation="0">
     <MudCardActions class="ts-tabbed-card-btn-container">
-        <MudButton id="editProfileBtn" class="ts-card-tab-btn" @onclick="HandleEdit">Edit Profile</MudButton>
-        <MudButton id="closeProfileBtn" class="ts-card-tab-btn" @onclick="HandleClose">Close</MudButton>
+        <MudButton id="editProfileBtn" class="ts-tab-btn ts-tab-btn-one" @onclick="HandleEdit">Edit Profile</MudButton>
+        <MudButton id="closeProfileBtn" class="ts-tab-btn ts-tab-btn-two" @onclick="HandleClose">Close</MudButton>
     </MudCardActions>
 
     <MudCardContent class="ts-card-content">
         <MudCardHeader Class="ts-tabbed-card-header">
-            <h3 class="ts-tabbed-card-title"><span class="ts-label">My Profile</span></h3>
+            <h2 class="ts-tabbed-card-title">
+                <span class="material-icons" style="vertical-align: middle; font-size: 24px;">person</span>
+                <span class="ts-label">My Profile</span>
+            </h2>
+            <MudDivider />
         </MudCardHeader>
 
         <div class="ts-card-body">

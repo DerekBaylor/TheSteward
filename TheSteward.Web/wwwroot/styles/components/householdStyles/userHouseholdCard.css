@@ -1,35 +1,4 @@
-﻿/* User Household Card (Member Card) */
-/* --------------------------------- */
-#userHouseholdCard.ts-tabbed-card {
-    width: 25rem;
-    animation: slideUp 0.4s ease-out;
-}
-
-/* Tab Buttons */
-/* ----------- */
-#editPermissionsBtn.ts-card-tab-btn {
-    background-color: var(--blue-4);
-    border-color: var(--light-blue);
-    color: var(--off-white);
-}
-
-#closeMemberBtn.ts-card-tab-btn {
-    background-color: var(--blue-5);
-    border-color: var(--blue-5);
-    color: var(--off-white);
-}
-
-button#editPermissionsBtn:hover {
-    background-color: var(--blue-8);
-    color: var(--off-white);
-}
-
-button#closeMemberBtn:hover {
-    background-color: var(--blue-8);
-    color: var(--off-white);
-}
-
-/* Content */
+﻿/* Content */
 /* ------- */
 #userHouseholdCard .ts-card-content {
     border-color: var(--base-blue);
@@ -53,12 +22,12 @@ button#closeMemberBtn:hover {
     margin: 0;
 }
 
+/* Permissions List */
 #userHouseholdCard .ts-card-row :first-child {
     flex-grow: 2;
     max-width: 15rem;
 }
 
-/* Permissions List */
 ul#memberPermissionsList li {
     display: flex;
     flex-direction: row;
@@ -72,3 +41,10 @@ ul#memberPermissionsList li {
     ul#memberPermissionsList li :last-child {
         flex-grow: 1;
     }
+
+#memberPermissionsList li > span {
+    align-items: center;
+    gap: 0.5rem;
+    display: flex;
+    padding: 0.15rem 0.5rem;
+}

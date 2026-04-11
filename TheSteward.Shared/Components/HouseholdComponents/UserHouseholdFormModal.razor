@@ -2,78 +2,88 @@
 @using TheSteward.Shared.Dtos
 @using TheSteward.Shared.Dtos.HouseholdDtos
 
-<MudDialog Class="user-household-modal ts-modal">
-    <TitleContent>
-        <div class="modal-header-custom">
-            <MudText Typo="Typo.h5">Edit Member Permissions</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Close"
-                           OnClick="HandleCancel"
-                           Class="modal-close-btn" />
-        </div>
-    </TitleContent>
-
+<MudDialog Class="ts-modal user-household-modal">
     <DialogContent>
-        <MudText Typo="Typo.h6" Class="mb-3">
-            <strong>User Name: </strong> @FormData.MemberName
-        </MudText>
-        <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
-            <DataAnnotationsValidator />
+        <MudElement Class="modal-layout">
+            <MudStack Class="modal-sidebar">
+                <MudElement Class="modal-sidebar-content">
+                    <MudIcon Icon="@Icons.Material.Filled.Edit"/>
+                    <MudText Typo="Typo.h5">MEMEBER PERMISSIONS</MudText>
+                </MudElement>
+            </MudStack>
 
-            <MudText Typo="Typo.body1" Class="mb-3">
-                <strong>Household Owner:</strong> @(FormData.IsHouseholdOwner ? "Yes" : "No")
-            </MudText>
+            <MudStack Class="modal-right-stack">
 
-            <MudText Typo="Typo.subtitle2" Class="mb-2">General Permissions:</MudText>
-            <MudSwitch @bind-Value="FormData.HasAdminPermissions"
-                       Label="Admin Permissions"
-                       Class="mb-3" />
+                <MudElement Class="modal-subtitle">
+                    <MudText Typo="Typo.h6" >
+                        <strong>User Name: </strong> @FormData.MemberName
+                    </MudText>
+                    <MudText Typo="Typo.body1">
+                        <strong>Household Owner:</strong> @(FormData.IsHouseholdOwner ? "Yes" : "No")
+                    </MudText>
+                </MudElement>
 
-            <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">Finance Manager:</MudText>
-            <MudSwitch @bind-Value="FormData.HasFinanceManagerReadPermission"
-                       Label="Read Permission"
-                       Class="mb-3" />
-            <MudSwitch @bind-Value="FormData.HasFinanceManagerWritePermission"
-                       Label="Write Permission"
-                       Class="mb-2" />
+                <MudDivider />
 
-            <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">Kitchen Manager:</MudText>
-            <MudSwitch @bind-Value="FormData.HasKitchenManagerReadPermission"
-                       Label="Read Permission"
-                       Class="mb-3" />
-            <MudSwitch @bind-Value="FormData.HasKitchenManagerWritePermission"
-                       Label="Write Permission"
-                       Class="mb-2" />
+                <EditForm Model="FormData" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
 
-            <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">Task Manager:</MudText>
-            <MudSwitch @bind-Value="FormData.HasTaskManagerReadPermission"
-                       Label="Read Permission"
-                       Class="mb-3" />
-            <MudSwitch @bind-Value="FormData.HasTaskManagerWritePermission"
-                       Label="Write Permission"
-                       Class="mb-2" />
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">General Permissions:</MudText>
+                    <MudSwitch @bind-Value="FormData.HasAdminPermissions"
+                               Label="Admin Permissions"
+                               Color="Color.Primary" />
 
-            <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">File Manager:</MudText>
-            <MudSwitch @bind-Value="FormData.HasFileManagerReadPermission"
-                       Label="Read Permission" 
-                       Class="mb-3" />
-            <MudSwitch @bind-Value="FormData.HasFileManagerWritePermission"
-                       Label="Write Permission" 
-                       Class="mb-2" />
-        </EditForm>
+                    <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">Finance Manager:</MudText>
+                    <MudSwitch @bind-Value="FormData.HasFinanceManagerReadPermission"
+                               Label="Read Permission"
+                               Color="Color.Primary" />
+                    <MudSwitch @bind-Value="FormData.HasFinanceManagerWritePermission"
+                               Label="Write Permission"
+                               Color="Color.Primary" />
+
+                    <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">Kitchen Manager:</MudText>
+                    <MudSwitch @bind-Value="FormData.HasKitchenManagerReadPermission"
+                               Label="Read Permission"
+                               Color="Color.Primary" />
+                    <MudSwitch @bind-Value="FormData.HasKitchenManagerWritePermission"
+                               Label="Write Permission"
+                               Color="Color.Primary" />
+
+                    <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">Task Manager:</MudText>
+                    <MudSwitch @bind-Value="FormData.HasTaskManagerReadPermission"
+                               Label="Read Permission"
+                               Color="Color.Primary" />
+                    <MudSwitch @bind-Value="FormData.HasTaskManagerCompletePermission"
+                                Label="Complete Permission"
+                                Color="Color.Primary" />
+                    <MudSwitch @bind-Value="FormData.HasTaskManagerWritePermission"
+                               Label="Write Permission"
+                               Color="Color.Primary" />
+
+                    <MudText Typo="Typo.subtitle2" Class="mb-2 mt-3">File Manager:</MudText>
+                    <MudSwitch @bind-Value="FormData.HasFileManagerReadPermission"
+                               Label="Read Permission"
+                               Color="Color.Primary" />
+                    <MudSwitch @bind-Value="FormData.HasFileManagerWritePermission"
+                               Label="Write Permission"
+                               Color="Color.Primary" />
+                </EditForm>
+
+                <MudElement Class="modal-actions">
+                    <MudButton OnClick="HandleCancel"
+                               Variant="Variant.Outlined">
+                        Cancel
+                    </MudButton>
+                    <MudButton Color="Color.Primary"
+                               OnClick="HandleSubmit"
+                               Variant="Variant.Filled" >
+                        Update Permissions
+                    </MudButton>
+                </MudElement>
+            </MudStack>
+        </MudElement>
     </DialogContent>
 
-    <DialogActions>
-        <MudButton Class="cancel-btn"
-                    OnClick="HandleCancel"
-                   Variant="Variant.Outlined">
-            Cancel
-        </MudButton>
-        <MudButton Class="submit-btn"
-                    OnClick="HandleSubmit"
-                   Variant="Variant.Filled" >
-            Update Permissions
-        </MudButton>
-    </DialogActions>
 </MudDialog>
 
 @code {

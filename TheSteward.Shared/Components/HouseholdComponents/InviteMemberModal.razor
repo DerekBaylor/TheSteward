@@ -1,60 +1,61 @@
 ﻿@namespace TheSteward.Shared.Components.HouseholdComponents
 @using TheSteward.Core.Dtos.HouseholdDtos
 
-<MudDialog Class="invite-member-modal ts-modal">
-    <TitleContent>
-        <div class="modal-header-custom">
-            <MudText Typo="Typo.h5">Invite Memeber to Household</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Close"
-                           OnClick="HandleCancel"
-                           Class="modal-close-btn" />
-        </div>
-    </TitleContent>
-
+<MudDialog Class="ts-modal invite-member-modal ">
     <DialogContent>
-        <EditForm Model="inviteDto" OnValidSubmit="HandleSubmit">
-            <DataAnnotationsValidator />
+        <MudElement Class="modal-layout">
 
-            <MudTextField @bind-Value="inviteDto.Email"
-                          Label="Email Address"
-                          Variant="Variant.Outlined"
-                          For="@(() => inviteDto.Email)"
-                          Margin="Margin.Dense"
-                          Placeholder="user@example.com"
-                          InputType="InputType.Email"
-                          Class="mb-4" />
+            <MudStack class="modal-sidebar">
+                <MudElement class="modal-sidebar-content">
+                    <MudIcon Icon="@Icons.Material.Filled.Add" />
+                    <MudText Typo="Typo.h6">INVITE</MudText>
+                </MudElement>
+            </MudStack>
 
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <MudAlert Severity="Severity.Error" Class="mb-3">@errorMessage</MudAlert>
-            }
+            <MudStack Class="modal-right-stack">
+                <EditForm Model="inviteDto" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
 
-            @if (!string.IsNullOrEmpty(successMessage))
-            {
-                <MudAlert Severity="Severity.Success" Class="mb-3">@successMessage</MudAlert>
-            }
-        </EditForm>
+                    <MudTextField @bind-Value="inviteDto.Email"
+                                  Label="Email Address"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => inviteDto.Email)"
+                                  Margin="Margin.Dense"
+                                  Placeholder="user@example.com"
+                                  InputType="InputType.Email"
+                                  Class="mb-4" />
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <MudAlert Severity="Severity.Error" Class="mb-3">@errorMessage</MudAlert>
+                    }
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <MudAlert Severity="Severity.Success" Class="mb-3">@successMessage</MudAlert>
+                    }
+                </EditForm>
+
+                <MudElement Class="modal-actions">
+                        <MudButton OnClick="HandleCancel"
+                                   Variant="Variant.Outlined"
+                                   Disabled="@isSubmitting">
+                            Cancel
+                        </MudButton>
+                        <MudButton OnClick="HandleSubmit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                            }
+                            Send Invitation
+                        </MudButton>
+                </MudElement>
+            </MudStack>
+        </MudElement>
     </DialogContent>
-
-    <DialogActions>
-        <MudButton OnClick="HandleCancel"
-                   Variant="Variant.Outlined"
-                   Color="Color.Default"
-                   Disabled="@isSubmitting"
-                   Class="ts-btn ts-cancel-btn">
-            Cancel
-        </MudButton>
-        <MudButton OnClick="HandleSubmit"
-                   Variant="Variant.Filled"
-                   Disabled="@isSubmitting"
-                   Class="ts-btn card-btn send-btn">
-            @if (isSubmitting)
-            {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
-            }
-            Send Invitation
-        </MudButton>
-    </DialogActions>
 </MudDialog>
 
 @code {

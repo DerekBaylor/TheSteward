@@ -1,7 +1,6 @@
-﻿.household-form-modal.ts-modal {
+﻿/*.household-form-modal.ts-modal {
     border: 3px solid var(--base-purple);
 }
-
 
 .household-form-modal div.mud-input-control > div > div > fieldset {
     border-color: var(--gray-3) !important;
@@ -54,3 +53,4 @@
         .ts-btn.household-update-btn:active {
             background-color: var(--purple-6);
         }
+*/

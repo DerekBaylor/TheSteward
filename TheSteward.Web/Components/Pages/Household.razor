@@ -35,17 +35,17 @@ else
                           @bind-Value="selectedHouseholdId"
                           OnChange="OnHouseholdChanged"
                           Placeholder="Choose household" 
-                          Variant="purple"/>
+                          Variant="blue"/>
             </div>
         }
 
         <div class="toolbar-actions">
-            <MudButton Class="toolbar-btn btn-add" @onclick="OpenHouseholdFormModalAsync">
+            <MudButton Class="" Color="Color.Primary" Variant="Variant.Filled" @onclick="OpenHouseholdFormModalAsync">
                 <span class="material-icons">add</span>
                 Add Household
             </MudButton>
 
-            <MudButton Class="toolbar-btn btn-profile" @onclick="ShowUserProfile">
+            <MudButton Class="" Color="Color.Primary" Variant="Variant.Outlined" @onclick="ShowUserProfile">
                 <span class="material-icons">person</span>
                 My Profile
             </MudButton>
@@ -73,7 +73,6 @@ else
     {
         <div class="household-container"> 
             <div class="household-card-container">
-                <h4 class="section-title"> Household Information </h4>
                 <HouseholdCard HouseholdDto="selectedHouseholdDto"
                                HasAdminPermissions="hasAdminPermissions"
                                CurrentUserId="@(currentUserId ?? string.Empty)"
@@ -88,7 +87,6 @@ else
                 <div class="household-card-container">
                     @if (selectedUserHouseholdDto != null && showMemberCard)
                         {
-                        <h4 class="section-title"> Member Information</h4>
                         <UserHouseholdCard 
                             UserHouseholdDto="selectedUserHouseholdDto"
                             OnCancel="ClearSelectedMember"
@@ -103,7 +101,6 @@ else
     {
         <div class="household-container mt-3">
             <div class="household-card-container">
-                <h4 class="section-title">My Profile</h4>
                 <UserProfileCard User="currentUser"
                                     OnClose="CloseUserProfile"
                                     OnEdit="EditUserProfile" />
@@ -606,10 +603,7 @@ else
             FullWidth = true
         };
 
-        var dialog = await DialogService.ShowAsync<InviteMemberModal>(
-            "Invite Member to Household",
-            parameters,
-            options);
+        var dialog = await DialogService.ShowAsync<InviteMemberModal>("", parameters, options);
 
         var result = await dialog.Result;
 
@@ -695,7 +689,7 @@ else
     }
     #endregion Member Invitation
 
-    #region UserHousehold Management / Memmber Management
+    #region UserHousehold Management / Member Management
     private async Task GetMember(ApplicationUser member)
     {
         if (selectedHouseholdDto == null)
@@ -762,6 +756,7 @@ else
             HasKitchenManagerReadPermission = userHouseholdDto.HasKitchenManagerReadPermission,
             HasKitchenManagerWritePermission = userHouseholdDto.HasKitchenManagerWritePermission,
             HasTaskManagerReadPermission = userHouseholdDto.HasTaskManagerReadPermission,
+            HasTaskManagerCompletePermission = userHouseholdDto.HasTaskManagerCompletePermission,
             HasTaskManagerWritePermission = userHouseholdDto.HasTaskManagerWritePermission,
             HasFileManagerReadPermission = userHouseholdDto.HasFileManagerReadPermission,
             HasFileManagerWritePermission = userHouseholdDto.HasFileManagerWritePermission
@@ -821,6 +816,7 @@ else
                 HasKitchenManagerWritePermission = formDto.HasKitchenManagerWritePermission,
                 HasKitchenManagerReadPermission = formDto.HasKitchenManagerReadPermission,
                 HasTaskManagerWritePermission = formDto.HasTaskManagerWritePermission,
+                HasTaskManagerCompletePermission = formDto.HasTaskManagerCompletePermission,
                 HasTaskManagerReadPermission = formDto.HasTaskManagerReadPermission,
                 HasFileManagerWritePermission = formDto.HasFileManagerWritePermission,
                 HasFileManagerReadPermission = formDto.HasFileManagerReadPermission
@@ -854,5 +850,5 @@ else
         }
     }
 
-    #endregion UserHousehold Management / Memmber Management
+    #endregion UserHousehold Management / Member Management
 }

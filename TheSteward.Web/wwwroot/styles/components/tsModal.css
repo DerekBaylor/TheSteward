@@ -1,5 +1,4 @@
-﻿/* Modal styling */
-.ts-modal.mud-dialog,
+﻿.ts-modal.mud-dialog,
 .household-form-modal.mud-dialog,
 .user-profile-modal.mud-dialog {
     border: 3px solid var(--base-purple);
@@ -50,3 +49,63 @@
     opacity: 0.75;
     line-height: 1.5;
 }
+
+/* ---------------- */
+/* ts-modal updates */
+/* ---------------- */
+.ts-modal.ts-modal {
+    border: none;
+}
+
+    .ts-modal .mud-dialog-title {
+        display: none;
+    }
+
+.modal-layout {
+    display: flex;
+
+    .modal-sidebar {
+        align-items: center;
+        background-image: var(--blue-gradient);
+        border-radius: 0 1.5rem 0 0;
+        display: flex;
+        flex-shrink: 0;
+        justify-content: flex-start;
+        padding: 0 0 .5rem 0;
+        width: 3rem;
+    }
+
+    .modal-sidebar-content {
+        align-items: center;
+        color: white;
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        margin-top: .5rem;
+        padding: 0;
+        text-orientation: upright;
+        white-space: nowrap;
+        writing-mode: vertical-rl;
+    }
+
+        .modal-sidebar-content .mud-icon-root,
+        .modal-sidebar-content .mud-typography {
+            color: white;
+        }
+
+    .modal-right-stack {
+        margin: 1rem;
+        padding: .5rem 0 0 0;
+        width: 100%;
+    }
+
+    .modal-form {
+        width: 100%;
+    }
+
+    .modal-actions {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        gap: .5rem;
+    }

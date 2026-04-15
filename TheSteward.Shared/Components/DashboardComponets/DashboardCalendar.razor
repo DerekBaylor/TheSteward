@@ -40,24 +40,35 @@
 </div>
 
 @code {
+    // ── Parameters ─────────────────────────────────────────────────────────
+    /// <summary>
+    /// Set of local dates that have at least one task due.
+    /// Passed in from Dashboard so the calendar reflects real data.
+    /// </summary>
+    [Parameter]
+    public HashSet<DateTime> TaskDates { get; set; } = new();
+
+    // ── State ──────────────────────────────────────────────────────────────
     private DateTime currentDate = DateTime.Today;
     private List<CalendarDay> calendarDays = new();
     private CalendarDay? selectedDay;
 
-    protected override void OnInitialized()
-    {
-        GenerateCalendar();
-    }
+    // ── Lifecycle ──────────────────────────────────────────────────────────
+    protected override void OnInitialized() => GenerateCalendar();
 
+    // Re-generate whenever TaskDates changes so new data is reflected
+    protected override void OnParametersSet() => GenerateCalendar();
+
+    // ── Calendar Generation ────────────────────────────────────────────────
     private void GenerateCalendar()
     {
         calendarDays.Clear();
 
         var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
         var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-
         int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
 
+        // Trailing days from the previous month
         var previousMonth = firstDayOfMonth.AddMonths(-1);
         var daysInPreviousMonth = DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
 
@@ -67,10 +78,11 @@
             {
                 Date = new DateTime(previousMonth.Year, previousMonth.Month, daysInPreviousMonth - i),
                 IsCurrentMonth = false,
-                HasEvent = false
+                HasEvent = false   // don't show indicators for overflow days
             });
         }
 
+        // Days in the current month
         for (int day = 1; day <= lastDayOfMonth.Day; day++)
         {
             var date = new DateTime(currentDate.Year, currentDate.Month, day);
@@ -78,10 +90,11 @@
             {
                 Date = date,
                 IsCurrentMonth = true,
-                HasEvent = Random.Shared.Next(0, 5) == 0
+                HasEvent = TaskDates.Contains(date)   // ← real data
             });
         }
 
+        // Leading days from the next month to fill the grid to 42 cells
         int remainingDays = 42 - calendarDays.Count;
         var nextMonth = firstDayOfMonth.AddMonths(1);
 
@@ -96,26 +109,19 @@
         }
     }
 
+    // ── Helpers ────────────────────────────────────────────────────────────
     private string GetDayClass(CalendarDay day)
     {
         var classes = new List<string> { "calendar-day" };
 
-        if (!day.IsCurrentMonth)
-            classes.Add("other-month");
-
-        if (day.Date.Date == DateTime.Today)
-            classes.Add("today");
-
-        if (selectedDay?.Date.Date == day.Date.Date)
-            classes.Add("selected");
+        if (!day.IsCurrentMonth) classes.Add("other-month");
+        if (day.Date == DateTime.Today) classes.Add("today");
+        if (selectedDay?.Date == day.Date) classes.Add("selected");
 
         return string.Join(" ", classes);
     }
 
-    private void SelectDay(CalendarDay day)
-    {
-        selectedDay = day;
-    }
+    private void SelectDay(CalendarDay day) => selectedDay = day;
 
     private void PreviousMonth()
     {
@@ -129,6 +135,7 @@
         GenerateCalendar();
     }
 
+    // ── Inner Types ────────────────────────────────────────────────────────
     private class CalendarDay
     {
         public DateTime Date { get; set; }
@@ -137,3 +144,5 @@
         public int Day => Date.Day;
     }
 }
+
+

@@ -1,0 +1,91 @@
+﻿@namespace TheSteward.Shared.Components.DashboardComponets
+
+@using TheSteward.Core.Dtos.HouseholdDtos
+@using TheSteward.Shared.Dtos.HouseholdDtos
+@using TheSteward.Shared.Models
+@using TheSteward.Shared.Components
+
+@inject HouseholdState HouseholdState
+
+@implements IDisposable
+
+@if (!isLoading && householdItems.Count > 0)
+{
+    <MudToolBar Class="dashboard-toolbar">
+
+        <div class="toolbar-select-group">
+            <label class="select-label">
+                <span class="material-symbols-outlined">home</span>
+                Active Household
+            </label>
+
+            @if (householdItems.Count == 1)
+            {
+                <span class="toolbar-household-name">
+                    @HouseholdState.CurrentHousehold?.HouseholdName
+                </span>
+            }
+            else
+            {
+                <TsSelect TValue="Guid?"
+                          Items="householdItems"
+                          @bind-Value="selectedHouseholdId"
+                          OnChange="OnHouseholdChangedAsync"
+                          Placeholder="Choose household"
+                          Variant="blue" />
+            }
+        </div>
+
+        <MudSpacer />
+
+    </MudToolBar>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<UserHouseholdDto> OnHouseholdChanged { get; set; }
+
+    private List<SelectItem<Guid?>> householdItems = new();
+    private Guid? selectedHouseholdId;
+    private bool isLoading = true;
+    private Action? _stateChangeHandler;
+
+    protected override Task OnInitializedAsync()
+    {
+        _stateChangeHandler = () => InvokeAsync(StateHasChanged);
+        HouseholdState.OnChange += _stateChangeHandler;
+
+        BuildHouseholdItems();
+
+        isLoading = false;
+        return Task.CompletedTask;
+    }
+
+    private void BuildHouseholdItems()
+    {
+        householdItems = HouseholdState.UserHouseholds
+            .Select(uh => new SelectItem<Guid?>
+            {
+                Value = uh.HouseholdId,
+                Text = uh.Household?.HouseholdName ?? "Unknown"
+            })
+            .ToList();
+
+        selectedHouseholdId = HouseholdState.CurrentHousehold?.HouseholdId;
+    }
+
+    private async Task OnHouseholdChangedAsync()
+    {
+        var selected = HouseholdState.UserHouseholds
+            .FirstOrDefault(uh => uh.HouseholdId == selectedHouseholdId);
+
+        if (selected == null) return;
+
+        HouseholdState.SetUserHousehold(selected);
+        await OnHouseholdChanged.InvokeAsync(selected);
+    }
+
+    public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
+}
+
+

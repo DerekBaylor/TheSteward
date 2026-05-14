@@ -170,5 +170,7 @@ public interface ITaskItemService
     /// <param name="requestingUserHouseholdId">The UserHousehold making the request.</param>
     /// <returns>A list of visible, non-archived <see cref="TaskItemDto"/> records.</returns>
     Task<List<TaskItemDto>> GetAllByHouseholdIdAsync(Guid householdId, Guid requestingUserHouseholdId);
+
+    Task<List<TaskItemDto>> GetAllActiveByHouseholdIdWithRecurrenceAsync(Guid householdId, Guid requestingUserHouseholdId);
     #endregion Get Methods
 }

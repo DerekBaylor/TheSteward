@@ -1,139 +1,126 @@
 ﻿@namespace TheSteward.Shared.Components.DashboardComponets
 
+@using TheSteward.Shared.Dtos.DashboardDtos
+
 <div class="calendar-card">
+
+    @* ── Month Navigation ── *@
     <div class="calendar-header">
-        <button class="calendar-nav-btn" @onclick="PreviousMonth">
+        <button class="calendar-nav-btn" @onclick="GoToPreviousMonth">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
         </button>
-
-        <h3 class="calendar-month">@currentDate.ToString("MMMM yyyy")</h3>
-
-        <button class="calendar-nav-btn" @onclick="NextMonth">
+        <h3 class="calendar-month">@visibleMonth.ToString("MMMM yyyy")</h3>
+        <button class="calendar-nav-btn" @onclick="GoToNextMonth">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </button>
     </div>
 
+    @* ── Day-of-week headers ── *@
     <div class="calendar-grid">
-        <div class="calendar-day-header">Sun</div>
-        <div class="calendar-day-header">Mon</div>
-        <div class="calendar-day-header">Tue</div>
-        <div class="calendar-day-header">Wed</div>
-        <div class="calendar-day-header">Thu</div>
-        <div class="calendar-day-header">Fri</div>
-        <div class="calendar-day-header">Sat</div>
-
-        @foreach (var day in calendarDays)
+        @foreach (var day in new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" })
         {
-            <div class="@GetDayClass(day)" @onclick="() => SelectDay(day)">
-                <span class="day-number">@day.Day</span>
-                @if (day.HasEvent)
+            <div class="calendar-day-header">@day</div>
+        }
+
+        @* ── Day cells ── *@
+        @foreach (var cell in calendarCells)
+        {
+            <div class="calendar-day @GetCellCss(cell)" @onclick="() => SelectDate(cell)">
+                <span class="day-number">@cell.Day</span>
+                @if (OccurrenceDates.Contains(cell.Date))
                 {
-                    <div class="event-indicator"></div>
+                    <span class="event-indicator"></span>
                 }
             </div>
         }
     </div>
+
 </div>
 
 @code {
-    private DateTime currentDate = DateTime.Today;
-    private List<CalendarDay> calendarDays = new();
-    private CalendarDay? selectedDay;
 
+    // ── Parameters ─────────────────────────────────────────────────────────
+    [Parameter] public HashSet<DateTime> OccurrenceDates { get; set; } = new();
+    [Parameter] public DateTime SelectedDate { get; set; } = DateTime.Today;
+    [Parameter] public EventCallback<DateTime> SelectedDateChanged { get; set; }
+    [Parameter] public EventCallback<DateTime> OnMonthChanged { get; set; }
+
+    // ── Private state ──────────────────────────────────────────────────────
+    private DateTime visibleMonth;
+    private List<DateTime> calendarCells = new();
+
+    // ── Lifecycle ──────────────────────────────────────────────────────────
     protected override void OnInitialized()
     {
-        GenerateCalendar();
+        visibleMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        BuildCalendarCells();
     }
 
-    private void GenerateCalendar()
+    // ── Navigation ─────────────────────────────────────────────────────────
+    private async Task GoToPreviousMonth()
     {
-        calendarDays.Clear();
-
-        var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
-        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-
-        int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
-
-        var previousMonth = firstDayOfMonth.AddMonths(-1);
-        var daysInPreviousMonth = DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
-
-        for (int i = startDayOfWeek - 1; i >= 0; i--)
-        {
-            calendarDays.Add(new CalendarDay
-            {
-                Date = new DateTime(previousMonth.Year, previousMonth.Month, daysInPreviousMonth - i),
-                IsCurrentMonth = false,
-                HasEvent = false
-            });
-        }
-
-        for (int day = 1; day <= lastDayOfMonth.Day; day++)
-        {
-            var date = new DateTime(currentDate.Year, currentDate.Month, day);
-            calendarDays.Add(new CalendarDay
-            {
-                Date = date,
-                IsCurrentMonth = true,
-                HasEvent = Random.Shared.Next(0, 5) == 0
-            });
-        }
-
-        int remainingDays = 42 - calendarDays.Count;
-        var nextMonth = firstDayOfMonth.AddMonths(1);
-
-        for (int day = 1; day <= remainingDays; day++)
-        {
-            calendarDays.Add(new CalendarDay
-            {
-                Date = new DateTime(nextMonth.Year, nextMonth.Month, day),
-                IsCurrentMonth = false,
-                HasEvent = false
-            });
-        }
+        visibleMonth = visibleMonth.AddMonths(-1);
+        BuildCalendarCells();
+        await OnMonthChanged.InvokeAsync(visibleMonth);
     }
 
-    private string GetDayClass(CalendarDay day)
+    private async Task GoToNextMonth()
     {
-        var classes = new List<string> { "calendar-day" };
-
-        if (!day.IsCurrentMonth)
-            classes.Add("other-month");
-
-        if (day.Date.Date == DateTime.Today)
-            classes.Add("today");
-
-        if (selectedDay?.Date.Date == day.Date.Date)
-            classes.Add("selected");
-
-        return string.Join(" ", classes);
+        visibleMonth = visibleMonth.AddMonths(1);
+        BuildCalendarCells();
+        await OnMonthChanged.InvokeAsync(visibleMonth);
     }
 
-    private void SelectDay(CalendarDay day)
+    // ── Day selection ──────────────────────────────────────────────────────
+    private async Task SelectDate(DateTime date)
     {
-        selectedDay = day;
+        await SelectedDateChanged.InvokeAsync(date);
     }
 
-    private void PreviousMonth()
+    // ── Calendar cell builder ──────────────────────────────────────────────
+    private void BuildCalendarCells()
     {
-        currentDate = currentDate.AddMonths(-1);
-        GenerateCalendar();
+        calendarCells.Clear();
+
+        var firstDay = visibleMonth;
+        var startOffset = (int)firstDay.DayOfWeek; // 0 = Sunday
+        var daysInMonth = DateTime.DaysInMonth(firstDay.Year, firstDay.Month);
+
+        // Leading days from the previous month
+        for (int i = startOffset - 1; i >= 0; i--)
+            calendarCells.Add(firstDay.AddDays(-i - 1));
+
+        // Current month days
+        for (int d = 1; d <= daysInMonth; d++)
+            calendarCells.Add(new DateTime(firstDay.Year, firstDay.Month, d));
+
+        // Trailing days to complete the last row
+        int trailing = 7 - (calendarCells.Count % 7);
+        if (trailing < 7)
+            for (int i = 1; i <= trailing; i++)
+                calendarCells.Add(firstDay.AddMonths(1).AddDays(i - 1));
     }
 
-    private void NextMonth()
+    // ── CSS helpers — maps to your existing CSS class names ────────────────
+    private string GetCellCss(DateTime date)
     {
-        currentDate = currentDate.AddMonths(1);
-        GenerateCalendar();
-    }
+        var classes = new System.Text.StringBuilder();
 
-    private class CalendarDay
-    {
-        public DateTime Date { get; set; }
-        public bool IsCurrentMonth { get; set; }
-        public bool HasEvent { get; set; }
-        public int Day => Date.Day;
+        if (date.Month != visibleMonth.Month)
+            classes.Append(" other-month");
+
+        if (date.Date == DateTime.Today)
+            classes.Append(" today");
+
+        if (date.Date == SelectedDate.Date)
+            classes.Append(" selected");
+
+        return classes.ToString().Trim();
     }
 }
+
+

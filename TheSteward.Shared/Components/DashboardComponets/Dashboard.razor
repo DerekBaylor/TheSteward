@@ -1,130 +1,230 @@
 ﻿@namespace TheSteward.Shared.Components.DashboardComponets
 
+@using TheSteward.Core.Dtos.HouseholdDtos
+@using TheSteward.Core.Dtos.TaskManagerDtos
+@using TheSteward.Core.IServices.TaskManagerIServices
+@using TheSteward.Core.Utils.TaskManagerUtils
+
+@inject HouseholdState HouseholdState
+@inject ITaskItemService TaskItemService
+
+@implements IDisposable
+
 <div class="dashboard-container">
+
+    @* ── Toolbar ── *@
+    <DashboardToolbar OnHouseholdChanged="OnHouseholdChangedAsync" />
+
+    @* ── Header ── *@
     <div class="dashboard-header">
-        <h2 class="dashboard-title">Your Household Dashboard</h2>
+        <h2 class="dashboard-title">
+            @(HouseholdState.CurrentHousehold?.HouseholdName ?? "Your Household") Dashboard
+        </h2>
         <p class="dashboard-subtitle">@GetGreeting()</p>
     </div>
 
-    <div class="dashboard-grid">
-        <!-- Calendar Section -->
-        <div class="dashboard-section calendar-section">
-            <DashboardCalendar />
-        </div>
+    @* ── Body ── *@
+    @if (HouseholdState.CurrentUserHousehold == null)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mt-4">
+            You are not part of a household. Please visit the
+            <MudLink Href="/household">Household page</MudLink> to get started.
+        </MudAlert>
+    }
+    else if (isLoading)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-4" />
+    }
+    else
+    {
+        <div class="dashboard-grid">
 
-        <!-- Today's Overview Section -->
-        <div class="dashboard-section overview-section">
-            <div class="section-card">
-                <div class="section-header">
-                    <h3 class="section-title">Today's Overview</h3>
-                    <span class="section-date">@DateTime.Today.ToString("MMM dd, yyyy")</span>
-                </div>
+            @* ── Calendar ── *@
+            <div class="dashboard-section calendar-section">
+                <DashboardCalendar OccurrenceDates="occurrenceDates"
+                                   @bind-SelectedDate="selectedDate"
+                                   OnMonthChanged="OnMonthChangedAsync" />
+            </div>
 
-                <div class="overview-content">
-                    <!-- Tasks -->
-                    <div class="overview-category">
-                        <div class="category-header">
-                            <div class="category-icon tasks-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11l3 3L22 4"></path>
-                                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
-                                </svg>
-                            </div>
-                            <h4 class="category-title">Tasks</h4>
-                            <span class="category-badge">3</span>
-                        </div>
-                        <ul class="category-list">
-                            <li class="category-item">
-                                <span class="item-bullet"></span>
-                                <span class="item-text">Complete weekly grocery shopping</span>
-                            </li>
-                            <li class="category-item">
-                                <span class="item-bullet"></span>
-                                <span class="item-text">Review household budget</span>
-                            </li>
-                            <li class="category-item">
-                                <span class="item-bullet"></span>
-                                <span class="item-text">Schedule maintenance appointment</span>
-                            </li>
-                        </ul>
+            @* ── Selected Day Overview ── *@
+            <div class="dashboard-section overview-section">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            @(selectedDate == DateTime.Today ? "Today's Overview" : "Overview")
+                        </h3>
+                        <span class="section-date">@selectedDate.ToString("MMM dd, yyyy")</span>
                     </div>
 
-                    <!-- Appointments -->
-                    <div class="overview-category">
-                        <div class="category-header">
-                            <div class="category-icon appointments-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                            </div>
-                            <h4 class="category-title">Appointments</h4>
-                            <span class="category-badge">2</span>
-                        </div>
-                        <ul class="category-list">
+                    @if (isMonthLoading)
+                    {
+                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                    }
+
+                    <div class="overview-content">
+                        @* ── Tasks ── *@
+                        @foreach (var task in SelectedDayTasks)
+                        {
                             <li class="category-item">
-                                <span class="item-time">10:00 AM</span>
-                                <span class="item-text">Doctor's appointment</span>
+                                <span class="item-bullet"></span>
+                                <span class="item-text">@task.TaskItemName</span>
+                                <span class="tm-status-badge tm-status-badge--@task.Status.ToString().ToLower()">
+                                    @task.Status
+                                </span>
                             </li>
+                        }
+
+                        @* ── Appointments ── *@
+                        @foreach (var task in SelectedDayAppointments)
+                        {
                             <li class="category-item">
-                                <span class="item-time">3:30 PM</span>
-                                <span class="item-text">Parent-teacher conference</span>
+                                <span class="item-time">@(task.DueDate?.ToLocalTime().ToString("hh:mm tt") ?? "--")</span>
+                                <span class="item-text">@task.TaskItemName</span>
                             </li>
-                        </ul>
+                        }
+
+                        @* ── Meals ── *@
+                        @foreach (var task in SelectedDayMeals)
+                        {
+                            <li class="category-item">
+                                <span class="item-label">@task.TaskItemCategoryName</span>
+                                <span class="item-text">@task.TaskItemName</span>
+                            </li>
+                        }
+
+
                     </div>
 
-                    <!-- Meals -->
-                    <div class="overview-category">
-                        <div class="category-header">
-                            <div class="category-icon meals-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"></path>
-                                    <path d="M7 2v20"></path>
-                                    <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"></path>
-                                </svg>
-                            </div>
-                            <h4 class="category-title">Meals</h4>
-                            <span class="category-badge">3</span>
-                        </div>
-                        <ul class="category-list">
-                            <li class="category-item">
-                                <span class="item-label">Breakfast</span>
-                                <span class="item-text">Oatmeal with berries</span>
-                            </li>
-                            <li class="category-item">
-                                <span class="item-label">Lunch</span>
-                                <span class="item-text">Chicken Caesar salad</span>
-                            </li>
-                            <li class="category-item">
-                                <span class="item-label">Dinner</span>
-                                <span class="item-text">Spaghetti Bolognese</span>
-                            </li>
-                        </ul>
+                    <div class="section-footer">
+                        <a href="/tasks" class="btn-view-all">
+                            View All Activities
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </a>
                     </div>
-                </div>
-
-                <div class="section-footer">
-                    <button class="btn-view-all">
-                        View All Activities
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </button>
                 </div>
             </div>
+
         </div>
-    </div>
+    }
 </div>
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mt-3">@errorMessage</MudAlert>
+}
+
 @code {
+    private bool isLoading = true;
+    private bool isMonthLoading = false;
+    private string? errorMessage;
+    private Action? _stateChangeHandler;
+
+    private DateTime selectedDate = DateTime.Today;
+    private DateTime visibleMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    private List<TaskItemDto> recurringTasks = new();
+    private HashSet<DateTime> occurrenceDates = new();
+
+    // ── Selected-day task lists projected from recurringTasks ──────────────
+    private List<TaskItemDto> SelectedDayTasks => recurringTasks
+        .Where(t => t.RecurrenceRule != null
+                 && RecurrenceProjector.ProjectRule(t.RecurrenceRule, selectedDate.Date, selectedDate.Date)
+                                       .Any()
+                 && !AppointmentCategories.Contains(t.TaskItemCategoryName ?? "")
+                 && !MealCategories.Contains(t.TaskItemCategoryName ?? ""))
+        .ToList();
+
+    private List<TaskItemDto> SelectedDayAppointments => recurringTasks
+        .Where(t => t.RecurrenceRule != null
+                 && RecurrenceProjector.ProjectRule(t.RecurrenceRule, selectedDate.Date, selectedDate.Date)
+                                       .Any()
+                 && AppointmentCategories.Contains(t.TaskItemCategoryName ?? ""))
+        .OrderBy(t => t.DueDate)
+        .ToList();
+
+    private List<TaskItemDto> SelectedDayMeals => recurringTasks
+        .Where(t => t.RecurrenceRule != null
+                 && RecurrenceProjector.ProjectRule(t.RecurrenceRule, selectedDate.Date, selectedDate.Date)
+                                       .Any()
+                 && MealCategories.Contains(t.TaskItemCategoryName ?? ""))
+        .OrderBy(t => t.DueDate)
+        .ToList();
+
+    private static readonly HashSet<string> AppointmentCategories =
+        new(StringComparer.OrdinalIgnoreCase) { "Appointment", "Appointments" };
+
+    private static readonly HashSet<string> MealCategories =
+        new(StringComparer.OrdinalIgnoreCase) { "Meal", "Meals" };
+
+    // ── Lifecycle ───────────────────────────────────────────────────────────
+    protected override async Task OnInitializedAsync()
+    {
+        _stateChangeHandler = () => InvokeAsync(StateHasChanged);
+        HouseholdState.OnChange += _stateChangeHandler;
+
+        await LoadCalendarAsync(visibleMonthStart);
+
+        isLoading = false; // ← was never being set to false
+    }
+
+    public void Dispose() => HouseholdState.OnChange -= _stateChangeHandler;
+
+    // ── Data loading ────────────────────────────────────────────────────────
+    private async Task LoadCalendarAsync(DateTime monthStart)
+    {
+        var userHousehold = HouseholdState.CurrentUserHousehold;
+        if (userHousehold == null) return;
+
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+
+        recurringTasks = await TaskItemService
+            .GetAllActiveByHouseholdIdWithRecurrenceAsync(
+                userHousehold.HouseholdId,
+                userHousehold.UserHouseholdId);
+
+        // Project calendar dot dates for the visible month
+        occurrenceDates = recurringTasks
+            .Where(t => t.RecurrenceRule != null)
+            .SelectMany(t => RecurrenceProjector.ProjectRule(t.RecurrenceRule!, monthStart, monthEnd))
+            .Select(d => d.Date)
+            .ToHashSet();
+    }
+
+    // ── Navigation ──────────────────────────────────────────────────────────
+    private async Task OnMonthChangedAsync(DateTime newMonth)
+    {
+        isMonthLoading = true;
+        StateHasChanged();
+
+        visibleMonthStart = new DateTime(newMonth.Year, newMonth.Month, 1);
+        await LoadCalendarAsync(visibleMonthStart);
+
+        isMonthLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task OnHouseholdChangedAsync(UserHouseholdDto _)
+    {
+        errorMessage = null;
+        selectedDate = DateTime.Today;
+        visibleMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        isLoading = true;
+        StateHasChanged();
+
+        await LoadCalendarAsync(visibleMonthStart);
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
     private string GetGreeting()
     {
         var hour = DateTime.Now.Hour;
-        if (hour < 12)
-            return "Good morning! Here's what's happening today.";
-        else if (hour < 17)
-            return "Good afternoon! Here's what's happening today.";
-        else
-            return "Good evening! Here's what's happening today.";
+        return hour < 12 ? "Good morning! Here's what's happening today."
+             : hour < 17 ? "Good afternoon! Here's what's happening today."
+             : "Good evening! Here's what's happening today.";
     }
 }

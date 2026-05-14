@@ -1,4 +1,5 @@
 ﻿using TheSteward.Core.Dtos.TaskManagerDtos;
+using TheSteward.Shared.Dtos.DashboardDtos;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
 namespace TheSteward.Core.IServices.TaskManagerIServices;
@@ -135,5 +136,7 @@ public interface ITaskItemOccurrenceService
     /// </returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="userHouseholdId"/> is empty or <paramref name="startDate"/> is after <paramref name="endDate"/>.</exception>
     Task<List<TaskItemOccurrenceDto>> GetAllByUserHouseholdIdAndDateRangeAsync(Guid userHouseholdId, DateTime startDate, DateTime endDate);
+
+    Task<List<DashboardOccurrenceDto>> GetDashboardOccurrencesByUserHouseholdIdAndDateRangeAsync(Guid userHouseholdId, DateTime from, DateTime to);
     #endregion Get Methods
 }

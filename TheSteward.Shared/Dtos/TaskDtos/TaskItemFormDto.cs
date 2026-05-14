@@ -44,5 +44,7 @@ public class TaskItemFormDto
     public DateTime? RecurrenceEndDate { get; set; }
 
     public Guid HouseholdId { get; set; }
+
+    public RecurrenceFrequency? ExistingReccurrenceFrequency { get; set; }
 }
 

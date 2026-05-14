@@ -1,5 +1,7 @@
 ﻿using TheSteward.Core.Dtos.TaskManagerDtos;
 using TheSteward.Core.Models.TaskManagerModels;
+using TheSteward.Shared.Dtos.DashboardDtos;
+using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
 namespace TheSteward.Core.MappingExtensions;
 
@@ -20,6 +22,7 @@ public static class TaskManagerMappingExtensions
         dto.TaskItemCategoryIconName = src.TaskItemCategory?.IconName;
         dto.RelatedExpenseName = src.RelatedExpense?.ExpenseName;
         dto.RelatedExpenseAmountDue = src.RelatedExpense?.AmountDue;
+        dto.RecurrenceRule = src.RecurrenceRule?.ToDto();
 
         return dto;
     }
@@ -90,13 +93,28 @@ public static class TaskManagerMappingExtensions
 
     /// <summary>
     /// Converts a RecurrenceRule entity to its corresponding RecurrenceRuleDto representation.
-    /// If TaskItems are loaded, they are mapped explicitly — GenericMapper cannot resolve
-    /// a child entity collection to a child DTO collection.
+    /// TaskItems are intentionally NOT mapped here to prevent a bidirectional mapping loop
+    /// (TaskItem → RecurrenceRule → TaskItems → TaskItem → ...).
+    /// If you need TaskItems populated on the DTO, call ToDto(includeTaskItems: true) explicitly.
     /// </summary>
     public static RecurrenceRuleDto ToDto(this RecurrenceRule src)
     {
         var dto = GenericMapper.Map<RecurrenceRule, RecurrenceRuleDto>(src);
-        dto.TaskItems = src.TaskItems?.Select(t => t.ToDto()).ToList();
+        // TaskItems deliberately omitted — see summary above
+        return dto;
+    }
+
+    /// <summary>
+    /// Converts a RecurrenceRule entity to its DTO, optionally including the TaskItems collection.
+    /// Only call this overload when you are querying a rule directly and explicitly need its tasks.
+    /// Never call this from within TaskItem.ToDto().
+    /// </summary>
+    public static RecurrenceRuleDto ToDto(this RecurrenceRule src, bool includeTaskItems)
+    {
+        var dto = GenericMapper.Map<RecurrenceRule, RecurrenceRuleDto>(src);
+
+        if (includeTaskItems)
+            dto.TaskItems = src.TaskItems?.Select(t => t.ToDto()).ToList();
 
         return dto;
     }
@@ -159,6 +177,42 @@ public static class TaskManagerMappingExtensions
     /// </summary>
     public static void ApplyUpdate(this TaskItemOccurrence entity, UpdateTaskItemOccurrenceDto src)
         => GenericMapper.MapProperties(src, entity);
+
+
+    /// <summary>
+    /// Converts a TaskItemOccurrenceDto (with TaskItem populated) to a DashboardOccurrenceDto.
+    /// All task-level fields are read from dto.TaskItem — TaskItemOccurrenceDto does not own them.
+    /// </summary>
+    public static DashboardOccurrenceDto ToDashboardDto(this TaskItemOccurrenceDto src)
+    {
+        var task = src.TaskItem;
+
+        return new DashboardOccurrenceDto
+        {
+            TaskItemOccurrenceId = src.TaskItemOccurrenceId,
+            TaskItemId = src.TaskItemId,
+            ScheduledDate = src.ScheduledDateTime.ToLocalTime().Date,
+            ScheduledDateTime = src.ScheduledDateTime,
+            Status = src.Status,
+
+            TaskItemName = task?.TaskItemName ?? "Unknown Task",
+            Description = task?.Description,
+            TaskItemCategoryName = task?.TaskItemCategoryName,
+            TaskItemCategoryColorHex = task?.TaskItemCategoryColorHex,
+            TaskItemCategoryIconName = task?.TaskItemCategoryIconName,
+            Priority = task?.Priority ?? TaskItemPriority.Medium,
+            IsRecurring = task?.RecurrenceId != null,
+            ExpenseId = task?.ExpenseId,
+            RelatedExpenseName = task?.RelatedExpenseName,
+            RelatedExpenseAmountDue = task?.RelatedExpenseAmountDue,
+        };
+    }
+
+    /// <summary>
+    /// Converts a sequence of TaskItemOccurrenceDtos to a list of DashboardOccurrenceDtos.
+    /// </summary>
+    public static List<DashboardOccurrenceDto> ToDashboardDtoList(this IEnumerable<TaskItemOccurrenceDto> src)
+        => src.Select(o => o.ToDashboardDto()).ToList();
 
     #endregion TaskItemOccurrence Mappings
 

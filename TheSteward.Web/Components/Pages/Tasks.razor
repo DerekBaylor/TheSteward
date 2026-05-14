@@ -331,7 +331,8 @@ else
             RecurrenceId = task.RecurrenceId,
             ExpenseId = task.ExpenseId,
             IsEditMode = true,
-            HouseholdId = HouseholdState.CurrentUserHousehold!.HouseholdId
+            HouseholdId = HouseholdState.CurrentUserHousehold!.HouseholdId,
+            ExistingReccurrenceFrequency = task.RecurrenceRule?.RecurrenceFrequency
         };
 
         await OpenTaskModal(formData);

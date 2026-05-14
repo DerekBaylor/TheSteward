@@ -89,7 +89,7 @@ public class RecurrenceRuleService : IRecurrenceRuleService
             .Include(r => r.TaskItems)
             .FirstOrDefaultAsync(r => r.RecurrenceRuleId == recurrenceRuleId);
 
-        return recurrenceRule?.ToDto();
+        return recurrenceRule?.ToDto(includeTaskItems: true);
     }
 
     public async Task<List<RecurrenceRuleDto>> GetAllByTaskItemIdAsync(Guid taskItemId)

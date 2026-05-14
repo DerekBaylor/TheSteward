@@ -36,7 +36,9 @@ public class TaskItemDto
     public Guid? AssignedToUserHouseholdId { get; set; }
     
     public Guid? RecurrenceId { get; set; }
-    
+
+    public RecurrenceRuleDto? RecurrenceRule { get; set; }
+
     public Guid TaskItemCategoryId { get; set; }
     
     public string? TaskItemCategoryName { get; set; }

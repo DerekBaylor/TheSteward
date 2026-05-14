@@ -4,6 +4,7 @@ using TheSteward.Core.IRepositories;
 using TheSteward.Core.IServices.TaskManagerIServices;
 using TheSteward.Core.MappingExtensions;
 using TheSteward.Core.Models.TaskManagerModels;
+using TheSteward.Shared.Dtos.DashboardDtos;
 using static TheSteward.Core.Utils.TaskManagerUtils.TaskManagerConstants;
 
 namespace TheSteward.Infrastructure.Services.TaskManagerServices;
@@ -193,6 +194,20 @@ public class TaskItemOccurrenceService : ITaskItemOccurrenceService
         return occurrences.ToDtoList();
     }
 
+    public async Task<List<DashboardOccurrenceDto>> GetDashboardOccurrencesByUserHouseholdIdAndDateRangeAsync(Guid userHouseholdId, DateTime from, DateTime to)
+    {
+        if (userHouseholdId == Guid.Empty)
+            throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(userHouseholdId));
+
+        if (from > to)
+            throw new ArgumentException("Start date cannot be after end date.", nameof(from));
+
+        // Already does the correct query, includes TaskItem → TaskItemCategory + RelatedExpense
+        var occurrenceDtos = await GetAllByUserHouseholdIdAndDateRangeAsync(userHouseholdId, from, to);
+
+        // Map each TaskItemOccurrenceDto → DashboardOccurrenceDto via the extension
+        return occurrenceDtos.ToDashboardDtoList();
+    }
     #endregion Get Methods
 }
 

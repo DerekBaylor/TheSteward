@@ -109,7 +109,7 @@
                         }
 
                         @* Recurrence Toggle *@
-                        @if (!FormData.IsEditMode || FormData.RecurrenceId == null)
+                        @if (!FormData.IsEditMode || FormData.RecurrenceId == null || FormData.RecurrenceFrequency == RecurrenceFrequency.Once)
                         {
                             <MudSwitch T="bool"
                                        Label="Repeats"
@@ -127,7 +127,8 @@
                                            Label="Repeats"
                                            @bind-Value="FormData.RecurrenceFrequency"
                                            Class="mb-3">
-                                    @foreach (var freq in Enum.GetValues<RecurrenceFrequency>())
+                                            @foreach (var freq in Enum.GetValues<RecurrenceFrequency>()
+                                                .Where(f => f != RecurrenceFrequency.Once))                                                
                                     {
                                         <MudSelectItem T="RecurrenceFrequency" Value="freq">
                                             @FrequencyLabel(freq)
@@ -217,7 +218,7 @@
 @code {
     [CascadingParameter] 
     private IMudDialogInstance MudDialog { get; set; } = default!;
-    
+
     [Parameter] 
     public TaskItemFormDto FormData { get; set; } = new();
 
@@ -228,6 +229,7 @@
     private bool isValid;
     private bool isSaving;
     private List<TaskItemCategoryDto> availableCategories = new();
+
 
     // MudDatePicker needs nullable DateTime? — bridge to FormData
     private DateTime? recurrenceStartDate
@@ -264,6 +266,7 @@
 
     private static string FrequencyLabel(RecurrenceFrequency freq) => freq switch
     {
+        RecurrenceFrequency.Once => "One-Time",
         RecurrenceFrequency.Daily => "Daily",
         RecurrenceFrequency.Weekly => "Weekly",
         RecurrenceFrequency.BiWeekly => "Every 2 weeks",

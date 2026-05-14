@@ -51,6 +51,7 @@ public class TaskItemService : ITaskItemService
 
             if (taskItemDto.RecurrenceRule != null)
             {
+                // ── Explicit recurrence rule provided (Daily, Weekly, etc.) ──
                 recurrenceRule = new RecurrenceRule
                 {
                     RecurrenceRuleId = Guid.NewGuid(),
@@ -58,13 +59,35 @@ public class TaskItemService : ITaskItemService
                     RecurrenceDays = taskItemDto.RecurrenceRule.RecurrenceDays,
                     IntervalDays = taskItemDto.RecurrenceRule.IntervalDays,
                     StartDateTime = DateTime.SpecifyKind(
-                                                taskItemDto.RecurrenceRule.StartDateTime,
-                                                DateTimeKind.Utc),
+                                              taskItemDto.RecurrenceRule.StartDateTime,
+                                              DateTimeKind.Utc),
                     EndDateTime = taskItemDto.RecurrenceRule.EndDateTime.HasValue
-                                                ? DateTime.SpecifyKind(
+                                              ? DateTime.SpecifyKind(
                                                     taskItemDto.RecurrenceRule.EndDateTime.Value,
                                                     DateTimeKind.Utc)
-                                                : null,
+                                              : null,
+                    LastGeneratedDateTime = DateTime.UtcNow
+                };
+
+                await _recurrenceRuleRepository.AddAsync(recurrenceRule);
+                await _recurrenceRuleRepository.SaveChangesAsync();
+            }
+            else if (taskItemDto.DueDate.HasValue)
+            {
+                // ── No recurrence rule, but a DueDate was given ───────────────
+                // Auto-wrap as a Once rule so the task flows through the same
+                // pipeline as recurring tasks (calendar dots, dashboard display,
+                // service query filter, etc.)
+                var utcDueDate = DateTime.SpecifyKind(taskItemDto.DueDate.Value, DateTimeKind.Utc);
+
+                recurrenceRule = new RecurrenceRule
+                {
+                    RecurrenceRuleId = Guid.NewGuid(),
+                    RecurrenceFrequency = RecurrenceFrequency.Once,
+                    RecurrenceDays = null,
+                    IntervalDays = null,
+                    StartDateTime = utcDueDate,  // The one and only date this task occurs
+                    EndDateTime = utcDueDate,  // Start == End signals a single occurrence
                     LastGeneratedDateTime = DateTime.UtcNow
                 };
 
@@ -93,7 +116,19 @@ public class TaskItemService : ITaskItemService
 
             if (recurrenceRule != null)
             {
-                var firstOccurrenceDate = ComputeNextOccurrence(recurrenceRule, recurrenceRule.StartDateTime);
+                // ── Determine the first (and for Once rules, only) occurrence ──
+                DateTime firstOccurrenceDate;
+
+                if (recurrenceRule.RecurrenceFrequency == RecurrenceFrequency.Once)
+                {
+                    // StartDateTime IS the occurrence — no projection needed
+                    firstOccurrenceDate = recurrenceRule.StartDateTime;
+                }
+                else
+                {
+                    // For all other frequencies, compute the next scheduled date
+                    firstOccurrenceDate = ComputeNextOccurrence(recurrenceRule, recurrenceRule.StartDateTime);
+                }
 
                 var firstOccurrence = new TaskItemOccurrence
                 {
@@ -124,6 +159,7 @@ public class TaskItemService : ITaskItemService
             throw;
         }
     }
+
 
     public async Task AddStandardTasksAsync(Guid userHouseholdId, IEnumerable<StandardTaskDefinition> selectedTasks, IEnumerable<TaskItemDto> existingTasks)
     {
@@ -313,6 +349,7 @@ public class TaskItemService : ITaskItemService
             .Where(t => t.AssignedToUserHouseholdId == userHouseholdId && !t.IsArchived)
             .Include(t => t.TaskItemCategory)
             .Include(t => t.RelatedExpense)
+            .Include(t => t.RecurrenceRule)
             .OrderBy(t => t.DueDate)
             .ToListAsync();
 
@@ -388,6 +425,29 @@ public class TaskItemService : ITaskItemService
         return taskItems.ToDtoList();
     }
 
+    public async Task<List<TaskItemDto>> GetAllActiveByHouseholdIdWithRecurrenceAsync(Guid householdId, Guid requestingUserHouseholdId)
+    {
+        if (householdId == Guid.Empty)
+            throw new ArgumentException("Household ID cannot be empty.", nameof(householdId));
+
+        if (requestingUserHouseholdId == Guid.Empty)
+            throw new ArgumentException("UserHousehold ID cannot be empty.", nameof(requestingUserHouseholdId));
+
+        var taskItems = await _taskItemRepository.GetAll()
+            .Where(t => t.HouseholdId == householdId
+                     && !t.IsArchived
+                     && t.Status != TaskItemStatus.Completed
+                     && t.RecurrenceId != null
+                     && (!t.IsPrivate
+                         || t.CreatedByUserHouseholdId == requestingUserHouseholdId
+                         || t.AssignedToUserHouseholdId == requestingUserHouseholdId))
+            .Include(t => t.TaskItemCategory)
+            .Include(t => t.RecurrenceRule)
+            .ToListAsync();
+
+        return taskItems.ToDtoList();
+    }
+
 
     #endregion Get Methods
 
@@ -403,6 +463,7 @@ public class TaskItemService : ITaskItemService
 
         return rule.RecurrenceFrequency switch
         {
+            RecurrenceFrequency.Once => DateTime.MinValue,
             RecurrenceFrequency.Daily => utcFrom.AddDays(1),
             RecurrenceFrequency.Weekly => ComputeNextWeeklyOccurrence(rule, utcFrom, 7),
             RecurrenceFrequency.BiWeekly => ComputeNextWeeklyOccurrence(rule, utcFrom, 14),
@@ -546,7 +607,7 @@ public class TaskItemService : ITaskItemService
     {
         var rule = await _recurrenceRuleRepository.GetByIdAsync(taskItem.RecurrenceId!.Value);
 
-        if (rule == null || (rule.EndDateTime != null && rule.EndDateTime <= DateTime.UtcNow))
+        if (rule == null || rule.RecurrenceFrequency == RecurrenceFrequency.Once || (rule.EndDateTime != null && rule.EndDateTime <= DateTime.UtcNow))
         {
             FinalizeTaskAsCompleted(taskItem);
             return;

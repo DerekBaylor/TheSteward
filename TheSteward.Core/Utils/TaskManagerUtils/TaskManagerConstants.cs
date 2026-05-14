@@ -35,6 +35,7 @@ public static class TaskManagerConstants
 
     public enum RecurrenceFrequency
     {
+        Once,
         Daily,
         Weekly,
         BiWeekly,

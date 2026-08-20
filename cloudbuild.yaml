@@ -37,7 +37,7 @@ steps:
      - '--min-instances'
      - '1'
      - '--max-instances'
-     - '5'
+     - '2'
 images:
  - 'us-east1-docker.pkg.dev/thesteward-506018/thesteward-repo/thesteward:$COMMIT_SHA'
  - 'us-east1-docker.pkg.dev/thesteward-506018/thesteward-repo/thesteward:latest'

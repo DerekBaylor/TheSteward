@@ -210,12 +210,18 @@ body.main-content {
     min-height: 100vh;
 }
 
-.mud-main-content.main-content {
+div.mud-main-content.main-content {
     padding: 0;
     padding-top: 0 !important;
-    margin-left: 240px !important;
+    margin-left: 240px;
     display: flex;
     flex-direction: column;
+}
+
+@media (max-width: 960px){
+    div.mud-main-content.main-content {
+        margin-left: 0;
+    }
 }
 
 .main-content {

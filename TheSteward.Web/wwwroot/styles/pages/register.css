@@ -163,11 +163,12 @@
 
 @media (max-width: 640px) {
     .registration-container {
-        padding: 1rem;
+        padding: 0;
     }
 
     #registrationCard.ts-card {
-        padding: 2rem 1.5rem;
+        padding: 0;
+        max-width: 90vw;
     }
 
     #registrationCard .ts-card-header h1 {

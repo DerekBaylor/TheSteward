@@ -95,3 +95,20 @@ ul#householdFeatureList li {
 .member-remove-btn--reactivate {
     color: var(--base-green);
 }
+
+
+/* =============================== */
+/*         Mobile Breakpoint       */
+/* =============================== */
+@media (max-width: 1000px) {
+    #householdCard {
+        max-width: 90vw;
+    }
+
+    #householdCard .material-icons {
+        display: flex;
+        justify-content: end;
+    }
+
+}
+

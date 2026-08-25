@@ -218,7 +218,7 @@ div.mud-main-content.main-content {
     flex-direction: column;
 }
 
-@media (max-width: 960px){
+@media (max-width: 1000px){
     div.mud-main-content.main-content {
         margin-left: 0;
     }
@@ -242,15 +242,10 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-.mud-drawer.mud-drawer-responsive.mud-drawer-pos-left, .mud-drawer.mud-drawer-persistent.mud-drawer-pos-left {
-    width: 240px !important;
-    background-color: var(--off-white);
-    border-radius: 0 5rem 0 0;
-}
 
-/* ----- */
-/* Fonts */
-/* ----- */
+/* ================== */
+/*      Fonts         */
+/* ================== */
 @font-face {
     font-family: 'Title-Font';
     font-display: auto;

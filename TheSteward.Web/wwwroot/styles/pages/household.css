@@ -125,3 +125,15 @@
     flex-direction: row;
     justify-content: center;
 }
+
+
+/* =============================== */
+/*         Mobile Breakpoint       */
+/* =============================== */
+@media (max-width: 1000px) {
+    .household-toolbar {
+        margin: 0.5rem;
+        max-width: 95vw;
+    }
+}
+

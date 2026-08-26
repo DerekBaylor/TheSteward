@@ -13,3 +13,18 @@
     flex-grow: 2;
     max-width: 15rem;
 }
+
+/* =============================== */
+/*         Mobile Breakpoint       */
+/* =============================== */
+@media (max-width: 1000px) {
+    #userProfileCard {
+        max-width: 90vw;
+    }
+
+    #householdCard .material-icons {
+        display: flex;
+        justify-content: end;
+    }
+
+}

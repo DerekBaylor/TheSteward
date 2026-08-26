@@ -225,11 +225,11 @@
 
 @media (max-width: 640px) {
     .login-container {
-        padding: 1rem;
+        padding: 0;
     }
 
-    .login-card {
-        padding: 2rem 1.5rem;
+    #loginCard.ts-card {
+        max-width: 90vw;
     }
 
     .login-header h1 {

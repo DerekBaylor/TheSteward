@@ -20,11 +20,11 @@
 }
 else if (householdItems.Count > 0)
 {
-    <MudToolBar Class="budget-toolbar">
+    <MudToolBar id="budgetToolbar" Class="budget-toolbar">
         <div class="toolbar-select-group">
             <label class="select-label">
                 <span class="material-icons">home</span>
-                Active Household
+                Household
             </label>
             @if (householdItems.Count == 1)
             {

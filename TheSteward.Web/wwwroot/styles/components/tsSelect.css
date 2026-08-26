@@ -233,3 +233,14 @@
     .ts-select-options.ts-select--blue li:active {
         background-color: var(--blue-3);
     }
+
+/* =============================== */
+/*         Mobile Breakpoint       */
+/* =============================== */
+@media (max-width: 1000px) {
+    .ts-custom-select-container {
+        min-width: 170px;
+    }
+}
+
+

@@ -15,7 +15,24 @@
 
 @namespace TheSteward.Shared.Components
 
-<nav id="mainSidebar" class="sidebar">
+@* ── Mobile top bar (hidden on desktop via CSS) ── *@
+<div class="mobile-topbar">
+    <a href="/" class="mobile-brand">
+        <img src="/Assets/Images/TheSteward_264x563.webp" alt="The Steward logo" class="mobile-brand-img" />
+        <span class="mobile-brand-text">The Steward</span>
+    </a>
+    <button class="mobile-menu-toggle" @onclick="ToggleMenu" aria-label="Toggle navigation" aria-expanded="@isMenuOpen">
+        <span class="material-symbols-outlined">@(isMenuOpen ? "close" : "menu")</span>
+    </button>
+</div>
+
+@* ── Backdrop, closes menu on tap outside ── *@
+@if (isMenuOpen)
+{
+    <div class="sidebar-backdrop" @onclick="CloseMenu"></div>
+}
+
+<nav id="mainSidebar" class="sidebar @(isMenuOpen ? "sidebar-open" : "")">
 
     <NavLink href="/"
              class="nav-img-container"
@@ -80,11 +97,17 @@
 
 @code {
     private UserHouseholdDto? _currentUserHousehold;
+    private bool isMenuOpen = false;
+    private Action? _navServiceHandler;
+    private Action? _householdStateHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        NavigationService.OnChange += HandleStateChange;
-        HouseholdState.OnChange += HandleStateChange;
+        _navServiceHandler = HandleStateChange;
+        _householdStateHandler = HandleStateChange;
+
+        NavigationService.OnChange += _navServiceHandler;
+        HouseholdState.OnChange += _householdStateHandler;
 
         await LoadCurrentUserHousehold();
     }
@@ -96,6 +119,16 @@
             await LoadCurrentUserHousehold();
             StateHasChanged();
         });
+    }
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
+
+    private void CloseMenu()
+    {
+        isMenuOpen = false;
     }
 
     private async Task LoadCurrentUserHousehold()
@@ -170,12 +203,15 @@
     private void HandleNavClick(NavItem item)
     {
         NavigationService.SetMainSection(item.Title);
+        CloseMenu();
     }
 
     public void Dispose()
     {
-        NavigationService.OnChange -= HandleStateChange;
+        if (_navServiceHandler != null)
+            NavigationService.OnChange -= _navServiceHandler;
 
-        HouseholdState.OnChange -= () => InvokeAsync(StateHasChanged);
+        if (_householdStateHandler != null)
+            HouseholdState.OnChange -= _householdStateHandler;
     }
 }

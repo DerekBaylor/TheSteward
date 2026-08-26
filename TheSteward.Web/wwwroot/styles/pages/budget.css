@@ -31,3 +31,27 @@
 }
 
 
+
+/* ============================= */
+/*        Tablet Styles          */
+/* ============================= */
+@media (max-width: 1000px) {
+    .budget-layout {
+        flex-direction: column;
+    }
+    
+    .budget-col-left {
+        width: 95vw;
+    }
+}
+
+
+
+/* ============================= */
+/*        Mobile Styles          */
+/* ============================= */
+@media (max-width: 600px) {
+    .budget-layout {
+        flex-direction: column;
+    } 
+}

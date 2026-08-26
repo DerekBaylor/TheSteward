@@ -125,3 +125,122 @@
         .logout-button:hover .nav-title {
             color: var(--base-yellow);
         }
+
+/* ======================================= */
+/*            Mobile Top Bar               */
+/* ======================================= */
+.mobile-topbar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    background-image: var(--blue-gradient);
+    padding: 0.75rem 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 1100;
+}
+
+.mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none !important;
+}
+
+.mobile-brand-img {
+    height: 2.25rem;
+    width: fit-content;
+}
+
+.mobile-brand-text {
+    font-family: var(--title-font);
+    font-size: 1.1rem;
+    color: var(--gray-1);
+    white-space: nowrap;
+}
+
+.mobile-menu-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--off-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: var(--border-radius, 8px);
+}
+
+.mobile-menu-toggle .material-symbols-outlined {
+    font-size: 1.75rem;
+}
+
+.mobile-menu-toggle:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ---------------- */
+/* Backdrop          */
+/* ---------------- */
+.sidebar-backdrop {
+    display: none;
+}
+
+/* =============================== */
+/*         Mobile Breakpoint       */
+/* =============================== */
+@media (max-width: 1000px) {
+    .mobile-topbar {
+        display: flex;
+        max-width: 100vw;
+    }
+    
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1050;
+    }
+
+    .sidebar {
+        /* collapse into a dropdown panel under the top bar */
+        top: 60px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        max-height: 0;
+        padding: 0 1rem;
+        border-radius: 0 0 1.5rem 1.5rem;
+        overflow: hidden;
+        transition: max-height 0.28s ease, padding 0.28s ease;
+        z-index: 1075;
+    }
+
+    .sidebar.sidebar-open {
+        max-height: calc(100vh - 60px);
+        height: fit-content;
+        padding: 1rem 1rem 2rem;
+        overflow-y: auto;
+    }
+
+    /* hide the desktop brand block inside the sidebar itself, the topbar brand replaces it */
+    .sidebar .nav-img-container {
+        display: none;
+    }
+
+    .nav-link-group,
+    .nav-link-group-form {
+        width: 100%;
+    }
+
+    /* give the page content room so it isn't hidden under the fixed topbar */
+    body {
+        padding-top: 60px;
+    }
+}        

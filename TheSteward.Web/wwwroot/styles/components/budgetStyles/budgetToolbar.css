@@ -198,3 +198,88 @@
     font-size: 0.8rem;
     opacity: 0.7;
 }
+
+
+/* =============================== */
+/*         Mobile Breakpoint       */
+/* =============================== */
+@media (max-width: 1000px) {
+    .budget-toolbar {
+        max-width: 90vw;
+    }
+
+    .budget-selector-bar {
+        justify-content: flex-start;
+    }
+
+    .budget-selector-left,
+    .budget-selector-right {
+        width: 100%;
+    }
+
+    .budget-selector-right {
+        justify-content: flex-start;
+    }
+
+    /* dividers don't make sense once groups wrap to their own rows */
+    .toolbar-divider {
+        display: none;
+    }
+}
+
+@media (max-width: 1000px) {
+    #budgetToolbar.budget-toolbar {
+        margin:0.5rem;
+        padding: 0.75rem .5rem;
+        gap: .5rem;
+        height: fit-content;
+        width: 95vw;
+        align-self: center;
+    }
+
+    #budgetToolbar.budget-toolbar .toolbar-select-group {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .budget-selector-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.75rem;
+    }
+
+    .budget-selector-left,
+    .toolbar-budget-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-budget-pills,
+    .budget-selector-left {
+        gap: 0.5rem;
+    }
+
+    /* bigger, full-width tap targets on small screens */
+    .budget-pill-btn {
+        padding: 0.5rem 1rem;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .budget-action-btn {
+        padding: 0.5rem 1rem;
+        justify-content: center;
+        flex: 1 1 auto;
+    }
+
+    .toolbar-budget-actions {
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .budget-selector-label {
+        margin-bottom: 0.25rem;
+    }
+}

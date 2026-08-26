@@ -20,9 +20,8 @@
 else
 {
     <MudLayout class="app-container">
-        <MudDrawer Open="true">
-            <SidebarNav />
-        </MudDrawer>
+        <SidebarNav />
+        
         <MudMainContent class="main-content">
             @Body
         </MudMainContent>
@@ -31,10 +30,12 @@ else
 
 @code {
     private bool isLoading = true;
+    private Action? _navChangeHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        NavigationService.OnChange += () => InvokeAsync(StateHasChanged);
+        _navChangeHandler = () => InvokeAsync(StateHasChanged);
+        NavigationService.OnChange += _navChangeHandler;
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -67,6 +68,7 @@ else
 
     public void Dispose()
     {
-        NavigationService.OnChange -= () => InvokeAsync(StateHasChanged);
+        if (_navChangeHandler != null)
+            NavigationService.OnChange -= _navChangeHandler;
     }
 }

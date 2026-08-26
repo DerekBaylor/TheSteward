@@ -44,7 +44,6 @@ builder.Services.AddMudServices(config =>
 
 
 
-
 #region Services & Repositories
 builder.Services.AddScoped<INavigationService, NavigationService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));

@@ -269,7 +269,20 @@ public static class StewardTheme
             Dialog = 1300,
             Snackbar = 1400,
             Tooltip = 1500,
-        }
+        },
+        
+        // ---------------------------------------------------
+        // Z-Index
+        // ---------------------------------------------------
+        // Breakpoints = new BreakpointGlobalOptions
+        // {
+        //     Xs = 0,
+        //     Sm = 480,
+        //     Md = 1000,   // <-- was 960, now matches your CSS breakpoint
+        //     Lg = 1280,
+        //     Xl = 1920,
+        //     Xxl = 2560,
+        // }
     };
 }
 

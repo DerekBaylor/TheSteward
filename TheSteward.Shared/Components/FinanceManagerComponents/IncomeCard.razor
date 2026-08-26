@@ -8,14 +8,14 @@
     @if (!IsReadOnly)
     {
             <MudButton id="addIncomeBtn"
-                       class="ts-card-tab-btn"
+                       class="ts-tab-btn add-income-tab-btn"
                        StartIcon="@Icons.Material.Filled.Add"
                        OnClick="HandleAddIncome">
                 Add Income
             </MudButton>
     }
             <MudButton id="showIncomeDetails"
-                       class="ts-card-tab-btn"
+                       class="ts-tab-btn income-details-tab-btn"
                        StartIcon="@Icons.Material.Filled.FileOpen"
                        OnClick="HandleShowIncomeDetails"
                        Disabled="!Incomes.Any()">
@@ -36,45 +36,45 @@
         <div class="ts-card-body">
             @if (!Incomes.Any())
             {
-                <div class="income-empty-state">
-                    <span class="material-icons income-empty-icon">account_balance_wallet</span>
-                    <p class="income-empty-text">No income sources added yet.</p>
+                <div class="card-empty-state">
+                    <span class="material-icons card-empty-incon">account_balance_wallet</span>
+                    <p class="card-empty-text">No income sources added yet.</p>
                 </div>
             }
             else
             {
                 <section class="ts-card-section">
-                    <table class="income-table">
+                    <table class="card-table income-table">
                         <thead>
                             <tr>
-                                <th class="income-th income-th-name">Name</th>
-                                <th class="income-th income-th-amount">Monthly Net</th>
-                                <th class="income-th income-th-amount">Yearly Net</th>
+                                <th class="card-th income-th-name">Name</th>
+                                <th class="card-th income-th-amount">Monthly Net</th>
+                                <th class="card-th income-th-amount">Yearly Net</th>
                                 @if (!IsReadOnly)
                                 {
-                                    <th class="income-th income-th-action"></th>
-                                    <th class="income-th income-th-action"></th>
+                                    <th class="card-th card-th-action income-th-action"></th>
+                                    <th class="card-th card-th-action income-th-action"></th>
                                 }
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var income in Incomes)
                             {
-                                <tr class="income-row">
-                                    <td class="income-td income-td-name">@income.IncomeName</td>
-                                    <td class="income-td income-td-amount">@income.MonthlyNetIncome.ToString("C")</td>
-                                    <td class="income-td income-td-amount">@((income.MonthlyNetIncome * 12).ToString("C"))</td>
+                                <tr class="card-table-row income-row">
+                                    <td class="card-td card-td-1 income-td-name">@income.IncomeName</td>
+                                    <td class="card-td card-td-2 income-td-amount">@income.MonthlyNetIncome.ToString("C")</td>
+                                    <td class="card-td card-td-3 income-td-amount">@((income.MonthlyNetIncome * 12).ToString("C"))</td>
                                     @if (!IsReadOnly)
                                     {
-                                        <td class="income-td income-td-action">
-                                            <button class="income-row-btn income-row-btn--edit"
+                                        <td class="card-td card-td-action-container">
+                                            <button class="card-row-btn card-row-btn--edit"
                                                     title="Edit"
                                                     @onclick="() => HandleRowEdit(income)">
                                                 <span class="material-icons">edit</span>
                                             </button>
                                         </td>
-                                        <td class="income-td income-td-action">
-                                            <button class="income-row-btn income-row-btn--delete"
+                                        <td class="card-td income-td-action-container">
+                                            <button class="card-row-btn card-row-btn--delete"
                                                     title="Delete"
                                                     @onclick="() => HandleRowDelete(income)">
                                                 <span class="material-icons">delete</span>
@@ -85,18 +85,18 @@
                             }
                         </tbody>
                         <tfoot>
-                            <tr class="income-totals-row">
-                                <td class="income-td income-td-name income-totals-label">Total</td>
-                                <td class="income-td income-td-amount income-totals-value">
+                            <tr class="card-table-footer income-totals-row">
+                                <td class="card-td card-footer-td-1 income-totals-label">Total</td>
+                                <td class="card-td card-footer-td-2 income-totals-value">
                                     @Incomes.Sum(i => i.MonthlyNetIncome).ToString("C")
                                 </td>
-                                <td class="income-td income-td-amount income-totals-value">
+                                <td class="card-td card-footer-td-3 income-totals-value">
                                     @Incomes.Sum(i => i.MonthlyNetIncome * 12).ToString("C")
                                 </td>
                                 @if (!IsReadOnly)
                                 {
-                                    <td class="income-td income-td-action"></td>
-                                    <td class="income-td income-td-action"></td>
+                                    <td class="card-td income-td-action"></td>
+                                    <td class="card-td income-td-action"></td>
                                 }
                             </tr>
                         </tfoot>

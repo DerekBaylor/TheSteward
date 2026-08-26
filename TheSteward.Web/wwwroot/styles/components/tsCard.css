@@ -1,6 +1,6 @@
-﻿/* --------- */
-/* Base Card */
-/* --------- */
+﻿/* ======================== */
+/*      Base Card           */
+/* ======================== */
 .ts-card {
     margin: 1rem;
     font-family: var(--primary-font);
@@ -73,11 +73,29 @@
         flex-grow: 1;
     }
 
+/* ============================== */
+/*       Base Card Mobile         */
+/* ============================== */
 
-/* ------------ */
-/* Tabbbed Card */
-/* ------------ */
+@media (max-width: 600px) {
+    .ts-card-content.ts-card-content {
+        padding: .25rem;
+    }
+    
+    .ts-card-body {
+        margin: .5rem;
+        padding: 0;
+    }
 
+    .ts-card-section {
+        margin-bottom: .5rem;
+    }
+}
+
+
+/* ============================== */
+/*          Tabbed Card           */
+/* ============================== */
 .ts-tabbed-card {
     animation: slideUp 0.4s ease-out;
     border: none;
@@ -101,32 +119,49 @@
     }
 }
 
+@media (max-width: 600px) {
+    div.ts-tabbed-card {
+        width: 95vw;
+        margin: .5rem 0;
+    }
+}
+
 
 /* tab buttons */
-/* ----------  */
+/* ===========  */
     .ts-tabbed-card .ts-tabbed-card-btn-container {
         background-color: var(--white-background);
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
         padding: 0 .5rem 0 0;
+            height: fit-content;
     }
 
+        /* === base tab button === */
         .ts-tabbed-card-btn-container .ts-tab-btn {
             border-radius: var(--border-radius) var(--border-radius) 0 0;
             border-width: 1px;
             cursor: pointer;
-            height: fit-content;
+            height: 100%;
             font-family: var(--label-font);
             font-weight: 400;
             padding: .375rem 1rem;
             color: var(--off-white);
         }
+        
+@media (max-width: 600px) {
+    .ts-tabbed-card-btn-container .ts-tab-btn {
+        font-size: .75rem;
+        width: 40%;
+    }
+}
+
 
 /* tab edit btn */
 .ts-tab-btn-one.ts-tab-btn-one {
     background-color: var(--blue-4);
-    border-color: var(--light-blue);
+    border-color: var(--blue-4);
     color: var(--off-white);
 }
 
@@ -143,6 +178,12 @@
 
     .ts-tab-btn-two.ts-tab-btn-two:hover {
         background-color: var(--blue-8);
+    }
+    
+    @media (max-width: 600px) {
+        .ts-tab-btn.ts-tab-btn{
+
+        }
     }
 
 /* Content */
@@ -173,3 +214,176 @@
         font-family: var(--label-font);
         margin: 0.25rem 0 0 0;
     }
+
+
+
+
+
+
+/* ====================== */
+/*       Card Table       */
+/* ====================== */
+.card-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.card-th {
+    text-align: left;
+    font-family: var(--label-font);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gray-6);
+    padding: 0.25rem 0.5rem 0.5rem;
+    border-bottom: 2px solid var(--blue-4);
+}
+
+.income-th-amount {
+    
+}
+
+.card-th-action {
+    width: 2rem;
+    text-align: center;
+    padding: 0.25rem 0.25rem 0.5rem;
+}
+
+.card-table-row {
+    transition: background-color 0.15s ease;
+}
+
+@media (max-width: 600px) {
+    .card-th {
+        font-size: 0.8rem;
+    }
+    .card-table-row {
+        font-size: .75rem;
+    }
+}
+
+.card-row:hover {
+    background-color: var(--blue-1);
+    border-radius: var(--border-radius);
+}
+
+.card-td {
+    padding: 0.5rem;
+    color: var(--gray-8);
+    border-bottom: 1px solid var(--gray-2);
+}
+
+.card-td-1 {
+    font-weight: 500;
+}
+
+.card-td-2, .card-td-3 {
+    text-align: right;
+}
+
+.card-td-action-container {
+    text-align: center;
+    padding: 0.25rem;
+    width: 2rem;
+}
+
+@media (max-width: 600px) {
+    .card-td {
+        padding: .25rem;
+    }
+    .card-td-action-container {}
+}
+
+/*      Row Action Buttons      */
+/* ============================ */
+.card-row-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    padding: 0.2rem;
+    cursor: pointer;
+    opacity: .5;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.card-row:hover .card-row-btn {
+    opacity: 1;
+}
+
+.card-row-btn .material-icons {
+    font-size: 16px;
+}
+
+.card-row-btn--edit {
+    color: var(--gray-6);
+}
+
+.card-row-btn--edit:hover {
+    background-color: var(--blue-2);
+    color: var(--base-blue);
+}
+
+.card-row-btn--delete {
+    color: var(--gray-6);
+}
+
+.card-row-btn--delete:hover {
+    background-color: var(--red-1);
+    color: var(--red-6);
+}
+
+
+
+/*      Totals Footer      */
+/* ======================= */
+.card-table-footer {
+    border-top: 2px solid var(--blue-4);
+}
+
+.card-td-footer-1 {
+    font-family: var(--label-font);
+    font-weight: 700;
+    color: var(--gray-9);
+    padding-top: 0.6rem;
+    text-align: right;
+}
+
+.card-footer-td-2, .card-footer-td-3 {
+    font-weight: 700;
+    color: var(--base-blue);
+    padding-top: 0.6rem;
+    text-align: right;
+}
+
+@media (max-width: 600px) {
+    .card-table-footer {
+        font-size: 0.8rem;
+    }
+}
+
+
+/*      Empty State      */
+/* ===================== */
+.card-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 0;
+    color: var(--gray-5);
+}
+
+.card-empty-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.card-empty-text {
+    font-size: 0.9rem;
+    margin: 0;
+}

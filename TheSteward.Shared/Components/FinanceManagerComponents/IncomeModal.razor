@@ -11,9 +11,9 @@
     <TitleContent>
         <div class="income-modal-title">
             <span class="material-icons income-modal-icon">
-                @(FormData.IsEditMode ? "edit" : "add_circle")
+                @(isViewMode ? "visibility" : (FormData.IsEditMode ? "edit" : "add_circle"))
             </span>
-            @(FormData.IsEditMode ? "Edit Income" : "Add Income")
+            @(isViewMode ? "Income Details" : (FormData.IsEditMode ? "Edit Income" : "Add Income"))
         </div>
     </TitleContent>
 
@@ -21,6 +21,7 @@
         <IncomeForm @ref="incomeForm"
                     FormData="FormData"
                     ExistingIncomeCount="ExistingIncomeCount"
+                    ReadOnly="isViewMode"
                     OnValidSubmit="HandleFormSubmit" />
     </DialogContent>
 
@@ -29,10 +30,10 @@
                    class="ts-card-tab-btn income-modal-btn-cancel"
                    OnClick="Cancel"
                    Disabled="isSaving">
-            Cancel
+            @(isViewMode ? "Close" : "Cancel")
         </MudButton>
 
-        @if (FormData.IsEditMode)
+        @if (FormData.IsEditMode && !IsReadOnly)
         {
             <MudButton id="incomeDeleteBtn"
                        class="ts-card-tab-btn income-modal-btn-delete"
@@ -43,16 +44,31 @@
             </MudButton>
         }
 
-        <MudButton id="incomeSaveBtn"
-                   class="ts-card-tab-btn income-modal-btn-save"
-                   OnClick="TriggerSubmit"
-                   Disabled="isSaving">
-            @if (isSaving)
+        @if (isViewMode)
+        {
+            @if (!IsReadOnly)
             {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <MudButton id="incomeEditBtn"
+                           class="ts-card-tab-btn income-modal-btn-save"
+                           OnClick="EnableEditing">
+                    <span class="material-icons" style="font-size: 16px; margin-right: 4px;">edit</span>
+                    Edit
+                </MudButton>
             }
-            @(FormData.IsEditMode ? "Save Changes" : "Add Income")
-        </MudButton>
+        }
+        else
+        {
+            <MudButton id="incomeSaveBtn"
+                       class="ts-card-tab-btn income-modal-btn-save"
+                       OnClick="TriggerSubmit"
+                       Disabled="isSaving">
+                @if (isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @(FormData.IsEditMode ? "Save Changes" : "Add Income")
+            </MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -66,8 +82,27 @@
     [Parameter]
     public int ExistingIncomeCount { get; set; } = 0;
 
+    /// <summary>True when the current user has no write permission — hides Edit/Delete/Save entirely.</summary>
+    [Parameter]
+    public bool IsReadOnly { get; set; }
+
+    /// <summary>
+    /// When false and this is an existing income, the modal opens read-only (row-tap "view" flow)
+    /// and the user must tap Edit to unlock the form. Ignored for new incomes and always true then.
+    /// </summary>
+    [Parameter]
+    public bool StartInEditMode { get; set; } = true;
+
     private IncomeForm? incomeForm;
     private bool isSaving = false;
+    private bool isViewMode;
+
+    protected override void OnInitialized()
+    {
+        isViewMode = FormData.IsEditMode && !StartInEditMode;
+    }
+
+    private void EnableEditing() => isViewMode = false;
 
     private async Task TriggerSubmit()
     {

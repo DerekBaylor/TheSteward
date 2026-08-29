@@ -48,10 +48,6 @@ button#showIncomeDetails:hover:not([disabled]) {
 /* ====================== */
 /*       Card Table       */
 /* ====================== */
-.card-table {
-
-}
-
 #incomeCard .card-th {
     border-bottom: 2px solid var(--green-3);
 }
@@ -92,10 +88,23 @@ button#showIncomeDetails:hover:not([disabled]) {
 
 
 
-
+/* ======================= */
+/*         Mobile          */
+/* ======================= */
 @media (max-width: 1000px) {
     #incomeCard.ts-tabbed-card {
         max-width: 90vw;
     }
 
+}
+
+@media (max-width: 600px) {
+    #incomeCard .row-expand-btn:hover {
+        background-color: var(--green-1);
+    }
+
+    #incomeCard .row-detail-value {
+        color: var(--base-green);
+        font-family: var(--primary-font);
+    }
 }

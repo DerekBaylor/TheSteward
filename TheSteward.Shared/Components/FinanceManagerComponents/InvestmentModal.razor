@@ -11,9 +11,9 @@
     <TitleContent>
         <div class="investment-modal-title">
             <span class="material-icons investment-modal-icon">
-                @(FormData.IsEditMode ? "edit" : "add_circle")
+                @(isViewMode ? "visibility" : (FormData.IsEditMode ? "edit" : "add_circle"))
             </span>
-            @(FormData.IsEditMode ? "Edit Investment" : "Add Investment")
+            @(isViewMode ? "Investment Details" : (FormData.IsEditMode ? "Edit Investment" : "Add Investment"))
         </div>
     </TitleContent>
 
@@ -21,9 +21,8 @@
         <InvestmentForm @ref="investmentForm"
                         FormData="FormData"
                         ExistingInvestmentCount="ExistingInvestmentCount"
+                        ReadOnly="isViewMode"
                         OnValidSubmit="HandleFormSubmit" />
-
-                        <p>Test</p>
     </DialogContent>
 
     <DialogActions>
@@ -31,10 +30,10 @@
                    class="ts-card-tab-btn investment-modal-btn-cancel"
                    OnClick="Cancel"
                    Disabled="isSaving">
-            Cancel
+            @(isViewMode ? "Close" : "Cancel")
         </MudButton>
 
-        @if (FormData.IsEditMode)
+        @if (FormData.IsEditMode && !IsReadOnly)
         {
             <MudButton id="investmentDeleteBtn"
                        class="ts-card-tab-btn investment-modal-btn-delete"
@@ -45,16 +44,31 @@
             </MudButton>
         }
 
-        <MudButton id="investmentSaveBtn"
-                   class="ts-card-tab-btn investment-modal-btn-save"
-                   OnClick="TriggerSubmit"
-                   Disabled="isSaving">
-            @if (isSaving)
+        @if (isViewMode)
+        {
+            @if (!IsReadOnly)
             {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <MudButton id="investmentEditBtn"
+                           class="ts-card-tab-btn investment-modal-btn-save"
+                           OnClick="EnableEditing">
+                    <span class="material-icons" style="font-size: 16px; margin-right: 4px;">edit</span>
+                    Edit
+                </MudButton>
             }
-            @(FormData.IsEditMode ? "Save Changes" : "Add Investment")
-        </MudButton>
+        }
+        else
+        {
+            <MudButton id="investmentSaveBtn"
+                       class="ts-card-tab-btn investment-modal-btn-save"
+                       OnClick="TriggerSubmit"
+                       Disabled="isSaving">
+                @if (isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @(FormData.IsEditMode ? "Save Changes" : "Add Investment")
+            </MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -68,8 +82,27 @@
     [Parameter]
     public int ExistingInvestmentCount { get; set; } = 0;
 
+    /// <summary>True when the current user has no write permission — hides Edit/Delete/Save entirely.</summary>
+    [Parameter]
+    public bool IsReadOnly { get; set; }
+
+    /// <summary>
+    /// When false and this is an existing investment, the modal opens read-only (row-tap "view" flow)
+    /// and the user must tap Edit to unlock the form. Ignored for new investments and always true then.
+    /// </summary>
+    [Parameter]
+    public bool StartInEditMode { get; set; } = true;
+
     private InvestmentForm? investmentForm;
     private bool isSaving = false;
+    private bool isViewMode;
+
+    protected override void OnInitialized()
+    {
+        isViewMode = FormData.IsEditMode && !StartInEditMode;
+    }
+
+    private void EnableEditing() => isViewMode = false;
 
     private async Task TriggerSubmit()
     {

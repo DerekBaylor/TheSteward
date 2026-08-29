@@ -65,13 +65,13 @@
     margin-bottom: .5rem;
 }
 
-    .ts-card-row:first-child {
-        flex-grow: 2;
-    }
+.ts-card-row:first-child {
+    flex-grow: 2;
+}
 
-    .ts-card-row:last-child {
-        flex-grow: 1;
-    }
+.ts-card-row:last-child {
+    flex-grow: 1;
+}
 
 /* ============================== */
 /*       Base Card Mobile         */
@@ -81,7 +81,7 @@
     .ts-card-content.ts-card-content {
         padding: .25rem;
     }
-    
+
     .ts-card-body {
         margin: .5rem;
         padding: 0;
@@ -89,6 +89,178 @@
 
     .ts-card-section {
         margin-bottom: .5rem;
+    }
+}
+
+/* ======================================== */
+/*   Touch-visible row action buttons       */
+/* ------------------------------------------
+   Row buttons default to opacity:0 revealed
+   on :hover, which never fires on touch. Force
+   them visible any time hover isn't available,
+   and as a fallback under the mobile breakpoint.
+   Shared across card-row-btn, credit-row-btn,
+   expense-row-btn and investment-row-btn.
+========================================== */
+@media (hover: none), (max-width: 600px) {
+    .card-row-btn,
+    .credit-row-btn,
+    .expense-row-btn,
+    .investment-row-btn {
+        opacity: .6;
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+    }
+
+    .row-expand-btn {
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+    }
+}
+
+/* ======================================== */
+/*     Responsive Table Row Expansion       */
+/* ------------------------------------------
+   Shared pattern used by every card table
+   (card-table, credit-table, expense-table,
+   investment-table). On mobile, secondary
+   columns are hidden via ".mobile-hide" and a
+   per-row chevron toggle reveals the hidden
+   values in a compact detail panel instead.
+========================================== */
+
+
+.row-expand-th,
+.row-expand-td {
+    display: none;
+}
+
+.card-table-row,
+.credit-row,
+.expense-row,
+.investment-row {
+    cursor: pointer;
+}
+
+.row-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: .2rem;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--gray-6);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.row-expand-btn .material-icons {
+    font-size: 20px;
+    transition: transform 0.15s ease;
+}
+
+.row-expand-btn.is-expanded .material-icons {
+    transform: rotate(90deg);
+}
+
+.row-expand-btn:hover {
+    background-color: var(--blue-1);
+}
+
+.row-detail {
+    display: none;
+}
+
+.row-detail.is-open {
+    display: table-row;
+}
+
+.row-detail-cell {
+    padding: .25rem .75rem .75rem !important;
+    border-bottom: 1px solid var(--gray-2);
+    background-color: var(--gray-1);
+}
+
+.row-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .4rem .75rem;
+}
+
+.row-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+    min-width: 0;
+}
+
+.row-detail-label {
+    font-family: var(--label-font);
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--gray-5);
+}
+
+.row-detail-value {
+    font-size: .85rem;
+    color: var(--gray-9);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.row-detail-actions {
+    display: flex;
+    gap: .5rem;
+    margin-top: .6rem;
+    padding-top: .6rem;
+    border-top: 1px solid var(--gray-2);
+}
+
+.row-detail-actions .card-row-btn,
+.row-detail-actions .credit-row-btn,
+.row-detail-actions .expense-row-btn,
+.row-detail-actions .investment-row-btn {
+    opacity: 1;
+    padding: .4rem .75rem;
+    border: 1px solid var(--gray-3);
+    border-radius: var(--border-radius);
+    font-size: .8rem;
+    gap: .3rem;
+}
+
+.row-detail-actions .card-row-btn .material-icons,
+.row-detail-actions .credit-row-btn .material-icons,
+.row-detail-actions .expense-row-btn .material-icons,
+.row-detail-actions .investment-row-btn .material-icons {
+    font-size: 16px;
+}
+
+.row-detail-actions .card-row-btn::after,
+.row-detail-actions .credit-row-btn::after,
+.row-detail-actions .expense-row-btn::after,
+.row-detail-actions .investment-row-btn::after {
+    content: attr(title);
+}
+
+@media (max-width: 600px) {
+    /* reveal the toggle column, hide the secondary columns */
+    .row-expand-th,
+    .row-expand-td {
+        display: table-cell;
+        width: 1.75rem;
+        padding: 0.25rem !important;
+        text-align: center;
+    }
+
+    .mobile-hide {
+        display: none !important;
+    }
+
+    .row-detail-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -127,29 +299,29 @@
 }
 
 
-/* tab buttons */
-/* ===========  */
-    .ts-tabbed-card .ts-tabbed-card-btn-container {
-        background-color: var(--white-background);
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        padding: 0 .5rem 0 0;
-            height: fit-content;
-    }
+/* ---- Tab Buttons ---- */
+/* ===================== */
+.ts-tabbed-card div.ts-tabbed-card-btn-container {
+    background-color: var(--white-background);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 0 .5rem 0 0;
+    height: fit-content;
+}
 
-        /* === base tab button === */
-        .ts-tabbed-card-btn-container .ts-tab-btn {
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
-            border-width: 1px;
-            cursor: pointer;
-            height: 100%;
-            font-family: var(--label-font);
-            font-weight: 400;
-            padding: .375rem 1rem;
-            color: var(--off-white);
-        }
-        
+/* === base tab button === */
+.ts-tabbed-card-btn-container .ts-tab-btn {
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    border-width: 1px;
+    cursor: pointer;
+    height: 100%;
+    font-family: var(--label-font);
+    font-weight: 400;
+    padding: .375rem 1rem;
+    color: var(--off-white);
+}
+
 @media (max-width: 600px) {
     .ts-tabbed-card-btn-container .ts-tab-btn {
         font-size: .75rem;
@@ -165,9 +337,9 @@
     color: var(--off-white);
 }
 
-    .ts-tab-btn-one.ts-tab-btn-one:hover {
-        background-color: var(--blue-8);
-    }
+.ts-tab-btn-one.ts-tab-btn-one:hover {
+    background-color: var(--blue-8);
+}
 
 /* tab add btn */
 .ts-tab-btn-two.ts-tab-btn-two {
@@ -176,15 +348,15 @@
     color: var(--off-white);
 }
 
-    .ts-tab-btn-two.ts-tab-btn-two:hover {
-        background-color: var(--blue-8);
-    }
-    
-    @media (max-width: 600px) {
-        .ts-tab-btn.ts-tab-btn{
+.ts-tab-btn-two.ts-tab-btn-two:hover {
+    background-color: var(--blue-8);
+}
 
-        }
+@media (max-width: 600px) {
+    .ts-tab-btn.ts-tab-btn{
+
     }
+}
 
 /* Content */
 /* ------- */
@@ -203,17 +375,17 @@
     padding: 0;
 }
 
-    .ts-card-content .ts-tabbed-card-header .ts-tabbed-card-title {
-        font-family: var(--label-font);
-        margin: 0 0 0.25rem 0;
-        color: var(--blue-9);
-    }
+.ts-card-content .ts-tabbed-card-header .ts-tabbed-card-title {
+    font-family: var(--label-font);
+    margin: 0 0 0.25rem 0;
+    color: var(--blue-9);
+}
 
-    .ts-tabbed-card-header .ts-tabbed-card-subtitle {
-        align-self: flex-start;
-        font-family: var(--label-font);
-        margin: 0.25rem 0 0 0;
-    }
+.ts-tabbed-card-header .ts-tabbed-card-subtitle {
+    align-self: flex-start;
+    font-family: var(--label-font);
+    margin: 0.25rem 0 0 0;
+}
 
 
 
@@ -229,6 +401,7 @@
     font-size: 0.9rem;
 }
 
+/* --- headers --- */
 .card-th {
     text-align: left;
     font-family: var(--label-font);
@@ -241,18 +414,20 @@
     border-bottom: 2px solid var(--blue-4);
 }
 
-.income-th-amount {
-    
-}
-
 .card-th-action {
     width: 2rem;
     text-align: center;
     padding: 0.25rem 0.25rem 0.5rem;
 }
 
+/* --- rows --- */
 .card-table-row {
     transition: background-color 0.15s ease;
+}
+
+.card-table-row:hover {
+    background-color: var(--blue-1);
+    border-radius: var(--border-radius);
 }
 
 @media (max-width: 600px) {
@@ -264,11 +439,7 @@
     }
 }
 
-.card-row:hover {
-    background-color: var(--blue-1);
-    border-radius: var(--border-radius);
-}
-
+/* --- columns --- */
 .card-td {
     padding: 0.5rem;
     color: var(--gray-8);
@@ -276,10 +447,11 @@
 }
 
 .card-td-1 {
-    font-weight: 500;
+    text-align: Left;
+    font-weight: 600;
 }
 
-.card-td-2, .card-td-3 {
+.card-td-2, .card-td-3, .card-td-4 {
     text-align: right;
 }
 
@@ -293,11 +465,9 @@
     .card-td {
         padding: .25rem;
     }
-    .card-td-action-container {}
 }
 
-/*      Row Action Buttons      */
-/* ============================ */
+/* --- Row Action Buttons  ---  */
 .card-row-btn {
     display: inline-flex;
     align-items: center;

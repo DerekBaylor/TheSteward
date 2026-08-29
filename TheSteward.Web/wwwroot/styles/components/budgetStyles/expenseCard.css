@@ -4,7 +4,7 @@
 }
 
 /* ---- Tab Buttons ---- */
-#addExpenseBtn.ts-card-tab-btn {
+#addExpenseBtn.ts-tab-btn {
     background-color: var(--purple-6);
     border-color: var(--purple-6);
     color: var(--off-white);
@@ -15,7 +15,7 @@ button#addExpenseBtn:hover:not([disabled]) {
     color: var(--off-white);
 }
 
-#openBudgetCategoriesBtn.ts-card-tab-btn {
+#openBudgetCategoriesBtn.ts-tab-btn {
     background-color: var(--purple-2);
     border-color: var(--purple-4);
     color: var(--purple-7);
@@ -100,10 +100,10 @@ button#openBudgetCategoriesBtn:hover:not([disabled]) {
     transition: background-color 0.15s ease;
 }
 
-    .expense-row:hover {
-        background-color: var(--purple-1);
-        border-radius: var(--border-radius);
-    }
+.expense-row:hover {
+    background-color: var(--purple-1);
+    border-radius: var(--border-radius);
+}
 
 .expense-td {
     padding: 0.45rem 0.5rem;
@@ -205,19 +205,19 @@ button#openBudgetCategoriesBtn:hover:not([disabled]) {
     color: var(--gray-6);
 }
 
-    .expense-row-btn--edit:hover {
-        background-color: var(--purple-2);
-        color: var(--base-purple);
-    }
+.expense-row-btn--edit:hover {
+    background-color: var(--purple-2);
+    color: var(--base-purple);
+}
 
 .expense-row-btn--delete {
     color: var(--gray-6);
 }
 
-    .expense-row-btn--delete:hover {
-        background-color: var(--red-1);
-        color: var(--red-6);
-    }
+.expense-row-btn--delete:hover {
+    background-color: var(--red-1);
+    color: var(--red-6);
+}
 
 /* ---- Grand Total ---- */
 .expense-grand-total {
@@ -269,9 +269,9 @@ button#openBudgetCategoriesBtn:hover:not([disabled]) {
     transition: background-color 0.15s ease;
 }
 
-    .expense-category-header:hover {
-        background-color: var(--purple-2);
-    }
+.expense-category-header:hover {
+    background-color: var(--purple-2);
+}
 
 .expense-category-header--collapsed {
     border-radius: var(--border-radius);
@@ -296,4 +296,23 @@ button#openBudgetCategoriesBtn:hover:not([disabled]) {
     font-weight: 400;
     text-transform: none;
     letter-spacing: 0;
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 600px) {
+    #expenseCard .row-expand-btn:hover {
+        background-color: var(--purple-1);
+    }
+
+    #expenseCard .row-detail-value {
+        color: var(--purple-7);
+    }
+
+    .expense-category-name {
+        font-size: 0.72rem;
+    }
+
+    .expense-category-total {
+        font-size: 0.78rem;
+    }
 }

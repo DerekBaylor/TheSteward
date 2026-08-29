@@ -126,6 +126,7 @@ else
                         OnAddIncome="OpenAddIncomeModal"
                         OnOpenIncomeDetails="OpenIncomeDetails"
                         OnEditIncome="OpenEditIncomeModal"
+                        OnViewIncome="OpenViewIncomeModal"
                         OnDeleteIncome="(income) => HandleDeleteIncome(income.IncomeId)" />
 
             <InvestmentCard Investments="currentBudget.Investments"
@@ -133,6 +134,7 @@ else
                             OnAddInvestment="OpenAddInvestmentModal"
                             OnOpenInvestmentDetails="OpenInvestmentDetails"
                             OnEditInvestment="OpenEditInvestmentModal"
+                            OnViewInvestment="OpenViewInvestmentModal"
                             OnDeleteInvestment="(investment) => HandleDeleteInvestment(investment.InvestmentId)" />
 
             <CreditCard Credits="currentBudget.Credits"
@@ -140,6 +142,7 @@ else
                         OnAddCredit="OpenAddCreditModal"
                         OnOpenCreditDetails="OpenCreditDetails"
                         OnEditCredit="OpenEditCreditModal"
+                        OnViewCredit="OpenViewCreditModal"
                         OnDeleteCredit="(credit) => HandleDeleteCredit(credit.CreditId)" />
         </div>
 
@@ -148,6 +151,7 @@ else
                          IsReadOnly="!HouseholdState.HasFinanceWritePermission"
                          OnAddExpense="OpenAddExpenseModal"
                          OnEditExpense="OpenEditExpenseModal"
+                         OnViewExpense="OpenViewExpenseModal"
                          OnDeleteExpense="(expense) => HandleDeleteExpense(expense.ExpenseId)"
                          OnOpenBudgetCategories="OpenBudgetCategoriesModal" />
 
@@ -443,23 +447,24 @@ else
             options);
     }
 
-    private async Task OpenEditIncomeModal(IncomeDto income)
+    private async Task OpenEditIncomeModal(IncomeDto income) =>
+        await OpenIncomeModal(BuildIncomeFormData(income), startInEditMode: true);
+
+    private async Task OpenViewIncomeModal(IncomeDto income) =>
+        await OpenIncomeModal(BuildIncomeFormData(income), startInEditMode: false);
+
+    private static IncomeFormDto BuildIncomeFormData(IncomeDto income) => new()
     {
-        var formData = new IncomeFormDto
-        {
-            IncomeId = income.IncomeId,
-            IncomeName = income.IncomeName,
-            IncomeFrequency = income.IncomeFrequency,
-            FilingStatus = income.FilingStatus,
-            PayCheckGross = income.PayCheckGross,
-            DisplayOrder = income.DisplayOrder,
-            BudgetId = income.BudgetId
-        };
+        IncomeId = income.IncomeId,
+        IncomeName = income.IncomeName,
+        IncomeFrequency = income.IncomeFrequency,
+        FilingStatus = income.FilingStatus,
+        PayCheckGross = income.PayCheckGross,
+        DisplayOrder = income.DisplayOrder,
+        BudgetId = income.BudgetId
+    };
 
-        await OpenIncomeModal(formData);
-    }
-
-    private async Task OpenIncomeModal(IncomeFormDto formData)
+    private async Task OpenIncomeModal(IncomeFormDto formData, bool startInEditMode = true)
     {
         var budgetIncomes = new List<IncomeDto>();
 
@@ -471,7 +476,9 @@ else
         var parameters = new DialogParameters
         {
             { "FormData", formData },
-            { "ExistingIncomeCount", currentBudget!.Incomes.Count }
+            { "ExistingIncomeCount", currentBudget!.Incomes.Count },
+            { "StartInEditMode", startInEditMode },
+            { "IsReadOnly", !HouseholdState.HasFinanceWritePermission }
         };
 
         var options = new DialogOptions
@@ -553,32 +560,35 @@ else
             options);
     }
 
-    private async Task OpenEditInvestmentModal(InvestmentDto investment)
+    private async Task OpenEditInvestmentModal(InvestmentDto investment) =>
+        await OpenInvestmentModal(BuildInvestmentFormData(investment), startInEditMode: true);
+
+    private async Task OpenViewInvestmentModal(InvestmentDto investment) =>
+        await OpenInvestmentModal(BuildInvestmentFormData(investment), startInEditMode: false);
+
+    private InvestmentFormDto BuildInvestmentFormData(InvestmentDto investment) => new()
     {
-        var formData = new InvestmentFormDto
-        {
-            InvestmentId = investment.InvestmentId,
-            InvestmentName = investment.InvestmentName,
-            CurrentValue = investment.CurrentValue,
-            InterestRate = investment.InterestRate,
-            ContributionAmount = investment.ContributionAmount,
-            ContributionFrequency = investment.ContributionFrequency,
-            EstYearlyGrowth = investment.EstYearlyGrowth,
-            DisplayOrder = investment.DisplayOrder,
-            BudgetId = investment.BudgetId,
-            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
-            ExpenseId = investment.ExpenseId
-        };
+        InvestmentId = investment.InvestmentId,
+        InvestmentName = investment.InvestmentName,
+        CurrentValue = investment.CurrentValue,
+        InterestRate = investment.InterestRate,
+        ContributionAmount = investment.ContributionAmount,
+        ContributionFrequency = investment.ContributionFrequency,
+        EstYearlyGrowth = investment.EstYearlyGrowth,
+        DisplayOrder = investment.DisplayOrder,
+        BudgetId = investment.BudgetId,
+        HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
+        ExpenseId = investment.ExpenseId
+    };
 
-        await OpenInvestmentModal(formData);
-    }
-
-    private async Task OpenInvestmentModal(InvestmentFormDto formData)
+    private async Task OpenInvestmentModal(InvestmentFormDto formData, bool startInEditMode = true)
     {
         var parameters = new DialogParameters
     {
         { "FormData", formData },
-        { "ExistingInvestmentCount", currentBudget!.Investments.Count }
+        { "ExistingInvestmentCount", currentBudget!.Investments.Count },
+        { "StartInEditMode", startInEditMode },
+        { "IsReadOnly", !HouseholdState.HasFinanceWritePermission }
     };
 
         var options = new DialogOptions
@@ -664,11 +674,17 @@ else
             options);
     }
 
-    private async Task OpenEditCreditModal(CreditDto credit)
+    private async Task OpenEditCreditModal(CreditDto credit) =>
+        await OpenCreditModal(BuildCreditFormData(credit), startInEditMode: true);
+
+    private async Task OpenViewCreditModal(CreditDto credit) =>
+        await OpenCreditModal(BuildCreditFormData(credit), startInEditMode: false);
+
+    private CreditFormDto BuildCreditFormData(CreditDto credit)
     {
         var linkedExpense = credit.ExpenseId != Guid.Empty ? currentBudget!.Expenses.FirstOrDefault(e => e.ExpenseId == credit.ExpenseId) : null;
 
-        var formData = new CreditFormDto
+        return new CreditFormDto
         {
             CreditId = credit.CreditId,
             CreditName = credit.CreditName,
@@ -690,17 +706,17 @@ else
             BudgetSubCategoryName = linkedExpense?.BudgetSubCategory?.BudgetSubCategoryName,
             CreatedById = userhouseholdDto.UserHouseholdId
         };
-
-        await OpenCreditModal(formData);
     }
 
-    private async Task OpenCreditModal(CreditFormDto formData)
+    private async Task OpenCreditModal(CreditFormDto formData, bool startInEditMode = true)
     {
         var parameters = new DialogParameters
         {
             { "FormData", formData },
             { "ExistingCreditCount", currentBudget!.Credits.Count },
-            { "BudgetCategories", BudgetCategories }
+            { "BudgetCategories", BudgetCategories },
+            { "StartInEditMode", startInEditMode },
+            { "IsReadOnly", !HouseholdState.HasFinanceWritePermission }
         };
 
         var options = new DialogOptions
@@ -762,36 +778,39 @@ else
         await OpenExpenseModal(formData);
     }
 
-    private async Task OpenEditExpenseModal(ExpenseDto expense)
+    private async Task OpenEditExpenseModal(ExpenseDto expense) =>
+        await OpenExpenseModal(BuildExpenseFormData(expense), startInEditMode: true);
+
+    private async Task OpenViewExpenseModal(ExpenseDto expense) =>
+        await OpenExpenseModal(BuildExpenseFormData(expense), startInEditMode: false);
+
+    private ExpenseFormDto BuildExpenseFormData(ExpenseDto expense) => new()
     {
-        var formData = new ExpenseFormDto
-        {
-            ExpenseId = expense.ExpenseId,
-            ExpenseName = expense.ExpenseName,
-            DueDay = expense.DueDay,
-            AmountDue = expense.AmountDue,
-            DisplayOrder = expense.DisplayOrder,
-            BudgetId = expense.BudgetId,
-            HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
-            CreatedByUserHouseholdId = HouseholdState.CurrentUserHousehold!.UserHouseholdId,
-            BudgetCategoryId = expense.BudgetCategoryId,
-            BudgetCategoryName = expense.BudgetCategory?.BudgetCategoryName ?? string.Empty,
-            BudgetSubCategoryId = expense.BudgetSubCategoryId,
-            BudgetSubCategoryName = expense.BudgetSubCategory?.BudgetSubCategoryName,
-            CreditId = expense.CreditId,
-            InvestmentId = expense.InvestmentId
-        };
+        ExpenseId = expense.ExpenseId,
+        ExpenseName = expense.ExpenseName,
+        DueDay = expense.DueDay,
+        AmountDue = expense.AmountDue,
+        DisplayOrder = expense.DisplayOrder,
+        BudgetId = expense.BudgetId,
+        HouseholdId = HouseholdState.CurrentHousehold!.HouseholdId,
+        CreatedByUserHouseholdId = HouseholdState.CurrentUserHousehold!.UserHouseholdId,
+        BudgetCategoryId = expense.BudgetCategoryId,
+        BudgetCategoryName = expense.BudgetCategory?.BudgetCategoryName ?? string.Empty,
+        BudgetSubCategoryId = expense.BudgetSubCategoryId,
+        BudgetSubCategoryName = expense.BudgetSubCategory?.BudgetSubCategoryName,
+        CreditId = expense.CreditId,
+        InvestmentId = expense.InvestmentId
+    };
 
-        await OpenExpenseModal(formData);
-    }
-
-    private async Task OpenExpenseModal(ExpenseFormDto formData)
+    private async Task OpenExpenseModal(ExpenseFormDto formData, bool startInEditMode = true)
     {
         var parameters = new DialogParameters
     {
         { "FormData", formData },
         { "ExistingExpenseCount", currentBudget!.Expenses.Count },
-        { "BudgetCategories", BudgetCategories }
+        { "BudgetCategories", BudgetCategories },
+        { "StartInEditMode", startInEditMode },
+        { "IsReadOnly", !HouseholdState.HasFinanceWritePermission }
     };
 
         var options = new DialogOptions

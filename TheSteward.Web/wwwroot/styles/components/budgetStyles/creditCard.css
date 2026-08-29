@@ -4,13 +4,14 @@
 }
 
 /* ---- Tab Buttons ---- */
-#addCreditBtn.ts-card-tab-btn {
+/* ===================== */
+#addCreditBtn.ts-tab-btn {
     background-color: var(--orange-6);
     border-color: var(--orange-6);
     color: var(--off-white);
 }
 
-#showCreditDetails.ts-card-tab-btn {
+#showCreditDetails.ts-tab-btn {
     background-color: var(--orange-7);
     border-color: var(--orange-7);
     color: var(--off-white);
@@ -68,10 +69,10 @@ button#showCreditDetails:hover:not([disabled]) {
     transition: background-color 0.15s ease;
 }
 
-    .credit-row:hover {
-        background-color: var(--orange-1);
-        border-radius: var(--border-radius);
-    }
+.credit-row:hover {
+    background-color: var(--orange-1);
+    border-radius: var(--border-radius);
+}
 
 .credit-td {
     padding: 0.5rem 0.5rem;
@@ -161,19 +162,19 @@ button#showCreditDetails:hover:not([disabled]) {
     color: var(--gray-6);
 }
 
-    .credit-row-btn--edit:hover {
-        background-color: var(--orange-2);
-        color: var(--base-orange);
-    }
+.credit-row-btn--edit:hover {
+    background-color: var(--orange-2);
+    color: var(--base-orange);
+}
 
 .credit-row-btn--delete {
     color: var(--gray-6);
 }
 
-    .credit-row-btn--delete:hover {
-        background-color: var(--red-1);
-        color: var(--red-6);
-    }
+.credit-row-btn--delete:hover {
+    background-color: var(--red-1);
+    color: var(--red-6);
+}
 
 /* ---- Totals Footer ---- */
 .credit-totals-row {
@@ -211,4 +212,19 @@ button#showCreditDetails:hover:not([disabled]) {
 .credit-empty-text {
     font-size: 0.9rem;
     margin: 0;
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 600px) {
+    #creditCard .row-expand-btn:hover {
+        background-color: var(--orange-1);
+    }
+
+    #creditCard .row-detail-value {
+        color: var(--orange-7);
+    }
+
+    .credit-table {
+        font-size: 0.85rem;
+    }
 }

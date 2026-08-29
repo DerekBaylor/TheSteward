@@ -20,6 +20,7 @@
                           Placeholder="e.g. Chase Sapphire, Car Loan, Student Loan"
                           Variant="Variant.Outlined"
                           MaxLength="200"
+                          ReadOnly="ReadOnly"
                           For="@(() => FormData.CreditName)" />
         </div>
 
@@ -30,7 +31,8 @@
                        Label="Account Type"
                        Variant="Variant.Outlined"
                        HelperText="Helps categorize the debt."
-                       Clearable="true">
+                       ReadOnly="ReadOnly"
+                       Clearable="!ReadOnly">
                 @foreach (var t in CreditTypeOptions)
                 {
                     <MudSelectItem T="string" Value="@t">@t</MudSelectItem>
@@ -46,6 +48,7 @@
                              Format="C2"
                              HelperText="The outstanding balance on this account."
                              Min="0m"
+                             ReadOnly="ReadOnly"
                              For="@(() => FormData.CurrentValue)"
                              @bind-Value:after="UpdatePreview" />
         </div>
@@ -59,6 +62,7 @@
                              HelperText="Annual percentage rate (e.g. 19.99 for 19.99%)."
                              Min="0m"
                              Max="100m"
+                             ReadOnly="ReadOnly"
                              @bind-Value:after="OnInterestRateChanged" />
         </div>
 
@@ -70,6 +74,7 @@
                              Format="C2"
                              HelperText="Your scheduled payment per period."
                              Min="0m"
+                             ReadOnly="ReadOnly"
                              For="@(() => FormData.PaymentAmount)"
                              @bind-Value:after="UpdatePreview" />
         </div>
@@ -81,6 +86,7 @@
                        Label="Payment Frequency"
                        Variant="Variant.Outlined"
                        For="@(() => FormData.PaymentFrequency)"
+                       ReadOnly="ReadOnly"
                        @bind-Value:after="UpdatePreview">
                 @foreach (var freq in FrequencyOptions)
                 {
@@ -97,6 +103,7 @@
                              HelperText="Day of the month your payment is due (1–31). Use 31 for 'last day'."
                              Min="1"
                              Max="31"
+                             ReadOnly="ReadOnly"
                              For="@(() => FormData.PaymentDay)" />
         </div>
 
@@ -109,7 +116,8 @@
                        Variant="Variant.Outlined"
                        ToStringFunc="@(c => c?.BudgetCategoryName ?? "Select a category")"
                        HelperText="The budget category the linked expense will appear under."
-                       Clearable="true">
+                       ReadOnly="ReadOnly"
+                       Clearable="!ReadOnly">
 
                 @foreach (var category in BudgetCategories)
                 {
@@ -155,6 +163,10 @@
 
     [Parameter]
     public int ExistingCreditCount { get; set; } = 0;
+
+    /// <summary>When true, every field is locked and Submit is a no-op — used for the "view" state of the modal.</summary>
+    [Parameter]
+    public bool ReadOnly { get; set; }
 
     private EditContext editContext = null!;
     private decimal interestRatePercent = 0m;
@@ -216,6 +228,8 @@
 
     public async Task SubmitAsync()
     {
+        if (ReadOnly) return;
+
         var isValid = editContext.Validate();
         if (isValid)
             await OnValidSubmit.InvokeAsync(FormData);

@@ -9,14 +9,14 @@
         @if (!IsReadOnly)
         {
             <MudButton id="addCreditBtn"
-                       class="ts-card-tab-btn"
+                       class="ts-tab-btn add-credit-btn"
                        StartIcon="@Icons.Material.Filled.Add"
                        OnClick="HandleAddCredit">
                 Add Credit
             </MudButton>
         }
         <MudButton id="showCreditDetails"
-                   class="ts-card-tab-btn"
+                   class="ts-tab-btn credit-details-btn"
                    StartIcon="@Icons.Material.Filled.FileOpen"
                    OnClick="HandleShowCreditDetails"
                    Disabled="!Credits.Any()">
@@ -48,26 +48,34 @@
                     <table class="credit-table">
                         <thead>
                             <tr>
+                                <th class="credit-th row-expand-th"></th>
                                 <th class="credit-th credit-th-name">Name</th>
-                                <th class="credit-th credit-th-text">Type</th>
+                                <th class="credit-th credit-th-text mobile-hide">Type</th>
                                 <th class="credit-th credit-th-amount">Balance</th>
-                                <th class="credit-th credit-th-amount">Rate</th>
-                                <th class="credit-th credit-th-amount">Monthly Interest</th>
+                                <th class="credit-th credit-th-amount mobile-hide">Rate</th>
+                                <th class="credit-th credit-th-amount mobile-hide">Monthly Interest</th>
                                 <th class="credit-th credit-th-amount">Payment</th>
-                                <th class="credit-th credit-th-text">Due</th>
+                                <th class="credit-th credit-th-text mobile-hide">Due</th>
                                 @if (!IsReadOnly)
                                 {
-                                    <th class="credit-th credit-th-action"></th>
-                                    <th class="credit-th credit-th-action"></th>
+                                    <th class="credit-th credit-th-action mobile-hide"></th>
                                 }
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var credit in Credits.OrderBy(c => c.DisplayOrder))
                             {
-                                <tr class="credit-row">
+                                <tr class="credit-row" @onclick="() => HandleRowView(credit)">
+                                    <td class="credit-td row-expand-td">
+                                        <button class="row-expand-btn @(IsRowExpanded(credit.CreditId) ? "is-expanded" : "")"
+                                                title="Show details"
+                                                @onclick="() => ToggleRowExpand(credit.CreditId)"
+                                                @onclick:stopPropagation="true">
+                                            <span class="material-icons">chevron_right</span>
+                                        </button>
+                                    </td>
                                     <td class="credit-td credit-td-name">@credit.CreditName</td>
-                                    <td class="credit-td credit-td-text">
+                                    <td class="credit-td credit-td-text mobile-hide">
                                         @if (!string.IsNullOrEmpty(credit.CreditType))
                                         {
                                             <span class="credit-type-badge">@credit.CreditType</span>
@@ -78,10 +86,10 @@
                                         }
                                     </td>
                                     <td class="credit-td credit-td-amount">@credit.CurrentValue.ToString("C")</td>
-                                    <td class="credit-td credit-td-amount credit-td-rate">
+                                    <td class="credit-td credit-td-amount credit-td-rate mobile-hide">
                                         @((credit.InterestRate * 100).ToString("F2"))%
                                     </td>
-                                    <td class="credit-td credit-td-amount credit-td-interest">
+                                    <td class="credit-td credit-td-amount credit-td-interest mobile-hide">
                                         @credit.EstMonthlyInterest.ToString("C")
                                     </td>
                                     <td class="credit-td credit-td-amount">
@@ -90,38 +98,73 @@
                                             @GetFrequencyShortLabel(credit.PaymentFrequency)
                                         </span>
                                     </td>
-                                    <td class="credit-td credit-td-text">
+                                    <td class="credit-td credit-td-text mobile-hide">
                                         @(credit.PaymentDay == 31 ? "Last day" : $"Day {credit.PaymentDay}")
                                     </td>
                                     @if (!IsReadOnly)
                                     {
-                                        <td class="credit-td credit-td-action">
-                                            <button class="credit-row-btn credit-row-btn--edit"
-                                                    title="Edit"
-                                                    @onclick="() => HandleRowEdit(credit)">
-                                                <span class="material-icons">edit</span>
-                                            </button>
-                                        </td>
-                                        <td class="credit-td credit-td-action">
+                                        <td class="credit-td credit-td-action mobile-hide">
                                             <button class="credit-row-btn credit-row-btn--delete"
                                                     title="Delete"
-                                                    @onclick="() => HandleRowDelete(credit)">
+                                                    @onclick="() => HandleRowDelete(credit)"
+                                                    @onclick:stopPropagation="true">
                                                 <span class="material-icons">delete</span>
                                             </button>
                                         </td>
                                     }
                                 </tr>
+                                @if (IsRowExpanded(credit.CreditId))
+                                {
+                                    <tr class="row-detail is-open">
+                                        <td class="row-detail-cell" colspan="@TotalColumns">
+                                            <div class="row-detail-grid">
+                                                <div class="row-detail-item">
+                                                    <span class="row-detail-label">Type</span>
+                                                    <span class="row-detail-value">@(string.IsNullOrEmpty(credit.CreditType) ? "—" : credit.CreditType)</span>
+                                                </div>
+                                                <div class="row-detail-item">
+                                                    <span class="row-detail-label">Rate</span>
+                                                    <span class="row-detail-value">@((credit.InterestRate * 100).ToString("F2"))%</span>
+                                                </div>
+                                                <div class="row-detail-item">
+                                                    <span class="row-detail-label">Monthly Interest</span>
+                                                    <span class="row-detail-value">@credit.EstMonthlyInterest.ToString("C")</span>
+                                                </div>
+                                                <div class="row-detail-item">
+                                                    <span class="row-detail-label">Due</span>
+                                                    <span class="row-detail-value">@(credit.PaymentDay == 31 ? "Last day" : $"Day {credit.PaymentDay}")</span>
+                                                </div>
+                                            </div>
+                                            @if (!IsReadOnly)
+                                            {
+                                                <div class="row-detail-actions">
+                                                    <button class="credit-row-btn credit-row-btn--edit"
+                                                            title="Edit"
+                                                            @onclick="() => HandleRowEdit(credit)">
+                                                        <span class="material-icons">edit</span>
+                                                    </button>
+                                                    <button class="credit-row-btn credit-row-btn--delete"
+                                                            title="Delete"
+                                                            @onclick="() => HandleRowDelete(credit)">
+                                                        <span class="material-icons">delete</span>
+                                                    </button>
+                                                </div>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                         <tfoot>
                             <tr class="credit-totals-row">
+                                <td class="credit-td row-expand-td"></td>
                                 <td class="credit-td credit-td-name credit-totals-label">Total</td>
-                                <td class="credit-td credit-td-text"></td>
+                                <td class="credit-td credit-td-text mobile-hide"></td>
                                 <td class="credit-td credit-td-amount credit-totals-value">
                                     @Credits.Sum(c => c.CurrentValue).ToString("C")
                                 </td>
-                                <td class="credit-td credit-td-amount"></td>
-                                <td class="credit-td credit-td-amount credit-totals-value">
+                                <td class="credit-td credit-td-amount mobile-hide"></td>
+                                <td class="credit-td credit-td-amount credit-totals-value mobile-hide">
                                     @Credits.Sum(c => c.EstMonthlyInterest).ToString("C")
                                 </td>
                                 <td class="credit-td credit-td-amount credit-totals-value">
@@ -130,11 +173,10 @@
                                     *@
                                     @Credits.Sum(c => c.PaymentAmount * (decimal)(int)c.PaymentFrequency).ToString("C") / yr
                                 </td>
-                                <td class="credit-td credit-td-text"></td>
+                                <td class="credit-td credit-td-text mobile-hide"></td>
                                 @if (!IsReadOnly)
                                 {
-                                    <td class="credit-td credit-td-action"></td>
-                                    <td class="credit-td credit-td-action"></td>
+                                    <td class="credit-td credit-td-action mobile-hide"></td>
                                 }
                             </tr>
                         </tfoot>
@@ -162,6 +204,10 @@
     [Parameter]
     public EventCallback<CreditDto> OnEditCredit { get; set; }
 
+    /// <summary>Row tap (any device) — parent opens the item in read-only view mode.</summary>
+    [Parameter]
+    public EventCallback<CreditDto> OnViewCredit { get; set; }
+
     [Parameter]
     public EventCallback<CreditDto> OnDeleteCredit { get; set; }
 
@@ -174,8 +220,24 @@
     private async Task HandleRowEdit(CreditDto credit) =>
         await OnEditCredit.InvokeAsync(credit);
 
+    private async Task HandleRowView(CreditDto credit) =>
+        await OnViewCredit.InvokeAsync(credit);
+
     private async Task HandleRowDelete(CreditDto credit) =>
         await OnDeleteCredit.InvokeAsync(credit);
+
+    /// <summary>Tracks which rows have their mobile detail panel open.</summary>
+    private readonly HashSet<Guid> expandedRows = new();
+
+    private int TotalColumns => (IsReadOnly ? 8 : 9);
+
+    private bool IsRowExpanded(Guid creditId) => expandedRows.Contains(creditId);
+
+    private void ToggleRowExpand(Guid creditId)
+    {
+        if (!expandedRows.Add(creditId))
+            expandedRows.Remove(creditId);
+    }
 
     private static string GetFrequencyShortLabel(FrequencyEnum freq) => freq switch
     {

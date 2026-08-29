@@ -4,13 +4,14 @@
 }
 
 /* ---- Tab Buttons ---- */
-#addInvestmentBtn.ts-card-tab-btn {
+/* ===================== */
+#addInvestmentBtn.ts-tab-btn {
     background-color: var(--blue-6);
     border-color: var(--blue-6);
     color: var(--off-white);
 }
 
-#showInvestmentDetails.ts-card-tab-btn {
+#showInvestmentDetails.ts-tab-btn {
     background-color: var(--blue-7);
     border-color: var(--blue-7);
     color: var(--off-white);
@@ -26,65 +27,33 @@ button#showInvestmentDetails:hover:not([disabled]) {
     color: var(--off-white);
 }
 
+
 /* ---- Card border accent ---- */
 #investmentCard .ts-card-content {
     border-color: var(--base-blue);
 }
 
-/* ---- Investment Table ---- */
-.investment-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
 
-.investment-th {
-    text-align: left;
-    font-family: var(--label-font);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--gray-6);
-    padding: 0.25rem 0.5rem 0.5rem;
-    border-bottom: 2px solid var(--blue-3);
-}
 
+/* ====================== */
+/*       Card Table       */
+/* ====================== */
 .investment-th-amount {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--primary-font);
     text-align: right;
-}
-
-.investment-th-action {
-    width: 2rem;
-    text-align: center;
-    padding: 0.25rem 0.25rem 0.5rem;
-}
-
-.investment-row {
-    transition: background-color 0.15s ease;
-}
-
-    .investment-row:hover {
-        background-color: var(--blue-1);
-        border-radius: var(--border-radius);
-    }
-
-.investment-td {
-    padding: 0.5rem 0.5rem;
-    color: var(--gray-8);
-    border-bottom: 1px solid var(--gray-2);
-}
-
-.investment-td-name {
-    font-weight: 500;
 }
 
 .investment-td-amount {
-    text-align: right;
     font-variant-numeric: tabular-nums;
     font-family: var(--primary-font);
 }
 
+.investment-th-action {
+    text-align: center;
+    padding: 0.25rem;
+    width: 2rem;
+}
 .investment-td-action {
     text-align: center;
     padding: 0.25rem;
@@ -126,19 +95,19 @@ button#showInvestmentDetails:hover:not([disabled]) {
     color: var(--gray-6);
 }
 
-    .investment-row-btn--edit:hover {
-        background-color: var(--blue-2);
-        color: var(--base-blue);
-    }
+.investment-row-btn--edit:hover {
+    background-color: var(--blue-2);
+    color: var(--base-blue);
+}
 
 .investment-row-btn--delete {
     color: var(--gray-6);
 }
 
-    .investment-row-btn--delete:hover {
-        background-color: var(--red-1);
-        color: var(--red-6);
-    }
+.investment-row-btn--delete:hover {
+    background-color: var(--red-1);
+    color: var(--red-6);
+}
 
 /* ---- Totals Footer ---- */
 .investment-totals-row {
@@ -158,22 +127,13 @@ button#showInvestmentDetails:hover:not([disabled]) {
     padding-top: 0.6rem;
 }
 
-/* ---- Empty State ---- */
-.investment-empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1.5rem 0;
-    color: var(--gray-5);
-}
+/* ---- Mobile ---- */
+@media (max-width: 600px) {
+    #investmentCard .row-expand-btn:hover {
+        background-color: var(--blue-1);
+    }
 
-.investment-empty-icon {
-    font-size: 2rem;
-    opacity: 0.5;
-}
-
-.investment-empty-text {
-    font-size: 0.9rem;
-    margin: 0;
+    #investmentCard .row-detail-value {
+        color: var(--base-blue);
+    }
 }

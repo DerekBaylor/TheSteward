@@ -59,6 +59,7 @@
     gap: 1.1rem;
     padding: 0.25rem 0;
     min-width: 340px;
+    margin: .5rem;
 }
 
 .credit-form-field {
@@ -135,5 +136,13 @@
     color: var(--gray-5);
     margin: 0.5rem 0 0;
     font-style: italic;
+}
+
+#creditEditBtn {
+    color: var(--orange-8);
+}
+
+#creditEditBtn:hover {
+    background-color: var(--orange-2);
 }
 

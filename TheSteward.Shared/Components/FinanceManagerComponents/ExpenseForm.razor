@@ -17,6 +17,7 @@
                           Placeholder="e.g. Rent, Electric Bill, Netflix"
                           Variant="Variant.Outlined"
                           MaxLength="200"
+                          ReadOnly="ReadOnly"
                           For="@(() => FormData.ExpenseName)" />
         </div>
 
@@ -28,6 +29,7 @@
                              Format="C2"
                              HelperText="The amount owed each billing period."
                              Min="0m"
+                             ReadOnly="ReadOnly"
                              For="@(() => FormData.AmountDue)" />
         </div>
 
@@ -39,6 +41,7 @@
                              HelperText="Day of the month this expense is due (1–31). Use 31 for 'last day'."
                              Min="1"
                              Max="31"
+                             ReadOnly="ReadOnly"
                              For="@(() => FormData.DueDay)" />
         </div>
 
@@ -51,7 +54,8 @@
                        Variant="Variant.Outlined"
                        ToStringFunc="@(c => c?.BudgetCategoryName ?? "Select a category")"
                        HelperText="The budget category this expense belongs to."
-                       Clearable="true">
+                       ReadOnly="ReadOnly"
+                       Clearable="!ReadOnly">
                 @foreach (var category in BudgetCategories)
                 {
                     <MudSelectItem Value="@category">@category.BudgetCategoryName</MudSelectItem>
@@ -69,7 +73,8 @@
                            Label="Subcategory (Optional)"
                            Variant="Variant.Outlined"
                            ToStringFunc="@(s => s?.BudgetSubCategoryName ?? "Select a subcategory")"
-                           Clearable="true">
+                           ReadOnly="ReadOnly"
+                           Clearable="!ReadOnly">
                     @foreach (var sub in selectedCategory.BudgetSubCategories)
                     {
                         <MudSelectItem Value="@sub">@sub.BudgetSubCategoryName</MudSelectItem>
@@ -94,6 +99,10 @@
 
     [Parameter]
     public int ExistingExpenseCount { get; set; } = 0;
+
+    /// <summary>When true, every field is locked and Submit is a no-op — used for the "view" state of the modal.</summary>
+    [Parameter]
+    public bool ReadOnly { get; set; }
 
     private EditContext editContext = null!;
     private BudgetCategoryDto? selectedCategory;
@@ -136,6 +145,8 @@
 
     public async Task SubmitAsync()
     {
+        if (ReadOnly) return;
+
         if (!editContext.Validate()) return;
 
         if (!FormData.BudgetCategoryId.HasValue || FormData.BudgetCategoryId == Guid.Empty)

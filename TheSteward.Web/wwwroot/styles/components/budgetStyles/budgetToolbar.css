@@ -13,39 +13,16 @@
     padding: 1rem 1.5rem;
 }
 
-
 .budget-toolbar .toolbar-select-group {
     align-items: center;
     display: flex;
     gap: 1rem;
 }
 
-
-
-.budget-selector-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background: white;
-    border-bottom: 2px solid var(--gray-2);
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.budget-selector-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.budget-selector-label {
+.toolbar-household-name {
     font-family: var(--label-font);
-    font-size: 0.8rem;
     font-weight: 600;
-    color: var(--gray-6);
-    white-space: nowrap;
+    color: var(--gray-8);
 }
 
 .budget-pill-btn {
@@ -58,33 +35,32 @@
     background: white;
     color: var(--gray-6);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-    .budget-pill-btn:hover {
-        background-color: var(--green-2);
-        border-color: var(--gray-4);
-        color: var(--gray-8);
-    }
+.budget-pill-btn:hover {
+    background-color: var(--green-2);
+    border-color: var(--gray-4);
+    color: var(--gray-8);
+}
 
-    .budget-pill-btn.active {
-        background: var(--base-green);
-        border-color: var(--base-green);
-        color: var(--off-white);
-    }
+.budget-pill-btn.active {
+    background: var(--base-green);
+    border-color: var(--base-green);
+    color: var(--off-white);
+}
 
-        .budget-pill-btn.active:hover {
-            background: var(--green-9);
-            border-color: var(--green-9);
-        }
+.budget-pill-btn.active:hover {
+    background: var(--green-9);
+    border-color: var(--green-9);
+}
 
-    .budget-pill-btn .material-icons {
-        font-size: 0.9rem;
-    }
+.budget-pill-btn .material-icons {
+    font-size: 0.9rem;
+}
 
 .budget-pill-btn-default-badge {
     font-size: 0.65rem;
@@ -96,26 +72,12 @@
     font-weight: 700;
 }
 
-    .budget-pill-btn-default-badge:hover {
-        font-size: 0.65rem;
-        background: var(--green-1);
-        color: var(--green-7);
-        border: 1px solid var(--green-3);
-        border-radius: 999px;
-        padding: 0.1rem 0.4rem;
-        font-weight: 700;
-    }
-
-.budget-pill-btn.active .bbudget-pill-btn-default-badge {
+/* was ".bbudget-pill-btn-default-badge" (typo) so this never fired — the
+   default badge stayed green-on-green even when its pill was active */
+.budget-pill-btn.active .budget-pill-btn-default-badge {
     background: var(--green-9);
     border-color: var(--green-3);
     color: var(--off-white);
-}
-
-.budget-selector-right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .budget-action-btn {
@@ -126,16 +88,15 @@
     border-radius: 8px;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-    .budget-action-btn .material-icons {
-        font-size: 1rem;
-    }
+.budget-action-btn .material-icons {
+    font-size: 1rem;
+}
 
 .budget-action-btn--add {
     background: var(--base-green);
@@ -143,10 +104,10 @@
     color: var(--off-white);
 }
 
-    .budget-action-btn--add:hover {
-        background: var(--green-8);
-        border-color: var(--green-8);
-    }
+.budget-action-btn--add:hover {
+    background: var(--green-8);
+    border-color: var(--green-8);
+}
 
 .budget-action-btn--edit {
     background: var(--off-white);
@@ -154,12 +115,10 @@
     color: var(--gray-7);
 }
 
-    .budget-action-btn--edit:hover {
-        background: var(--gray-1);
-        border-color: var(--gray-4);
-    }
-
-
+.budget-action-btn--edit:hover {
+    background: var(--gray-1);
+    border-color: var(--gray-4);
+}
 
 .toolbar-divider {
     width: 1px;
@@ -176,9 +135,9 @@
     flex-wrap: wrap;
 }
 
-    .toolbar-budget-group .select-label .material-icons {
-        color: var(--base-green);
-    }
+.toolbar-budget-group .select-label .material-icons {
+    color: var(--base-green);
+}
 
 .toolbar-budget-pills {
     display: flex;
@@ -199,42 +158,27 @@
     opacity: 0.7;
 }
 
+/* ChildContent slot — extra actions passed in by the page */
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
 
 /* =============================== */
 /*         Mobile Breakpoint       */
 /* =============================== */
 @media (max-width: 1000px) {
-    .budget-toolbar {
-        max-width: 90vw;
-    }
-
-    .budget-selector-bar {
-        justify-content: flex-start;
-    }
-
-    .budget-selector-left,
-    .budget-selector-right {
-        width: 100%;
-    }
-
-    .budget-selector-right {
-        justify-content: flex-start;
-    }
-
-    /* dividers don't make sense once groups wrap to their own rows */
-    .toolbar-divider {
-        display: none;
-    }
-}
-
-@media (max-width: 1000px) {
     #budgetToolbar.budget-toolbar {
-        margin:0.5rem;
+        margin: 0.5rem;
         padding: 0.75rem .5rem;
         gap: .5rem;
         height: fit-content;
         width: 95vw;
+        max-width: 90vw;
         align-self: center;
+        justify-content: flex-start;
     }
 
     #budgetToolbar.budget-toolbar .toolbar-select-group {
@@ -244,21 +188,24 @@
         gap: 0.5rem;
     }
 
-    .budget-selector-bar {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0.75rem;
+    .toolbar-household-name {
+        width: 100%;
     }
 
-    .budget-selector-left,
     .toolbar-budget-group {
+        width: 100%;
         flex-direction: column;
         align-items: stretch;
+        gap: 0.5rem;
     }
 
-    .toolbar-budget-pills,
-    .budget-selector-left {
+    .toolbar-budget-pills {
         gap: 0.5rem;
+    }
+
+    /* dividers don't make sense once groups wrap to their own rows */
+    .toolbar-divider {
+        display: none;
     }
 
     /* bigger, full-width tap targets on small screens */
@@ -268,18 +215,20 @@
         width: 100%;
     }
 
+    .toolbar-budget-actions {
+        width: 100%;
+        gap: 0.5rem;
+    }
+
     .budget-action-btn {
         padding: 0.5rem 1rem;
         justify-content: center;
         flex: 1 1 auto;
     }
 
-    .toolbar-budget-actions {
+    .toolbar-actions {
         width: 100%;
-        gap: 0.5rem;
-    }
-
-    .budget-selector-label {
-        margin-bottom: 0.25rem;
+        flex-direction: column;
+        align-items: stretch;
     }
 }

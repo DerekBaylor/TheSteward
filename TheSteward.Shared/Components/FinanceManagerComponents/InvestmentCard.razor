@@ -9,14 +9,14 @@
         @if (!IsReadOnly)
         {
             <MudButton id="addInvestmentBtn"
-                       class="ts-card-tab-btn"
+                       class="ts-tab-btn add-investment-tab-btn"
                        StartIcon="@Icons.Material.Filled.Add"
                        OnClick="HandleAddInvestment">
                 Add Investment
             </MudButton>
         }
         <MudButton id="showInvestmentDetails"
-                   class="ts-card-tab-btn"
+                   class="ts-tab-btn investment-details-tab-btn"
                    StartIcon="@Icons.Material.Filled.FileOpen"
                    OnClick="HandleShowInvestmentDetails"
                    Disabled="!Investments.Any()">
@@ -37,63 +37,94 @@
         <div class="ts-card-body">
             @if (!Investments.Any())
             {
-                <div class="investment-empty-state">
-                    <span class="material-icons investment-empty-icon">savings</span>
-                    <p class="investment-empty-text">No investments or savings added yet.</p>
+                <div class="card-empty-state">
+                    <span class="material-icons card-empty-icon">savings</span>
+                    <p class="card-empty-text">No investments or savings added yet.</p>
                 </div>
             }
             else
             {
                 <section class="ts-card-section">
-                    <table class="investment-table">
+                    <table class="card-table investment-table">
                         <thead>
                             <tr>
-                                <th class="investment-th investment-th-name">Name</th>
-                                <th class="investment-th investment-th-amount">Balance</th>
-                                <th class="investment-th investment-th-amount">Contribution</th>
-                                <th class="investment-th investment-th-amount">Est. Yearly Growth</th>
+                                <th class="card-th row-expand-th"></th>
+                                <th class="card-th investment-th-name">Name</th>
+                                <th class="card-th investment-th-amount">Balance</th>
+                                <th class="card-th investment-th-amount">Contribution</th>
+                                <th class="card-th investment-th-amount mobile-hide">Est. Yearly Growth</th>
                                 @if (!IsReadOnly)
                                 {
-                                    <th class="investment-th investment-th-action"></th>
-                                    <th class="investment-th investment-th-action"></th>
+                                    <th class="card-th investment-th-action mobile-hide"></th>
                                 }
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var investment in Investments.OrderBy(i => i.DisplayOrder))
                             {
-                                <tr class="investment-row">
-                                    <td class="investment-td investment-td-name">@investment.InvestmentName</td>
-                                    <td class="investment-td investment-td-amount">@investment.CurrentValue.ToString("C")</td>
-                                    <td class="investment-td investment-td-amount">
+                                <tr class="card-table-row investment-row" @onclick="() => HandleRowView(investment)">
+                                    <td class="card-td row-expand-td">
+                                        <button class="row-expand-btn @(IsRowExpanded(investment.InvestmentId) ? "is-expanded" : "")"
+                                                title="Show details"
+                                                @onclick="() => ToggleRowExpand(investment.InvestmentId)"
+                                                @onclick:stopPropagation="true">
+                                            <span class="material-icons">chevron_right</span>
+                                        </button>
+                                    </td>
+                                    <td class="card-td card-td-1 investment-td-name">@investment.InvestmentName</td>
+                                    <td class="card-td card-td-2 investment-td-amount">@investment.CurrentValue.ToString("C")</td>
+                                    <td class="card-td card-td-3 investment-td-amount">
                                         @investment.ContributionAmount.ToString("C")
                                         <span class="investment-freq-badge">
                                             @GetFrequencyShortLabel(investment.ContributionFrequency)
                                         </span>
                                     </td>
-                                    <td class="investment-td investment-td-amount">@investment.EstYearlyGrowth.ToString("C")</td>
+                                    <td class="card-td card-td-4 investment-td-amount mobile-hide">@investment.EstYearlyGrowth.ToString("C")</td>
                                     @if (!IsReadOnly)
                                     {
-                                        <td class="investment-td investment-td-action">
-                                            <button class="investment-row-btn investment-row-btn--edit"
-                                                    title="Edit"
-                                                    @onclick="() => HandleRowEdit(investment)">
-                                                <span class="material-icons">edit</span>
-                                            </button>
-                                        </td>
-                                        <td class="investment-td investment-td-action">
-                                            <button class="investment-row-btn investment-row-btn--delete"
+                                        <td class="card-td card-td-action-container mobile-hide">
+                                            <button class="card-row-btn card-row-btn--delete"
                                                     title="Delete"
-                                                    @onclick="() => HandleRowDelete(investment)">
+                                                    @onclick="() => HandleRowDelete(investment)"
+                                                    @onclick:stopPropagation="true">
                                                 <span class="material-icons">delete</span>
                                             </button>
                                         </td>
                                     }
                                 </tr>
+                                @if (IsRowExpanded(investment.InvestmentId))
+                                {
+                                    <tr class="row-detail is-open">
+                                        <td class="row-detail-cell" colspan="@TotalColumns">
+                                            <div class="row-detail-grid">
+                                                <div class="row-detail-item">
+                                                    <span class="row-detail-label">Est. Yearly Growth</span>
+                                                    <span class="row-detail-value">@investment.EstYearlyGrowth.ToString("C")</span>
+                                                </div>
+                                            </div>
+                                            @if (!IsReadOnly)
+                                            {
+                                                <div class="row-detail-actions">
+                                                    <button class="card-row-btn card-row-btn--edit"
+                                                            title="Edit"
+                                                            @onclick="() => HandleRowEdit(investment)">
+                                                        <span class="material-icons">edit</span>
+                                                    </button>
+                                                    <button class="card-row-btn card-row-btn--delete"
+                                                            title="Delete"
+                                                            @onclick="() => HandleRowDelete(investment)">
+                                                        <span class="material-icons">delete</span>
+                                                    </button>
+                                                </div>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                         <tfoot>
                             <tr class="investment-totals-row">
+                                <td class="investment-td row-expand-td"></td>
                                 <td class="investment-td investment-td-name investment-totals-label">Total</td>
                                 <td class="investment-td investment-td-amount investment-totals-value">
                                     @Investments.Sum(i => i.CurrentValue).ToString("C")
@@ -105,13 +136,12 @@
                                     *@
                                     —
                                 </td>
-                                <td class="investment-td investment-td-amount investment-totals-value">
+                                <td class="investment-td investment-td-amount investment-totals-value mobile-hide">
                                     @Investments.Sum(i => i.EstYearlyGrowth).ToString("C")
                                 </td>
                                 @if (!IsReadOnly)
                                 {
-                                    <td class="investment-td investment-td-action"></td>
-                                    <td class="investment-td investment-td-action"></td>
+                                    <td class="investment-td investment-td-action mobile-hide"></td>
                                 }
                             </tr>
                         </tfoot>
@@ -141,6 +171,10 @@
     [Parameter]
     public EventCallback<InvestmentDto> OnEditInvestment { get; set; }
 
+    /// <summary>Row tap (any device) — parent opens the item in read-only view mode.</summary>
+    [Parameter]
+    public EventCallback<InvestmentDto> OnViewInvestment { get; set; }
+
     [Parameter]
     public EventCallback<InvestmentDto> OnDeleteInvestment { get; set; }
 
@@ -153,8 +187,24 @@
     private async Task HandleRowEdit(InvestmentDto investment) =>
         await OnEditInvestment.InvokeAsync(investment);
 
+    private async Task HandleRowView(InvestmentDto investment) =>
+        await OnViewInvestment.InvokeAsync(investment);
+
     private async Task HandleRowDelete(InvestmentDto investment) =>
         await OnDeleteInvestment.InvokeAsync(investment);
+
+    /// <summary>Tracks which rows have their mobile detail panel open.</summary>
+    private readonly HashSet<Guid> expandedRows = new();
+
+    private int TotalColumns => (IsReadOnly ? 5 : 6);
+
+    private bool IsRowExpanded(Guid investmentId) => expandedRows.Contains(investmentId);
+
+    private void ToggleRowExpand(Guid investmentId)
+    {
+        if (!expandedRows.Add(investmentId))
+            expandedRows.Remove(investmentId);
+    }
 
     private static string GetFrequencyShortLabel(FrequencyEnum freq) => freq switch
     {

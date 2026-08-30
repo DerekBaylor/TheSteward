@@ -12,9 +12,9 @@
     <TitleContent>
         <div class="credit-modal-title">
             <span class="material-icons credit-modal-icon">
-                @(FormData.IsEditMode ? "edit" : "add_card")
+                @(isViewMode ? "visibility" : (FormData.IsEditMode ? "edit" : "add_card"))
             </span>
-            @(FormData.IsEditMode ? "Edit Credit / Debt" : "Add Credit / Debt")
+            @(isViewMode ? "Credit / Debt Details" : (FormData.IsEditMode ? "Edit Credit / Debt" : "Add Credit / Debt"))
         </div>
     </TitleContent>
 
@@ -23,6 +23,7 @@
                     FormData="FormData"
                     ExistingCreditCount="ExistingCreditCount"
                     BudgetCategories="BudgetCategories"
+                    ReadOnly="isViewMode"
                     OnValidSubmit="HandleFormSubmit" />
     </DialogContent>
 
@@ -31,10 +32,10 @@
                    class="ts-card-tab-btn credit-modal-btn-cancel"
                    OnClick="Cancel"
                    Disabled="isSaving">
-            Cancel
+            @(isViewMode ? "Close" : "Cancel")
         </MudButton>
 
-        @if (FormData.IsEditMode)
+        @if (FormData.IsEditMode && !IsReadOnly)
         {
             <MudButton id="creditDeleteBtn"
                        class="ts-card-tab-btn credit-modal-btn-delete"
@@ -45,16 +46,31 @@
             </MudButton>
         }
 
-        <MudButton id="creditSaveBtn"
-                   class="ts-card-tab-btn credit-modal-btn-save"
-                   OnClick="TriggerSubmit"
-                   Disabled="isSaving">
-            @if (isSaving)
+        @if (isViewMode)
+        {
+            @if (!IsReadOnly)
             {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <MudButton id="creditEditBtn"
+                           class="ts-card-tab-btn credit-modal-btn-save"
+                           OnClick="EnableEditing">
+                    <span class="material-icons" style="font-size: 16px; margin-right: 4px;">edit</span>
+                    Edit
+                </MudButton>
             }
-            @(FormData.IsEditMode ? "Save Changes" : "Add Credit")
-        </MudButton>
+        }
+        else
+        {
+            <MudButton id="creditSaveBtn"
+                       class="ts-card-tab-btn credit-modal-btn-save"
+                       OnClick="TriggerSubmit"
+                       Disabled="isSaving">
+                @if (isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @(FormData.IsEditMode ? "Save Changes" : "Add Credit")
+            </MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -71,8 +87,27 @@
     [Parameter]
     public List<BudgetCategoryDto> BudgetCategories { get; set; } = new();
 
+    /// <summary>True when the current user has no write permission — hides Edit/Delete/Save entirely.</summary>
+    [Parameter]
+    public bool IsReadOnly { get; set; }
+
+    /// <summary>
+    /// When false and this is an existing credit, the modal opens read-only (row-tap "view" flow)
+    /// and the user must tap Edit to unlock the form. Ignored for new credits and always true then.
+    /// </summary>
+    [Parameter]
+    public bool StartInEditMode { get; set; } = true;
+
     private CreditForm? creditForm;
     private bool isSaving = false;
+    private bool isViewMode;
+
+    protected override void OnInitialized()
+    {
+        isViewMode = FormData.IsEditMode && !StartInEditMode;
+    }
+
+    private void EnableEditing() => isViewMode = false;
 
     private async Task TriggerSubmit()
     {

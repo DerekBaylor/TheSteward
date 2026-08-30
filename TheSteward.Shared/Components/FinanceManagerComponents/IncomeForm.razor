@@ -18,6 +18,7 @@
                           Variant="Variant.Outlined"
                           HelperText="A short label to identify this income source."
                           MaxLength="200"
+                          ReadOnly="ReadOnly"
                           For="@(() => FormData.IncomeName)" />
         </div>
 
@@ -29,6 +30,7 @@
                        Variant="Variant.Outlined"
                        HelperText="How many paychecks do you receive per year?"
                        For="@(() => FormData.IncomeFrequency)"
+                       ReadOnly="ReadOnly"
                        @bind-Value:after="UpdatePreview">
                 @foreach (var freq in FrequencyOptions)
                 {
@@ -45,6 +47,7 @@
                         Variant="Variant.Outlined"
                         HelperText="What is your filing status?"
                         For="@(() => FormData.FilingStatus)"
+                        ReadOnly="ReadOnly"
                         @bind-Value:after="UpdatePreview">
                 @foreach (var freq in FilingStatusOptions)
                 {
@@ -61,6 +64,7 @@
                              Format="C2"
                              HelperText="Your pre-tax amount for each paycheck."
                              Min="0.01m"
+                             ReadOnly="ReadOnly"
                              For="@(() => FormData.PayCheckGross)"
                              @bind-Value:after="UpdatePreview" />
         </div>
@@ -113,6 +117,10 @@
     [Parameter]
     public int ExistingIncomeCount { get; set; } = 0;
 
+    /// <summary>When true, every field is locked and Submit is a no-op — used for the "view" state of the modal.</summary>
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
     private EditContext editContext = null!;
     private bool hasMultipleIncomes => ExistingIncomeCount > 1
         || (!FormData.IsEditMode && ExistingIncomeCount >= 1);
@@ -155,6 +163,8 @@
 
     public async Task SubmitAsync()
     {
+        if (ReadOnly) return;
+
         var isValid = editContext.Validate();
         if (isValid)
             await OnValidSubmit.InvokeAsync(FormData);

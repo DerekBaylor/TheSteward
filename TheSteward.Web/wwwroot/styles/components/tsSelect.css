@@ -17,6 +17,7 @@
     animation: dropdownSlide 0.2s ease-out;
     scrollbar-width: thin;
     scrollbar-color: var(--gray-4) var(--gray-1);
+    -webkit-overflow-scrolling: touch;
 }
 
 
@@ -40,9 +41,9 @@
     font-size: 0.95rem;
 }
 
-    .ts-select-options li.selected {
-        font-weight: 600;
-    }
+.ts-select-options li.selected {
+    font-weight: 600;
+}
 
 .ts-select-options::-webkit-scrollbar {
     width: 8px;
@@ -58,9 +59,9 @@
     border-radius: 4px;
 }
 
-    .ts-select-options::-webkit-scrollbar-thumb:hover {
-        background: var(--gray-5);
-    }
+.ts-select-options::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-5);
+}
 
 .ts-select-header {
     display: flex;
@@ -88,10 +89,10 @@
     transition: transform 0.2s ease, color 0.2s ease;
 }
 
-    .ts-custom-select-container.open .ts-chevron,
-    .ts-chevron.rotated {
-        transform: rotate(180deg);
-    }
+.ts-custom-select-container.open .ts-chevron,
+.ts-chevron.rotated {
+    transform: rotate(180deg);
+}
 
 .ts-custom-select-container {
     position: relative;
@@ -99,24 +100,24 @@
     min-width: 200px;
 }
 
-    /* Green variant (default) */
-    .ts-select-header.ts-select--green {
-        border-color: var(--base-green);
-        background-color: var(--green-1);
-    }
+/* Green variant (default) */
+.ts-select-header.ts-select--green {
+    border-color: var(--base-green);
+    background-color: var(--green-1);
+}
 
-        .ts-select-header.ts-select--green:hover {
-            border-color: var(--green-8);
-            background-color: var(--green-2);
-        }
+.ts-select-header.ts-select--green:hover {
+    border-color: var(--green-8);
+    background-color: var(--green-2);
+}
 
-        .ts-custom-select-container.open .ts-select-header.ts-select--green,
-        .ts-select-header.ts-select--green:focus {
-            border-color: var(--green-8);
-            background-color: white;
-            box-shadow: 0 0 0 3px var(--green-2);
-            outline: none;
-        }
+.ts-custom-select-container.open .ts-select-header.ts-select--green,
+.ts-select-header.ts-select--green:focus {
+    border-color: var(--green-8);
+    background-color: white;
+    box-shadow: 0 0 0 3px var(--green-2);
+    outline: none;
+}
 
 .ts-chevron.ts-select--green {
     color: var(--base-green);
@@ -130,19 +131,19 @@
     border-color: var(--base-green);
 }
 
-    .ts-select-options.ts-select--green li:hover {
-        background-color: var(--green-1);
-        color: var(--green-8);
-    }
+.ts-select-options.ts-select--green li:hover {
+    background-color: var(--green-1);
+    color: var(--green-8);
+}
 
-    .ts-select-options.ts-select--green li.selected {
-        background-color: var(--green-2);
-        color: var(--green-8);
-    }
+.ts-select-options.ts-select--green li.selected {
+    background-color: var(--green-2);
+    color: var(--green-8);
+}
 
-    .ts-select-options.ts-select--green li:active {
-        background-color: var(--green-3);
-    }
+.ts-select-options.ts-select--green li:active {
+    background-color: var(--green-3);
+}
 
 /* Purple variant */
 .ts-select-header.ts-select--purple {
@@ -150,18 +151,18 @@
     background-color: var(--purple-1);
 }
 
-    .ts-select-header.ts-select--purple:hover {
-        border-color: var(--purple-8);
-        background-color: var(--purple-2);
-    }
+.ts-select-header.ts-select--purple:hover {
+    border-color: var(--purple-8);
+    background-color: var(--purple-2);
+}
 
-    .ts-custom-select-container.open .ts-select-header.ts-select--purple,
-    .ts-select-header.ts-select--purple:focus {
-        border-color: var(--purple-8);
-        background-color: white;
-        box-shadow: 0 0 0 3px var(--purple-2);
-        outline: none;
-    }
+.ts-custom-select-container.open .ts-select-header.ts-select--purple,
+.ts-select-header.ts-select--purple:focus {
+    border-color: var(--purple-8);
+    background-color: white;
+    box-shadow: 0 0 0 3px var(--purple-2);
+    outline: none;
+}
 
 .ts-chevron.ts-select--purple {
     color: var(--base-purple);
@@ -175,19 +176,19 @@
     border-color: var(--base-purple);
 }
 
-    .ts-select-options.ts-select--purple li:hover {
-        background-color: var(--purple-1);
-        color: var(--purple-8);
-    }
+.ts-select-options.ts-select--purple li:hover {
+    background-color: var(--purple-1);
+    color: var(--purple-8);
+}
 
-    .ts-select-options.ts-select--purple li.selected {
-        background-color: var(--purple-2);
-        color: var(--purple-8);
-    }
+.ts-select-options.ts-select--purple li.selected {
+    background-color: var(--purple-2);
+    color: var(--purple-8);
+}
 
-    .ts-select-options.ts-select--purple li:active {
-        background-color: var(--purple-3);
-    }
+.ts-select-options.ts-select--purple li:active {
+    background-color: var(--purple-3);
+}
 
 /* Blue variant */
 .ts-select-header.ts-select--blue {
@@ -195,18 +196,18 @@
     background-color: var(--blue-1);
 }
 
-    .ts-select-header.ts-select--blue:hover {
-        border-color: var(--blue-8);
-        background-color: var(--blue-2);
-    }
+.ts-select-header.ts-select--blue:hover {
+    border-color: var(--blue-8);
+    background-color: var(--blue-2);
+}
 
-    .ts-custom-select-container.open .ts-select-header.ts-select--blue,
-    .ts-select-header.ts-select--blue:focus {
-        border-color: var(--blue-8);
-        background-color: white;
-        box-shadow: 0 0 0 3px var(--blue-2);
-        outline: none;
-    }
+.ts-custom-select-container.open .ts-select-header.ts-select--blue,
+.ts-select-header.ts-select--blue:focus {
+    border-color: var(--blue-8);
+    background-color: white;
+    box-shadow: 0 0 0 3px var(--blue-2);
+    outline: none;
+}
 
 .ts-chevron.ts-select--blue {
     color: var(--base-blue);
@@ -220,19 +221,19 @@
     border-color: var(--base-blue);
 }
 
-    .ts-select-options.ts-select--blue li:hover {
-        background-color: var(--blue-1);
-        color: var(--blue-8);
-    }
+.ts-select-options.ts-select--blue li:hover {
+    background-color: var(--blue-1);
+    color: var(--blue-8);
+}
 
-    .ts-select-options.ts-select--blue li.selected {
-        background-color: var(--blue-2);
-        color: var(--blue-8);
-    }
+.ts-select-options.ts-select--blue li.selected {
+    background-color: var(--blue-2);
+    color: var(--blue-8);
+}
 
-    .ts-select-options.ts-select--blue li:active {
-        background-color: var(--blue-3);
-    }
+.ts-select-options.ts-select--blue li:active {
+    background-color: var(--blue-3);
+}
 
 /* =============================== */
 /*         Mobile Breakpoint       */
@@ -243,4 +244,15 @@
     }
 }
 
+@media (max-width: 600px) {
+    .ts-select-header {
+        padding: 0.75rem 1rem;
+        padding-right: 2.75rem;
+        font-size: 1rem;
+    }
 
+    .ts-select-options li {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+}

@@ -11,9 +11,9 @@
     <TitleContent>
         <div class="expense-modal-title">
             <span class="material-icons expense-modal-icon">
-                @(FormData.IsEditMode ? "edit" : "receipt_long")
+                @(isViewMode ? "visibility" : (FormData.IsEditMode ? "edit" : "receipt_long"))
             </span>
-            @(FormData.IsEditMode ? "Edit Expense" : "Add Expense")
+            @(isViewMode ? "Expense Details" : (FormData.IsEditMode ? "Edit Expense" : "Add Expense"))
         </div>
     </TitleContent>
 
@@ -22,6 +22,7 @@
                      FormData="FormData"
                      ExistingExpenseCount="ExistingExpenseCount"
                      BudgetCategories="BudgetCategories"
+                     ReadOnly="isViewMode"
                      OnValidSubmit="HandleFormSubmit" />
     </DialogContent>
 
@@ -30,10 +31,10 @@
                    class="ts-card-tab-btn expense-modal-btn-cancel"
                    OnClick="Cancel"
                    Disabled="isSaving">
-            Cancel
+            @(isViewMode ? "Close" : "Cancel")
         </MudButton>
 
-        @if (FormData.IsEditMode)
+        @if (FormData.IsEditMode && !IsReadOnly)
         {
             <MudButton id="expenseDeleteBtn"
                        class="ts-card-tab-btn expense-modal-btn-delete"
@@ -44,16 +45,31 @@
             </MudButton>
         }
 
-        <MudButton id="expenseSaveBtn"
-                   class="ts-card-tab-btn expense-modal-btn-save"
-                   OnClick="TriggerSubmit"
-                   Disabled="isSaving">
-            @if (isSaving)
+        @if (isViewMode)
+        {
+            @if (!IsReadOnly)
             {
-                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <MudButton id="expenseEditBtn"
+                           class="ts-card-tab-btn expense-modal-btn-save"
+                           OnClick="EnableEditing">
+                    <span class="material-icons" style="font-size: 16px; margin-right: 4px;">edit</span>
+                    Edit
+                </MudButton>
             }
-            @(FormData.IsEditMode ? "Save Changes" : "Add Expense")
-        </MudButton>
+        }
+        else
+        {
+            <MudButton id="expenseSaveBtn"
+                       class="ts-card-tab-btn expense-modal-btn-save"
+                       OnClick="TriggerSubmit"
+                       Disabled="isSaving">
+                @if (isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @(FormData.IsEditMode ? "Save Changes" : "Add Expense")
+            </MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -70,8 +86,27 @@
     [Parameter]
     public List<BudgetCategoryDto> BudgetCategories { get; set; } = new();
 
+    /// <summary>True when the current user has no write permission — hides Edit/Delete/Save entirely.</summary>
+    [Parameter]
+    public bool IsReadOnly { get; set; }
+
+    /// <summary>
+    /// When false and this is an existing expense, the modal opens read-only (row-tap "view" flow)
+    /// and the user must tap Edit to unlock the form. Ignored for new expenses and always true then.
+    /// </summary>
+    [Parameter]
+    public bool StartInEditMode { get; set; } = true;
+
     private ExpenseForm? expenseForm;
     private bool isSaving = false;
+    private bool isViewMode;
+
+    protected override void OnInitialized()
+    {
+        isViewMode = FormData.IsEditMode && !StartInEditMode;
+    }
+
+    private void EnableEditing() => isViewMode = false;
 
     private async Task TriggerSubmit()
     {

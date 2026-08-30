@@ -18,6 +18,7 @@
                           Variant="Variant.Outlined"
                           HelperText="A short label to identify this investment or savings account."
                           MaxLength="200"
+                          ReadOnly="ReadOnly"
                           For="@(() => FormData.InvestmentName)" />
         </div>
 
@@ -29,6 +30,7 @@
                              Format="C2"
                              HelperText="The current value or balance of this account."
                              Min="0m"
+                             ReadOnly="ReadOnly"
                              For="@(() => FormData.CurrentValue)"
                              @bind-Value:after="UpdatePreview" />
         </div>
@@ -42,6 +44,7 @@
                              HelperText="Expected annual return rate (e.g. 7 for 7%). Used to estimate yearly growth."
                              Min="0m"
                              Max="100m"
+                             ReadOnly="ReadOnly"
                              @bind-Value:after="OnInterestRateChanged" />
         </div>
 
@@ -53,6 +56,7 @@
                              Format="C2"
                              HelperText="How much you contribute each pay period."
                              Min="0m"
+                             ReadOnly="ReadOnly"
                              For="@(() => FormData.ContributionAmount)"
                              @bind-Value:after="UpdatePreview" />
         </div>
@@ -65,6 +69,7 @@
                        Variant="Variant.Outlined"
                        HelperText="How often do you make contributions?"
                        For="@(() => FormData.ContributionFrequency)"
+                       ReadOnly="ReadOnly"
                        @bind-Value:after="UpdatePreview">
                 @foreach (var freq in FrequencyOptions)
                 {
@@ -112,6 +117,10 @@
     /// </summary>
     [Parameter]
     public int ExistingInvestmentCount { get; set; } = 0;
+
+    /// <summary>When true, every field is locked and Submit is a no-op — used for the "view" state of the modal.</summary>
+    [Parameter]
+    public bool ReadOnly { get; set; }
 
     private EditContext editContext = null!;
 
@@ -161,6 +170,8 @@
 
     public async Task SubmitAsync()
     {
+        if (ReadOnly) return;
+
         var isValid = editContext.Validate();
         if (isValid)
             await OnValidSubmit.InvokeAsync(FormData);

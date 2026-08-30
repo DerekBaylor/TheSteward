@@ -58,8 +58,18 @@
     gap: 1.1rem;
     padding: 0.25rem 0;
     min-width: 340px;
+    margin: .5rem;
 }
 
 .expense-form-field {
     width: 100%;
+}
+
+
+#expenseEditBtn {
+    color: var(--purple-8);
+}
+
+#expenseEditBtn:hover {
+    background-color: var(--purple-2);
 }

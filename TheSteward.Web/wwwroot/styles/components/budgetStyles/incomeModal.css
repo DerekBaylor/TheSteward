@@ -1,7 +1,4 @@
-﻿div#incomeModal#incomeModal {
-}
-
-.income-modal-title {
+﻿.income-modal-title {
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -23,10 +20,10 @@
     color: var(--off-white);
 }
 
-    #incomeSaveBtn:hover:not([disabled]),
-    .income-modal-btn-save:hover:not([disabled]) {
-        background-color: var(--green-8);
-    }
+#incomeSaveBtn:hover:not([disabled]),
+.income-modal-btn-save:hover:not([disabled]) {
+    background-color: var(--green-8);
+}
 
 #incomeCancelBtn.ts-card-tab-btn,
 .income-modal-btn-cancel {
@@ -35,10 +32,10 @@
     color: var(--gray-8);
 }
 
-    #incomeCancelBtn:hover:not([disabled]),
-    .income-modal-btn-cancel:hover:not([disabled]) {
-        background-color: var(--gray-4);
-    }
+#incomeCancelBtn:hover:not([disabled]),
+.income-modal-btn-cancel:hover:not([disabled]) {
+    background-color: var(--gray-4);
+}
 
 #incomeDeleteBtn.ts-card-tab-btn,
 .income-modal-btn-delete {
@@ -47,17 +44,18 @@
     color: var(--red-6);
 }
 
-    #incomeDeleteBtn:hover:not([disabled]),
-    .income-modal-btn-delete:hover:not([disabled]) {
-        background-color: var(--red-1);
-    }
+#incomeDeleteBtn:hover:not([disabled]),
+.income-modal-btn-delete:hover:not([disabled]) {
+    background-color: var(--red-1);
+}
 
 /* ---- Form Layout ---- */
 .income-form {
     display: flex;
     flex-direction: column;
-    gap: 1.1rem;
-    padding: 0.25rem 0;
+    gap: 1rem;
+    padding: .250rem;
+    min-width: 340px;
     margin: .5rem;
 }
 
@@ -65,90 +63,14 @@
     width: 100%;
 }
 
-/* ---- Live Preview Panel ---- */
-.income-preview {
-    background: var(--green-1);
-    border: 1px solid var(--green-3);
-    border-radius: var(--border-radius);
-    padding: 0.875rem 1rem;
-    opacity: 0;
-    overflow: hidden;
-    transition: opacity 0.25s ease, max-height 0.3s ease, padding 0.3s ease;
-}
-
-.income-preview--visible {
-    opacity: 1;
-    padding: 0.875rem 1rem;
-}
-
-.income-preview-title {
-    font-family: var(--label-font);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--gray-6);
-    margin: 0 0 0.6rem;
-}
-
-.income-preview-grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.3rem 1rem;
-    align-items: baseline;
-}
-
-.income-preview-label {
-    font-size: 0.875rem;
-    color: var(--gray-7);
-}
-
-.income-preview-value {
-    font-size: 0.875rem;
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-    color: var(--gray-8);
-}
-
-.income-preview-deduction {
-    color: var(--red-5);
-}
-
-.income-preview-net-label {
-    font-weight: 700;
-    color: var(--gray-9);
-    border-top: 1px solid var(--green-3);
-    padding-top: 0.35rem;
-}
-
-.income-preview-net-value {
-    font-weight: 700;
-    color: var(--base-green);
-    border-top: 1px solid var(--green-3);
-    padding-top: 0.35rem;
-}
-
-.income-preview-disclaimer {
-    font-size: 0.72rem;
-    color: var(--gray-5);
-    margin: 0.5rem 0 0;
-    font-style: italic;
-}
-
-.income-preview-warning {
+/* ---- Multi-income warning, used inside the summary card in IncomeForm ---- */
+.income-details-warning {
     font-size: 0.78rem;
-    color: var(--orange-7);
-    background-color: var(--orange-1);
-    border: 1px solid var(--orange-3);
+    color: var(--red-7);
+    background-color: var(--red-1);
+    border: 1px solid var(--red-3);
     border-radius: 4px;
     padding: 0.4rem 0.6rem;
-    margin: 0.6rem 0 0;
+    margin: 0 1rem 0.6rem;
     line-height: 1.4;
-}
-
-#incomeEditBtn {
-    color: var(--green-9);
-}
-#incomeEditBtn:hover {
-    background-color: var(--green-2);
 }

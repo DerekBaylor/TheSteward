@@ -13,136 +13,180 @@
 
     <div class="credit-form">
 
-        <!-- Name -->
-        <div class="credit-form-field">
-            <MudTextField @bind-Value="FormData.CreditName"
-                          Label="Account Name"
-                          Placeholder="e.g. Chase Sapphire, Car Loan, Student Loan"
-                          Variant="Variant.Outlined"
-                          MaxLength="200"
-                          ReadOnly="ReadOnly"
-                          For="@(() => FormData.CreditName)" />
-        </div>
-
-        <!-- Type -->
-        <div class="credit-form-field">
-            <MudSelect T="string"
-                       @bind-Value="FormData.CreditType"
-                       Label="Account Type"
-                       Variant="Variant.Outlined"
-                       HelperText="Helps categorize the debt."
-                       ReadOnly="ReadOnly"
-                       Clearable="!ReadOnly">
-                @foreach (var t in CreditTypeOptions)
-                {
-                    <MudSelectItem T="string" Value="@t">@t</MudSelectItem>
-                }
-            </MudSelect>
-        </div>
-
-        <!-- Current Balance -->
-        <div class="credit-form-field">
-            <MudNumericField @bind-Value="FormData.CurrentValue"
-                             Label="Current Balance"
-                             Variant="Variant.Outlined"
-                             Format="C2"
-                             HelperText="The outstanding balance on this account."
-                             Min="0m"
-                             ReadOnly="ReadOnly"
-                             For="@(() => FormData.CurrentValue)"
-                             @bind-Value:after="UpdatePreview" />
-        </div>
-
-        <!-- APR -->
-        <div class="credit-form-field">
-            <MudNumericField @bind-Value="interestRatePercent"
-                             Label="Annual Interest Rate / APR (%)"
-                             Variant="Variant.Outlined"
-                             Format="F2"
-                             HelperText="Annual percentage rate (e.g. 19.99 for 19.99%)."
-                             Min="0m"
-                             Max="100m"
-                             ReadOnly="ReadOnly"
-                             @bind-Value:after="OnInterestRateChanged" />
-        </div>
-
-        <!-- Payment Amount -->
-        <div class="credit-form-field">
-            <MudNumericField @bind-Value="FormData.PaymentAmount"
-                             Label="Payment Amount"
-                             Variant="Variant.Outlined"
-                             Format="C2"
-                             HelperText="Your scheduled payment per period."
-                             Min="0m"
-                             ReadOnly="ReadOnly"
-                             For="@(() => FormData.PaymentAmount)"
-                             @bind-Value:after="UpdatePreview" />
-        </div>
-
-        <!-- Payment Frequency -->
-        <div class="credit-form-field">
-            <MudSelect T="FrequencyEnum"
-                       @bind-Value="FormData.PaymentFrequency"
-                       Label="Payment Frequency"
-                       Variant="Variant.Outlined"
-                       For="@(() => FormData.PaymentFrequency)"
-                       ReadOnly="ReadOnly"
-                       @bind-Value:after="UpdatePreview">
-                @foreach (var freq in FrequencyOptions)
-                {
-                    <MudSelectItem T="FrequencyEnum" Value="@freq.Value">@freq.Label</MudSelectItem>
-                }
-            </MudSelect>
-        </div>
-
-        <!-- Payment Due Day -->
-        <div class="credit-form-field">
-            <MudNumericField @bind-Value="FormData.PaymentDay"
-                             Label="Payment Due Day"
-                             Variant="Variant.Outlined"
-                             HelperText="Day of the month your payment is due (1–31). Use 31 for 'last day'."
-                             Min="1"
-                             Max="31"
-                             ReadOnly="ReadOnly"
-                             For="@(() => FormData.PaymentDay)" />
-        </div>
-
-        <!-- Budget Category -->
-        <div class="credit-form-field">
-            <MudSelect T="BudgetCategoryDto"
-                       Value="selectedCategory"
-                       ValueChanged="OnCategoryChanged"
-                       Label="Expense Category"
-                       Variant="Variant.Outlined"
-                       ToStringFunc="@(c => c?.BudgetCategoryName ?? "Select a category")"
-                       HelperText="The budget category the linked expense will appear under."
-                       ReadOnly="ReadOnly"
-                       Clearable="!ReadOnly">
-
-                @foreach (var category in BudgetCategories)
-                {
-                    <MudSelectItem Value="@category">
-                        @category.BudgetCategoryName
-                    </MudSelectItem>
-                }
-
-            </MudSelect>
-        </div>
-
-        <!-- Live Preview -->
-        <div class="credit-preview credit-preview--visible">
-            <p class="credit-preview-title">Interest Summary</p>
-            <div class="credit-preview-grid">
-                <span class="credit-preview-label">Est. Monthly Interest</span>
-                <span class="credit-preview-value credit-preview-interest">@estMonthlyInterest.ToString("C")</span>
-
-                <span class="credit-preview-label">Est. Yearly Interest</span>
-                <span class="credit-preview-value credit-preview-interest">@estYearlyInterest.ToString("C")</span>
-
-                <span class="credit-preview-label credit-preview-net-label">Yearly Payments</span>
-                <span class="credit-preview-value credit-preview-net-value">@yearlyPayments.ToString("C")</span>
+        @if (!ReadOnly)
+        {
+            <!-- Name -->
+            <div class="credit-form-field">
+                <MudTextField @bind-Value="FormData.CreditName"
+                              Label="Account Name"
+                              Placeholder="e.g. Chase Sapphire, Car Loan, Student Loan"
+                              Variant="Variant.Outlined"
+                              MaxLength="200"
+                              For="@(() => FormData.CreditName)"
+                              @bind-Value:after="UpdatePreview" />
             </div>
-            <p class="credit-preview-disclaimer">
+
+            <!-- Type -->
+            <div class="credit-form-field">
+                <MudSelect T="string"
+                           @bind-Value="FormData.CreditType"
+                           Label="Account Type"
+                           Variant="Variant.Outlined"
+                           HelperText="Helps categorize the debt."
+                           Clearable="true"
+                           @bind-Value:after="UpdatePreview">
+                    @foreach (var t in CreditTypeOptions)
+                    {
+                        <MudSelectItem T="string" Value="@t">@t</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+
+            <!-- Current Balance -->
+            <div class="credit-form-field">
+                <MudNumericField @bind-Value="FormData.CurrentValue"
+                                 Label="Current Balance"
+                                 Variant="Variant.Outlined"
+                                 Format="C2"
+                                 HelperText="The outstanding balance on this account."
+                                 Min="0m"
+                                 For="@(() => FormData.CurrentValue)"
+                                 @bind-Value:after="UpdatePreview" />
+            </div>
+
+            <!-- APR -->
+            <div class="credit-form-field">
+                <MudNumericField @bind-Value="interestRatePercent"
+                                 Label="Annual Interest Rate / APR (%)"
+                                 Variant="Variant.Outlined"
+                                 Format="F2"
+                                 HelperText="Annual percentage rate (e.g. 19.99 for 19.99%)."
+                                 Min="0m"
+                                 Max="100m"
+                                 @bind-Value:after="OnInterestRateChanged" />
+            </div>
+
+            <!-- Payment Amount -->
+            <div class="credit-form-field">
+                <MudNumericField @bind-Value="FormData.PaymentAmount"
+                                 Label="Payment Amount"
+                                 Variant="Variant.Outlined"
+                                 Format="C2"
+                                 HelperText="Your scheduled payment per period."
+                                 Min="0m"
+                                 For="@(() => FormData.PaymentAmount)"
+                                 @bind-Value:after="UpdatePreview" />
+            </div>
+
+            <!-- Payment Frequency -->
+            <div class="credit-form-field">
+                <MudSelect T="FrequencyEnum"
+                           @bind-Value="FormData.PaymentFrequency"
+                           Label="Payment Frequency"
+                           Variant="Variant.Outlined"
+                           For="@(() => FormData.PaymentFrequency)"
+                           @bind-Value:after="UpdatePreview">
+                    @foreach (var freq in FrequencyOptions)
+                    {
+                        <MudSelectItem T="FrequencyEnum" Value="@freq.Value">@freq.Label</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+
+            <!-- Payment Due Day -->
+            <div class="credit-form-field">
+                <MudNumericField @bind-Value="FormData.PaymentDay"
+                                 Label="Payment Due Day"
+                                 Variant="Variant.Outlined"
+                                 HelperText="Day of the month your payment is due (1–31). Use 31 for 'last day'."
+                                 Min="1"
+                                 Max="31"
+                                 For="@(() => FormData.PaymentDay)"
+                                 @bind-Value:after="UpdatePreview" />
+            </div>
+
+            <!-- Budget Category -->
+            <div class="credit-form-field">
+                <MudSelect T="BudgetCategoryDto"
+                           Value="selectedCategory"
+                           ValueChanged="OnCategoryChanged"
+                           Label="Expense Category"
+                           Variant="Variant.Outlined"
+                           ToStringFunc="@(c => c?.BudgetCategoryName ?? "Select a category")"
+                           HelperText="The budget category the linked expense will appear under."
+                           Clearable="true">
+
+                    @foreach (var category in BudgetCategories)
+                    {
+                        <MudSelectItem Value="@category">
+                            @category.BudgetCategoryName
+                        </MudSelectItem>
+                    }
+
+                </MudSelect>
+            </div>
+        }
+
+        <!-- Summary card: the whole story when viewing, a running recap while editing -->
+        <div class="credit-details-card">
+            <div class="credit-details-card-header">
+                <div class="credit-details-name-block">
+                    <span class="credit-details-name">@(string.IsNullOrWhiteSpace(FormData.CreditName) ? "Untitled Account" : FormData.CreditName)</span>
+                    @if (!string.IsNullOrEmpty(FormData.CreditType))
+                    {
+                        <span class="credit-details-badge">@FormData.CreditType</span>
+                    }
+                </div>
+                <div class="credit-details-rate-highlight">
+                    <span class="credit-details-rate-label">APR</span>
+                    <span class="credit-details-rate-value">@interestRatePercent.ToString("F2")%</span>
+                </div>
+            </div>
+
+            <div class="credit-details-breakdown">
+                <div class="credit-details-row">
+                    <span class="credit-details-row-label">Current Balance</span>
+                    <span class="credit-details-row-value">@FormData.CurrentValue.ToString("C")</span>
+                </div>
+                <div class="credit-details-row">
+                    <span class="credit-details-row-label">Payment</span>
+                    <span class="credit-details-row-value">
+                        @FormData.PaymentAmount.ToString("C")
+                        <span class="credit-details-freq">@GetFrequencyShortLabel(FormData.PaymentFrequency)</span>
+                    </span>
+                </div>
+                <div class="credit-details-row">
+                    <span class="credit-details-row-label">Due Day</span>
+                    <span class="credit-details-row-value">@(FormData.PaymentDay == 31 ? "Last day" : $"Day {FormData.PaymentDay}")</span>
+                </div>
+                @if (selectedCategory != null)
+                {
+                    <div class="credit-details-row">
+                        <span class="credit-details-row-label">Category</span>
+                        <span class="credit-details-row-value">@selectedCategory.BudgetCategoryName</span>
+                    </div>
+                }
+
+                <div class="credit-details-divider"></div>
+
+                <div class="credit-details-row credit-details-row--interest">
+                    <span class="credit-details-row-label">
+                        <span class="material-icons credit-details-interest-icon">trending_up</span>
+                        Est. Monthly Interest
+                    </span>
+                    <span class="credit-details-row-value credit-details-row-value--interest">@estMonthlyInterest.ToString("C")</span>
+                </div>
+                <div class="credit-details-row credit-details-row--interest">
+                    <span class="credit-details-row-label">Est. Yearly Interest</span>
+                    <span class="credit-details-row-value credit-details-row-value--interest">@estYearlyInterest.ToString("C")</span>
+                </div>
+                <div class="credit-details-row credit-details-row--net">
+                    <span class="credit-details-row-label credit-details-row-label--net">Yearly Payments</span>
+                    <span class="credit-details-row-value--net">@yearlyPayments.ToString("C")</span>
+                </div>
+            </div>
+
+            <p class="credit-details-disclaimer" style="padding: 0 1rem 0.75rem;">
                 Interest estimates assume a constant rate on the current balance and do not account for paydown.
             </p>
         </div>
@@ -234,6 +278,15 @@
         if (isValid)
             await OnValidSubmit.InvokeAsync(FormData);
     }
+
+    private static string GetFrequencyShortLabel(FrequencyEnum freq) => freq switch
+    {
+        FrequencyEnum.Weekly => "/ wk",
+        FrequencyEnum.BiWeekly => "/ 2wk",
+        FrequencyEnum.BiMonthly => "/ 2mo",
+        FrequencyEnum.Monthly => "/ mo",
+        _ => string.Empty
+    };
 
     private async Task HandleValidSubmit()
     {

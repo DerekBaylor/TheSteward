@@ -10,6 +10,7 @@
     gap: 1rem;
     padding: 0.25rem 0;
     min-width: 340px;
+    margin: .5rem;
 }
 
 /* Per-Investment Card */
@@ -180,7 +181,7 @@
 .investment-details-disclaimer {
     font-size: 0.7rem;
     font-style: italic;
-    color: var(--gray-4);
+    color: var(--gray-5);
     margin: 0.25rem 0 0;
     line-height: 1.5;
 }

@@ -10,14 +10,18 @@
     gap: 1rem;
     padding: 0.25rem 0;
     min-width: 340px;
+    margin: .5rem;
 }
 
 /* Per-Income Card */
+/* =============== */
 .income-details-card {
     border: 1px solid var(--green-3);
     border-radius: var(--border-radius);
     overflow: hidden;
     animation: slideUp 0.3s ease-out;
+    max-width: 100%;
+    
 }
 
 .income-details-card-header {
@@ -155,6 +159,7 @@
     border: 1px solid var(--green-4);
     border-radius: var(--border-radius);
     overflow: hidden;
+    margin: .5rem;
 }
 
 .income-details-totals-header {
@@ -197,7 +202,7 @@
 .income-details-disclaimer {
     font-size: 0.7rem;
     font-style: italic;
-    color: var(--gray-4);
-    margin: 0.25rem 0 0;
+    color: var(--gray-5);
+    margin: .25rem 1rem;
     line-height: 1.5;
 }

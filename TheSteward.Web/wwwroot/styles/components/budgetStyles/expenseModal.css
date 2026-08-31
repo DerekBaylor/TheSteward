@@ -22,10 +22,10 @@
     color: var(--off-white);
 }
 
-    #expenseSaveBtn:hover:not([disabled]),
-    .expense-modal-btn-save:hover:not([disabled]) {
-        background-color: var(--purple-8);
-    }
+#expenseSaveBtn:hover:not([disabled]),
+.expense-modal-btn-save:hover:not([disabled]) {
+    background-color: var(--purple-8);
+}
 
 #expenseCancelBtn.ts-card-tab-btn,
 .expense-modal-btn-cancel {
@@ -34,10 +34,10 @@
     color: var(--gray-8);
 }
 
-    #expenseCancelBtn:hover:not([disabled]),
-    .expense-modal-btn-cancel:hover:not([disabled]) {
-        background-color: var(--gray-4);
-    }
+#expenseCancelBtn:hover:not([disabled]),
+.expense-modal-btn-cancel:hover:not([disabled]) {
+    background-color: var(--gray-4);
+}
 
 #expenseDeleteBtn.ts-card-tab-btn,
 .expense-modal-btn-delete {
@@ -46,16 +46,16 @@
     color: var(--red-6);
 }
 
-    #expenseDeleteBtn:hover:not([disabled]),
-    .expense-modal-btn-delete:hover:not([disabled]) {
-        background-color: var(--red-1);
-    }
+#expenseDeleteBtn:hover:not([disabled]),
+.expense-modal-btn-delete:hover:not([disabled]) {
+    background-color: var(--red-1);
+}
 
 /* ---- Form Layout ---- */
 .expense-form {
     display: flex;
     flex-direction: column;
-    gap: 1.1rem;
+    gap: 1rem;
     padding: 0.25rem 0;
     min-width: 340px;
     margin: .5rem;
@@ -65,11 +65,105 @@
     width: 100%;
 }
 
-
-#expenseEditBtn {
-    color: var(--purple-8);
+/* ---- Summary Card (view mode display + live recap while editing) ---- */
+.expense-details-card {
+    border: 1px solid var(--purple-3);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
 }
 
-#expenseEditBtn:hover {
-    background-color: var(--purple-2);
+.expense-details-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: var(--purple-1);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--purple-3);
+}
+
+.expense-details-name-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.expense-details-name {
+    font-family: var(--label-font);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--gray-9);
+}
+
+.expense-details-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--purple-2);
+    color: var(--base-purple);
+    border: 1px solid var(--purple-4);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+}
+
+.expense-details-amount-highlight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+.expense-details-amount-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--gray-5);
+}
+
+.expense-details-amount-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--base-purple);
+}
+
+.expense-details-breakdown {
+    padding: 0.6rem 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.expense-details-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.expense-details-row-label {
+    color: var(--gray-7);
+}
+
+.expense-details-row-value {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--primary-font);
+    color: var(--gray-8);
+}
+
+.expense-details-divider {
+    height: 1px;
+    background: var(--purple-2);
+    margin: 0.2rem 0;
+}
+
+.expense-details-row--net .expense-details-row-label--net,
+.expense-details-row-value--net {
+    font-weight: 700;
+    color: var(--base-purple);
+    font-size: 0.9rem;
 }

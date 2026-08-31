@@ -10,93 +10,124 @@
 
     <div class="income-form">
 
-        <!-- Name -->
-        <div class="income-form-field">
-            <MudTextField @bind-Value="FormData.IncomeName"
-                          Label="Income Name"
-                          Placeholder="e.g. Primary Job, Freelance"
-                          Variant="Variant.Outlined"
-                          HelperText="A short label to identify this income source."
-                          MaxLength="200"
-                          ReadOnly="ReadOnly"
-                          For="@(() => FormData.IncomeName)" />
-        </div>
-
-        <!-- Frequency -->
-        <div class="income-form-field">
-            <MudSelect T="FrequencyEnum"
-                       @bind-Value="FormData.IncomeFrequency"
-                       Label="Pay Frequency"
-                       Variant="Variant.Outlined"
-                       HelperText="How many paychecks do you receive per year?"
-                       For="@(() => FormData.IncomeFrequency)"
-                       ReadOnly="ReadOnly"
-                       @bind-Value:after="UpdatePreview">
-                @foreach (var freq in FrequencyOptions)
-                {
-                    <MudSelectItem T="FrequencyEnum" Value="@freq.Value">@freq.Label</MudSelectItem>
-                }
-            </MudSelect>
-        </div>
-
-        <!-- Filing Status -->
-        <div class="income-form-field">
-            <MudSelect T="FilingStatusEnum"
-                        @bind-Value="FormData.FilingStatus"
-                        Label="Filing Status"
-                        Variant="Variant.Outlined"
-                        HelperText="What is your filing status?"
-                        For="@(() => FormData.FilingStatus)"
-                        ReadOnly="ReadOnly"
-                        @bind-Value:after="UpdatePreview">
-                @foreach (var freq in FilingStatusOptions)
-                {
-                    <MudSelectItem T="FilingStatusEnum" Value="@freq.Value">@freq.Label</MudSelectItem>
-                }
-            </MudSelect>
-        </div>
-
-        <!-- Gross Per Paycheck -->
-        <div class="income-form-field">
-            <MudNumericField @bind-Value="FormData.PayCheckGross"
-                             Label="Gross Per Paycheck"
-                             Variant="Variant.Outlined"
-                             Format="C2"
-                             HelperText="Your pre-tax amount for each paycheck."
-                             Min="0.01m"
-                             ReadOnly="ReadOnly"
-                             For="@(() => FormData.PayCheckGross)"
-                             @bind-Value:after="UpdatePreview" />
-        </div>
-
-        <!-- Live Preview -->
-            <div class="income-preview income-preview--visible">
-                <p class="income-preview-title">Estimated Breakdown</p>
-                <div class="income-preview-grid">
-                    <span class="income-preview-label">Yearly Gross</span>
-                    <span class="income-preview-value">@yearlyGross.ToString("C")</span>
-
-                    <span class="income-preview-label">Est. Federal Tax</span>
-                    <span class="income-preview-value income-preview-deduction">−@estFederalTax.ToString("C")</span>
-
-                    <span class="income-preview-label">Est. State Tax (6%)</span>
-                    <span class="income-preview-value income-preview-deduction">−@estStateTax.ToString("C")</span>
-
-                    <span class="income-preview-label income-preview-net-label">Est. Monthly Net</span>
-                    <span class="income-preview-value income-preview-net-value">@estMonthlyNet.ToString("C")</span>
-                </div>
-                @if (hasMultipleIncomes)
-                {
-                    <p class="income-preview-warning">
-                        <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
-                        You have multiple income sources. Each is taxed individually here, but your
-                        combined income may push you into a higher bracket. Actual net may be lower.
-                    </p>
-                }
-                <p class="income-preview-disclaimer">
-                    Estimates only — final values are calculated on save.
-                </p>
+        @if (!ReadOnly)
+        {
+            <!-- Name -->
+            <div class="income-form-field">
+                <MudTextField @bind-Value="FormData.IncomeName"
+                              Label="Income Name"
+                              Placeholder="e.g. Primary Job, Freelance"
+                              Variant="Variant.Outlined"
+                              HelperText="A short label to identify this income source."
+                              MaxLength="200"
+                              For="@(() => FormData.IncomeName)"
+                              @bind-Value:after="UpdatePreview" />
             </div>
+
+            <!-- Frequency -->
+            <div class="income-form-field">
+                <MudSelect T="FrequencyEnum"
+                           @bind-Value="FormData.IncomeFrequency"
+                           Label="Pay Frequency"
+                           Variant="Variant.Outlined"
+                           HelperText="How many paychecks do you receive per year?"
+                           For="@(() => FormData.IncomeFrequency)"
+                           @bind-Value:after="UpdatePreview">
+                    @foreach (var freq in FrequencyOptions)
+                    {
+                        <MudSelectItem T="FrequencyEnum" Value="@freq.Value">@freq.Label</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+
+            <!-- Filing Status -->
+            <div class="income-form-field">
+                <MudSelect T="FilingStatusEnum"
+                            @bind-Value="FormData.FilingStatus"
+                            Label="Filing Status"
+                            Variant="Variant.Outlined"
+                            HelperText="What is your filing status?"
+                            For="@(() => FormData.FilingStatus)"
+                            @bind-Value:after="UpdatePreview">
+                    @foreach (var freq in FilingStatusOptions)
+                    {
+                        <MudSelectItem T="FilingStatusEnum" Value="@freq.Value">@freq.Label</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+
+            <!-- Gross Per Paycheck -->
+            <div class="income-form-field">
+                <MudNumericField @bind-Value="FormData.PayCheckGross"
+                                 Label="Gross Per Paycheck"
+                                 Variant="Variant.Outlined"
+                                 Format="C2"
+                                 HelperText="Your pre-tax amount for each paycheck."
+                                 Min="0.01m"
+                                 For="@(() => FormData.PayCheckGross)"
+                                 @bind-Value:after="UpdatePreview" />
+            </div>
+        }
+
+        <!-- Summary card: the whole story when viewing, a running recap while editing -->
+        <div class="income-details-card">
+            <div class="income-details-card-header">
+                <div class="income-details-name-block">
+                    <span class="income-details-name">@(string.IsNullOrWhiteSpace(FormData.IncomeName) ? "Untitled Income" : FormData.IncomeName)</span>
+                    <span class="income-details-badge">@FrequencyLabel</span>
+                    <span class="income-details-badge income-details-badge--filing">@FilingStatusLabel</span>
+                </div>
+                <div class="income-details-net-highlight">
+                    <span class="income-details-net-label">Monthly Net</span>
+                    <span class="income-details-net-value">@estMonthlyNet.ToString("C")</span>
+                </div>
+            </div>
+
+            <div class="income-details-breakdown">
+                <div class="income-details-row">
+                    <span class="income-details-row-label">Gross Per Paycheck</span>
+                    <span class="income-details-row-value">@FormData.PayCheckGross.ToString("C")</span>
+                </div>
+                <div class="income-details-row">
+                    <span class="income-details-row-label">Yearly Gross</span>
+                    <span class="income-details-row-value">@yearlyGross.ToString("C")</span>
+                </div>
+
+                <div class="income-details-divider"></div>
+
+                <div class="income-details-row income-details-row--deduction">
+                    <span class="income-details-row-label">
+                        <span class="material-icons income-details-deduction-icon">arrow_downward</span>
+                        Est. Federal Tax
+                    </span>
+                    <span class="income-details-row-value income-details-row-value--deduction">−@estFederalTax.ToString("C")</span>
+                </div>
+                <div class="income-details-row income-details-row--deduction">
+                    <span class="income-details-row-label">Est. State Tax (6%)</span>
+                    <span class="income-details-row-value income-details-row-value--deduction">−@estStateTax.ToString("C")</span>
+                </div>
+                <div class="income-details-row income-details-row--net">
+                    <span class="income-details-row-label income-details-row-label--net">Est. Monthly Net</span>
+                    <span class="income-details-row-value--net">@estMonthlyNet.ToString("C")</span>
+                </div>
+                <div class="income-details-row income-details-row--yearly-net">
+                    <span class="income-details-row-label">Est. Yearly Net</span>
+                    <span class="income-details-row-value">@((estMonthlyNet * 12).ToString("C"))</span>
+                </div>
+            </div>
+
+            @if (hasMultipleIncomes)
+            {
+                <p class="income-details-warning">
+                    <span class="material-icons" style="font-size: 14px; vertical-align: middle;">info</span>
+                    You have multiple income sources. Each is taxed individually here, but your
+                    combined income may push you into a higher bracket. Actual net may be lower.
+                </p>
+            }
+            <p class="income-details-disclaimer" style="padding: 0 1rem 0.75rem;">
+                Estimates only — final values are calculated on save.
+            </p>
+        </div>
 
         <ValidationSummary />
 
@@ -160,6 +191,12 @@
         estStateTax = Math.Round(yearlyGross * 0.06m, 2);
         estMonthlyNet = Math.Round((yearlyGross - estFederalTax - estStateTax) / 12m, 2);
     }
+
+    private string FrequencyLabel =>
+        FrequencyOptions.FirstOrDefault(f => f.Value == FormData.IncomeFrequency).Label ?? string.Empty;
+
+    private string FilingStatusLabel =>
+        FilingStatusOptions.FirstOrDefault(f => f.Value == FormData.FilingStatus).Label ?? string.Empty;
 
     public async Task SubmitAsync()
     {

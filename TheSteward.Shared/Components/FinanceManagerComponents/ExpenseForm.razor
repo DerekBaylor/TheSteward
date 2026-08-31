@@ -10,78 +10,109 @@
 
     <div class="expense-form">
 
-        <!-- Name -->
-        <div class="expense-form-field">
-            <MudTextField @bind-Value="FormData.ExpenseName"
-                          Label="Expense Name"
-                          Placeholder="e.g. Rent, Electric Bill, Netflix"
-                          Variant="Variant.Outlined"
-                          MaxLength="200"
-                          ReadOnly="ReadOnly"
-                          For="@(() => FormData.ExpenseName)" />
-        </div>
-
-        <!-- Amount Due -->
-        <div class="expense-form-field">
-            <MudNumericField @bind-Value="FormData.AmountDue"
-                             Label="Amount Due"
-                             Variant="Variant.Outlined"
-                             Format="C2"
-                             HelperText="The amount owed each billing period."
-                             Min="0m"
-                             ReadOnly="ReadOnly"
-                             For="@(() => FormData.AmountDue)" />
-        </div>
-
-        <!-- Due Day -->
-        <div class="expense-form-field">
-            <MudNumericField @bind-Value="FormData.DueDay"
-                             Label="Due Day"
-                             Variant="Variant.Outlined"
-                             HelperText="Day of the month this expense is due (1–31). Use 31 for 'last day'."
-                             Min="1"
-                             Max="31"
-                             ReadOnly="ReadOnly"
-                             For="@(() => FormData.DueDay)" />
-        </div>
-
-        <!-- Budget Category -->
-        <div class="expense-form-field">
-            <MudSelect T="BudgetCategoryDto"
-                       Value="selectedCategory"
-                       ValueChanged="OnCategoryChanged"
-                       Label="Budget Category"
-                       Variant="Variant.Outlined"
-                       ToStringFunc="@(c => c?.BudgetCategoryName ?? "Select a category")"
-                       HelperText="The budget category this expense belongs to."
-                       ReadOnly="ReadOnly"
-                       Clearable="!ReadOnly">
-                @foreach (var category in BudgetCategories)
-                {
-                    <MudSelectItem Value="@category">@category.BudgetCategoryName</MudSelectItem>
-                }
-            </MudSelect>
-        </div>
-
-        <!-- Budget Subcategory -->
-        @if (selectedCategory?.BudgetSubCategories?.Any() == true)
+        @if (!ReadOnly)
         {
+            <!-- Name -->
             <div class="expense-form-field">
-                <MudSelect T="BudgetSubCategoryDto"
-                           Value="selectedSubCategory"
-                           ValueChanged="OnSubCategoryChanged"
-                           Label="Subcategory (Optional)"
+                <MudTextField @bind-Value="FormData.ExpenseName"
+                              Label="Expense Name"
+                              Placeholder="e.g. Rent, Electric Bill, Netflix"
+                              Variant="Variant.Outlined"
+                              MaxLength="200"
+                              For="@(() => FormData.ExpenseName)" />
+            </div>
+
+            <!-- Amount Due -->
+            <div class="expense-form-field">
+                <MudNumericField @bind-Value="FormData.AmountDue"
+                                 Label="Amount Due"
+                                 Variant="Variant.Outlined"
+                                 Format="C2"
+                                 HelperText="The amount owed each billing period."
+                                 Min="0m"
+                                 For="@(() => FormData.AmountDue)" />
+            </div>
+
+            <!-- Due Day -->
+            <div class="expense-form-field">
+                <MudNumericField @bind-Value="FormData.DueDay"
+                                 Label="Due Day"
+                                 Variant="Variant.Outlined"
+                                 HelperText="Day of the month this expense is due (1–31). Use 31 for 'last day'."
+                                 Min="1"
+                                 Max="31"
+                                 For="@(() => FormData.DueDay)" />
+            </div>
+
+            <!-- Budget Category -->
+            <div class="expense-form-field">
+                <MudSelect T="BudgetCategoryDto"
+                           Value="selectedCategory"
+                           ValueChanged="OnCategoryChanged"
+                           Label="Budget Category"
                            Variant="Variant.Outlined"
-                           ToStringFunc="@(s => s?.BudgetSubCategoryName ?? "Select a subcategory")"
-                           ReadOnly="ReadOnly"
-                           Clearable="!ReadOnly">
-                    @foreach (var sub in selectedCategory.BudgetSubCategories)
+                           ToStringFunc="@(c => c?.BudgetCategoryName ?? "Select a category")"
+                           HelperText="The budget category this expense belongs to."
+                           Clearable="true">
+                    @foreach (var category in BudgetCategories)
                     {
-                        <MudSelectItem Value="@sub">@sub.BudgetSubCategoryName</MudSelectItem>
+                        <MudSelectItem Value="@category">@category.BudgetCategoryName</MudSelectItem>
                     }
                 </MudSelect>
             </div>
+
+            <!-- Budget Subcategory -->
+            @if (selectedCategory?.BudgetSubCategories?.Any() == true)
+            {
+                <div class="expense-form-field">
+                    <MudSelect T="BudgetSubCategoryDto"
+                               Value="selectedSubCategory"
+                               ValueChanged="OnSubCategoryChanged"
+                               Label="Subcategory (Optional)"
+                               Variant="Variant.Outlined"
+                               ToStringFunc="@(s => s?.BudgetSubCategoryName ?? "Select a subcategory")"
+                               Clearable="true">
+                        @foreach (var sub in selectedCategory.BudgetSubCategories)
+                        {
+                            <MudSelectItem Value="@sub">@sub.BudgetSubCategoryName</MudSelectItem>
+                        }
+                    </MudSelect>
+                </div>
+            }
         }
+
+        <!-- Summary card: the whole story when viewing, a running recap while editing -->
+        <div class="expense-details-card">
+            <div class="expense-details-card-header">
+                <div class="expense-details-name-block">
+                    <span class="expense-details-name">@(string.IsNullOrWhiteSpace(FormData.ExpenseName) ? "Untitled Expense" : FormData.ExpenseName)</span>
+                    @if (selectedSubCategory != null)
+                    {
+                        <span class="expense-details-badge">@selectedSubCategory.BudgetSubCategoryName</span>
+                    }
+                </div>
+                <div class="expense-details-amount-highlight">
+                    <span class="expense-details-amount-label">Amount Due</span>
+                    <span class="expense-details-amount-value">@FormData.AmountDue.ToString("C")</span>
+                </div>
+            </div>
+
+            <div class="expense-details-breakdown">
+                <div class="expense-details-row">
+                    <span class="expense-details-row-label">Due Day</span>
+                    <span class="expense-details-row-value">@(FormData.DueDay == 31 ? "Last day" : $"Day {FormData.DueDay}")</span>
+                </div>
+                <div class="expense-details-row">
+                    <span class="expense-details-row-label">Category</span>
+                    <span class="expense-details-row-value">@(selectedCategory?.BudgetCategoryName ?? "—")</span>
+                </div>
+                <div class="expense-details-divider"></div>
+                <div class="expense-details-row expense-details-row--net">
+                    <span class="expense-details-row-label--net">Yearly Total</span>
+                    <span class="expense-details-row-value--net">@((FormData.AmountDue * 12).ToString("C"))</span>
+                </div>
+            </div>
+        </div>
 
         <ValidationSummary />
     </div>

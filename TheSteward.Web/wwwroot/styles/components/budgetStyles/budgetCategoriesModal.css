@@ -19,10 +19,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
-    min-width: 380px;
     max-height: 60vh;
     overflow-y: auto;
     padding-right: 0.25rem;
+    margin: .5rem;
 }
 
 /* ═══════════════════════════════════════

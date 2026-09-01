@@ -1,6 +1,6 @@
 ﻿namespace TheSteward.Core.Utils.FinanceManagerUtils;
 
-public static class FinanceManagerConstants
+public class FinanceManagerConstants
 {
     /// <summary>
     /// Represents the number of periods per year.

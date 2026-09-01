@@ -648,6 +648,373 @@ namespace TheSteward.Infrastructure.Migrations
                     b.ToTable("UserHouseholds");
                 });
 
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.CookBook", b =>
+                {
+                    b.Property<Guid>("CookBookId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CookBookDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CookBookName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserHouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("CookBookId");
+
+                    b.HasIndex("UserHouseholdId");
+
+                    b.ToTable("CookBook");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.DryGood", b =>
+                {
+                    b.Property<Guid>("DryGoodId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DryGoodName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MaximumQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinimumQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PantryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PurchaseQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("RecipeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ShoppingListId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("DryGoodId");
+
+                    b.HasIndex("PantryId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.HasIndex("ShoppingListId");
+
+                    b.ToTable("DryGood");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Equipment", b =>
+                {
+                    b.Property<Guid>("EquipmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EquipmentDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EquipmentName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("KitchenId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("PantryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RecipeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ShoppingListId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("EquipmentId");
+
+                    b.HasIndex("KitchenId");
+
+                    b.HasIndex("PantryId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.HasIndex("ShoppingListId");
+
+                    b.ToTable("Equipment");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Ingredient", b =>
+                {
+                    b.Property<Guid>("IngredientId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BuyingAmountType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("IngredientName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MaximumQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MeasuringType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinimumQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("PantryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PurchaseQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ShoppingListId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("IngredientId");
+
+                    b.HasIndex("PantryId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.HasIndex("ShoppingListId");
+
+                    b.ToTable("Ingredient");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Kitchen", b =>
+                {
+                    b.Property<Guid>("KitchenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EquipmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PantryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ShoppingListId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("KitchenId");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.HasIndex("HouseholdId");
+
+                    b.HasIndex("PantryId");
+
+                    b.HasIndex("ShoppingListId");
+
+                    b.ToTable("Kitchen");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.NutritionFact", b =>
+                {
+                    b.Property<Guid>("NutritionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("NutritionDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NutritionName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("NutritionId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("NutritionFact");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Pantry", b =>
+                {
+                    b.Property<Guid>("PantryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("KitchenId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PantryId");
+
+                    b.HasIndex("KitchenId");
+
+                    b.ToTable("Pantry");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Recipe", b =>
+                {
+                    b.Property<Guid>("RecipeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CookTime")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CookbookId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Cuisine")
+                        .HasColumnType("integer");
+
+                    b.PrimitiveCollection<int[]>("FoodAllergens")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<int>("PrepTime")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RecipeCategory")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RecipeImgUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecipeName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RecipePrivacy")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ServingSize")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalServings")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalTime")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserHouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RecipeId");
+
+                    b.HasIndex("CookbookId");
+
+                    b.HasIndex("UserHouseholdId");
+
+                    b.ToTable("Recipe");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.RecipeIngredient", b =>
+                {
+                    b.Property<Guid>("RecipeIngredientId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IngredientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("MeasuringType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RecipeQuantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RecipeIngredientId");
+
+                    b.HasIndex("IngredientId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("RecipeIngredient");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.RecipeText", b =>
+                {
+                    b.Property<Guid>("RecipeTextId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RecipeTextId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("RecipeText");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.ShoppingList", b =>
+                {
+                    b.Property<Guid>("ShoppingListId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("KitchenId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("ShoppingListEndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ShoppingListName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("ShoppingListStartDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("ShoppingListId");
+
+                    b.HasIndex("KitchenId");
+
+                    b.ToTable("ShoppingList");
+                });
+
             modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.RecurrenceRule", b =>
                 {
                     b.Property<Guid>("RecurrenceRuleId")
@@ -1018,6 +1385,199 @@ namespace TheSteward.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.CookBook", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.HouseholdModels.UserHousehold", "UserHousehold")
+                        .WithMany("CookBooks")
+                        .HasForeignKey("UserHouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserHousehold");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.DryGood", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Pantry", "Pantry")
+                        .WithMany("DryGoods")
+                        .HasForeignKey("PantryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Recipe", null)
+                        .WithMany("DryGoods")
+                        .HasForeignKey("RecipeId");
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.ShoppingList", null)
+                        .WithMany("DryGoods")
+                        .HasForeignKey("ShoppingListId");
+
+                    b.Navigation("Pantry");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Equipment", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Kitchen", "Kitchen")
+                        .WithMany()
+                        .HasForeignKey("KitchenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Pantry", null)
+                        .WithMany("Equipment")
+                        .HasForeignKey("PantryId");
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Recipe", null)
+                        .WithMany("Equipment")
+                        .HasForeignKey("RecipeId");
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.ShoppingList", null)
+                        .WithMany("Equipments")
+                        .HasForeignKey("ShoppingListId");
+
+                    b.Navigation("Kitchen");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Ingredient", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Pantry", "Pantry")
+                        .WithMany("Ingredients")
+                        .HasForeignKey("PantryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Recipe", "Recipe")
+                        .WithMany()
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.ShoppingList", null)
+                        .WithMany("Ingredients")
+                        .HasForeignKey("ShoppingListId");
+
+                    b.Navigation("Pantry");
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Kitchen", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Equipment", "Equipment")
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.HouseholdModels.Household", "Household")
+                        .WithMany()
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Pantry", "Pantry")
+                        .WithMany()
+                        .HasForeignKey("PantryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.ShoppingList", "shoppingList")
+                        .WithMany()
+                        .HasForeignKey("ShoppingListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Equipment");
+
+                    b.Navigation("Household");
+
+                    b.Navigation("Pantry");
+
+                    b.Navigation("shoppingList");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.NutritionFact", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Recipe", "Recipe")
+                        .WithMany("NutritionFacts")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Pantry", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Kitchen", "Kitchen")
+                        .WithMany()
+                        .HasForeignKey("KitchenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kitchen");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Recipe", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.CookBook", "Cookbook")
+                        .WithMany("Recipes")
+                        .HasForeignKey("CookbookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.HouseholdModels.UserHousehold", "UserHousehold")
+                        .WithMany()
+                        .HasForeignKey("UserHouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cookbook");
+
+                    b.Navigation("UserHousehold");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.RecipeIngredient", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Ingredient", "Ingredient")
+                        .WithMany()
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Recipe", "Recipe")
+                        .WithMany("RecipeIngredients")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.RecipeText", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Recipe", "Recipe")
+                        .WithMany("RecipeText")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.ShoppingList", b =>
+                {
+                    b.HasOne("TheSteward.Core.Models.KitchenManagerModels.Kitchen", "Kitchen")
+                        .WithMany()
+                        .HasForeignKey("KitchenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kitchen");
+                });
+
             modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.TaskItem", b =>
                 {
                     b.HasOne("TheSteward.Core.Models.HouseholdModels.UserHousehold", "AssignedToUserHousehold")
@@ -1102,6 +1662,47 @@ namespace TheSteward.Infrastructure.Migrations
             modelBuilder.Entity("TheSteward.Core.Models.HouseholdModels.Household", b =>
                 {
                     b.Navigation("UserHouseholds");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.HouseholdModels.UserHousehold", b =>
+                {
+                    b.Navigation("CookBooks");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.CookBook", b =>
+                {
+                    b.Navigation("Recipes");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Pantry", b =>
+                {
+                    b.Navigation("DryGoods");
+
+                    b.Navigation("Equipment");
+
+                    b.Navigation("Ingredients");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.Recipe", b =>
+                {
+                    b.Navigation("DryGoods");
+
+                    b.Navigation("Equipment");
+
+                    b.Navigation("NutritionFacts");
+
+                    b.Navigation("RecipeIngredients");
+
+                    b.Navigation("RecipeText");
+                });
+
+            modelBuilder.Entity("TheSteward.Core.Models.KitchenManagerModels.ShoppingList", b =>
+                {
+                    b.Navigation("DryGoods");
+
+                    b.Navigation("Equipments");
+
+                    b.Navigation("Ingredients");
                 });
 
             modelBuilder.Entity("TheSteward.Core.Models.TaskManagerModels.RecurrenceRule", b =>

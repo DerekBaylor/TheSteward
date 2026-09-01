@@ -1,56 +1,311 @@
 ﻿@page "/kitchen"
+@* NOTE: adjust the route above and the @namespace below (if this lives in a Pages folder
+   with a different root namespace) to match the rest of your routing conventions. *@
 
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims
+@using TheSteward.Core.Models.KitchenManagerModels
+@using static TheSteward.Core.Utils.KitchenManagerUtils.KitchenManagerConstants
+@using TheSteward.Shared.Components.KitchenManagerComponents
 
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
+<div class="dashboard-container kitchen-dashboard">
 
-@attribute [Authorize]
-
-<PageTitle>Kitchen Dashboard</PageTitle>
-
-<h3>Kitchen Dashboard</h3>
-<p>User Id: @currentUserId</p>
-
-
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger mt-3" role="alert">
-        @errorMessage
+    <div class="dashboard-header kitchen-header">
+        <div class="kitchen-header-text">
+            <h1 class="dashboard-title">Kitchen Manager</h1>
+            <p class="dashboard-subtitle">Plan meals, track your pantry, and keep your shopping list up to date.</p>
+        </div>
+        <span class="coming-soon-badge coming-soon-badge--large">
+            <span class="material-icons">construction</span>
+            Coming Soon
+        </span>
     </div>
-}
+
+    <div class="dashboard-grid kitchen-grid">
+        <div class="dashboard-section kitchen-section">
+            <PlannedMealsCard PlannedMeals="plannedMeals"
+                               SelectedDate="selectedDate"
+                               SelectedDateChanged="OnSelectedDateChanged" />
+        </div>
+
+        <div class="dashboard-section kitchen-section">
+            <ShoppingListCard Items="shoppingListItems" />
+        </div>
+    </div>
+
+</div>
 
 @code {
-    private bool isLoading = true;
-    private string? errorMessage;
-    private string? currentUserId;
+    private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Today);
+    private List<PlannedMeal> plannedMeals = new();
+    private Pantry pantry = new();
+    private List<ShoppingListCard.ShoppingListItemVm> shoppingListItems = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        try
-        {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
+        // TODO: replace with real service calls once Kitchen Manager services exist.
+        // (IPlannedMealService.GetForWeekAsync, IPantryService.GetForHouseholdAsync, etc.)
+        pantry = BuildMockPantry();
+        plannedMeals = BuildMockPlannedMeals();
+        shoppingListItems = BuildShoppingListFromWeek(plannedMeals, pantry);
+    }
 
-            if (user.Identity?.IsAuthenticated == true)
+    private void OnSelectedDateChanged(DateOnly newDate)
+    {
+        selectedDate = newDate;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Shopping list generation: aggregate every ingredient needed by the
+    // recipes planned for the current week, subtract what's already in the
+    // pantry, and surface only the shortfall. This is the real algorithm —
+    // only the data source (mock vs. a future service) is temporary.
+    // ─────────────────────────────────────────────────────────────────────
+    private static List<ShoppingListCard.ShoppingListItemVm> BuildShoppingListFromWeek(
+        List<PlannedMeal> meals, Pantry pantry)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var weekStart = today.AddDays(-(int)today.DayOfWeek);
+        var weekEnd = weekStart.AddDays(6);
+
+        var weekMeals = meals.Where(m => m.Date >= weekStart && m.Date <= weekEnd);
+
+        var needed = new Dictionary<(string Name, MeasuringType Unit), int>();
+
+        foreach (var meal in weekMeals)
+        foreach (var recipe in meal.Recipes ?? new List<Recipe>())
+        foreach (var ri in recipe.RecipeIngredients ?? new List<RecipeIngredient>())
+        {
+            var name = ri.Ingredient?.IngredientName ?? "Unknown Ingredient";
+            var key = (name, ri.MeasuringType);
+            needed[key] = needed.GetValueOrDefault(key) + ri.RecipeQuantity;
+        }
+
+        var results = new List<ShoppingListCard.ShoppingListItemVm>();
+
+        foreach (var ((name, unit), qtyNeeded) in needed)
+        {
+            var inPantry = pantry.Ingredients?
+                .FirstOrDefault(i => string.Equals(i.IngredientName, name, StringComparison.OrdinalIgnoreCase));
+
+            var haveQty = inPantry?.CurrentQuantity ?? 0;
+            var shortfall = qtyNeeded - haveQty;
+
+            if (shortfall > 0)
             {
-                currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                results.Add(new ShoppingListCard.ShoppingListItemVm
+                {
+                    Id = Guid.NewGuid(),
+                    Name = name,
+                    Quantity = shortfall,
+                    UnitLabel = GetUnitLabel(unit),
+                    IsManual = false,
+                    IsChecked = false
+                });
             }
         }
-        catch (Exception ex)
-        {
-            errorMessage = $"Error loading household: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
+
+        return results.OrderBy(r => r.Name).ToList();
     }
-}
 
-@code {
+    private static string GetUnitLabel(MeasuringType unit) => unit switch
+    {
+        MeasuringType.Tablespoon => "tbsp",
+        MeasuringType.Teaspoon => "tsp",
+        MeasuringType.Gallon => "gal",
+        MeasuringType.Liter => "L",
+        MeasuringType.Milliliter => "ml",
+        MeasuringType.Ounce => "oz",
+        MeasuringType.Pound => "lb",
+        MeasuringType.Gram => "g",
+        MeasuringType.Pinch => "pinch",
+        MeasuringType.ToTaste => "to taste",
+        MeasuringType.Cup => "cup",
+        _ => unit.ToString().ToLowerInvariant()
+    };
 
+    // ─────────────────────────────────────────────────────────────────────
+    // Mock data — stands in for real services until Kitchen Manager is wired up.
+    // ─────────────────────────────────────────────────────────────────────
+    private static Pantry BuildMockPantry()
+    {
+        Ingredient Make(string name, MeasuringType unit, int current, int min, int max, int purchase) => new()
+        {
+            IngredientId = Guid.NewGuid(),
+            IngredientName = name,
+            MeasuringType = unit,
+            BuyingAmountType = unit,
+            CurrentQuantity = current,
+            MinimumQuantity = min,
+            MaximumQuantity = max,
+            PurchaseQuantity = purchase,
+            Notes = string.Empty
+        };
+
+        return new Pantry
+        {
+            PantryId = Guid.NewGuid(),
+            Ingredients = new List<Ingredient>
+            {
+                Make("Eggs", MeasuringType.Large, current: 4, min: 6, max: 12, purchase: 12),
+                Make("Milk", MeasuringType.Cup, current: 3, min: 4, max: 16, purchase: 16),
+                Make("Chicken Breast", MeasuringType.Pound, current: 0, min: 1, max: 4, purchase: 2),
+                Make("Rice", MeasuringType.Cup, current: 6, min: 2, max: 8, purchase: 4),
+                Make("Broccoli", MeasuringType.Pound, current: 0, min: 1, max: 2, purchase: 1),
+                Make("Pasta", MeasuringType.Pound, current: 1, min: 1, max: 3, purchase: 1),
+                Make("Cheddar Cheese", MeasuringType.Ounce, current: 2, min: 4, max: 16, purchase: 8),
+                Make("Butter", MeasuringType.Tablespoon, current: 10, min: 4, max: 32, purchase: 16),
+                Make("Bread", MeasuringType.Large, current: 8, min: 4, max: 20, purchase: 20),
+                Make("Bananas", MeasuringType.Medium, current: 1, min: 2, max: 8, purchase: 6),
+                Make("Spinach", MeasuringType.Cup, current: 0, min: 2, max: 6, purchase: 4),
+            },
+            Equipment = new List<Equipment>(),
+            DryGoods = new List<DryGood>()
+        };
+    }
+
+    private static List<PlannedMeal> BuildMockPlannedMeals()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var pantry = BuildMockPantry();
+
+        Ingredient Find(string name) =>
+            pantry.Ingredients.First(i => i.IngredientName == name);
+
+        RecipeIngredient Ri(string name, int qty, MeasuringType unit) => new()
+        {
+            RecipeIngredientId = Guid.NewGuid(),
+            Ingredient = Find(name),
+            RecipeQuantity = qty,
+            MeasuringType = unit
+        };
+
+        var scrambledEggs = new Recipe
+        {
+            RecipeId = Guid.NewGuid(),
+            RecipeName = "Scrambled Eggs & Toast",
+            TotalServings = 2,
+            ServingSize = 1,
+            PrepTime = 5,
+            CookTime = 10,
+            TotalTime = 15,
+            RecipeCategory = RecipeCategory.Breakfast,
+            RecipeIngredients = new List<RecipeIngredient>
+            {
+                Ri("Eggs", 3, MeasuringType.Large),
+                Ri("Bread", 2, MeasuringType.Large),
+                Ri("Butter", 1, MeasuringType.Tablespoon),
+            }
+        };
+
+        var bananaPancakes = new Recipe
+        {
+            RecipeId = Guid.NewGuid(),
+            RecipeName = "Banana Pancakes",
+            TotalServings = 3,
+            ServingSize = 1,
+            PrepTime = 10,
+            CookTime = 15,
+            TotalTime = 25,
+            RecipeCategory = RecipeCategory.Breakfast,
+            RecipeIngredients = new List<RecipeIngredient>
+            {
+                Ri("Eggs", 2, MeasuringType.Large),
+                Ri("Bananas", 2, MeasuringType.Medium),
+                Ri("Milk", 1, MeasuringType.Cup),
+            }
+        };
+
+        var chickenSalad = new Recipe
+        {
+            RecipeId = Guid.NewGuid(),
+            RecipeName = "Grilled Chicken Salad",
+            TotalServings = 2,
+            ServingSize = 1,
+            PrepTime = 10,
+            CookTime = 15,
+            TotalTime = 25,
+            RecipeCategory = RecipeCategory.Lunch,
+            RecipeIngredients = new List<RecipeIngredient>
+            {
+                Ri("Chicken Breast", 1, MeasuringType.Pound),
+                Ri("Spinach", 2, MeasuringType.Cup),
+            }
+        };
+
+        var chickenAlfredo = new Recipe
+        {
+            RecipeId = Guid.NewGuid(),
+            RecipeName = "Chicken Alfredo",
+            TotalServings = 4,
+            ServingSize = 1,
+            PrepTime = 10,
+            CookTime = 25,
+            TotalTime = 35,
+            RecipeCategory = RecipeCategory.Dinner,
+            RecipeIngredients = new List<RecipeIngredient>
+            {
+                Ri("Chicken Breast", 1, MeasuringType.Pound),
+                Ri("Pasta", 1, MeasuringType.Pound),
+                Ri("Cheddar Cheese", 4, MeasuringType.Ounce),
+                Ri("Butter", 2, MeasuringType.Tablespoon),
+            }
+        };
+
+        var veggieStirFry = new Recipe
+        {
+            RecipeId = Guid.NewGuid(),
+            RecipeName = "Veggie Stir Fry",
+            TotalServings = 3,
+            ServingSize = 1,
+            PrepTime = 10,
+            CookTime = 15,
+            TotalTime = 25,
+            RecipeCategory = RecipeCategory.Dinner,
+            RecipeIngredients = new List<RecipeIngredient>
+            {
+                Ri("Rice", 2, MeasuringType.Cup),
+                Ri("Broccoli", 1, MeasuringType.Pound),
+            }
+        };
+
+        var bananaSnack = new Recipe
+        {
+            RecipeId = Guid.NewGuid(),
+            RecipeName = "Banana with Peanut Butter",
+            TotalServings = 1,
+            ServingSize = 1,
+            PrepTime = 2,
+            CookTime = 0,
+            TotalTime = 2,
+            RecipeCategory = RecipeCategory.Snack,
+            RecipeIngredients = new List<RecipeIngredient>
+            {
+                Ri("Bananas", 1, MeasuringType.Medium),
+            }
+        };
+
+        PlannedMeal Meal(int dayOffset, MealCategory category, params Recipe[] recipes) => new()
+        {
+            PlannedMealId = Guid.NewGuid(),
+            Date = today.AddDays(dayOffset),
+            MealCategory = category,
+            Recipes = recipes.ToList()
+        };
+
+        return new List<PlannedMeal>
+        {
+            Meal(0, MealCategory.Breakfast, scrambledEggs),
+            Meal(0, MealCategory.Lunch, chickenSalad),
+            Meal(0, MealCategory.Dinner, chickenAlfredo),
+
+            Meal(1, MealCategory.Breakfast, bananaPancakes),
+            Meal(1, MealCategory.Snack, bananaSnack),
+            Meal(1, MealCategory.Dinner, veggieStirFry),
+
+            Meal(-1, MealCategory.Breakfast, scrambledEggs),
+            Meal(-1, MealCategory.Dinner, chickenAlfredo),
+
+            Meal(2, MealCategory.Lunch, chickenSalad),
+            Meal(2, MealCategory.Dinner, veggieStirFry),
+        };
+    }
 }

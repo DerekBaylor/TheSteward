@@ -1,0 +1,174 @@
+@namespace TheSteward.Shared.Components.KitchenManagerComponents
+
+@using TheSteward.Core.Models.KitchenManagerModels
+@using static TheSteward.Core.Utils.KitchenManagerUtils.KitchenManagerConstants
+
+<div class="section-card meals-card">
+
+    @* ── Day Navigation ── *@
+    <div class="section-header meals-header">
+        <div class="meals-header-top">
+            <h3 class="section-title">Planned Meals</h3>
+            <span class="coming-soon-badge">Coming Soon</span>
+        </div>
+        <div class="meals-day-nav">
+            <button class="calendar-nav-btn" title="Previous day" @onclick="GoToPreviousDay">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <div class="meals-day-label">
+                <span class="meals-day-name">@GetDayLabel(SelectedDate)</span>
+                <span class="meals-day-date">@SelectedDate.ToString("MMMM d, yyyy")</span>
+            </div>
+            <button class="calendar-nav-btn" title="Next day" @onclick="GoToNextDay">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+        @if (SelectedDate != DateOnly.FromDateTime(DateTime.Today))
+        {
+            <button class="meals-today-btn" @onclick="GoToToday">Jump to Today</button>
+        }
+    </div>
+
+    @* ── Meals for the selected day, grouped by category ── *@
+    <div class="overview-content meals-content">
+        @if (mealsForSelectedDay.Any())
+        {
+            @foreach (var category in OrderedCategories)
+            {
+                var mealsInCategory = mealsForSelectedDay.Where(m => m.MealCategory == category).ToList();
+                if (!mealsInCategory.Any()) continue;
+
+                <div class="overview-category meal-category">
+                    <div class="category-header">
+                        <div class="category-icon @GetCategoryIconClass(category)">
+                            @GetCategoryIcon(category)
+                        </div>
+                        <h4 class="category-title">@category</h4>
+                        <span class="category-badge">@mealsInCategory.Sum(m => m.Recipes?.Count ?? 0)</span>
+                    </div>
+
+                    <ul class="category-list meal-recipe-list">
+                        @foreach (var meal in mealsInCategory)
+                        {
+                            @foreach (var recipe in meal.Recipes ?? new List<Recipe>())
+                            {
+                                <li class="category-item meal-recipe-item">
+                                    <span class="item-bullet"></span>
+                                    <div class="meal-recipe-info">
+                                        <span class="item-text meal-recipe-name">@recipe.RecipeName</span>
+                                        <div class="meal-recipe-meta">
+                                            <span class="item-label meal-time-badge">
+                                                <span class="material-icons meal-time-icon">schedule</span>
+                                                @recipe.TotalTime min
+                                            </span>
+                                            <span class="item-label meal-servings-badge">@recipe.ServingSize servings</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="meals-empty-state">
+                <span class="material-icons meals-empty-icon">restaurant_menu</span>
+                <p class="meals-empty-text">No meals planned for this day yet.</p>
+                <button class="meals-add-btn" disabled title="Meal planning is coming soon">
+                    <span class="material-icons">add</span>
+                    Plan a Meal
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    // ── Parameters ─────────────────────────────────────────────────────────
+
+    /// <summary>All planned meals available to browse — the card filters down to SelectedDate internally.</summary>
+    [Parameter]
+    public List<PlannedMeal> PlannedMeals { get; set; } = new();
+
+    [Parameter]
+    public DateOnly SelectedDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
+    [Parameter]
+    public EventCallback<DateOnly> SelectedDateChanged { get; set; }
+
+    // ── Derived state ──────────────────────────────────────────────────────
+    private List<PlannedMeal> mealsForSelectedDay =>
+        PlannedMeals.Where(m => m.Date == SelectedDate).ToList();
+
+    private static readonly MealCategory[] OrderedCategories =
+    {
+        MealCategory.Breakfast,
+        MealCategory.Brunch,
+        MealCategory.Lunch,
+        MealCategory.Snack,
+        MealCategory.Dinner,
+        MealCategory.Appetizer,
+        MealCategory.Dessert,
+        MealCategory.Other
+    };
+
+    // ── Navigation ─────────────────────────────────────────────────────────
+    private async Task GoToPreviousDay() =>
+        await SelectedDateChanged.InvokeAsync(SelectedDate.AddDays(-1));
+
+    private async Task GoToNextDay() =>
+        await SelectedDateChanged.InvokeAsync(SelectedDate.AddDays(1));
+
+    private async Task GoToToday() =>
+        await SelectedDateChanged.InvokeAsync(DateOnly.FromDateTime(DateTime.Today));
+
+    private static string GetDayLabel(DateOnly date)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        if (date == today) return "Today";
+        if (date == today.AddDays(-1)) return "Yesterday";
+        if (date == today.AddDays(1)) return "Tomorrow";
+        return date.DayOfWeek.ToString();
+    }
+
+    // ── Category icon styling ──────────────────────────────────────────────
+    private static string GetCategoryIconClass(MealCategory category) => category switch
+    {
+        MealCategory.Breakfast => "meal-icon--breakfast",
+        MealCategory.Brunch => "meal-icon--brunch",
+        MealCategory.Lunch => "meal-icon--lunch",
+        MealCategory.Snack => "meal-icon--snack",
+        MealCategory.Dinner => "meal-icon--dinner",
+        MealCategory.Appetizer => "meal-icon--appetizer",
+        MealCategory.Dessert => "meal-icon--dessert",
+        _ => "meal-icon--other"
+    };
+
+    private static MarkupString GetCategoryIcon(MealCategory category)
+    {
+        // Simple stroke icons; swappable for a proper icon set later.
+        var path = category switch
+        {
+            MealCategory.Breakfast => "M6 2v20M6 2c3 0 3 3 6 3s3-3 6-3M18 2v20",
+            MealCategory.Brunch => "M4 10h16M6 10a6 6 0 0 0 12 0M4 18h16",
+            MealCategory.Lunch => "M12 2v6M8 5v3a4 4 0 0 0 8 0V5M12 11v11",
+            MealCategory.Snack => "M12 3c4 0 7 3 7 7 0 6-4 11-7 11S5 16 5 10c0-4 3-7 7-7z",
+            MealCategory.Dinner => "M4 21h16M6 21V9a6 6 0 0 1 12 0v12",
+            MealCategory.Appetizer => "M12 2a8 8 0 0 1 8 8c0 5-8 12-8 12S4 15 4 10a8 8 0 0 1 8-8z",
+            MealCategory.Dessert => "M4 12h16v2a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6v-2zM8 12V8a4 4 0 0 1 8 0v4",
+            _ => "M12 2v20M2 12h20"
+        };
+
+        return new MarkupString($"""
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="{path}"></path>
+            </svg>
+            """);
+    }
+}

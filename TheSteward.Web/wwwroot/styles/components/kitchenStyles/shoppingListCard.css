@@ -1,0 +1,239 @@
+/* ================================= */
+/*        Shopping Card Header       */
+/* ================================= */
+.shopping-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: stretch;
+}
+
+.shopping-count {
+    align-self: flex-start;
+}
+
+/* ================================= */
+/*          Add item row             */
+/* ================================= */
+.shopping-add-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.shopping-add-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.75rem;
+    border: 2px solid var(--gray-2);
+    border-radius: 8px;
+    font-family: var(--primary-font);
+    font-size: 0.9rem;
+    color: var(--gray-8);
+}
+
+.shopping-add-input:focus {
+    outline: none;
+    border-color: var(--base-green);
+}
+
+.shopping-add-qty {
+    width: 4rem;
+    flex-shrink: 0;
+    padding: 0.6rem 0.5rem;
+    border: 2px solid var(--gray-2);
+    border-radius: 8px;
+    font-family: var(--primary-font);
+    font-size: 0.9rem;
+    color: var(--gray-8);
+    text-align: center;
+}
+
+.shopping-add-qty:focus {
+    outline: none;
+    border-color: var(--base-green);
+}
+
+.shopping-add-btn {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--base-green);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.shopping-add-btn:hover:not(:disabled) {
+    background: var(--green-8);
+}
+
+.shopping-add-btn:disabled {
+    background: var(--gray-3);
+    cursor: not-allowed;
+}
+
+/* ================================= */
+/*           Item rows               */
+/* ================================= */
+.shopping-item {
+    gap: 0.6rem;
+}
+
+.shopping-checkbox {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.shopping-item-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.shopping-item-name {
+    font-weight: 500;
+}
+
+.shopping-item-qty {
+    font-size: 0.75rem;
+    color: var(--gray-5);
+    font-variant-numeric: tabular-nums;
+}
+
+.shopping-item--checked .shopping-item-name {
+    text-decoration: line-through;
+    color: var(--gray-4);
+}
+
+.shopping-source-badge {
+    flex-shrink: 0;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 999px;
+    padding: 0.15rem 0.5rem;
+    white-space: nowrap;
+}
+
+.shopping-source-badge--recipe {
+    background: var(--blue-1);
+    color: var(--blue-7);
+    border: 1px solid var(--blue-3);
+}
+
+.shopping-source-badge--manual {
+    background: var(--purple-1);
+    color: var(--purple-7);
+    border: 1px solid var(--purple-3);
+}
+
+.shopping-remove-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: var(--gray-4);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.shopping-item:hover .shopping-remove-btn {
+    opacity: 1;
+}
+
+.shopping-remove-btn:hover {
+    background: var(--red-1);
+    color: var(--red-6);
+}
+
+.shopping-remove-btn .material-icons {
+    font-size: 16px;
+}
+
+/* ================================= */
+/*        Checked-off section        */
+/* ================================= */
+.shopping-checked-section {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--gray-2);
+}
+
+.shopping-checked-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: none;
+    color: var(--gray-6);
+    font-family: var(--label-font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.25rem 0;
+}
+
+.shopping-checked-chevron {
+    font-size: 1.1rem !important;
+    transition: transform 0.15s ease;
+}
+
+.shopping-checked-chevron.is-expanded {
+    transform: rotate(90deg);
+}
+
+.shopping-list--checked {
+    margin-top: 0.5rem;
+}
+
+/* ================================= */
+/*           Empty state             */
+/* ================================= */
+.shopping-empty-subtext {
+    font-size: 0.82rem;
+    color: var(--gray-4);
+    max-width: 26rem;
+    margin: 0;
+}
+
+/* ================================= */
+/*           Responsive              */
+/* ================================= */
+@media (max-width: 480px) {
+    .shopping-add-row {
+        flex-wrap: wrap;
+    }
+
+    .shopping-add-input {
+        flex-basis: 100%;
+    }
+
+    .shopping-add-qty {
+        flex: 1;
+    }
+
+    .shopping-add-btn {
+        flex: 1;
+        width: auto;
+    }
+
+    /* remove buttons need to be reachable without hover on touch */
+    .shopping-remove-btn {
+        opacity: 0.5;
+    }
+}

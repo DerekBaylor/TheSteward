@@ -1,0 +1,182 @@
+@namespace TheSteward.Shared.Components.KitchenManagerComponents
+
+@using static TheSteward.Core.Utils.KitchenManagerUtils.KitchenManagerConstants
+
+<div class="section-card shopping-card">
+
+    <div class="section-header shopping-header">
+        <div class="meals-header-top">
+            <h3 class="section-title">Shopping List</h3>
+            <span class="coming-soon-badge">Coming Soon</span>
+        </div>
+        <span class="section-date shopping-count">
+            @uncheckedCount @(uncheckedCount == 1 ? "item" : "items") left
+        </span>
+    </div>
+
+    <div class="overview-content shopping-content">
+
+        @* ── Manual add row ── *@
+        <div class="shopping-add-row">
+            <input class="shopping-add-input"
+                   placeholder="Add an item…"
+                   @bind="newItemName"
+                   @bind:event="oninput"
+                   @onkeyup="HandleAddKeyUp" />
+            <input class="shopping-add-qty"
+                   type="number"
+                   min="1"
+                   @bind="newItemQuantity" />
+            <button class="shopping-add-btn" @onclick="AddManualItem" disabled="@string.IsNullOrWhiteSpace(newItemName)">
+                <span class="material-icons">add</span>
+            </button>
+        </div>
+
+        @if (Items.Any())
+        {
+            @* ── Needed items ── *@
+            @if (uncheckedItems.Any())
+            {
+                <ul class="category-list shopping-list">
+                    @foreach (var item in uncheckedItems)
+                    {
+                        <li class="category-item shopping-item">
+                            <input type="checkbox"
+                                   class="ts-checkbox shopping-checkbox"
+                                   checked="@item.IsChecked"
+                                   @onchange="() => ToggleItem(item)" />
+                            <div class="shopping-item-info">
+                                <span class="item-text shopping-item-name">@item.Name</span>
+                                @if (item.Quantity > 1 || !string.IsNullOrEmpty(item.UnitLabel))
+                                {
+                                    <span class="shopping-item-qty">@item.Quantity @item.UnitLabel</span>
+                                }
+                            </div>
+                            <span class="shopping-source-badge shopping-source-badge--@(item.IsManual ? "manual" : "recipe")">
+                                @(item.IsManual ? "Manual" : "Recipe")
+                            </span>
+                            <button class="shopping-remove-btn" title="Remove" @onclick="() => RemoveItem(item)">
+                                <span class="material-icons">close</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            }
+
+            @* ── Checked-off items, tucked away below ── *@
+            @if (checkedItems.Any())
+            {
+                <div class="shopping-checked-section">
+                    <button class="shopping-checked-toggle" @onclick="() => showChecked = !showChecked">
+                        <span class="material-icons shopping-checked-chevron @(showChecked ? "is-expanded" : "")">chevron_right</span>
+                        In Cart (@checkedItems.Count)
+                    </button>
+                    @if (showChecked)
+                    {
+                        <ul class="category-list shopping-list shopping-list--checked">
+                            @foreach (var item in checkedItems)
+                            {
+                                <li class="category-item shopping-item shopping-item--checked">
+                                    <input type="checkbox"
+                                           class="ts-checkbox shopping-checkbox"
+                                           checked="@item.IsChecked"
+                                           @onchange="() => ToggleItem(item)" />
+                                    <div class="shopping-item-info">
+                                        <span class="item-text shopping-item-name">@item.Name</span>
+                                        @if (item.Quantity > 1 || !string.IsNullOrEmpty(item.UnitLabel))
+                                        {
+                                            <span class="shopping-item-qty">@item.Quantity @item.UnitLabel</span>
+                                        }
+                                    </div>
+                                    <button class="shopping-remove-btn" title="Remove" @onclick="() => RemoveItem(item)">
+                                        <span class="material-icons">close</span>
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="meals-empty-state shopping-empty-state">
+                <span class="material-icons meals-empty-icon">shopping_cart</span>
+                <p class="meals-empty-text">Your shopping list is empty.</p>
+                <p class="shopping-empty-subtext">
+                    Items missing from your pantry will show up here automatically once meal planning is connected.
+                </p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// The full working list — a mix of auto-generated items (from planned meals vs. pantry stock)
+    /// and manually-added items. Owned by the parent so it can seed auto items; this component
+    /// mutates it in place for checking off / adding / removing until real persistence exists.
+    /// </summary>
+    [Parameter]
+    public List<ShoppingListItemVm> Items { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnItemsChanged { get; set; }
+
+    private bool showChecked = false;
+    private string newItemName = string.Empty;
+    private int newItemQuantity = 1;
+
+    private List<ShoppingListItemVm> uncheckedItems => Items.Where(i => !i.IsChecked).ToList();
+    private List<ShoppingListItemVm> checkedItems => Items.Where(i => i.IsChecked).ToList();
+    private int uncheckedCount => uncheckedItems.Count;
+
+    private async Task ToggleItem(ShoppingListItemVm item)
+    {
+        item.IsChecked = !item.IsChecked;
+        await OnItemsChanged.InvokeAsync();
+    }
+
+    private async Task RemoveItem(ShoppingListItemVm item)
+    {
+        Items.Remove(item);
+        await OnItemsChanged.InvokeAsync();
+    }
+
+    private async Task HandleAddKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await AddManualItem();
+    }
+
+    private async Task AddManualItem()
+    {
+        if (string.IsNullOrWhiteSpace(newItemName)) return;
+
+        Items.Add(new ShoppingListItemVm
+        {
+            Id = Guid.NewGuid(),
+            Name = newItemName.Trim(),
+            Quantity = Math.Max(1, newItemQuantity),
+            UnitLabel = string.Empty,
+            IsManual = true,
+            IsChecked = false
+        });
+
+        newItemName = string.Empty;
+        newItemQuantity = 1;
+
+        await OnItemsChanged.InvokeAsync();
+    }
+
+    /// <summary>Lightweight UI model unifying auto-generated (recipe/pantry) and manually-added items.</summary>
+    public class ShoppingListItemVm
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int Quantity { get; set; } = 1;
+        public string UnitLabel { get; set; } = string.Empty;
+        public bool IsManual { get; set; }
+        public bool IsChecked { get; set; }
+    }
+}

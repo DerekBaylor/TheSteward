@@ -1,0 +1,193 @@
+/* ================================= */
+/*         Meals Card Header         */
+/* ================================= */
+.meals-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+}
+
+.meals-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.meals-day-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.meals-day-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.meals-day-name {
+    font-family: var(--label-font);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--gray-9);
+}
+
+.meals-day-date {
+    font-size: 0.78rem;
+    color: var(--gray-5);
+}
+
+.meals-today-btn {
+    align-self: center;
+    background: none;
+    border: none;
+    color: var(--base-orange);
+    font-family: var(--label-font);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.meals-today-btn:hover {
+    background: var(--orange-1);
+}
+
+/* ================================= */
+/*      Per-category icon colors     */
+/* ================================= */
+.meal-icon--breakfast {
+    background: linear-gradient(135deg, var(--yellow-5), var(--orange-6));
+}
+
+.meal-icon--brunch {
+    background: linear-gradient(135deg, var(--orange-5), var(--orange-7));
+}
+
+.meal-icon--lunch {
+    background: linear-gradient(135deg, var(--green-5), var(--green-7));
+}
+
+.meal-icon--snack {
+    background: linear-gradient(135deg, var(--purple-4), var(--purple-6));
+}
+
+.meal-icon--dinner {
+    background: linear-gradient(135deg, var(--blue-5), var(--blue-7));
+}
+
+.meal-icon--appetizer {
+    background: linear-gradient(135deg, var(--red-4), var(--red-6));
+}
+
+.meal-icon--dessert {
+    background: linear-gradient(135deg, var(--purple-5), var(--purple-7));
+}
+
+.meal-icon--other {
+    background: linear-gradient(135deg, var(--gray-5), var(--gray-7));
+}
+
+/* ================================= */
+/*         Recipe rows               */
+/* ================================= */
+.meal-recipe-item {
+    align-items: flex-start;
+}
+
+.meal-recipe-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.meal-recipe-name {
+    font-weight: 600;
+    color: var(--gray-8);
+}
+
+.meal-recipe-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.meal-time-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.meal-time-icon {
+    font-size: 13px !important;
+}
+
+/* ================================= */
+/*           Empty state             */
+/* ================================= */
+.meals-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--gray-5);
+}
+
+.meals-empty-icon {
+    font-size: 2.5rem;
+    opacity: 0.4;
+}
+
+.meals-empty-text {
+    font-size: 0.95rem;
+    color: var(--gray-6);
+    margin: 0;
+}
+
+.meals-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--gray-1);
+    border: 1px dashed var(--gray-4);
+    border-radius: 999px;
+    color: var(--gray-5);
+    font-family: var(--label-font);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: not-allowed;
+}
+
+.meals-add-btn .material-icons {
+    font-size: 1rem;
+}
+
+/* ================================= */
+/*           Responsive              */
+/* ================================= */
+@media (max-width: 480px) {
+    .meals-day-name {
+        font-size: 0.9rem;
+    }
+
+    .meals-day-date {
+        font-size: 0.72rem;
+    }
+
+    .meal-recipe-meta {
+        gap: 0.3rem;
+    }
+}

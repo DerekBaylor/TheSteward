@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TheSteward.Core.Models.FinanceManagerModels;
+using TheSteward.Core.Models.KitchenManagerModels;
 
 namespace TheSteward.Core.Models.HouseholdModels;
 
@@ -71,4 +72,6 @@ public class UserHousehold
 
     [ForeignKey("DefaultBudgetId")]
     public Budget? DefaultBudget { get; set; }
+    
+    public List<CookBook> CookBooks { get; set; }
 }

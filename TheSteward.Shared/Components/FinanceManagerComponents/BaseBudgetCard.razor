@@ -1,0 +1,162 @@
+@namespace TheSteward.Shared.Components.FinanceManagerComponents
+
+@*
+    BaseBudgetCard
+    ---------------------------------------------------------------
+    Shared shell used by IncomeCard, InvestmentCard, and CreditCard.
+
+    Parameters
+    ----------
+    Title           – Section heading displayed in the header.
+    HeaderTotals    – Column-total chips shown in the header.
+                      Each entry is a BudgetCardTotal(Label, Value).
+                      Label may be empty for a single-value chip.
+    IsReadOnly      – Hides the Add button when true.
+    IsCollapsible   – Enables expand/collapse chevron (default true).
+    InitiallyExpanded – Starting state (default true).
+    OnAdd           – Callback for the Add icon button.
+    OnDetails       – Callback for the Details icon button.
+    ChildContent    – Table / body content rendered inside the card.
+*@
+
+<MudCard class="ts-card bbc-card" Elevation="0">
+    <MudCardContent class="ts-card-content">
+
+        @* ── Header ── *@
+        <div class="bbc-header @(IsCollapsible && !_expanded ? "bbc-header--collapsed" : "")"
+             @onclick="HandleHeaderClick"
+             role="@(IsCollapsible ? "button" : null)"
+             aria-expanded="@(IsCollapsible ? _expanded.ToString().ToLower() : null)"
+             tabindex="@(IsCollapsible ? "0" : null)"
+             @onkeydown="HandleHeaderKeyDown">
+
+            @* Chevron *@
+            @if (IsCollapsible)
+            {
+                <span class="material-icons bbc-chevron @(_expanded ? "bbc-chevron--open" : "")">
+                    chevron_right
+                </span>
+            }
+
+            @* Title *@
+            <span class="bbc-title">@Title</span>
+
+            @* Column totals — always visible so collapsed state is still informative *@
+            @if (HeaderTotals != null && HeaderTotals.Count > 0)
+            {
+                <div class="bbc-totals">
+                    @foreach (var total in HeaderTotals)
+                    {
+                        <span class="bbc-total-chip">
+                            @if (!string.IsNullOrEmpty(total.Label))
+                            {
+                                <span class="bbc-total-label">@total.Label</span>
+                            }
+                            <span class="bbc-total-value">@total.Value</span>
+                        </span>
+                    }
+                </div>
+            }
+
+            @* Header icon buttons — stop propagation so clicks don't toggle collapse *@
+            <div class="bbc-header-actions" @onclick:stopPropagation="true">
+                @if (!IsReadOnly && OnAdd.HasDelegate)
+                {
+                    <button class="bbc-icon-btn bbc-icon-btn--add"
+                            title="Add @Title"
+                            @onclick="HandleAdd">
+                        <span class="material-icons">add_circle</span>
+                    </button>
+                }
+                @if (OnDetails.HasDelegate)
+                {
+                    <button class="bbc-icon-btn bbc-icon-btn--details"
+                            title="@Title Details"
+                            @onclick="HandleDetails">
+                        <span class="material-icons">open_in_new</span>
+                    </button>
+                }
+            </div>
+
+        </div>
+
+        @* ── Body ── *@
+        @if (!IsCollapsible || _expanded)
+        {
+            <div class="ts-card-body bbc-body">
+                @ChildContent
+            </div>
+        }
+
+    </MudCardContent>
+</MudCard>
+
+@code {
+
+    // ── Parameters ──────────────────────────────────────────────────────────────
+
+    /// <summary>Section title shown in the header (e.g. "Income").</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Column totals rendered as chips in the header.
+    /// Each entry is a BudgetCardTotal(Label, Value).
+    /// Label may be empty for a single unlabeled value chip.
+    /// </summary>
+    [Parameter]
+    public List<BudgetCardTotal> HeaderTotals { get; set; } = new();
+
+    /// <summary>When true the Add icon button is hidden.</summary>
+    [Parameter]
+    public bool IsReadOnly { get; set; } = false;
+
+    /// <summary>Enables the expand/collapse chevron and body toggle. Default: true.</summary>
+    [Parameter]
+    public bool IsCollapsible { get; set; } = true;
+
+    /// <summary>Initial expanded state. Default: true (card starts open).</summary>
+    [Parameter]
+    public bool InitiallyExpanded { get; set; } = true;
+
+    /// <summary>Fired when the Add icon button is clicked.</summary>
+    [Parameter]
+    public EventCallback OnAdd { get; set; }
+
+    /// <summary>Fired when the Details icon button is clicked.</summary>
+    [Parameter]
+    public EventCallback OnDetails { get; set; }
+
+    /// <summary>The table / content rendered inside the card body.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // ── State ────────────────────────────────────────────────────────────────────
+
+    private bool _expanded;
+
+    protected override void OnInitialized() => _expanded = InitiallyExpanded;
+
+    // ── Handlers ─────────────────────────────────────────────────────────────────
+
+    private void HandleHeaderClick()
+    {
+        if (IsCollapsible) _expanded = !_expanded;
+    }
+
+    private void HandleHeaderKeyDown(KeyboardEventArgs e)
+    {
+        if (IsCollapsible && (e.Key == "Enter" || e.Key == " "))
+            _expanded = !_expanded;
+    }
+
+    private async Task HandleAdd()     => await OnAdd.InvokeAsync();
+    private async Task HandleDetails() => await OnDetails.InvokeAsync();
+
+    // ── Supporting types ──────────────────────────────────────────────────────────
+
+    /// <summary>A single column-total chip displayed in the card header.</summary>
+    /// <param name="Label">Short column label (e.g. "Monthly"). May be empty.</param>
+    /// <param name="Value">Formatted value string (e.g. "$3,200.00").</param>
+    public record BudgetCardTotal(string Label, string Value);
+}

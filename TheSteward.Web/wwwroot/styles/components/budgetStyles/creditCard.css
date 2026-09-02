@@ -1,36 +1,28 @@
-﻿#creditCard.ts-tabbed-card {
+﻿#creditCard.ts-card {
     width: 100%;
     animation: slideUp 0.4s ease-out;
 }
 
-/* ---- Tab Buttons ---- */
-/* ===================== */
-#addCreditBtn.ts-tab-btn {
-    background-color: var(--orange-6);
-    border-color: var(--orange-6);
-    color: var(--off-white);
-}
+/* ---- Action buttons (moved into the card body) ---- */
+/* =================================================== */
+/*#creditCard .ts-card-action-btn--primary {*/
+/*    background-color: var(--orange-6);*/
+/*    border-color: var(--orange-6);*/
+/*    color: var(--off-white);*/
+/*}*/
 
-#showCreditDetails.ts-tab-btn {
-    background-color: var(--orange-7);
-    border-color: var(--orange-7);
-    color: var(--off-white);
-}
+/*#creditCard .ts-card-action-btn--primary:hover:not(:disabled) {*/
+/*    background-color: var(--orange-8);*/
+/*}*/
 
-button#addCreditBtn:hover:not([disabled]) {
-    background-color: var(--orange-8);
-    color: var(--off-white);
-}
-
-button#showCreditDetails:hover:not([disabled]) {
-    background-color: var(--orange-8);
-    color: var(--off-white);
-}
+/*#creditCard .ts-card-action-btn--secondary:hover:not(:disabled) {*/
+/*    background-color: var(--orange-1);*/
+/*    border-color: var(--orange-4);*/
+/*    color: var(--orange-7);*/
+/*}*/
 
 /* ---- Card border accent ---- */
-#creditCard .ts-card-content {
-    border-color: var(--base-orange);
-}
+
 
 /* ---- Credit Table ---- */
 .credit-table {

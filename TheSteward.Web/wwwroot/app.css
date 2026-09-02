@@ -47,6 +47,8 @@
 @import url('styles/components/budgetStyles/expenseModal.css');
 @import url('styles/components/budgetStyles/budgetModal.css');
 @import url('styles/components/budgetStyles/budgetCategoriesModal.css');
+@import url('styles/components/budgetStyles/baseBudgetCard.css');
+
 
 /* tasks */
 @import url('styles/components/taskStyles/taskManagerToolbar.css');

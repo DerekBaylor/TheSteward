@@ -1,29 +1,24 @@
-﻿#expenseCard.ts-tabbed-card {
+﻿#expenseCard.ts-card {
     width: 100%;
     animation: slideUp 0.4s ease-out;
 }
 
-/* ---- Tab Buttons ---- */
-#addExpenseBtn.ts-tab-btn {
+/* ---- Action buttons (moved into the card body) ---- */
+/* =================================================== */
+#expenseCard .ts-card-action-btn--primary {
     background-color: var(--purple-6);
     border-color: var(--purple-6);
     color: var(--off-white);
 }
 
-button#addExpenseBtn:hover:not([disabled]) {
+#expenseCard .ts-card-action-btn--primary:hover:not(:disabled) {
     background-color: var(--purple-8);
-    color: var(--off-white);
 }
 
-#openBudgetCategoriesBtn.ts-tab-btn {
-    background-color: var(--purple-2);
+#expenseCard .ts-card-action-btn--secondary:hover:not(:disabled) {
+    background-color: var(--purple-1);
     border-color: var(--purple-4);
     color: var(--purple-7);
-}
-
-button#openBudgetCategoriesBtn:hover:not([disabled]) {
-    background-color: var(--purple-3);
-    color: var(--purple-8);
 }
 
 /* ---- Card border accent ---- */

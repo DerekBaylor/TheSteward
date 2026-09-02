@@ -1,30 +1,24 @@
-﻿#investmentCard.ts-tabbed-card {
+﻿#investmentCard.ts-card {
     width: 100%;
     animation: slideUp 0.4s ease-out;
 }
 
-/* ---- Tab Buttons ---- */
-/* ===================== */
-#addInvestmentBtn.ts-tab-btn {
+/* ---- Action buttons (moved into the card body) ---- */
+/* =================================================== */
+#investmentCard .ts-card-action-btn--primary {
     background-color: var(--blue-6);
     border-color: var(--blue-6);
     color: var(--off-white);
 }
 
-#showInvestmentDetails.ts-tab-btn {
-    background-color: var(--blue-7);
-    border-color: var(--blue-7);
-    color: var(--off-white);
+#investmentCard .ts-card-action-btn--primary:hover:not(:disabled) {
+    background-color: var(--blue-8);
 }
 
-button#addInvestmentBtn:hover:not([disabled]) {
-    background-color: var(--blue-8);
-    color: var(--off-white);
-}
-
-button#showInvestmentDetails:hover:not([disabled]) {
-    background-color: var(--blue-8);
-    color: var(--off-white);
+#investmentCard .ts-card-action-btn--secondary:hover:not(:disabled) {
+    background-color: var(--blue-1);
+    border-color: var(--blue-4);
+    color: var(--blue-8);
 }
 
 

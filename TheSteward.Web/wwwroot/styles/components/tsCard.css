@@ -1,20 +1,21 @@
 ﻿/* ======================== */
 /*      Base Card           */
 /* ======================== */
-.ts-card {
+.ts-card.ts-card {
     margin: 1rem;
     font-family: var(--primary-font);
     border-radius: var(--border-radius);
     box-shadow: var(--blue-shadow-5);
+    border: none;
 }
 
-.ts-card-content {
-    border: solid 3px var(--gray-9);
+.ts-card .ts-card-content {
+    border: solid 1px var(--gray-3);
     border-radius: var(--border-radius);
-    padding: 0 0 .5rem 0;
+    padding: 0 0 0.5rem 0;
 }
 
-.ts-card-header {
+.ts-card .ts-card-header {
     align-items: center;
     background-image: var(--blue-gradient);
     border-radius: var(--border-radius) var(--border-radius) 0 0;
@@ -26,14 +27,84 @@
     padding: 1rem 1rem;
 }
 
-.ts-card-title {
+.ts-card .ts-card-title {
     font-family: var(--label-font);
     margin: 0 1rem 0 0;
 }
 
-.ts-card-body {
+.ts-card .ts-card-body {
     padding-left: .5rem;
     margin: .5rem;
+}
+
+/* ============================== */
+/*      In-Body Action Row        */
+/* ------------------------------ */
+/* Replaces the old tabbed-card button row that floated above the card.
+   Buttons now live at the top of the body so every card shares one
+   consistent shell (header bar + body), instead of two card styles. */
+/* ============================== */
+.ts-card .ts-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.ts-card .ts-card-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    border-radius: var(--border-radius);
+    border-width: 1px;
+    border-style: solid;
+    cursor: pointer;
+    font-family: var(--label-font);
+    font-weight: 400;
+    padding: .5rem 1rem;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.ts-card .ts-card-action-btn .mud-icon-root,
+.ts-card .ts-card-action-btn .material-icons {
+    font-size: 1.1rem;
+}
+
+.ts-card  .ts-card-action-btn:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+/* Default (blue) primary/secondary — each card recolors these by id. */
+.ts-card .ts-card-action-btn--primary {
+    background-color: var(--base-blue);
+    border-color: var(--base-blue);
+    color: var(--off-white);
+}
+
+.ts-card .ts-card-action-btn--primary:hover:not(:disabled) {
+    background-color: var(--blue-8);
+}
+
+.ts-card .ts-card-action-btn--secondary {
+    background-color: var(--white);
+    border: 1px solid var(--blue-6);
+    color: var(--blue-7);
+}
+
+.ts-card .ts-card-action-btn--secondary:hover:not(:disabled) {
+    background-color: var(--blue-1);
+}
+
+@media (max-width: 600px) {
+    .ts-card-actions {
+        flex-direction: column;
+    }
+
+    .ts-card-action-btn {
+        justify-content: center;
+        width: 100%;
+    }
 }
 
 .ts-card-section {
@@ -129,12 +200,13 @@
    values in a compact detail panel instead.
 ========================================== */
 
-
+/* toggle column: hidden above the breakpoint */
 .row-expand-th,
 .row-expand-td {
     display: none;
 }
 
+/* Rows are tappable — the whole row opens the item in a read-only view */
 .card-table-row,
 .credit-row,
 .expense-row,
@@ -168,6 +240,7 @@
     background-color: var(--blue-1);
 }
 
+/* detail panel row, injected under an expanded row */
 .row-detail {
     display: none;
 }
@@ -301,7 +374,7 @@
 
 /* ---- Tab Buttons ---- */
 /* ===================== */
-.ts-tabbed-card div.ts-tabbed-card-btn-container {
+.ts-tabbed-card .ts-tabbed-card-btn-container {
     background-color: var(--white-background);
     display: flex;
     flex-direction: row;
@@ -414,6 +487,18 @@
     border-bottom: 2px solid var(--blue-4);
 }
 
+.th-left, .td-left {
+    text-align: left !important;
+}
+
+.th-right, .td-right {
+    text-align: right !important;
+}
+
+.th-center, .td-center {
+    text-align: center !important;
+}
+
 .card-th-action {
     width: 2rem;
     text-align: center;
@@ -452,7 +537,7 @@
 }
 
 .card-td-2, .card-td-3, .card-td-4 {
-    text-align: right;
+
 }
 
 .card-td-action-container {

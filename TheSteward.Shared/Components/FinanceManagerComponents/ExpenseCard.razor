@@ -2,199 +2,184 @@
 
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 
-<MudCard id="expenseCard" class="ts-tabbed-card" Elevation="0">
 
-    <MudCardActions class="ts-tabbed-card-btn-container">
-        @if (!IsReadOnly)
+<BaseBudgetCard Title="Expenses"
+                HeaderTotals="_expensesTotal"
+                IsReadOnly="IsReadOnly"
+                OnAdd="HandleAddExpense"
+                OnDetails="HandleOpenBudgetCategories"
+                DetailsButtonIcon="category"
+                DetailsButtonTooltip="Budget Categories">
+
+
+        @if (!Expenses.Any())
         {
-            <MudButton id="openBudgetCategoriesBtn"
-                       class="ts-tab-btn budget-categories-btn"
-                       StartIcon="@Icons.Material.Filled.Category"
-                       OnClick="HandleOpenBudgetCategories">
-                Budget Categories
-            </MudButton>
-
-            <MudButton id="addExpenseBtn"
-                       class="ts-tab-btn add-expense-btn"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="HandleAddExpense">
-                Add Expense
-            </MudButton>
+            <div class="card-empty-state">
+                <span class="material-icons card-empty-icon">receipt_long</span>
+                <p class="card-empty-text">No expenses added yet.</p>
+            </div>
         }
-    </MudCardActions>
-
-    <MudCardContent class="ts-card-content">
-
-        <MudCardHeader Class="ts-tabbed-card-header">
-            <CardHeaderContent>
-                <h3 class="ts-tabbed-card-title">
-                    <span class="ts-label">Expenses</span>
-                </h3>
-            </CardHeaderContent>
-        </MudCardHeader>
-
-        <div class="ts-card-body">
-            @if (!Expenses.Any())
+        else
+        {
+            @foreach (var category in Expenses
+               .GroupBy(e => e.BudgetCategoryId)
+               .OrderBy(g => g.First().BudgetCategory?.DisplayOrder ?? int.MaxValue))
             {
-                <div class="expense-empty-state">
-                    <span class="material-icons expense-empty-icon">receipt_long</span>
-                    <p class="expense-empty-text">No expenses added yet.</p>
-                </div>
-            }
-            else
-            {
-                @foreach (var category in Expenses
-                   .GroupBy(e => e.BudgetCategoryId)
-                   .OrderBy(g => g.First().BudgetCategory?.DisplayOrder ?? int.MaxValue))
-                {
-                    var categoryKey = category.Key;
-                    var categoryName = category.First().BudgetCategory?.BudgetCategoryName ?? "Uncategorized";
-                    var categoryTotal = category.Sum(e => e.AmountDue);
-                    var isExpanded = !collapsedCategories.Contains(categoryKey);
+                var categoryKey  = category.Key;
+                var categoryName = category.First().BudgetCategory?.BudgetCategoryName ?? "Uncategorized";
+                var categoryTotal = category.Sum(e => e.AmountDue);
+                var isExpanded   = !collapsedCategories.Contains(categoryKey);
 
-                    <section class="ts-card-section expense-category-section">
+                <section class="ts-card-section expense-category-section">
 
-                        <div class="expense-category-header @(isExpanded ? "" : "expense-category-header--collapsed")"
-                             @onclick="() => ToggleCategory(categoryKey)">
-                            <div class="expense-category-header-left">
-                                <span class="material-icons expense-category-chevron">
-                                    @(isExpanded ? "expand_more" : "chevron_right")
-                                </span>
-                                <span class="expense-category-name">@categoryName</span>
-                                <span class="expense-category-count">
-                                    @category.Count() item@(category.Count() == 1 ? "" : "s")
-                                </span>
-                            </div>
-                            <span class="expense-category-total">@categoryTotal.ToString("C")</span>
+                    @* Category header — matches bbc-header visual language *@
+                    <div class="bbc-header expense-category-header @(isExpanded ? "" : "bbc-header--collapsed")"
+                         @onclick="() => ToggleCategory(categoryKey)"
+                         role="button"
+                         tabindex="0"
+                         @onkeydown='(e) => { if (e.Key == "Enter" || e.Key == " ") ToggleCategory(categoryKey); }'>
+
+                        <span class="material-icons bbc-chevron @(isExpanded ? "bbc-chevron--open" : "")">
+                            chevron_right
+                        </span>
+
+                        <span class="bbc-title">@categoryName</span>
+
+                        <div class="bbc-totals">
+                            <span class="bbc-total-chip">
+                                <span class="bbc-total-label">@category.Count() item@(category.Count() == 1 ? "" : "s")</span>
+                                <span class="bbc-total-value">@categoryTotal.ToString("C")</span>
+                            </span>
                         </div>
 
-                        @if (isExpanded)
-                        {
-                            <table class="expense-table">
-                                <thead>
-                                    <tr>
-                                        <th class="expense-th row-expand-th"></th>
-                                        <th class="expense-th expense-th-name">Name</th>
-                                        <th class="expense-th expense-th-text mobile-hide">Subcategory</th>
-                                        <th class="expense-th expense-th-text mobile-hide">Due</th>
-                                        <th class="expense-th expense-th-amount">Amount</th>
+                    </div>
+
+                    @if (isExpanded)
+                    {
+                        <table class="card-table expense-table">
+                            <thead>
+                                <tr>
+                                    <th class="card-th row-expand-th"></th>
+                                    <th class="card-th th-left">Name</th>
+                                    <th class="card-th th-left mobile-hide">Subcategory</th>
+                                    <th class="card-th th-left mobile-hide">Due</th>
+                                    <th class="card-th th-right">Amount</th>
+                                    @if (!IsReadOnly)
+                                    {
+                                        <th class="card-th card-th-action mobile-hide"></th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var expense in category
+                                    .OrderBy(e => e.BudgetSubCategory?.DisplayOrder ?? int.MaxValue)
+                                    .ThenBy(e => e.DisplayOrder))
+                                {
+                                    <tr class="card-table-row" @onclick="() => HandleRowView(expense)">
+                                        <td class="card-td row-expand-td">
+                                            <button class="row-expand-btn @(IsRowExpanded(expense.ExpenseId) ? "is-expanded" : "")"
+                                                    title="Show details"
+                                                    @onclick="() => ToggleRowExpand(expense.ExpenseId)"
+                                                    @onclick:stopPropagation="true">
+                                                <span class="material-icons">chevron_right</span>
+                                            </button>
+                                        </td>
+                                        <td class="card-td card-td-1 td-left expense-td-name">
+                                            @expense.ExpenseName
+                                            @if (expense.LinkedCreditDto != null)
+                                            {
+                                                <span class="expense-linked-badge expense-linked-badge--credit"
+                                                      title="Linked to credit: @expense.LinkedCreditDto.CreditName">
+                                                    <span class="material-icons" style="font-size: 11px;">credit_card</span>
+                                                </span>
+                                            }
+                                            @if (expense.LinkedInvestmentDto != null)
+                                            {
+                                                <span class="expense-linked-badge expense-linked-badge--investment"
+                                                      title="Linked to investment: @expense.LinkedInvestmentDto.InvestmentName">
+                                                    <span class="material-icons" style="font-size: 11px;">savings</span>
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="card-td td-left mobile-hide">
+                                            @if (expense.BudgetSubCategory != null)
+                                            {
+                                                <span class="bc-sub-badge">
+                                                    @expense.BudgetSubCategory.BudgetSubCategoryName
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="card-td-empty">—</span>
+                                            }
+                                        </td>
+                                        <td class="card-td td-left expense-td-due mobile-hide">
+                                            @(expense.DueDay == 31 ? "Last day" : $"Day {expense.DueDay}")
+                                        </td>
+                                        <td class="card-td td-right">
+                                            @expense.AmountDue.ToString("C")
+                                        </td>
                                         @if (!IsReadOnly)
                                         {
-                                            <th class="expense-th expense-th-action mobile-hide"></th>
-                                        }
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var expense in category
-                                        .OrderBy(e => e.BudgetSubCategory?.DisplayOrder ?? int.MaxValue)
-                                        .ThenBy(e => e.DisplayOrder))
-                                    {
-                                        <tr class="expense-row" @onclick="() => HandleRowView(expense)">
-                                            <td class="expense-td row-expand-td">
-                                                <button class="row-expand-btn @(IsRowExpanded(expense.ExpenseId) ? "is-expanded" : "")"
-                                                        title="Show details"
-                                                        @onclick="() => ToggleRowExpand(expense.ExpenseId)"
+                                            <td class="card-td card-td-action-container mobile-hide">
+                                                <button class="card-row-btn card-row-btn--delete"
+                                                        title="Delete"
+                                                        @onclick="() => HandleRowDelete(expense)"
                                                         @onclick:stopPropagation="true">
-                                                    <span class="material-icons">chevron_right</span>
+                                                    <span class="material-icons">delete</span>
                                                 </button>
                                             </td>
-                                            <td class="expense-td expense-td-name">
-                                                @expense.ExpenseName
-                                                @if (expense.LinkedCreditDto != null)
-                                                {
-                                                    <span class="expense-linked-badge expense-linked-badge--credit"
-                                                          title="Linked to credit: @expense.LinkedCreditDto.CreditName">
-                                                        <span class="material-icons" style="font-size: 11px;">credit_card</span>
-                                                    </span>
-                                                }
-                                                @if (expense.LinkedInvestmentDto != null)
-                                                {
-                                                    <span class="expense-linked-badge expense-linked-badge--investment"
-                                                          title="Linked to investment: @expense.LinkedInvestmentDto.InvestmentName">
-                                                        <span class="material-icons" style="font-size: 11px;">savings</span>
-                                                    </span>
-                                                }
-                                            </td>
-                                            <td class="expense-td expense-td-text mobile-hide">
-                                                @if (expense.BudgetSubCategory != null)
-                                                {
-                                                    <span class="expense-sub-badge">
-                                                        @expense.BudgetSubCategory.BudgetSubCategoryName
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="expense-td-empty">—</span>
-                                                }
-                                            </td>
-                                            <td class="expense-td expense-td-text expense-td-due mobile-hide">
-                                                @(expense.DueDay == 31 ? "Last day" : $"Day {expense.DueDay}")
-                                            </td>
-                                            <td class="expense-td expense-td-amount">
-                                                @expense.AmountDue.ToString("C")
-                                            </td>
-                                            @if (!IsReadOnly)
-                                            {
-                                                <td class="expense-td expense-td-action mobile-hide">
-                                                    <button class="expense-row-btn expense-row-btn--delete"
-                                                            title="Delete"
-                                                            @onclick="() => HandleRowDelete(expense)"
-                                                            @onclick:stopPropagation="true">
-                                                        <span class="material-icons">delete</span>
-                                                    </button>
-                                                </td>
-                                            }
-                                        </tr>
-                                        @if (IsRowExpanded(expense.ExpenseId))
-                                        {
-                                            <tr class="row-detail is-open">
-                                                <td class="row-detail-cell" colspan="@TotalColumns">
-                                                    <div class="row-detail-grid">
-                                                        <div class="row-detail-item">
-                                                            <span class="row-detail-label">Subcategory</span>
-                                                            <span class="row-detail-value">@(expense.BudgetSubCategory?.BudgetSubCategoryName ?? "—")</span>
-                                                        </div>
-                                                        <div class="row-detail-item">
-                                                            <span class="row-detail-label">Due</span>
-                                                            <span class="row-detail-value">@(expense.DueDay == 31 ? "Last day" : $"Day {expense.DueDay}")</span>
-                                                        </div>
-                                                    </div>
-                                                    @if (!IsReadOnly)
-                                                    {
-                                                        <div class="row-detail-actions">
-                                                            <button class="expense-row-btn expense-row-btn--edit"
-                                                                    title="Edit"
-                                                                    @onclick="() => HandleRowEdit(expense)">
-                                                                <span class="material-icons">edit</span>
-                                                            </button>
-                                                            <button class="expense-row-btn expense-row-btn--delete"
-                                                                    title="Delete"
-                                                                    @onclick="() => HandleRowDelete(expense)">
-                                                                <span class="material-icons">delete</span>
-                                                            </button>
-                                                        </div>
-                                                    }
-                                                </td>
-                                            </tr>
                                         }
+                                    </tr>
+                                    @if (IsRowExpanded(expense.ExpenseId))
+                                    {
+                                        <tr class="row-detail is-open">
+                                            <td class="row-detail-cell" colspan="@TotalColumns">
+                                                <div class="row-detail-grid">
+                                                    <div class="row-detail-item">
+                                                        <span class="row-detail-label">Subcategory</span>
+                                                        <span class="row-detail-value">@(expense.BudgetSubCategory?.BudgetSubCategoryName ?? "—")</span>
+                                                    </div>
+                                                    <div class="row-detail-item">
+                                                        <span class="row-detail-label">Due</span>
+                                                        <span class="row-detail-value">@(expense.DueDay == 31 ? "Last day" : $"Day {expense.DueDay}")</span>
+                                                    </div>
+                                                </div>
+                                                @if (!IsReadOnly)
+                                                {
+                                                    <div class="row-detail-actions">
+                                                        <button class="card-row-btn card-row-btn--edit"
+                                                                title="Edit"
+                                                                @onclick="() => HandleRowEdit(expense)">
+                                                            <span class="material-icons">edit</span>
+                                                        </button>
+                                                        <button class="card-row-btn card-row-btn--delete"
+                                                                title="Delete"
+                                                                @onclick="() => HandleRowDelete(expense)">
+                                                            <span class="material-icons">delete</span>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </td>
+                                        </tr>
                                     }
-                                </tbody>
-                            </table>
-                        }
+                                }
+                            </tbody>
+                        </table>
+                    }
 
-                    </section>
-                }
-
-                <!-- Grand Total -->
-                <div class="expense-grand-total">
-                    <span class="expense-grand-total-label">Total Monthly Expenses</span>
-                    <span class="expense-grand-total-value">@Expenses.Sum(e => e.AmountDue).ToString("C")</span>
-                </div>
+                </section>
             }
-        </div>
 
-    </MudCardContent>
-</MudCard>
+            @* Grand Total *@
+            <div class="expense-grand-total">
+                <span class="expense-grand-total-label">Total Monthly Expenses</span>
+                <span class="expense-grand-total-value">@Expenses.Sum(e => e.AmountDue).ToString("C")</span>
+            </div>
+        }
+
+        
+</BaseBudgetCard>
 
 @code {
     [Parameter, EditorRequired]
@@ -212,7 +197,7 @@
     [Parameter]
     public EventCallback<ExpenseDto> OnEditExpense { get; set; }
 
-    /// <summary>Row tap (any device) — parent opens the item in read-only view mode.</summary>
+    /// <summary>Row tap — parent opens item in read-only view mode.</summary>
     [Parameter]
     public EventCallback<ExpenseDto> OnViewExpense { get; set; }
 
@@ -222,10 +207,23 @@
     [Parameter]
     public EventCallback OnOpenBudgetCategories { get; set; }
 
-    private async Task HandleOpenBudgetCategories() =>
-        await OnOpenBudgetCategories.InvokeAsync();
+    private async Task HandleOpenBudgetCategories() => await OnOpenBudgetCategories.InvokeAsync();
+    private async Task HandleAddExpense()            => await OnAddExpense.InvokeAsync();
+    private async Task HandleRowEdit(ExpenseDto e)   => await OnEditExpense.InvokeAsync(e);
+    private async Task HandleRowView(ExpenseDto e)   => await OnViewExpense.InvokeAsync(e);
+    private async Task HandleRowDelete(ExpenseDto e) => await OnDeleteExpense.InvokeAsync(e);
 
     private readonly HashSet<Guid> collapsedCategories = new();
+    
+    // ── Header totals ────────────────────────────────────────────────────────────
+
+    private List<BaseBudgetCard.BudgetCardTotal> _expensesTotal =>
+        new()
+        {
+            new BaseBudgetCard.BudgetCardTotal(
+                "Total",
+                Expenses.Sum(e => e.AmountDue).ToString("C"))
+        };
 
     private void ToggleCategory(Guid categoryId)
     {
@@ -233,28 +231,12 @@
             collapsedCategories.Remove(categoryId);
     }
 
-    private async Task HandleAddExpense() =>
-        await OnAddExpense.InvokeAsync();
-
-    private async Task HandleRowEdit(ExpenseDto expense) =>
-        await OnEditExpense.InvokeAsync(expense);
-
-    private async Task HandleRowView(ExpenseDto expense) =>
-        await OnViewExpense.InvokeAsync(expense);
-
-    private async Task HandleRowDelete(ExpenseDto expense) =>
-        await OnDeleteExpense.InvokeAsync(expense);
-
-    /// <summary>Tracks which rows have their mobile detail panel open.</summary>
     private readonly HashSet<Guid> expandedRows = new();
+    private int TotalColumns => IsReadOnly ? 5 : 6;
+    private bool IsRowExpanded(Guid id) => expandedRows.Contains(id);
 
-    private int TotalColumns => (IsReadOnly ? 5 : 6);
-
-    private bool IsRowExpanded(Guid expenseId) => expandedRows.Contains(expenseId);
-
-    private void ToggleRowExpand(Guid expenseId)
+    private void ToggleRowExpand(Guid id)
     {
-        if (!expandedRows.Add(expenseId))
-            expandedRows.Remove(expenseId);
+        if (!expandedRows.Add(id)) expandedRows.Remove(id);
     }
 }

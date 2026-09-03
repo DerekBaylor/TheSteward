@@ -49,6 +49,8 @@
         background-color: var(--orange-9);
         color: var(--off-white);
     }
+    
+    
 
 .ts-btn.ts-cancel-btn {
     background-color: var(--gray-2);
@@ -62,6 +64,22 @@
     .ts-btn.ts-cancel-btn:active {
         background-color: var(--gray-3);
     }
+    
+    
+.ts-btn.ts-info-btn {
+    /*background-color: var(--gray-2);*/
+    border: solid 1px var(--blue3);
+    color: var(--gray-8);
+}    
+    .ts-btn.ts-info-btn:hover {
+         background-color: var(--blue-1);
+     }
+
+    .ts-btn.ts-info-btn:active {
+        background-color: var(--blue-3);
+    }
+
+    
 
 .ts-btn.ts-submit-btn {
     background-color: var(--base-green);

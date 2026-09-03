@@ -2,193 +2,171 @@
 
 @using TheSteward.Core.Dtos.FinanceManagerDtos
 @using static TheSteward.Core.Utils.FinanceManagerUtils.FinanceManagerConstants
+@using static TheSteward.Shared.Components.FinanceManagerComponents.BaseBudgetCard
 
-<MudCard id="creditCard" class="ts-tabbed-card" Elevation="0">
+<BaseBudgetCard Title="Credit &amp; Debt"
+                HeaderTotals="_headerTotals"
+                IsReadOnly="IsReadOnly"
+                OnAdd="HandleAddCredit"
+                OnDetails="HandleShowCreditDetails">
 
-    <MudCardActions class="ts-tabbed-card-btn-container">
-        @if (!IsReadOnly)
-        {
-            <MudButton id="addCreditBtn"
-                       class="ts-tab-btn add-credit-btn"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="HandleAddCredit">
-                Add Credit
-            </MudButton>
-        }
-        <MudButton id="showCreditDetails"
-                   class="ts-tab-btn credit-details-btn"
-                   StartIcon="@Icons.Material.Filled.FileOpen"
-                   OnClick="HandleShowCreditDetails"
-                   Disabled="!Credits.Any()">
-            Credit Details
-        </MudButton>
-    </MudCardActions>
-
-    <MudCardContent class="ts-card-content">
-
-        <MudCardHeader Class="ts-tabbed-card-header">
-            <CardHeaderContent>
-                <h3 class="ts-tabbed-card-title">
-                    <span class="ts-label">Credit &amp; Debt</span>
-                </h3>
-            </CardHeaderContent>
-        </MudCardHeader>
-
-        <div class="ts-card-body">
-            @if (!Credits.Any())
-            {
-                <div class="credit-empty-state">
-                    <span class="material-icons credit-empty-icon">credit_card_off</span>
-                    <p class="credit-empty-text">No credit or debt accounts added yet.</p>
-                </div>
-            }
-            else
-            {
-                <section class="ts-card-section">
-                    <table class="credit-table">
-                        <thead>
-                            <tr>
-                                <th class="credit-th row-expand-th"></th>
-                                <th class="credit-th credit-th-name">Name</th>
-                                <th class="credit-th credit-th-text mobile-hide">Type</th>
-                                <th class="credit-th credit-th-amount">Balance</th>
-                                <th class="credit-th credit-th-amount mobile-hide">Rate</th>
-                                <th class="credit-th credit-th-amount mobile-hide">Monthly Interest</th>
-                                <th class="credit-th credit-th-amount">Payment</th>
-                                <th class="credit-th credit-th-text mobile-hide">Due</th>
-                                @if (!IsReadOnly)
+    @if (!Credits.Any())
+    {
+        <div class="card-empty-state">
+            <span class="material-icons card-empty-icon">credit_card_off</span>
+            <p class="card-empty-text">No credit or debt accounts added yet.</p>
+        </div>
+    }
+    else
+    {
+        <section class="ts-card-section">
+            <table class="card-table">
+                <thead>
+                    <tr>
+                        <th class="card-th row-expand-th"></th>
+                        <th class="card-th th-left">Name</th>
+                        <th class="card-th th-left mobile-hide">Type</th>
+                        <th class="card-th th-right">Balance</th>
+                        <th class="card-th th-right mobile-hide">Rate</th>
+                        <th class="card-th th-right mobile-hide">Mo. Interest</th>
+                        <th class="card-th th-right">Payment</th>
+                        <th class="card-th th-left mobile-hide">Due</th>
+                        @if (!IsReadOnly)
+                        {
+                            <th class="card-th card-th-action mobile-hide"></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var credit in Credits.OrderBy(c => c.DisplayOrder))
+                    {
+                        <tr class="card-table-row" @onclick="() => HandleRowView(credit)">
+                            <td class="card-td row-expand-td">
+                                <button class="row-expand-btn @(IsRowExpanded(credit.CreditId) ? "is-expanded" : "")"
+                                        title="Show details"
+                                        @onclick="() => ToggleRowExpand(credit.CreditId)"
+                                        @onclick:stopPropagation="true">
+                                    <span class="material-icons">chevron_right</span>
+                                </button>
+                            </td>
+                            <td class="card-td card-td-1 td-left">@credit.CreditName</td>
+                            <td class="card-td td-left mobile-hide">
+                                @if (!string.IsNullOrEmpty(credit.CreditType))
                                 {
-                                    <th class="credit-th credit-th-action mobile-hide"></th>
+                                    <span class="bc-type-badge">@credit.CreditType</span>
                                 }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var credit in Credits.OrderBy(c => c.DisplayOrder))
+                                else
+                                {
+                                    <span class="card-td-empty">—</span>
+                                }
+                            </td>
+                            <td class="card-td td-right">@credit.CurrentValue.ToString("C")</td>
+                            @* Rate — orange accent: high APR warrants attention *@
+                            <td class="card-td td-right bc-td-rate mobile-hide">
+                                @((credit.InterestRate * 100).ToString("F2"))%
+                            </td>
+                            @* Monthly interest — red accent: ongoing cost *@
+                            <td class="card-td td-right bc-td-interest mobile-hide">
+                                @credit.EstMonthlyInterest.ToString("C")
+                            </td>
+                            <td class="card-td td-right">
+                                @credit.PaymentAmount.ToString("C")
+                                <span class="bc-freq-badge">
+                                    @GetFrequencyShortLabel(credit.PaymentFrequency)
+                                </span>
+                            </td>
+                            <td class="card-td td-left mobile-hide">
+                                @(credit.PaymentDay == 31 ? "Last day" : $"Day {credit.PaymentDay}")
+                            </td>
+                            @if (!IsReadOnly)
                             {
-                                <tr class="credit-row" @onclick="() => HandleRowView(credit)">
-                                    <td class="credit-td row-expand-td">
-                                        <button class="row-expand-btn @(IsRowExpanded(credit.CreditId) ? "is-expanded" : "")"
-                                                title="Show details"
-                                                @onclick="() => ToggleRowExpand(credit.CreditId)"
-                                                @onclick:stopPropagation="true">
-                                            <span class="material-icons">chevron_right</span>
-                                        </button>
-                                    </td>
-                                    <td class="credit-td credit-td-name">@credit.CreditName</td>
-                                    <td class="credit-td credit-td-text mobile-hide">
-                                        @if (!string.IsNullOrEmpty(credit.CreditType))
-                                        {
-                                            <span class="credit-type-badge">@credit.CreditType</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="credit-td-empty">—</span>
-                                        }
-                                    </td>
-                                    <td class="credit-td credit-td-amount">@credit.CurrentValue.ToString("C")</td>
-                                    <td class="credit-td credit-td-amount credit-td-rate mobile-hide">
-                                        @((credit.InterestRate * 100).ToString("F2"))%
-                                    </td>
-                                    <td class="credit-td credit-td-amount credit-td-interest mobile-hide">
-                                        @credit.EstMonthlyInterest.ToString("C")
-                                    </td>
-                                    <td class="credit-td credit-td-amount">
-                                        @credit.PaymentAmount.ToString("C")
-                                        <span class="credit-freq-badge">
-                                            @GetFrequencyShortLabel(credit.PaymentFrequency)
-                                        </span>
-                                    </td>
-                                    <td class="credit-td credit-td-text mobile-hide">
-                                        @(credit.PaymentDay == 31 ? "Last day" : $"Day {credit.PaymentDay}")
-                                    </td>
+                                <td class="card-td card-td-action-container mobile-hide">
+                                    <button class="card-row-btn card-row-btn--delete"
+                                            title="Delete"
+                                            @onclick="() => HandleRowDelete(credit)"
+                                            @onclick:stopPropagation="true">
+                                        <span class="material-icons">delete</span>
+                                    </button>
+                                </td>
+                            }
+                        </tr>
+                        @if (IsRowExpanded(credit.CreditId))
+                        {
+                            <tr class="row-detail is-open">
+                                <td class="row-detail-cell" colspan="@TotalColumns">
+                                    <div class="row-detail-grid">
+                                        <div class="row-detail-item">
+                                            <span class="row-detail-label">Type</span>
+                                            <span class="row-detail-value">@(string.IsNullOrEmpty(credit.CreditType) ? "—" : credit.CreditType)</span>
+                                        </div>
+                                        <div class="row-detail-item">
+                                            <span class="row-detail-label">Rate</span>
+                                            <span class="row-detail-value bc-td-rate">@((credit.InterestRate * 100).ToString("F2"))%</span>
+                                        </div>
+                                        <div class="row-detail-item">
+                                            <span class="row-detail-label">Monthly Interest</span>
+                                            <span class="row-detail-value bc-td-interest">@credit.EstMonthlyInterest.ToString("C")</span>
+                                        </div>
+                                        <div class="row-detail-item">
+                                            <span class="row-detail-label">Due</span>
+                                            <span class="row-detail-value">@(credit.PaymentDay == 31 ? "Last day" : $"Day {credit.PaymentDay}")</span>
+                                        </div>
+                                    </div>
                                     @if (!IsReadOnly)
                                     {
-                                        <td class="credit-td credit-td-action mobile-hide">
-                                            <button class="credit-row-btn credit-row-btn--delete"
+                                        <div class="row-detail-actions">
+                                            <button class="card-row-btn card-row-btn--edit"
+                                                    title="Edit"
+                                                    @onclick="() => HandleRowEdit(credit)">
+                                                <span class="material-icons">edit</span>
+                                            </button>
+                                            <button class="card-row-btn card-row-btn--delete"
                                                     title="Delete"
-                                                    @onclick="() => HandleRowDelete(credit)"
-                                                    @onclick:stopPropagation="true">
+                                                    @onclick="() => HandleRowDelete(credit)">
                                                 <span class="material-icons">delete</span>
                                             </button>
-                                        </td>
+                                        </div>
                                     }
-                                </tr>
-                                @if (IsRowExpanded(credit.CreditId))
-                                {
-                                    <tr class="row-detail is-open">
-                                        <td class="row-detail-cell" colspan="@TotalColumns">
-                                            <div class="row-detail-grid">
-                                                <div class="row-detail-item">
-                                                    <span class="row-detail-label">Type</span>
-                                                    <span class="row-detail-value">@(string.IsNullOrEmpty(credit.CreditType) ? "—" : credit.CreditType)</span>
-                                                </div>
-                                                <div class="row-detail-item">
-                                                    <span class="row-detail-label">Rate</span>
-                                                    <span class="row-detail-value">@((credit.InterestRate * 100).ToString("F2"))%</span>
-                                                </div>
-                                                <div class="row-detail-item">
-                                                    <span class="row-detail-label">Monthly Interest</span>
-                                                    <span class="row-detail-value">@credit.EstMonthlyInterest.ToString("C")</span>
-                                                </div>
-                                                <div class="row-detail-item">
-                                                    <span class="row-detail-label">Due</span>
-                                                    <span class="row-detail-value">@(credit.PaymentDay == 31 ? "Last day" : $"Day {credit.PaymentDay}")</span>
-                                                </div>
-                                            </div>
-                                            @if (!IsReadOnly)
-                                            {
-                                                <div class="row-detail-actions">
-                                                    <button class="credit-row-btn credit-row-btn--edit"
-                                                            title="Edit"
-                                                            @onclick="() => HandleRowEdit(credit)">
-                                                        <span class="material-icons">edit</span>
-                                                    </button>
-                                                    <button class="credit-row-btn credit-row-btn--delete"
-                                                            title="Delete"
-                                                            @onclick="() => HandleRowDelete(credit)">
-                                                        <span class="material-icons">delete</span>
-                                                    </button>
-                                                </div>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr class="credit-totals-row">
-                                <td class="credit-td row-expand-td"></td>
-                                <td class="credit-td credit-td-name credit-totals-label">Total</td>
-                                <td class="credit-td credit-td-text mobile-hide"></td>
-                                <td class="credit-td credit-td-amount credit-totals-value">
-                                    @Credits.Sum(c => c.CurrentValue).ToString("C")
                                 </td>
-                                <td class="credit-td credit-td-amount mobile-hide"></td>
-                                <td class="credit-td credit-td-amount credit-totals-value mobile-hide">
-                                    @Credits.Sum(c => c.EstMonthlyInterest).ToString("C")
-                                </td>
-                                <td class="credit-td credit-td-amount credit-totals-value">
-                                    @*
-                                        Payments have mixed frequencies — show yearly total instead.
-                                    *@
-                                    @Credits.Sum(c => c.PaymentAmount * (decimal)(int)c.PaymentFrequency).ToString("C") / yr
-                                </td>
-                                <td class="credit-td credit-td-text mobile-hide"></td>
-                                @if (!IsReadOnly)
-                                {
-                                    <td class="credit-td credit-td-action mobile-hide"></td>
-                                }
                             </tr>
-                        </tfoot>
-                    </table>
-                </section>
-            }
-        </div>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="card-table-footer">
+                        <td class="card-td row-expand-td"></td>
+                        <td class="card-td card-td-footer-1 td-left">Total</td>
+                        <td class="card-td mobile-hide"></td>
+                        @* Balance total *@
+                        <td class="card-td card-footer-td-2 td-right">
+                            @Credits.Sum(c => c.CurrentValue).ToString("C")
+                        </td>
+                        @* Rate column — no meaningful aggregate *@
+                        <td class="card-td mobile-hide"></td>
+                        @* Monthly interest total *@
+                        <td class="card-td card-footer-td-3 td-right mobile-hide">
+                            @Credits.Sum(c => c.EstMonthlyInterest).ToString("C")
+                        </td>
+                        @* Yearly payment total (mixed frequencies) *@
+                        <td class="card-td card-footer-td-3 td-right">
+                            @Credits.Sum(c => c.PaymentAmount * (decimal)(int)c.PaymentFrequency).ToString("C")
+                            <span class="bc-freq-badge">/ yr</span>
+                        </td>
+                        <td class="card-td mobile-hide"></td>
+                        @if (!IsReadOnly)
+                        {
+                            <td class="card-td mobile-hide"></td>
+                        }
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+    }
 
-    </MudCardContent>
-</MudCard>
+</BaseBudgetCard>
 
 @code {
+
     [Parameter, EditorRequired]
     public List<CreditDto> Credits { get; set; } = new();
 
@@ -204,47 +182,47 @@
     [Parameter]
     public EventCallback<CreditDto> OnEditCredit { get; set; }
 
-    /// <summary>Row tap (any device) — parent opens the item in read-only view mode.</summary>
+    /// <summary>Row tap — parent opens item in read-only view mode.</summary>
     [Parameter]
     public EventCallback<CreditDto> OnViewCredit { get; set; }
 
     [Parameter]
     public EventCallback<CreditDto> OnDeleteCredit { get; set; }
 
-    private async Task HandleAddCredit() =>
-        await OnAddCredit.InvokeAsync();
+    // ── Header totals ────────────────────────────────────────────────────────────
 
-    private async Task HandleShowCreditDetails() =>
-        await OnOpenCreditDetails.InvokeAsync();
-
-    private async Task HandleRowEdit(CreditDto credit) =>
-        await OnEditCredit.InvokeAsync(credit);
-
-    private async Task HandleRowView(CreditDto credit) =>
-        await OnViewCredit.InvokeAsync(credit);
-
-    private async Task HandleRowDelete(CreditDto credit) =>
-        await OnDeleteCredit.InvokeAsync(credit);
-
-    /// <summary>Tracks which rows have their mobile detail panel open.</summary>
-    private readonly HashSet<Guid> expandedRows = new();
-
-    private int TotalColumns => (IsReadOnly ? 8 : 9);
-
-    private bool IsRowExpanded(Guid creditId) => expandedRows.Contains(creditId);
-
-    private void ToggleRowExpand(Guid creditId)
+    private List<BudgetCardTotal> _headerTotals => new()
     {
-        if (!expandedRows.Add(creditId))
-            expandedRows.Remove(creditId);
+        new("Balance",     Credits.Sum(c => c.CurrentValue).ToString("C")),
+        new("Mo. Interest", Credits.Sum(c => c.EstMonthlyInterest).ToString("C")),
+        new("Yearly Pmts", Credits.Sum(c => c.PaymentAmount * (decimal)(int)c.PaymentFrequency).ToString("C")),
+    };
+
+    // ── Handlers ─────────────────────────────────────────────────────────────────
+
+    private async Task HandleAddCredit()               => await OnAddCredit.InvokeAsync();
+    private async Task HandleShowCreditDetails()       => await OnOpenCreditDetails.InvokeAsync();
+    private async Task HandleRowEdit(CreditDto c)      => await OnEditCredit.InvokeAsync(c);
+    private async Task HandleRowView(CreditDto c)      => await OnViewCredit.InvokeAsync(c);
+    private async Task HandleRowDelete(CreditDto c)    => await OnDeleteCredit.InvokeAsync(c);
+
+    // ── Row expand ───────────────────────────────────────────────────────────────
+
+    private readonly HashSet<Guid> expandedRows = new();
+    private int TotalColumns => IsReadOnly ? 8 : 9;
+    private bool IsRowExpanded(Guid id) => expandedRows.Contains(id);
+
+    private void ToggleRowExpand(Guid id)
+    {
+        if (!expandedRows.Add(id)) expandedRows.Remove(id);
     }
 
     private static string GetFrequencyShortLabel(FrequencyEnum freq) => freq switch
     {
-        FrequencyEnum.Weekly => "/ wk",
-        FrequencyEnum.BiWeekly => "/ 2wk",
+        FrequencyEnum.Weekly    => "/ wk",
+        FrequencyEnum.BiWeekly  => "/ 2wk",
         FrequencyEnum.BiMonthly => "/ 2mo",
-        FrequencyEnum.Monthly => "/ mo",
-        _ => $"×{(int)freq}/yr"
+        FrequencyEnum.Monthly   => "/ mo",
+        _                       => $"×{(int)freq}/yr"
     };
 }

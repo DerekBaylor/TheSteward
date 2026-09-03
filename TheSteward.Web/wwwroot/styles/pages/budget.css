@@ -40,7 +40,8 @@
         flex-direction: column;
     }
 
-    .budget-col-left {
+    .budget-col-left,
+    .budget-col-right {
         width: 95vw;
     }
 }
@@ -53,7 +54,7 @@
 @media (max-width: 600px) {
     .budget-layout {
         flex-direction: column;
-        padding: .5rem;
+        padding: 0;
         gap: 0;
     }
 

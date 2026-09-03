@@ -1,148 +1,121 @@
 ﻿@namespace TheSteward.Shared.Components.FinanceManagerComponents
 
 @using TheSteward.Core.Dtos.FinanceManagerDtos
+@using static TheSteward.Shared.Components.FinanceManagerComponents.BaseBudgetCard
 
-<MudCard id="incomeCard" class="ts-tabbed-card" Elevation="0">
+<BaseBudgetCard Title="Income"
+                HeaderTotals="_headerTotals"
+                IsReadOnly="IsReadOnly"
+                OnAdd="HandleAddIncome"
+                OnDetails="HandleShowIncomeDetails">
 
-        <MudCardActions class="ts-tabbed-card-btn-container">
-    @if (!IsReadOnly)
+    @if (!Incomes.Any())
     {
-            <MudButton id="addIncomeBtn"
-                       class="ts-tab-btn add-income-tab-btn"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="HandleAddIncome">
-                Add Income
-            </MudButton>
+        <div class="card-empty-state">
+            <span class="material-icons card-empty-icon">account_balance_wallet</span>
+            <p class="card-empty-text">No income sources added yet.</p>
+        </div>
     }
-            <MudButton id="showIncomeDetails"
-                       class="ts-tab-btn income-details-tab-btn"
-                       StartIcon="@Icons.Material.Filled.FileOpen"
-                       OnClick="HandleShowIncomeDetails"
-                       Disabled="!Incomes.Any()">
-                Income Details
-            </MudButton>
-        </MudCardActions>
-
-    <MudCardContent class="ts-card-content">
-
-        <MudCardHeader Class="ts-tabbed-card-header">
-            <CardHeaderContent>
-                <h3 class="ts-tabbed-card-title">
-                    <span class="ts-label">Income</span>
-                </h3>
-            </CardHeaderContent>
-        </MudCardHeader>
-
-        <div class="ts-card-body">
-            @if (!Incomes.Any())
-            {
-                <div class="card-empty-state">
-                    <span class="material-icons card-empty-icon">account_balance_wallet</span>
-                    <p class="card-empty-text">No income sources added yet.</p>
-                </div>
-            }
-            else
-            {
-                <section class="ts-card-section">
-                    <table class="card-table income-table">
-                        <thead>
-                            <tr>
-                                <th class="card-th row-expand-th"></th>
-                                <th class="card-th income-th-name">Name</th>
-                                <th class="card-th income-th-amount income-th-monthly">Monthly Net</th>
-                                <th class="card-th income-th-amount income-th-yearly mobile-hide">Yearly Net</th>
-                                @if (!IsReadOnly)
-                                {
-                                    <th class="card-th card-th-action income-th-action mobile-hide"></th>
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var income in Incomes)
+    else
+    {
+        <section class="ts-card-section">
+            <table class="card-table">
+                <thead>
+                    <tr>
+                        <th class="card-th row-expand-th"></th>
+                        <th class="card-th th-left">Name</th>
+                        <th class="card-th th-right">Monthly Net</th>
+                        <th class="card-th th-right mobile-hide">Yearly Net</th>
+                        @if (!IsReadOnly)
+                        {
+                            <th class="card-th card-th-action mobile-hide"></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var income in Incomes)
+                    {
+                        <tr class="card-table-row" @onclick="() => HandleRowView(income)">
+                            <td class="card-td row-expand-td">
+                                <button class="row-expand-btn @(IsRowExpanded(income.IncomeId) ? "is-expanded" : "")"
+                                        title="Show details"
+                                        @onclick="() => ToggleRowExpand(income.IncomeId)"
+                                        @onclick:stopPropagation="true">
+                                    <span class="material-icons">chevron_right</span>
+                                </button>
+                            </td>
+                            <td class="card-td card-td-1 td-left">@income.IncomeName</td>
+                            <td class="card-td card-td-2 td-right">@income.MonthlyNetIncome.ToString("C")</td>
+                            <td class="card-td card-td-3 td-right mobile-hide">@((income.MonthlyNetIncome * 12).ToString("C"))</td>
+                            @if (!IsReadOnly)
                             {
-                                <tr class="card-table-row income-row" @onclick="() => HandleRowView(income)">
-                                    <td class="card-td row-expand-td">
-                                        <button class="row-expand-btn @(IsRowExpanded(income.IncomeId) ? "is-expanded" : "")"
-                                                title="Show details"
-                                                @onclick="() => ToggleRowExpand(income.IncomeId)"
-                                                @onclick:stopPropagation="true">
-                                            <span class="material-icons">chevron_right</span>
-                                        </button>
-                                    </td>
-                                    <td class="card-td card-td-1 income-td-name">@income.IncomeName</td>
-                                    <td class="card-td card-td-2 income-td-amount income-th-monthly">@income.MonthlyNetIncome.ToString("C")</td>
-                                    <td class="card-td card-td-3 income-td-amount income-th-yearly mobile-hide">@((income.MonthlyNetIncome * 12).ToString("C"))</td>
+                                <td class="card-td card-td-action-container mobile-hide">
+                                    <button class="card-row-btn card-row-btn--delete"
+                                            title="Delete"
+                                            @onclick="() => HandleRowDelete(income)"
+                                            @onclick:stopPropagation="true">
+                                        <span class="material-icons">delete</span>
+                                    </button>
+                                </td>
+                            }
+                        </tr>
+                        @if (IsRowExpanded(income.IncomeId))
+                        {
+                            <tr class="row-detail is-open">
+                                <td class="row-detail-cell" colspan="@TotalColumns">
+                                    <div class="row-detail-grid">
+                                        <div class="row-detail-item">
+                                            <span class="row-detail-label">Yearly Net</span>
+                                            <span class="row-detail-value">@((income.MonthlyNetIncome * 12).ToString("C"))</span>
+                                        </div>
+                                    </div>
                                     @if (!IsReadOnly)
                                     {
-                                        <td class="card-td income-td-action-container mobile-hide">
+                                        <div class="row-detail-actions">
+                                            <button class="card-row-btn card-row-btn--edit"
+                                                    title="Edit"
+                                                    @onclick="() => HandleRowEdit(income)">
+                                                <span class="material-icons">edit</span>
+                                            </button>
                                             <button class="card-row-btn card-row-btn--delete"
                                                     title="Delete"
-                                                    @onclick="() => HandleRowDelete(income)"
-                                                    @onclick:stopPropagation="true">
+                                                    @onclick="() => HandleRowDelete(income)">
                                                 <span class="material-icons">delete</span>
                                             </button>
-                                        </td>
+                                        </div>
                                     }
-                                </tr>
-                                @if (IsRowExpanded(income.IncomeId))
-                                {
-                                    <tr class="row-detail is-open">
-                                        <td class="row-detail-cell" colspan="@TotalColumns">
-                                            <div class="row-detail-grid">
-                                                <div class="row-detail-item">
-                                                    <span class="row-detail-label">Yearly Net</span>
-                                                    <span class="row-detail-value">@((income.MonthlyNetIncome * 12).ToString("C"))</span>
-                                                </div>
-                                            </div>
-                                            @if (!IsReadOnly)
-                                            {
-                                                <div class="row-detail-actions">
-                                                    <button class="card-row-btn card-row-btn--edit"
-                                                            title="Edit"
-                                                            @onclick="() => HandleRowEdit(income)">
-                                                        <span class="material-icons">edit</span>
-                                                    </button>
-                                                    <button class="card-row-btn card-row-btn--delete"
-                                                            title="Delete"
-                                                            @onclick="() => HandleRowDelete(income)">
-                                                        <span class="material-icons">delete</span>
-                                                    </button>
-                                                </div>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr class="card-table-footer income-totals-row">
-                                <td class="card-td row-expand-td"></td>
-                                <td class="card-td card-footer-td-1 income-totals-label">Total</td>
-                                <td class="card-td card-footer-td-2 income-totals-value income-th-monthly">
-                                    @Incomes.Sum(i => i.MonthlyNetIncome).ToString("C")
                                 </td>
-                                <td class="card-td card-footer-td-3 income-totals-value income-th-yearly mobile-hide">
-                                    @Incomes.Sum(i => i.MonthlyNetIncome * 12).ToString("C")
-                                </td>
-                                @if (!IsReadOnly)
-                                {
-                                    <td class="card-td income-td-action mobile-hide"></td>
-                                }
                             </tr>
-                        </tfoot>
-                    </table>
-                </section>
-            }
-        </div>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="card-table-footer">
+                        <td class="card-td row-expand-td"></td>
+                        <td class="card-td card-td-footer-1 td-left">Total</td>
+                        <td class="card-td card-footer-td-2 td-right">
+                            @Incomes.Sum(i => i.MonthlyNetIncome).ToString("C")
+                        </td>
+                        <td class="card-td card-footer-td-3 td-right mobile-hide">
+                            @Incomes.Sum(i => i.MonthlyNetIncome * 12).ToString("C")
+                        </td>
+                        @if (!IsReadOnly)
+                        {
+                            <td class="card-td mobile-hide"></td>
+                        }
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+    }
 
-    </MudCardContent>
-</MudCard>
+</BaseBudgetCard>
 
 @code {
+
     [Parameter, EditorRequired]
     public List<IncomeDto> Incomes { get; set; } = new();
 
-    /// <summary>Hides action buttons when the user only has read access.</summary>
     [Parameter]
     public bool IsReadOnly { get; set; } = false;
 
@@ -152,52 +125,40 @@
     [Parameter]
     public EventCallback OnOpenIncomeDetails { get; set; }
 
-    /// <summary>Passes the currently selected income back so the parent can open an edit form.</summary>
     [Parameter]
     public EventCallback<IncomeDto> OnEditIncome { get; set; }
 
-    /// <summary>Row tap (any device) — parent opens the item in read-only view mode.</summary>
+    /// <summary>Row tap — parent opens item in read-only view mode.</summary>
     [Parameter]
     public EventCallback<IncomeDto> OnViewIncome { get; set; }
 
     [Parameter]
     public EventCallback<IncomeDto> OnDeleteIncome { get; set; }
 
-    private async Task HandleAddIncome()
-    {
-        await OnAddIncome.InvokeAsync();
-    }
+    // ── Header totals ────────────────────────────────────────────────────────────
 
-    private async Task HandleShowIncomeDetails()
+    private List<BudgetCardTotal> _headerTotals => new()
     {
-        await OnOpenIncomeDetails.InvokeAsync();
-    }
+        new("Monthly", Incomes.Sum(i => i.MonthlyNetIncome).ToString("C")),
+        new("Yearly",  Incomes.Sum(i => i.MonthlyNetIncome * 12).ToString("C")),
+    };
 
-    private async Task HandleRowEdit(IncomeDto income)
-    {
-        await OnEditIncome.InvokeAsync(income);
-    }
+    // ── Handlers ─────────────────────────────────────────────────────────────────
 
-    private async Task HandleRowView(IncomeDto income)
-    {
-        await OnViewIncome.InvokeAsync(income);
-    }
+    private async Task HandleAddIncome()          => await OnAddIncome.InvokeAsync();
+    private async Task HandleShowIncomeDetails()  => await OnOpenIncomeDetails.InvokeAsync();
+    private async Task HandleRowEdit(IncomeDto i) => await OnEditIncome.InvokeAsync(i);
+    private async Task HandleRowView(IncomeDto i) => await OnViewIncome.InvokeAsync(i);
+    private async Task HandleRowDelete(IncomeDto i) => await OnDeleteIncome.InvokeAsync(i);
 
-    private async Task HandleRowDelete(IncomeDto income)
-    {
-        await OnDeleteIncome.InvokeAsync(income);
-    }
+    // ── Row expand ───────────────────────────────────────────────────────────────
 
-    /// <summary>Tracks which rows have their mobile detail panel open.</summary>
     private readonly HashSet<Guid> expandedRows = new();
+    private int TotalColumns => IsReadOnly ? 4 : 5;
+    private bool IsRowExpanded(Guid id) => expandedRows.Contains(id);
 
-    private int TotalColumns => (IsReadOnly ? 4 : 5);
-
-    private bool IsRowExpanded(Guid incomeId) => expandedRows.Contains(incomeId);
-
-    private void ToggleRowExpand(Guid incomeId)
+    private void ToggleRowExpand(Guid id)
     {
-        if (!expandedRows.Add(incomeId))
-            expandedRows.Remove(incomeId);
+        if (!expandedRows.Add(id)) expandedRows.Remove(id);
     }
 }

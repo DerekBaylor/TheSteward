@@ -1,4 +1,7 @@
-﻿#incomeCard.ts-tabbed-card {
+﻿/* =================================================== */
+/* ----              Budget Card                  ---- */
+/* =================================================== */
+.ts-card.budget-card {
     width: 100%;
     animation: slideUp 0.4s ease-out;
 }
@@ -15,96 +18,116 @@
     }
 }
 
-/* ---- Tab Buttons ---- */
-/* ===================== */
-#addIncomeBtn.add-income-tab-btn {
-    background-color: var(--green-7);
-    border-color: var(--green-7);
-    color: var(--off-white);
-}
-
-#showIncomeDetails.income-details-tab-btn {
-    background-color: var(--green-8);
-    border-color: var(--green-8);
-    color: var(--off-white);
-}
-
-button#addIncomeBtn:hover:not([disabled]) {
-    background-color: var(--green-9);
-    color: var(--off-white);
-}
-
-button#showIncomeDetails:hover:not([disabled]) {
-    background-color: var(--green-9);
-    color: var(--off-white);
-}
-
-
 /* ---- Card border accent ---- */
-#incomeCard .ts-card-content {
-    border-color: var(--base-green);
+.ts-card.budget-card .ts-card-content {
+    border: solid 1px var(--gray-3);
+    padding: 0rem;
 }
 
-/* ====================== */
-/*       Card Table       */
-/* ====================== */
-#incomeCard .card-th {
-    border-bottom: 2px solid var(--green-3);
+/* =================================================== */
+/* ----                Header                     ---- */
+/* =================================================== */
+.budget-card .ts-card-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0.5rem 0.4rem;
+    background: var(--blue-1);
+    color: var(--base-blue);
+    border-left: 3px solid var(--base-blue);
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    margin-bottom: 0.25rem;
+    
 }
 
-.income-th-amount {
-    text-align: right;
+.budget-card-chevron {
+    font-size: 1.1rem;
+    color: var(--base-blue);
+    flex-shrink: 0;
 }
 
-#incomeCard .income-row:hover {
-    background-color: var(--green-1);
+
+/* =================================================== */
+/* ----             Action buttons                ---- */
+/* =================================================== */
+.ts-card.budget-card .ts-card-action-btn--create {
+    background-color: var(--blue-6);
+    border-color: var(--blue-6);
+    color: var(--off-white);
 }
 
-.income-td-amount {
-    font-variant-numeric: tabular-nums;
-    font-family: var(--primary-font);
+.ts-card.budget-card .ts-card-action-btn--create:hover:not(:disabled) {
+    background-color: var(--blue-8);
 }
 
-.income-td-action {
-    text-align: center;
-    padding: 0.25rem;
-    width: 2rem;
+
+.ts-card .ts-card-action-btn--info {
+    background-color: var(--white);
+    border: 1px solid var(--blue-6);
+    color: var(--blue-7);
 }
 
-#incomeCard .card-row-btn--edit:hover {
-    background-color: var(--green-2);
-    color: var(--green-8);
+.ts-card.budget-card.ts-card-action-btn--info:hover:not(:disabled) {
+    background-color: var(--blue-1);
+    border-color: var(--blue-4);
+    color: var(--blue-8);
 }
+
+
+
+/* =================================================== */
+/*                   Card Table                        */
+/* =================================================== */
+/*#incomeCard .card-th {*/
+/*    border-bottom: 2px solid var(--green-3);*/
+/*}*/
+
+/*.income-th-amount {*/
+/*    text-align: right;*/
+/*}*/
+
+/*#incomeCard .income-row:hover {*/
+/*    background-color: var(--green-1);*/
+/*}*/
+
+/*.income-td-amount {*/
+/*    font-variant-numeric: tabular-nums;*/
+/*    font-family: var(--primary-font);*/
+/*}*/
+
+/*.income-td-action {*/
+/*    text-align: center;*/
+/*    padding: 0.25rem;*/
+/*    width: 2rem;*/
+/*}*/
+
+/*#incomeCard .card-row-btn--edit:hover {*/
+/*    background-color: var(--green-2);*/
+/*    color: var(--green-8);*/
+/*}*/
 
 /*      Totals Footer      */
 /* ======================= */
 #incomeCard .income-totals-row {
-    border-top: 2px solid var(--green-4);
+    /*border-top: 2px solid var(--green-4);*/
 }
 
 #incomeCard .income-totals-value {
-    color: var(--base-green);
+    /*color: var(--base-green);*/
 }
 
 
 
-/* ======================= */
-/*         Mobile          */
-/* ======================= */
+/* =================================================== */
+/*                      Mobile                         */
+/* =================================================== */
 @media (max-width: 1000px) {
-    #incomeCard.ts-tabbed-card {
+    .ts-card.budget-card {
         max-width: 90vw;
     }
 
 }
 
 @media (max-width: 600px) {
-    #incomeCard .row-expand-btn:hover {
-        background-color: var(--green-1);
-    }
 
-    #incomeCard .row-detail-value {
-        color: var(--base-green);
-        font-family: var(--primary-font);
-    }
 }

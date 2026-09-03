@@ -68,9 +68,9 @@
     margin: 0 1rem 0 0;
 }
 
-.ts-card .ts-card-body {
-    padding: 0 0.5rem;
-    margin: 0.5rem;
+.ts-card.bbc-card .ts-card-body {
+    padding: 0 0 0 0.25rem;
+    margin: 0 0 0 0.25rem;
 }
 
 /* In-header action buttons (ExpenseCard) */
@@ -201,8 +201,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--blue-8);
-    white-space: nowrap;
-    flex-shrink: 0;
+    overflow-wrap: break-word;
 }
 
 
@@ -377,6 +376,7 @@
     padding: 0.45rem 0.5rem;
     color: var(--gray-8);
     border-bottom: 1px solid var(--gray-2);
+    height: 3rem;
 }
 
 .card-td-1 { font-weight: 500; }

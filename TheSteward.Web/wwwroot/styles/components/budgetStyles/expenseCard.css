@@ -1,35 +1,11 @@
-﻿#expenseCard.ts-card {
-    width: 100%;
-    animation: slideUp 0.4s ease-out;
-}
+﻿/*#expenseCard.ts-card {*/
+/*    width: 100%;*/
+/*    animation: slideUp 0.4s ease-out;*/
+/*}*/
 
-/* ---- Action buttons (moved into the card body) ---- */
-/* =================================================== */
-#expenseCard .ts-card-action-btn--primary {
-    background-color: var(--purple-6);
-    border-color: var(--purple-6);
-    color: var(--off-white);
-}
 
-#expenseCard .ts-card-action-btn--primary:hover:not(:disabled) {
-    background-color: var(--purple-8);
-}
 
-#expenseCard .ts-card-action-btn--secondary:hover:not(:disabled) {
-    background-color: var(--purple-1);
-    border-color: var(--purple-4);
-    color: var(--purple-7);
-}
 
-/* ---- Card border accent ---- */
-#expenseCard .ts-card-content {
-    border-color: var(--base-purple);
-}
-
-/* ---- Category Section ---- */
-.expense-category-section {
-    margin-bottom: 1rem;
-}
 
 .expense-category-header {
     display: flex;

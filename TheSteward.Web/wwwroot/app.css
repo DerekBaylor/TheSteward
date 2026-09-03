@@ -229,6 +229,12 @@ div.mud-main-content.main-content {
     }
 }
 
+@media (max-width: 600px){
+    div.mud-main-content.main-content {
+        align-items: center;
+    }
+}
+
 .main-content {
     flex: 1;
     transition: margin-left 0.3s ease;

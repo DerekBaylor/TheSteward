@@ -71,9 +71,9 @@
                 @if (OnDetails.HasDelegate)
                 {
                     <button class="bbc-icon-btn bbc-icon-btn--details"
-                            title="@Title Details"
+                            title="@DetailsButtonTooltip"
                             @onclick="HandleDetails">
-                        <span class="material-icons">open_in_new</span>
+                        <span class="material-icons">@DetailsButtonIcon</span>
                     </button>
                 }
             </div>
@@ -126,6 +126,15 @@
     /// <summary>Fired when the Details icon button is clicked.</summary>
     [Parameter]
     public EventCallback OnDetails { get; set; }
+    
+    [Parameter]
+    public string DetailsButtonText { get; set; } = "Details";
+
+    [Parameter]
+    public string DetailsButtonIcon { get; set; } = "open_in_new";
+
+    [Parameter]
+    public string DetailsButtonTooltip { get; set; } = "Details";
 
     /// <summary>The table / content rendered inside the card body.</summary>
     [Parameter]

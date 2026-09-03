@@ -47,6 +47,8 @@
 @import url('styles/components/budgetStyles/expenseModal.css');
 @import url('styles/components/budgetStyles/budgetModal.css');
 @import url('styles/components/budgetStyles/budgetCategoriesModal.css');
+@import url('styles/components/budgetStyles/baseBudgetCard.css');
+
 
 /* tasks */
 @import url('styles/components/taskStyles/taskManagerToolbar.css');
@@ -224,6 +226,12 @@ div.mud-main-content.main-content {
 @media (max-width: 1000px){
     div.mud-main-content.main-content {
         margin-left: 0;
+    }
+}
+
+@media (max-width: 600px){
+    div.mud-main-content.main-content {
+        align-items: center;
     }
 }
 

@@ -22,10 +22,6 @@ else if (householdItems.Count > 0)
 {
     <MudToolBar id="budgetToolbar" Class="budget-toolbar">
         <div class="toolbar-select-group">
-            <label class="select-label">
-                <span class="material-icons">home</span>
-                Household
-            </label>
             @if (householdItems.Count == 1)
             {
                 <span class="toolbar-household-name">
@@ -39,7 +35,12 @@ else if (householdItems.Count > 0)
                           @bind-Value="selectedHouseholdId"
                           OnChange="OnHouseholdChangedAsync"
                           Placeholder="Choose household"
-                          Variant="purple" />
+                          Variant="blue">
+                    <ItemTemplate Context="item">
+                        <span class="material-icons">home</span>
+                        @item.Text
+                    </ItemTemplate>
+                </TsSelect>
             }
         </div>
 
@@ -48,15 +49,12 @@ else if (householdItems.Count > 0)
             <div class="toolbar-divider"></div>
             
             <div class="toolbar-budget-group">
-                <label class="select-label">
-                    <span class="material-icons">account_balance_wallet</span>
-                    Budget
-                </label>
                 <div class="toolbar-budget-pills">
                     @foreach (var budget in AvailableBudgets)
                     {
                         <button class="budget-pill-btn @(CurrentBudget?.BudgetId == budget.BudgetId ? "active" : "")"
                                 @onclick="() => OnBudgetSelected.InvokeAsync(budget)">
+                            <span class="material-icons">account_balance_wallet</span>
                             @budget.BudgetName
                             @if (budget.IsDefaultBudget)
                             {
@@ -131,7 +129,7 @@ else
     [Parameter] 
     public EventCallback OnAddBudget { get; set; }
     
-    [Parameter] 
+    [Parameter]  
     public EventCallback OnEditBudget { get; set; }
 
     private List<SelectItem<Guid?>> householdItems = new();

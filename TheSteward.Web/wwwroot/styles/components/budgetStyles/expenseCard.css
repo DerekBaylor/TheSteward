@@ -1,13 +1,4 @@
-﻿/*#expenseCard.ts-card {*/
-/*    width: 100%;*/
-/*    animation: slideUp 0.4s ease-out;*/
-/*}*/
-
-
-
-
-
-.expense-category-header {
+﻿.expense-category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;

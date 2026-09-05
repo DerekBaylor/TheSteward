@@ -1,4 +1,4 @@
-﻿.budget-toolbar {
+﻿#budgetToolbar.budget-toolbar {
     align-items: center;
     animation: slideDown 0.4s ease-out;
     background: white;
@@ -10,7 +10,6 @@
     gap: 1.5rem;
     justify-content: center;
     margin: 1.5rem 1rem;
-    padding: 1rem 1.5rem;
 }
 
 .budget-toolbar .toolbar-select-group {
@@ -42,20 +41,20 @@
 }
 
 .budget-pill-btn:hover {
-    background-color: var(--green-2);
+    background-color: var(--blue-2);
     border-color: var(--gray-4);
     color: var(--gray-8);
 }
 
 .budget-pill-btn.active {
-    background: var(--base-green);
-    border-color: var(--base-green);
+    background: var(--base-blue);
+    border-color: var(--base-blue);
     color: var(--off-white);
 }
 
 .budget-pill-btn.active:hover {
-    background: var(--green-9);
-    border-color: var(--green-9);
+    background: var(--blue-9);
+    border-color: var(--blue-9);
 }
 
 .budget-pill-btn .material-icons {
@@ -64,9 +63,9 @@
 
 .budget-pill-btn-default-badge {
     font-size: 0.65rem;
-    background: var(--green-1);
-    color: var(--green-7);
-    border: 1px solid var(--green-3);
+    background: var(--blue-1);
+    color: var(--blue-7);
+    border: 1px solid var(--blue-3);
     border-radius: 999px;
     padding: 0.1rem 0.4rem;
     font-weight: 700;
@@ -75,8 +74,8 @@
 /* was ".bbudget-pill-btn-default-badge" (typo) so this never fired — the
    default badge stayed green-on-green even when its pill was active */
 .budget-pill-btn.active .budget-pill-btn-default-badge {
-    background: var(--green-9);
-    border-color: var(--green-3);
+    background: var(--blue-9);
+    border-color: var(--blue-3);
     color: var(--off-white);
 }
 
@@ -99,14 +98,14 @@
 }
 
 .budget-action-btn--add {
-    background: var(--base-green);
-    border-color: var(--base-green);
+    background: var(--base-blue);
+    border-color: var(--base-blue);
     color: var(--off-white);
 }
 
 .budget-action-btn--add:hover {
-    background: var(--green-8);
-    border-color: var(--green-8);
+    background: var(--blue-8);
+    border-color: var(--blue-8);
 }
 
 .budget-action-btn--edit {
@@ -136,7 +135,7 @@
 }
 
 .toolbar-budget-group .select-label .material-icons {
-    color: var(--base-green);
+    color: var(--base-blue);
 }
 
 .toolbar-budget-pills {

@@ -68,8 +68,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 0.625rem 1rem;
-    padding-right: 2.75rem;
+    padding: 0.625rem 2.75rem 0.625rem 1rem;
     border-radius: 8px;
     border-width: 2px;
     border-style: solid;
@@ -80,6 +79,13 @@
     position: relative;
     font-family: var(--primary-font);
 }
+
+.ts-select-option-group {
+    display: flex;
+    align-items: center;
+    gap: .5rem
+}
+
 
 .ts-chevron {
     position: absolute;
@@ -97,10 +103,17 @@
 .ts-custom-select-container {
     position: relative;
     width: 100%;
-    min-width: 200px;
+    min-width: 16rem;
 }
 
-/* Green variant (default) */
+.ts-select-options li {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+/* Green variant */
+/* ============= */
 .ts-select-header.ts-select--green {
     border-color: var(--base-green);
     background-color: var(--green-1);
@@ -145,7 +158,15 @@
     background-color: var(--green-3);
 }
 
+.ts-select-header.ts-select--green .material-icons {
+    color: var(--base-green);
+}
+.ts-select-options.ts-select--green li .material-icons {
+    color: var(--base-green);
+}
+
 /* Purple variant */
+/* ============== */
 .ts-select-header.ts-select--purple {
     border-color: var(--base-purple);
     background-color: var(--purple-1);
@@ -190,7 +211,15 @@
     background-color: var(--purple-3);
 }
 
-/* Blue variant */
+.ts-select-header.ts-select--green .material-icons {
+    color: var(--base-green);
+}
+.ts-select-options.ts-select--green li .material-icons {
+    color: var(--base-green);
+}
+
+/* Blue variant (default) */
+/* ====================== */
 .ts-select-header.ts-select--blue {
     border-color: var(--base-blue);
     background-color: var(--blue-1);
@@ -233,6 +262,13 @@
 
 .ts-select-options.ts-select--blue li:active {
     background-color: var(--blue-3);
+}
+
+.ts-select-header.ts-select--blue .material-icons {
+    color: var(--base-blue);
+}
+.ts-select-options.ts-select--blue li .material-icons {
+    color: var(--base-blue);
 }
 
 /* =============================== */

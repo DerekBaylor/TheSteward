@@ -4,7 +4,16 @@
 
 <div class="ts-custom-select-container @(IsOpen ? "open" : "")">
     <div class="ts-select-header ts-select--@Variant" @onclick="ToggleDropdown">
-        <span>@GetDisplayText()</span>
+        <span class="ts-select-option-group">
+            @if (SelectedItem != null && ItemTemplate != null)
+            {
+                @ItemTemplate(SelectedItem)
+            }
+            else
+            {
+                @GetDisplayText()
+            }
+        </span>
         <span class="material-icons ts-chevron @(IsOpen ? "rotated" : "")">expand_more</span>
     </div>
 
@@ -14,12 +23,20 @@
             @foreach (var item in Items)
             {
                 <li @onclick="() => SelectItemHandler(item)">
-                    @item.Text
+                    @if (ItemTemplate != null)
+                    {
+                        @ItemTemplate(item)
+                    }
+                    else
+                    {
+                         @item.Text
+                    }
                 </li>
             }
         </ul>
     }
 </div>
+
 
 @code {
     private bool IsOpen = false;
@@ -40,9 +57,16 @@
     public EventCallback OnChange { get; set; }
 
     [Parameter] 
-    public string Variant { get; set; } = "green";
-
+    public string Variant { get; set; } = "blue";
     
+    [Parameter]
+    public RenderFragment<SelectItem<TValue>>? ItemTemplate { get; set; }
+
+    private SelectItem<TValue>? SelectedItem =>
+        Value is null
+            ? null
+            : Items.FirstOrDefault(i => EqualityComparer<TValue>.Default.Equals(i.Value, Value));
+
     private void ToggleDropdown() => IsOpen = !IsOpen;
 
     private async Task SelectItemHandler(SelectItem<TValue> item)
